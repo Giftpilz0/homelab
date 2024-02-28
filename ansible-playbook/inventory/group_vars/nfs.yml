@@ -1,0 +1,42 @@
+---
+######################################
+### giftpilz0.general.firewalld
+
+firewalld_zones_define:
+  - zone: work
+    source: 192.168.178.0/24
+  - zone: cockpit
+    source: 192.168.178.220
+  - zone: kubernetes
+    source: 192.168.178.231
+  - zone: kubernetes
+    source: 192.168.178.232
+  - zone: kubernetes
+    source: 192.168.178.233
+
+firewalld_rules_services:
+  - service: ssh
+    zone: work
+    state: enabled
+  - service: cockpit
+    zone: work
+    state: disabled
+  - service: cockpit
+    zone: cockpit
+    state: enabled
+  - service: ssh
+    zone: cockpit
+    state: enabled
+  - service: nfs
+    zone: kubernetes
+    state: enabled
+
+######################################
+### giftpilz0.server.nfs
+
+nfs_exports:
+  - path: /srv/kubernetes/
+    host: 192.168.178.0/24
+    options: rw,sync,all_squash
+
+nfs_firewalld_state: skip

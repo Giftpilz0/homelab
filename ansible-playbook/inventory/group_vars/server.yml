@@ -1,0 +1,38 @@
+---
+######################################
+### giftpilz0.general.timezone
+
+timezone_timezone: Europe/Berlin
+
+######################################
+### giftpilz0.general.cockpit
+
+cockpit_firewalld_state: skip
+
+######################################
+### giftpilz0.general.firewalld
+
+firewalld_zones_define:
+  - zone: work
+    source: 192.168.178.0/24
+
+firewalld_rules_services:
+  - service: ssh
+    zone: work
+    state: enabled
+  - service: cockpit
+    zone: work
+    state: disabled
+
+######################################
+### giftpilz0.general.packages
+
+packages_additional_package:
+  - epel-release
+  - nmap
+
+packages_python_package: []
+packages_rpmfusion_package_state: skip
+
+packages_flatpak_repo_state: skip
+packages_flatpak_package: []

@@ -1,0 +1,42 @@
+---
+######################################
+### giftpilz0.general.firewalld
+
+firewalld_zones_define:
+  - zone: work
+    source: 192.168.178.0/24
+  - zone: cockpit
+    source: 192.168.178.220
+  - zone: kubernetes
+    source: 192.168.178.231
+  - zone: kubernetes
+    source: 192.168.178.232
+  - zone: kubernetes
+    source: 192.168.178.233
+
+firewalld_rules_services:
+  - service: ssh
+    zone: work
+    state: enabled
+  - service: cockpit
+    zone: work
+    state: disabled
+  - service: cockpit
+    zone: cockpit
+    state: enabled
+  - service: ssh
+    zone: cockpit
+    state: enabled
+  - service: kube-control-plane
+    zone: kubernetes
+    state: enabled
+
+######################################
+### giftpilz0.kubernetes.k3s
+
+k3s_token: changeme
+k3s_version: v1.29.1+k3s2
+k3s_vip_api_endpoint: 192.168.178.234
+k3s_extra_server_args: --tls-san {{ k3s_vip_api_endpoint }} --flannel-backend=none --disable-network-policy --disable traefik --disable servicelb
+k3s_kube_vip_tag: v0.6.4
+k3s_kube_vip_iface: enp6s18

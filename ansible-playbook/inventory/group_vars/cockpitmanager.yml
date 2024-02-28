@@ -1,0 +1,15 @@
+---
+######################################
+### giftpilz0.general.firewalld
+
+firewalld_zones_define:
+  - zone: work
+    source: 192.168.178.0/24
+
+firewalld_rules_services:
+  - service: ssh
+    zone: work
+    state: enabled
+  - service: cockpit
+    zone: work
+    state: enabled

@@ -1,0 +1,76 @@
+---
+######################################
+### roles
+
+- name: Configure hosts - cockpitmanager
+  hosts: cockpitmanager
+  vars_prompt:
+    - name: user_username
+      prompt: Select username
+      private: false
+    - name: user_password
+      prompt: Select password
+      private: true
+      confirm: true
+      unsafe: true
+  tasks:
+    - name: "Cockpitmanager: Set facts"
+      ansible.builtin.set_fact:
+        user_username: "{{ user_username }}"
+        user_password: "{{ user_password }}"
+        user_home: true
+        user_shell: /bin/bash
+  roles:
+    - role: giftpilz0.general.user
+
+- name: Configure hosts - common
+  hosts: all
+  roles:
+    - role: giftpilz0.general.update
+    - role: giftpilz0.general.dnf
+    - role: giftpilz0.general.firewalld
+    - role: giftpilz0.general.packages
+    - role: giftpilz0.general.timezone
+    - role: giftpilz0.server.cockpit
+  tasks:
+    - name: "Cockpit: Generate SSH key pair"
+      community.crypto.openssh_keypair:
+        path: /home/{{ ansible_user }}/.ssh/id_cockpit
+        type: ed25519
+        mode: "0600"
+        state: present
+      when: inventory_hostname in groups["cockpitmanager"]
+
+    - name: "Cockpit: Fetch public key from the control node"
+      ansible.builtin.slurp:
+        src: /home/{{ ansible_user }}/.ssh/id_cockpit.pub
+      register: public_key
+      when: inventory_hostname in groups["cockpitmanager"]
+
+    - name: Store publickey
+      ansible.builtin.set_fact:
+        token: "{{ public_key.content | b64decode | regex_replace('\n', '') }}"
+      when: inventory_hostname in groups["cockpitmanager"]
+
+    - name: "Cockpit: Add the public key to all nodes"
+      ansible.posix.authorized_key:
+        user: "{{ ansible_user }}"
+        state: present
+        key: "{{ hostvars[item]['token'] }}"
+      loop: "{{ groups['cockpitmanager'] }}"
+      when: inventory_hostname not in groups["cockpitmanager"]
+
+- name: Configure hosts - podman
+  hosts: podman
+  roles:
+    - role: giftpilz0.server.podman
+
+- name: Configure hosts - nfs
+  hosts: nfs
+  roles:
+    - role: giftpilz0.server.nfs
+
+- name: Configure hosts - k3s
+  hosts: k3s
+  roles:
+    - role: giftpilz0.kubernetes.k3s
