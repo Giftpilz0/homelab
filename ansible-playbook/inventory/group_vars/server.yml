@@ -29,6 +29,7 @@ firewalld_rules_services:
 
 packages_additional_package:
   - epel-release
+  - nfs-utils
   - nmap
 
 packages_python_package: []
