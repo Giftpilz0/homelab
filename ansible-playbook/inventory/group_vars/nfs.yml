@@ -48,7 +48,7 @@ nfs_exports:
     permissions: "750"
   - path: /srv/container/
     host: 192.168.178.0/24
-    options: rw,sync,all_squash
+    options: rw,sync,all_squash,security_label,anonuid=1000,anongid=1000
     user: nobody
     group: nobody
     permissions: "750"
