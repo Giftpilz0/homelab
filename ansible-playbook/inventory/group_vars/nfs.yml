@@ -13,6 +13,8 @@ firewalld_zones_define:
     source: 192.168.178.232
   - zone: kubernetes
     source: 192.168.178.233
+  - zone: container
+    source: 192.168.178.221
 
 firewalld_rules_services:
   - service: ssh
@@ -30,6 +32,9 @@ firewalld_rules_services:
   - service: nfs
     zone: kubernetes
     state: enabled
+  - service: nfs
+    zone: container
+    state: enabled
 
 ######################################
 ### giftpilz0.server.nfs
@@ -40,6 +45,12 @@ nfs_exports:
     options: rw,sync,all_squash
     user: nobody
     group: nobody
-    permissions: "755"
+    permissions: "750"
+  - path: /srv/container/
+    host: 192.168.178.0/24
+    options: rw,sync,all_squash
+    user: nobody
+    group: nobody
+    permissions: "750"
 
 nfs_firewalld_state: skip
