@@ -5,9 +5,6 @@
 - name: Configure hosts - cockpitmanager
   hosts: cockpitmanager
   vars_prompt:
-    - name: user_username
-      prompt: Select username
-      private: false
     - name: user_password
       prompt: Select password
       private: true
@@ -16,10 +13,7 @@
   tasks:
     - name: "Cockpitmanager: Set facts"
       ansible.builtin.set_fact:
-        user_username: "{{ user_username }}"
         user_password: "{{ user_password }}"
-        user_home: true
-        user_shell: /bin/bash
   roles:
     - role: giftpilz0.general.user
 

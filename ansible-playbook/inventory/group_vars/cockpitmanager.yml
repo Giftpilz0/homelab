@@ -13,3 +13,11 @@ firewalld_rules_services:
   - service: cockpit
     zone: work
     state: enabled
+
+######################################
+### giftpilz0.general.user
+
+user_username: "{{ ansible_user }}"
+user_groups: adm
+user_shell: /bin/bash
+user_home: true
