@@ -1,0 +1,29 @@
+---
+######################################
+### giftpilz0.general.firewalld
+
+firewalld_zones_define:
+  - zone: work
+    source: 192.168.178.0/24
+  - zone: cockpit
+    source: 192.168.178.220
+
+firewalld_rules_services:
+  - service: ssh
+    zone: work
+    state: enabled
+  - service: dns
+    zone: work
+    state: enabled
+  - service: http
+    zone: work
+    state: enabled
+  - service: cockpit
+    zone: work
+    state: disabled
+  - service: cockpit
+    zone: cockpit
+    state: enabled
+  - service: ssh
+    zone: cockpit
+    state: enabled
