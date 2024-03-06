@@ -24,7 +24,7 @@ resource "proxmox_vm_qemu" "nfs" {
         disk {
           cache    = "none"
           iothread = true
-          size     = 600
+          size     = 500
           storage  = "local-lvm"
         }
       }

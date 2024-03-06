@@ -24,7 +24,7 @@ resource "proxmox_vm_qemu" "container" {
         disk {
           cache    = "none"
           iothread = true
-          size     = 40
+          size     = 500
           storage  = "local-lvm"
         }
       }
