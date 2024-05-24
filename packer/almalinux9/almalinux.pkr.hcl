@@ -2,7 +2,7 @@ packer {
   required_plugins {
     name = {
       source  = "github.com/hashicorp/proxmox"
-      version = ">= 1.1.7"
+      version = ">= 1.1.8"
     }
   }
 }
@@ -24,12 +24,12 @@ variable "proxmox_password" {
 
 variable "almalinux_iso_url" {
   type    = string
-  default = "http://repo.almalinux.org/almalinux/9.3/isos/x86_64/AlmaLinux-9.3-x86_64-boot.iso"
+  default = "http://repo.almalinux.org/almalinux/9.4/isos/x86_64/AlmaLinux-9.4-x86_64-boot.iso"
 }
 
 variable "almalinux_sha256sum_url" {
   type    = string
-  default = "http://repo.almalinux.org/almalinux/9.3/isos/x86_64/CHECKSUM"
+  default = "http://repo.almalinux.org/almalinux/9.4/isos/x86_64/CHECKSUM"
 }
 
 source "proxmox-iso" "almalinux9" {
