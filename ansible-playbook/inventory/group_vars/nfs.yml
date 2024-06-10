@@ -4,17 +4,17 @@
 
 firewalld_zones_define:
   - zone: work
-    source: 192.168.178.0/24
+    source: 192.168.10.0/24
   - zone: cockpit
-    source: 192.168.178.220
+    source: 192.168.60.220
   - zone: kubernetes
-    source: 192.168.178.231
+    source: 192.168.60.231
   - zone: kubernetes
-    source: 192.168.178.232
+    source: 192.168.60.232
   - zone: kubernetes
-    source: 192.168.178.233
+    source: 192.168.60.233
   - zone: container
-    source: 192.168.178.221
+    source: 192.168.60.221
 
 firewalld_rules_services:
   - service: ssh
@@ -41,13 +41,13 @@ firewalld_rules_services:
 
 nfs_exports:
   - path: /srv/kubernetes/
-    host: 192.168.178.0/24
+    host: 192.168.60.0/24
     options: rw,sync,all_squash
     user: nobody
     group: nobody
     permissions: "750"
   - path: /srv/container/
-    host: 192.168.178.0/24
+    host: 192.168.60.0/24
     options: rw,sync,all_squash,security_label,anonuid=1000,anongid=1000
     user: nobody
     group: nobody

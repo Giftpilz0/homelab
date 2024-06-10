@@ -39,8 +39,8 @@ resource "proxmox_vm_qemu" "k3s-node3" {
 
   # Cloud Init
   cloudinit_cdrom_storage = "local-lvm"
-  ipconfig0               = "ip=192.168.178.233/24,gw=192.168.178.1"
-  nameserver              = "192.168.178.1"
+  ipconfig0               = "ip=192.168.60.233/24,gw=192.168.60.1"
+  nameserver              = "192.168.60.1"
   ciuser                  = "serveradmin"
   sshkeys                 = var.publick_ssh_key
 }
