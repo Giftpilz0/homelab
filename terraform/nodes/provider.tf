@@ -9,7 +9,7 @@ terraform {
 
 variable "proxmox_url" {
   type    = string
-  default = "https://pve:8006/api2/json"
+  default = "https://192.168.50.10:8006/api2/json"
 }
 
 variable "proxmox_user" {
