@@ -33,6 +33,7 @@ resource "proxmox_vm_qemu" "container" {
 
   network {
     bridge   = "vmbr0"
+    tag      = 60
     model    = "virtio"
     firewall = true
   }
