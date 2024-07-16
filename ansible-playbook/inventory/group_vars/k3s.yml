@@ -27,9 +27,6 @@ firewalld_rules_services:
   - service: ssh
     zone: cockpit
     state: enabled
-  - service: kube-control-plane
-    zone: kubernetes
-    state: enabled
 
 ######################################
 ### giftpilz0.kubernetes.k3s
