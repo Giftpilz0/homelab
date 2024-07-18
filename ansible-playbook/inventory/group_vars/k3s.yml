@@ -37,3 +37,22 @@ k3s_vip_api_endpoint: 192.168.60.234
 k3s_extra_server_args: --tls-san {{ k3s_vip_api_endpoint }} --flannel-backend=none --disable-network-policy --disable traefik --disable servicelb --selinux
 k3s_kube_vip_tag: v0.8.1
 k3s_kube_vip_iface: eth0
+
+cilium_config_k8sclientratelimit_qps: 30
+cilium_config_k8sclientratelimit_burst: 150
+cilium_config_rolloutciliumpods: true
+cilium_config_l2announcements_enabled: true
+cilium_config_ingresscontroller_enabled: true
+cilium_config_ingresscontroller_default: true
+cilium_config_gatewayapi_enabled: true
+cilium_config_hostfirewall_enabled: false
+cilium_config_hubble_enabled: true
+cilium_config_hubble_relay_enabled: true
+cilium_config_hubble_relay_rolloutpods: true
+cilium_config_hubble_ui_enabled: true
+cilium_config_hubble_ui_rolloutpods: true
+cilium_config_ipv4_enabled: true
+cilium_config_ipv6_enabled: false
+cilium_config_egressgateway_enabled: false
+cilium_config_operator_enabled: true
+cilium_config_operator_rolloutpods: true
