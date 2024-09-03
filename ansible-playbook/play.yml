@@ -60,6 +60,11 @@
   roles:
     - role: giftpilz0.server.podman
 
+- name: Configure hosts - monitoring
+  hosts: monitoring
+  roles:
+    - role: giftpilz0.server.podman
+
 - name: Configure hosts - nfs
   hosts: nfs
   roles:
