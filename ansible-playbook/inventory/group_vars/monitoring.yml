@@ -7,6 +7,8 @@ firewalld_zones_define:
     source: 192.168.10.0/24
   - zone: cockpit
     source: 192.168.60.220
+  - zone: server
+    source: 192.168.60.0/24
 
 firewalld_rules_services:
   - service: ssh
@@ -34,9 +36,9 @@ firewalld_rules_services:
 firewalld_rules_ports:
   - port: 9100
     protocol: tcp
-    zone: work
-    state: enabled
+    zone: server
+    state: disabled
   - port: 3100
     protocol: tcp
-    zone: work
-    state: enabled
+    zone: server
+    state: disabled
