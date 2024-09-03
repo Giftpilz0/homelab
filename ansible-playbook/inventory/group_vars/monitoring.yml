@@ -21,9 +21,22 @@ firewalld_rules_services:
   - service: ssh
     zone: cockpit
     state: enabled
+  - service: ssh
+    zone: cockpit
+    state: enabled
   - service: http
     zone: work
     state: enabled
   - service: https
+    zone: work
+    state: enabled
+
+firewalld_rules_ports:
+  - port: 9100
+    protocol: tcp
+    zone: work
+    state: enabled
+  - port: 3100
+    protocol: tcp
     zone: work
     state: enabled

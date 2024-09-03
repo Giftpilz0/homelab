@@ -25,6 +25,7 @@
     - role: giftpilz0.general.firewalld
     - role: giftpilz0.general.packages
     - role: giftpilz0.general.timezone
+    - role: giftpilz0.general.monitoring
     - role: giftpilz0.server.cockpit
   tasks:
     - name: "Cockpit: Generate SSH key pair"
