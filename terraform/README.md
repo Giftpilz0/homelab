@@ -13,6 +13,7 @@ The project directory structure is as follows:
 │   ├── k3s-node1.tf
 │   ├── k3s-node2.tf
 │   ├── k3s-node3.tf
+│   ├── monitoring.tf
 │   ├── nfs.tf
 │   └── provider.tf
 ```
@@ -21,6 +22,7 @@ The project directory structure is as follows:
   - **cockpit-manager.tf**: Terraform configuration for the Cockpit manager VM.
   - **container.tf**: Terraform configuration for the container VM.
   - **k3s-node1.tf**, **k3s-node2.tf**, **k3s-node3.tf**: Terraform configurations for Kubernetes nodes.
+  - **monitoring.tf**: Terraform configuration for the monitoring VM.
   - **nfs.tf**: Terraform configuration for the NFS Storage VM.
   - **provider.tf**: Terraform provider configuration for Proxmox.
 
