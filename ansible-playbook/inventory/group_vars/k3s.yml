@@ -32,13 +32,13 @@ firewalld_rules_services:
 ### giftpilz0.kubernetes.k3s
 
 k3s_token: changeme
-k3s_version: v1.30.2+k3s1
+k3s_version: v1.31.2+k3s1
 k3s_vip_api_endpoint: 192.168.60.234
 k3s_extra_server_args: --tls-san {{ k3s_vip_api_endpoint }} --flannel-backend=none --disable-network-policy --disable traefik --disable servicelb --selinux
-k3s_kube_vip_tag: v0.8.1
+k3s_kube_vip_tag: v0.8.7
 k3s_kube_vip_iface: eth0
 
-cilium_version: 1.15.7
+cilium_version: 1.16.4
 
 cilium_config_kubeproxyreplacement: true
 cilium_config_k8sclientratelimit_qps: 30
