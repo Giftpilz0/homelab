@@ -16,11 +16,11 @@ firewalld_zones_define:
   - zone: server
     source: 192.168.60.0/24
   - zone: loadbalancer
-    source: 192.168.50.100
+    source: 192.168.70.100
   - zone: loadbalancer
-    source: 192.168.50.101
+    source: 192.168.70.101
   - zone: loadbalancer
-    source: 192.168.50.102
+    source: 192.168.70.102
 
 firewalld_rules_services:
   - service: cockpit

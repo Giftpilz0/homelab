@@ -33,15 +33,15 @@ resource "proxmox_vm_qemu" "lb1" {
 
   network {
     bridge   = "vmbr0"
-    tag      = 50
+    tag      = 70
     model    = "virtio"
     firewall = true
   }
 
   # Cloud Init
   cloudinit_cdrom_storage = "local-lvm"
-  ipconfig0               = "ip=192.168.50.101/24,gw=192.168.50.1"
-  nameserver              = "192.168.50.1"
+  ipconfig0               = "ip=192.168.70.101/24,gw=192.168.70.1"
+  nameserver              = "192.168.70.1"
   ciuser                  = "serveradmin"
   sshkeys                 = var.publick_ssh_key
 }
