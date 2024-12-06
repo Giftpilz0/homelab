@@ -13,16 +13,22 @@ cockpit_firewalld_state: skip
 ### giftpilz0.general.firewalld
 
 firewalld_zones_define:
-  - zone: work
-    source: 192.168.10.0/24
+  - zone: server
+    source: 192.168.60.0/24
+  - zone: loadbalancer
+    source: 192.168.50.100
+  - zone: loadbalancer
+    source: 192.168.50.101
+  - zone: loadbalancer
+    source: 192.168.50.102
 
 firewalld_rules_services:
-  - service: ssh
-    zone: work
-    state: enabled
   - service: cockpit
-    zone: work
-    state: disabled
+    zone: loadbalancer
+    state: enabled
+  - service: ssh
+    zone: loadbalancer
+    state: enabled
 
 ######################################
 ### giftpilz0.general.packages
@@ -38,11 +44,12 @@ packages_rpmfusion_package_state: skip
 
 packages_flatpak_repo_state: skip
 packages_flatpak_package: []
+
 ######################################
 ### giftpilz0.general.monitoring
 
-monitoring_agent_tag: 1.3.1
-monitoring_agent_package_state: present
+monitoring_agent_tag: 1.5.1
+monitoring_agent_package_state: skip
 
 monitoring_agent_config_remoteserver_loki: http://192.168.60.223:3100/loki/api/v1/push
 monitoring_agent_config_remoteserver_prometheus: http://192.168.60.223:9100/api/v1/push

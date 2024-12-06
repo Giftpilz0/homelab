@@ -1,8 +1,8 @@
-resource "proxmox_vm_qemu" "cockpit-manager" {
-  name                   = "cockpit-manager"
+resource "proxmox_vm_qemu" "lb2" {
+  name                   = "lb2"
   target_node            = "pve"
-  memory                 = 4096
-  cores                  = 4
+  memory                 = 2048
+  cores                  = 2
   agent                  = 1
   force_create           = false
   tablet                 = false
@@ -24,7 +24,7 @@ resource "proxmox_vm_qemu" "cockpit-manager" {
         disk {
           cache    = "none"
           iothread = true
-          size     = 40
+          size     = 10
           storage  = "local-lvm"
         }
       }
@@ -33,15 +33,15 @@ resource "proxmox_vm_qemu" "cockpit-manager" {
 
   network {
     bridge   = "vmbr0"
-    tag      = 60
+    tag      = 50
     model    = "virtio"
     firewall = true
   }
 
   # Cloud Init
   cloudinit_cdrom_storage = "local-lvm"
-  ipconfig0               = "ip=192.168.60.220/24,gw=192.168.60.1"
-  nameserver              = "192.168.60.1"
+  ipconfig0               = "ip=192.168.50.102/24,gw=192.168.50.1"
+  nameserver              = "192.168.50.1"
   ciuser                  = "serveradmin"
   sshkeys                 = var.publick_ssh_key
 }

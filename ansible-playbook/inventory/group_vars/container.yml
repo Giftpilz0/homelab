@@ -3,27 +3,19 @@
 ### giftpilz0.general.firewalld
 
 firewalld_zones_define:
-  - zone: work
-    source: 192.168.10.0/24
-  - zone: cockpit
-    source: 192.168.60.220
+  - zone: server
+    source: 192.168.60.0/24
+  - zone: loadbalancer
+    source: 192.168.50.100
+  - zone: loadbalancer
+    source: 192.168.50.101
+  - zone: loadbalancer
+    source: 192.168.50.102
 
 firewalld_rules_services:
-  - service: ssh
-    zone: work
-    state: enabled
   - service: cockpit
-    zone: work
-    state: disabled
-  - service: cockpit
-    zone: cockpit
+    zone: loadbalancer
     state: enabled
   - service: ssh
-    zone: cockpit
-    state: enabled
-  - service: http
-    zone: work
-    state: enabled
-  - service: https
-    zone: work
+    zone: loadbalancer
     state: enabled

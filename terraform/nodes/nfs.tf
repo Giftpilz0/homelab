@@ -1,8 +1,8 @@
 resource "proxmox_vm_qemu" "nfs" {
   name                   = "nfs"
   target_node            = "pve"
-  memory                 = 4096
-  cores                  = 4
+  memory                 = 2048
+  cores                  = 2
   agent                  = 1
   force_create           = false
   tablet                 = false

@@ -1,8 +1,8 @@
-resource "proxmox_vm_qemu" "dns" {
-  name                   = "dns"
+resource "proxmox_vm_qemu" "lb1" {
+  name                   = "lb1"
   target_node            = "pve"
-  memory                 = 4096
-  cores                  = 4
+  memory                 = 2048
+  cores                  = 2
   agent                  = 1
   force_create           = false
   tablet                 = false
@@ -33,15 +33,15 @@ resource "proxmox_vm_qemu" "dns" {
 
   network {
     bridge   = "vmbr0"
-    tag      = 60
+    tag      = 50
     model    = "virtio"
     firewall = true
   }
 
   # Cloud Init
   cloudinit_cdrom_storage = "local-lvm"
-  ipconfig0               = "ip=192.168.60.222/24,gw=192.168.60.1"
-  nameserver              = "192.168.60.1"
+  ipconfig0               = "ip=192.168.50.101/24,gw=192.168.50.1"
+  nameserver              = "192.168.50.1"
   ciuser                  = "serveradmin"
   sshkeys                 = var.publick_ssh_key
 }

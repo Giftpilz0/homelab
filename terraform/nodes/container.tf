@@ -1,8 +1,8 @@
 resource "proxmox_vm_qemu" "container" {
   name                   = "container"
   target_node            = "pve"
-  memory                 = 4096
-  cores                  = 4
+  memory                 = 8192
+  cores                  = 8
   agent                  = 1
   force_create           = false
   tablet                 = false

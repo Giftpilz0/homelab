@@ -2,8 +2,8 @@
 ######################################
 ### roles
 
-- name: Configure hosts - cockpitmanager
-  hosts: cockpitmanager
+- name: Configure hosts - lb
+  hosts: lb
   vars_prompt:
     - name: user_password
       prompt: Select password
@@ -11,7 +11,7 @@
       confirm: true
       unsafe: true
   tasks:
-    - name: "Cockpitmanager: Set facts"
+    - name: "lb: Set facts"
       ansible.builtin.set_fact:
         user_password: "{{ user_password }}"
   roles:
@@ -34,26 +34,26 @@
         type: ed25519
         mode: "0600"
         state: present
-      when: inventory_hostname in groups["cockpitmanager"]
+      when: inventory_hostname in groups["lb"]
 
     - name: "Cockpit: Fetch public key from the control node"
       ansible.builtin.slurp:
         src: /home/{{ ansible_user }}/.ssh/id_cockpit.pub
       register: public_key
-      when: inventory_hostname in groups["cockpitmanager"]
+      when: inventory_hostname in groups["lb"]
 
     - name: Store publickey
       ansible.builtin.set_fact:
         token: "{{ public_key.content | b64decode | regex_replace('\n', '') }}"
-      when: inventory_hostname in groups["cockpitmanager"]
+      when: inventory_hostname in groups["lb"]
 
     - name: "Cockpit: Add the public key to all nodes"
       ansible.posix.authorized_key:
         user: "{{ ansible_user }}"
         state: present
         key: "{{ hostvars[item]['token'] }}"
-      loop: "{{ groups['cockpitmanager'] }}"
-      when: inventory_hostname not in groups["cockpitmanager"]
+      loop: "{{ groups['lb'] }}"
+      when: inventory_hostname not in groups["lb"]
 
 - name: Configure hosts - container
   hosts: container
