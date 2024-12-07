@@ -12,11 +12,11 @@ firewalld_zones_define:
   - zone: loadbalancer
     source: 192.168.70.102
   - zone: kubernetes
-    source: 192.168.60.231
+    source: 192.168.65.231
   - zone: kubernetes
-    source: 192.168.60.232
+    source: 192.168.65.232
   - zone: kubernetes
-    source: 192.168.60.233
+    source: 192.168.65.233
 
 firewalld_rules_services:
   - service: cockpit
@@ -31,7 +31,7 @@ firewalld_rules_services:
 
 k3s_token: changeme
 k3s_version: v1.31.2+k3s1
-k3s_vip_api_endpoint: 192.168.60.234
+k3s_vip_api_endpoint: 192.168.65.234
 k3s_extra_server_args: --tls-san {{ k3s_vip_api_endpoint }} --flannel-backend=none --disable-network-policy --disable traefik --disable servicelb --selinux
 k3s_kube_vip_tag: v0.8.7
 k3s_kube_vip_iface: eth0
