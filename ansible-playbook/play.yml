@@ -11,7 +11,7 @@
       confirm: true
       unsafe: true
   tasks:
-    - name: "lb: Set facts"
+    - name: "Lb: Set facts"
       ansible.builtin.set_fact:
         user_password: "{{ user_password }}"
   roles:
@@ -54,6 +54,39 @@
         key: "{{ hostvars[item]['token'] }}"
       loop: "{{ groups['lb'] }}"
       when: inventory_hostname not in groups["lb"]
+
+- name: Configure hosts - lb
+  hosts: lb
+  tasks:
+    - name: "Lb: Enable vrrp"
+      become: true
+      ansible.posix.firewalld:
+        rich_rule: rule protocol value="vrrp" accept
+        permanent: true
+        state: enabled
+        zone: block
+
+- name: Configure hosts - lb (MASTER)
+  hosts: lb[0]
+  tasks:
+    - name: "Lb (MASTER): Set facts"
+      ansible.builtin.set_fact:
+        keepalived_config_state: MASTER
+        keepalived_config_priority: 255
+    - name: "Lb (MASTER): Install keepalived"
+      ansible.builtin.import_role:
+        name: giftpilz0.server.keepalived
+
+- name: Configure hosts - lb (BACKUP)
+  hosts: lb[1]
+  tasks:
+    - name: "Lb (BACKUP): Set facts"
+      ansible.builtin.set_fact:
+        keepalived_config_state: BACKUP
+        keepalived_config_priority: 200
+    - name: "Lb (BACKUP): Install keepalived"
+      ansible.builtin.import_role:
+        name: giftpilz0.server.keepalived
 
 - name: Configure hosts - container
   hosts: container

@@ -29,3 +29,12 @@ user_username: "{{ ansible_user }}"
 user_groups: adm
 user_shell: /bin/bash
 user_home: true
+
+######################################
+### giftpilz0.server.keepalived
+
+keepalived_config_path: /etc/keepalived/keepalived.conf
+keepalived_config_virtual_ip: 192.168.70.100
+keepalived_config_interface: eth0
+keepalived_config_virtual_router_id: 100
+keepalived_config_vrrp_instance: VG

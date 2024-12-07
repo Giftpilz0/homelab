@@ -44,7 +44,6 @@ packages_rpmfusion_package_state: skip
 
 packages_flatpak_repo_state: skip
 packages_flatpak_package: []
-
 ######################################
 ### giftpilz0.general.monitoring
 
