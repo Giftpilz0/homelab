@@ -19,3 +19,13 @@ firewalld_rules_services:
   - service: ssh
     zone: loadbalancer
     state: enabled
+
+firewalld_rules_ports:
+  - port: 30000-30050
+    protocol: tcp
+    zone: loadbalancer
+    state: enabled
+  - port: 30000-30050
+    protocol: udp
+    zone: loadbalancer
+    state: enabled

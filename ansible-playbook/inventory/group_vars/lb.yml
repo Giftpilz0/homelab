@@ -7,6 +7,10 @@ firewalld_zones_define:
     source: 192.168.60.0/24
   - zone: work
     source: 192.168.10.0/24
+  - zone: work
+    source: 192.168.15.0/24
+  - zone: iot
+    source: 192.168.30.0/24
 
 firewalld_rules_services:
   - service: cockpit
@@ -19,6 +23,44 @@ firewalld_rules_services:
     zone: work
     state: enabled
   - service: https
+    zone: work
+    state: enabled
+
+firewalld_rules_ports:
+  - port: 30013
+    protocol: tcp
+    zone: iot
+    state: enabled
+  - port: 30014
+    protocol: tcp
+    zone: iot
+    state: enabled
+  - port: 30002
+    protocol: tcp
+    zone: work
+    state: enabled
+  - port: 30007
+    protocol: tcp
+    zone: work
+    state: enabled
+  - port: 30024
+    protocol: tcp
+    zone: work
+    state: enabled
+  - port: 30026
+    protocol: tcp
+    zone: work
+    state: enabled
+  - port: 30027
+    protocol: tcp
+    zone: work
+    state: enabled
+  - port: 30031
+    protocol: tcp
+    zone: work
+    state: enabled
+  - port: 30032
+    protocol: tcp
     zone: work
     state: enabled
 
