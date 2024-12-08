@@ -32,8 +32,7 @@ resource "proxmox_vm_qemu" "nfs" {
   }
 
   network {
-    bridge   = "vmbr0"
-    tag      = 60
+    bridge   = "misc"
     model    = "virtio"
     firewall = true
   }

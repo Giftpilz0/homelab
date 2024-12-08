@@ -32,8 +32,7 @@ resource "proxmox_vm_qemu" "k3s-node1" {
   }
 
   network {
-    bridge   = "vmbr0"
-    tag      = 65
+    bridge   = "k8s"
     model    = "virtio"
     firewall = true
   }

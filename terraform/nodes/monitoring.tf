@@ -32,8 +32,7 @@ resource "proxmox_vm_qemu" "monitoring" {
   }
 
   network {
-    bridge   = "vmbr0"
-    tag      = 60
+    bridge   = "misc"
     model    = "virtio"
     firewall = true
   }

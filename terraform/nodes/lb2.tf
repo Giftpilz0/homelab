@@ -32,8 +32,7 @@ resource "proxmox_vm_qemu" "lb2" {
   }
 
   network {
-    bridge   = "vmbr0"
-    tag      = 70
+    bridge   = "lb"
     model    = "virtio"
     firewall = true
   }
