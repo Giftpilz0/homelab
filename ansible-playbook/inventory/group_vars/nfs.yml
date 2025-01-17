@@ -5,6 +5,8 @@
 firewalld_zones_define:
   - zone: server
     source: 192.168.60.0/24
+  - zone: kubernetes
+    source: 192.168.65.0/24
   - zone: loadbalancer
     source: 192.168.70.100
   - zone: loadbalancer
@@ -22,13 +24,16 @@ firewalld_rules_services:
   - service: nfs
     zone: server
     state: enabled
+  - service: nfs
+    zone: kubernetes
+    state: enabled
 
 ######################################
 ### giftpilz0.server.nfs
 
 nfs_exports:
   - path: /srv/kubernetes/
-    host: 192.168.60.0/24
+    host: 192.168.65.0/24
     options: rw,sync,all_squash
     user: nobody
     group: nobody
