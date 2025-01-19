@@ -65,6 +65,9 @@
         permanent: true
         state: enabled
         zone: block
+  roles:
+    - role: lego
+    - role: giftpilz0.server.haproxy
 
 - name: Configure hosts - lb (MASTER)
   hosts: lb[0]

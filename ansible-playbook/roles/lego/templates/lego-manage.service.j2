@@ -1,0 +1,18 @@
+[Unit]
+Description=Manage Lego Certificates (Order and Renew)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+Environment="LEGO_BIN={{ lego_path }}/lego"
+Environment="LEGO_PATH={{ lego_cert_path }}"
+Environment="EMAIL={{ lego_acme_email }}"
+Environment="DNS_PROVIDER={{ lego_acme_provider }}"
+Environment="DOMAIN={{ lego_acme_domains | join(' ') }}"
+Environment="KEY_TYPE={{ lego_keytype }}"
+Environment="IONOS_API_KEY={{ lego_ionos_api_key }}"
+Environment="DNS_RESOLVER={{ lego_dns_resolver }}"
+ExecStart={{ lego_manager_script_path }}
+User=root
+Group=root

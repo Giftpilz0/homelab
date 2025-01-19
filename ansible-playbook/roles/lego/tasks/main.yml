@@ -1,0 +1,96 @@
+---
+# tasks file for lego
+
+######################################
+### packages
+
+- name: "Lego: Gather package facts"
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: "Lego: Manage dependencies"
+  become: true
+  ansible.builtin.package:
+    name: "{{ lego_package }}"
+    state: "{{ lego_package_state }}"
+
+- name: "Lego: Manage directory"
+  become: true
+  ansible.builtin.file:
+    name: "{{ lego_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when:
+    - lego_bin_state != 'skip'
+
+- name: "Lego: Download"
+  become: true
+  ansible.builtin.unarchive:
+    src: "{{ lego_url }}"
+    dest: "{{ lego_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+    remote_src: true
+    extra_opts:
+      - --add-file
+      - lego
+  when:
+    - lego_bin_state != 'skip'
+
+######################################
+### config
+
+- name: "Lego: Manage directory"
+  become: true
+  ansible.builtin.file:
+    name: "{{ lego_cert_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  when:
+    - lego_bin_state != 'skip'
+
+- name: "Lego: Manage lego systemd files"
+  become: true
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "/etc/systemd/system/{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - { src: "lego-manage.service.j2", dest: "lego-manage.service" }
+    - { src: "lego-manage.timer.j2", dest: "lego-manage.timer" }
+  when:
+    - lego_package_state != 'skip'
+
+- name: "Lego: Systemd daemon-reload"
+  become: true
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+
+- name: "Lego: Manage lego systemd files"
+  become: true
+  ansible.builtin.template:
+    src: manage_lego_certs.sh
+    dest: "{{ lego_manager_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+######################################
+### services
+
+- name: "Lego: Manage services"
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: "{{ lego_service_state }}"
+    enabled: "{{ lego_service_enabled }}"
+  loop: "{{ lego_service_name }}"
+  when:
+    - lego_package_state != 'absent'
