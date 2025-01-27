@@ -38,11 +38,14 @@ firewalld_rules_ports:
 k3s_token: changeme
 k3s_version: v1.32.0+k3s1
 k3s_vip_api_endpoint: 192.168.65.234
-k3s_extra_server_args: --tls-san {{ k3s_vip_api_endpoint }} --flannel-backend=none --disable-network-policy --disable traefik --disable servicelb --selinux
+k3s_extra_server_args: --tls-san {{ k3s_vip_api_endpoint }} --service-cidr {{ k3s_service_cidr }} --cluster-cidr {{ k3s_cluster_cidr }} --flannel-backend=none --disable-network-policy --disable-helm-controller --disable metrics-server --disable servicelb --disable traefik --selinux
+
 k3s_kube_vip_tag: v0.8.9
 k3s_kube_vip_iface: eth0
+k3s_service_cidr: 10.43.0.0/16
+k3s_cluster_cidr: 10.42.0.0/16
 
-cilium_version: 1.16.5
+cilium_version: 1.16.6
 
 cilium_config_kubeproxyreplacement: true
 cilium_config_k8sclientratelimit_qps: 30
@@ -58,6 +61,7 @@ cilium_config_hubble_relay_enabled: true
 cilium_config_hubble_relay_rolloutpods: true
 cilium_config_hubble_ui_enabled: true
 cilium_config_hubble_ui_rolloutpods: true
+cilium_config_ipam_operator_clusterpoolipv4podcidrlist: ["{{ k3s_cluster_cidr }}"]
 cilium_config_ipv4_enabled: true
 cilium_config_ipv6_enabled: false
 cilium_config_egressgateway_enabled: false
