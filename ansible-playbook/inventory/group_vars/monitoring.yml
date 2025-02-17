@@ -5,6 +5,8 @@
 firewalld_zones_define:
   - zone: server
     source: 192.168.60.0/24
+  - zone: kubernetes
+    source: 192.168.65.0/24
   - zone: loadbalancer
     source: 192.168.70.100
   - zone: loadbalancer
@@ -25,7 +27,15 @@ firewalld_rules_ports:
     protocol: tcp
     zone: server
     state: enabled
+  - port: 9100
+    protocol: tcp
+    zone: kubernetes
+    state: enabled
   - port: 3100
     protocol: tcp
     zone: server
+    state: enabled
+  - port: 3100
+    protocol: tcp
+    zone: kubernetes
     state: enabled

@@ -10,8 +10,10 @@ The project directory structure is as follows:
 ├── ansible.cfg
 ├── inventory
 │   ├── group_vars
-│   │   ├── cockpit-manager.yml
+│   │   ├── container.yml
 │   │   ├── k3s.yml
+│   │   ├── lb.yml
+│   │   ├── monitoring.yml
 │   │   ├── nfs.yml
 │   │   └── server.yml
 │   └── hosts.yml
@@ -21,8 +23,10 @@ The project directory structure is as follows:
 - **ansible.cfg**: Ansible configuration file that specifies settings for the Ansible runtime environment.
 - **inventory**: Directory containing inventory files and group variables.
   - **group_vars**: Directory containing YAML files with variables specific to different groups of hosts.
-    - **cockpit-manager.yml**: Variables used to configure the Cockpit Manager VM.
+    - **container.yml**: Variables used to configure the Podman VM.
     - **k3s.yml**: Variables used to configure Kubernetes nodes.
+    - **lb.yml**: Variables used to configure the Loadbalancer/Jumphost VM.
+    - **monitoring.yml**: Variables used to configure the Monitoring VM.
     - **nfs.yml**: Variables used to configure the NFS Storage VM.
     - **server.yml**: Variables used to configure common settings.
   - **hosts.yml**: Inventory file that defines the hosts and groups that Ansible will manage.
