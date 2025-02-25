@@ -23,12 +23,8 @@ ignoredisk --only-use=sda
 clearpart --all --initlabel --disklabel=gpt
 
 part /boot/efi --fstype=efi --size=600
-part btrfs.01 --size=4096 --grow
-
-btrfs none --data=0 --metadata=1 --label=btrfs_root btrfs.01
-btrfs / --subvol --name=root LABEL=btrfs_root
-btrfs /boot --subvol --name=boot LABEL=btrfs_root
-btrfs /home --subvol --name=home LABEL=btrfs_root
+part /boot --fstype=xfs --size=1024
+part / --fstype=xfs --size=4096 --grow --size=1
 
 rootpw --plaintext packer
 
