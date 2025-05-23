@@ -24,12 +24,12 @@ variable "proxmox_password" {
 
 variable "almalinux_iso_url" {
   type    = string
-  default = "http://repo.almalinux.org/almalinux/9.5/isos/x86_64/AlmaLinux-9.5-x86_64-boot.iso"
+  default = "https://repo.almalinux.org/almalinux/9.6/isos/x86_64/AlmaLinux-9.6-x86_64-boot.iso"
 }
 
 variable "almalinux_sha256sum_url" {
   type    = string
-  default = "http://repo.almalinux.org/almalinux/9.5/isos/x86_64/CHECKSUM"
+  default = "https://repo.almalinux.org/almalinux/9.6/isos/x86_64/CHECKSUM"
 }
 
 source "proxmox-iso" "almalinux9" {
