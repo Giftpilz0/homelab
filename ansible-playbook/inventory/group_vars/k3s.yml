@@ -13,10 +13,6 @@ firewalld_zones_define:
     source: 192.168.70.102
   - zone: kubernetes
     source: 192.168.65.231
-  - zone: kubernetes
-    source: 192.168.65.232
-  - zone: kubernetes
-    source: 192.168.65.233
 
 firewalld_rules_services:
   - service: cockpit
@@ -37,7 +33,7 @@ firewalld_rules_ports:
 
 k3s_token: changeme
 k3s_version: v1.33.0+k3s1
-k3s_vip_api_endpoint: 192.168.65.234
+k3s_vip_api_endpoint: 192.168.65.230
 k3s_extra_server_args: --tls-san {{ k3s_vip_api_endpoint }} --service-cidr {{ k3s_service_cidr }} --cluster-cidr {{ k3s_cluster_cidr }} --flannel-backend=none --disable-network-policy --disable-helm-controller --disable metrics-server --disable servicelb --disable traefik --selinux
 
 k3s_kube_vip_tag: v0.8.10

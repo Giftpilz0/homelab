@@ -13,8 +13,6 @@ The project directory structure is as follows:
 │   │   ├── container.yml
 │   │   ├── k3s.yml
 │   │   ├── lb.yml
-│   │   ├── monitoring.yml
-│   │   ├── nfs.yml
 │   │   └── server.yml
 │   └── hosts.yml
 └── play.yml
@@ -26,8 +24,6 @@ The project directory structure is as follows:
     - **container.yml**: Variables used to configure the Podman VM.
     - **k3s.yml**: Variables used to configure Kubernetes nodes.
     - **lb.yml**: Variables used to configure the Loadbalancer/Jumphost VM.
-    - **monitoring.yml**: Variables used to configure the Monitoring VM.
-    - **nfs.yml**: Variables used to configure the NFS Storage VM.
     - **server.yml**: Variables used to configure common settings.
   - **hosts.yml**: Inventory file that defines the hosts and groups that Ansible will manage.
 - **play.yml**: Ansible playbook file that defines tasks to run on managed hosts.

@@ -1,8 +1,10 @@
 packer {
   required_plugins {
     name = {
-      source  = "github.com/hashicorp/proxmox"
-      version = ">= 1.2.1"
+      # https://github.com/hashicorp/packer-plugin-proxmox/issues/307
+      # source  = "github.com/hashicorp/proxmox"
+      source  = "github.com/badsectorlabs/proxmox"
+      version = "= 1.2.3"
     }
   }
 }
@@ -46,15 +48,18 @@ source "proxmox-iso" "almalinux9" {
   cpu_type                 = "host"
   machine                  = "q35"
 
-  boot_command     = ["<wait><wait>e<down><down><end><bs><bs><bs><bs><bs>inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux.ks<leftCtrlOn>x<leftCtrlOff>"]
-  boot_wait        = "3s"
-  http_directory   = "http"
-  iso_storage_pool = "local"
-  iso_checksum     = "file:${var.almalinux_sha256sum_url}"
-  iso_url          = "${var.almalinux_iso_url}"
-  iso_download_pve = true
-  ssh_username     = "root"
-  ssh_password     = "packer"
+  boot_command   = ["<wait><wait>e<down><down><end><bs><bs><bs><bs><bs>inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux.ks<leftCtrlOn>x<leftCtrlOff>"]
+  boot_wait      = "3s"
+  http_directory = "http"
+  ssh_username   = "root"
+  ssh_password   = "packer"
+
+  boot_iso {
+    iso_storage_pool = "local"
+    iso_checksum     = "file:${var.almalinux_sha256sum_url}"
+    iso_url          = "${var.almalinux_iso_url}"
+    iso_download_pve = true
+  }
 
   scsi_controller = "virtio-scsi-single"
   disks {

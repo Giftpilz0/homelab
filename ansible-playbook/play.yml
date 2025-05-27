@@ -25,7 +25,6 @@
     - role: giftpilz0.general.firewalld
     - role: giftpilz0.general.packages
     - role: giftpilz0.general.timezone
-    - role: giftpilz0.general.monitoring
     - role: giftpilz0.server.cockpit
   tasks:
     - name: "Cockpit: Generate SSH key pair"
@@ -95,16 +94,6 @@
   hosts: container
   roles:
     - role: giftpilz0.server.podman
-
-- name: Configure hosts - monitoring
-  hosts: monitoring
-  roles:
-    - role: giftpilz0.server.podman
-
-- name: Configure hosts - nfs
-  hosts: nfs
-  roles:
-    - role: giftpilz0.server.nfs
 
 - name: Configure hosts - k3s
   hosts: k3s

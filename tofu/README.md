@@ -10,21 +10,15 @@ The project directory structure is as follows:
 ├── nodes
 │   ├── container.tf
 │   ├── k3s-node1.tf
-│   ├── k3s-node2.tf
-│   ├── k3s-node3.tf
 │   ├── lb1.tf
 │   ├── lb2.tf
-│   ├── monitoring.tf
-│   ├── nfs.tf
 │   └── provider.tf
 ```
 
 - **nodes**: This directory contains OpenTofu configuration files for defining Proxmox VMs and their associated resources.
   - **container.tf**: OpenTofu configuration for the container VM.
-  - **k3s-node1.tf**, **k3s-node2.tf**, **k3s-node3.tf**: OpenTofu configurations for Kubernetes nodes.
+  - **k3s-node1.tf**: OpenTofu configurations for Kubernetes nodes.
   - **lb1.tf**, **lb2.tf**: OpenTofu configurations for loadbalancer VM.
-  - **monitoring.tf**: OpenTofu configuration for the monitoring VM.
-  - **nfs.tf**: OpenTofu configuration for the NFS Storage VM.
   - **provider.tf**: OpenTofu provider configuration for Proxmox.
 
 ## Getting Started

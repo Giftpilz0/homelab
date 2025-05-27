@@ -10,7 +10,6 @@ resource "proxmox_vm_qemu" "lb2" {
   define_connection_info = true
   kvm                    = true
   bios                   = "ovmf"
-  cpu                    = "host"
   machine                = "q35"
   os_type                = "cloud-init"
   scsihw                 = "virtio-scsi-single"
@@ -29,18 +28,25 @@ resource "proxmox_vm_qemu" "lb2" {
         }
       }
     }
+    ide {
+      ide1 {
+        cloudinit {
+          storage = "local-lvm"
+        }
+      }
+    }
   }
 
   network {
+    id       = 0
     bridge   = "lb"
     model    = "virtio"
     firewall = true
   }
 
   # Cloud Init
-  cloudinit_cdrom_storage = "local-lvm"
-  ipconfig0               = "ip=192.168.70.102/24,gw=192.168.70.1"
-  nameserver              = "192.168.70.1"
-  ciuser                  = "serveradmin"
-  sshkeys                 = var.publick_ssh_key
+  ipconfig0  = "ip=192.168.70.102/24,gw=192.168.70.1"
+  nameserver = "192.168.70.1"
+  ciuser     = "serveradmin"
+  sshkeys    = var.publick_ssh_key
 }
