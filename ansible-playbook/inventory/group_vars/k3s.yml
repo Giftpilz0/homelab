@@ -13,6 +13,10 @@ firewalld_zones_define:
     source: 192.168.70.102
   - zone: kubernetes
     source: 192.168.65.231
+  - zone: work
+    source: 192.168.10.0/24
+  - zone: work
+    source: 192.168.15.0/24
 
 firewalld_rules_services:
   - service: cockpit
@@ -20,6 +24,12 @@ firewalld_rules_services:
     state: enabled
   - service: ssh
     zone: loadbalancer
+    state: enabled
+  - service: http
+    zone: work
+    state: enabled
+  - service: https
+    zone: work
     state: enabled
 
 firewalld_rules_ports:
