@@ -45,7 +45,7 @@ resource "proxmox_vm_qemu" "k3s-node1" {
   }
 
   # Cloud Init
-  ipconfig0  = "ip=192.168.65.233/24,gw=192.168.65.1"
+  ipconfig0  = "ip=192.168.65.231/24,gw=192.168.65.1"
   nameserver = "192.168.65.1"
   ciuser     = "serveradmin"
   sshkeys    = var.publick_ssh_key

@@ -26,15 +26,15 @@ variable "proxmox_password" {
 
 variable "almalinux_iso_url" {
   type    = string
-  default = "https://repo.almalinux.org/almalinux/9.6/isos/x86_64/AlmaLinux-9.6-x86_64-boot.iso"
+  default = "https://repo.almalinux.org/almalinux/10/isos/x86_64/AlmaLinux-10.0-x86_64-boot.iso"
 }
 
 variable "almalinux_sha256sum_url" {
   type    = string
-  default = "https://repo.almalinux.org/almalinux/9.6/isos/x86_64/CHECKSUM"
+  default = "https://repo.almalinux.org/almalinux/10.0/isos/x86_64/CHECKSUM"
 }
 
-source "proxmox-iso" "almalinux9" {
+source "proxmox-iso" "almalinux10" {
   proxmox_url              = var.proxmox_url
   username                 = var.proxmox_user
   password                 = var.proxmox_password
@@ -80,7 +80,7 @@ source "proxmox-iso" "almalinux9" {
 }
 
 build {
-  sources = ["source.proxmox-iso.almalinux9"]
+  sources = ["source.proxmox-iso.almalinux10"]
   provisioner "shell" {
     inline = ["passwd -d root", "passwd -l root", "rm -f /etc/ssh/ssh_config.d/allow-root-ssh.conf"]
   }

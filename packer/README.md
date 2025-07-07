@@ -7,13 +7,13 @@ This packer project automates the creation of Proxmox virtual machine (VM) templ
 The project directory structure is as follows:
 
 ```
-├── almalinux9
+├── almalinux10
 │   ├── almalinux.pkr.hcl
 │   └── http
 │       └── almalinux.ks
 ```
 
-- **almalinux9**: This directory contains configurations specific to building the AlmaLinux VM template.
+- **almalinux10**: This directory contains configurations specific to building the AlmaLinux VM template.
   - **almalinux.pkr.hcl**: Packer configuration file for building the AlmaLinux VM template.
   - **http**: Directory containing any additional files needed during the deployment process.
     - **almalinux.ks**: Kickstart file used during the deployment of the AlmaLinux template VM.
@@ -23,7 +23,7 @@ The project directory structure is as follows:
 To use this packer project to create Proxmox VM templates, follow these steps:
 
 1. Install packer on your local machine. You can download it from [packer.io](https://www.packer.io/downloads).
-1. Navigate to the 'almalinux9' directory:
+1. Navigate to the 'almalinux10' directory:
 1. Optionally, modify the kickstart file 'almalinux.ks' in the 'http' directory if additional configurations are required.
 1. Execute the packer build command to start building the AlmaLinux VM template:
    ```bash
