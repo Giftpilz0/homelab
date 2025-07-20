@@ -4,7 +4,7 @@ set -e  # Exit on any error
 
 # Configuration from environment variables
 DOMAINS=$DOMAIN
-IONOS_API_KEY=$IONOS_API_KEY
+CLOUDFLARE_DNS_API_TOKEN=$CLOUDFLARE_DNS_API_TOKEN
 
 # Loop through all domains passed via DOMAIN environment variable
 for DOMAIN in $DOMAINS; do
@@ -14,7 +14,7 @@ for DOMAIN in $DOMAINS; do
     # Check if the certificate exists
     if [ ! -f "$CERT_FILE" ]; then
         echo "Certificate for $DOMAIN does not exist. Ordering a new one..."
-        IONOS_API_KEY=$IONOS_API_KEY $LEGO_BIN \
+        CLOUDFLARE_DNS_API_TOKEN=$CLOUDFLARE_DNS_API_TOKEN $LEGO_BIN \
             --pem \
             --email "$EMAIL" \
             --accept-tos \
@@ -29,7 +29,7 @@ for DOMAIN in $DOMAINS; do
         # Check if the certificate is expiring soon (30 days threshold)
         if ! openssl x509 -checkend 2592000 -noout -in "$CERT_FILE"; then
             echo "Certificate for $DOMAIN is expiring soon. Renewing..."
-            IONOS_API_KEY=$IONOS_API_KEY $LEGO_BIN \
+            CLOUDFLARE_DNS_API_TOKEN=$CLOUDFLARE_DNS_API_TOKEN $LEGO_BIN \
                 --pem \
                 --email "$EMAIL" \
                 --accept-tos \

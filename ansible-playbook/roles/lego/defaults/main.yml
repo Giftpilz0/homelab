@@ -5,8 +5,8 @@ lego_keytype: rsa4096
 lego_cert_path: /etc/ssl/lego
 lego_acme_email:
 lego_dns_resolver: 8.8.8.8:53
-lego_acme_provider: ionos
-lego_ionos_api_key:
+lego_acme_provider: cloudflare
+lego_cloudflare_api_key:
 lego_manager_script_path: /usr/local/bin/manage_lego_certs.sh
 
 lego_acme_domains:
@@ -20,7 +20,7 @@ lego_service_name:
 lego_bin_state: present
 lego_url: https://github.com/go-acme/lego/releases/download/v{{ lego_tag }}/lego_v{{ lego_tag }}_linux_{{ lego_arch }}.tar.gz
 lego_arch: amd64
-lego_tag: 4.23.1
+lego_tag: 4.24.0
 lego_path: /usr/local/bin
 
 lego_package: openssl

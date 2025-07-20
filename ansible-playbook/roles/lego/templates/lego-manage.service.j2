@@ -11,7 +11,7 @@ Environment="EMAIL={{ lego_acme_email }}"
 Environment="DNS_PROVIDER={{ lego_acme_provider }}"
 Environment="DOMAIN={{ lego_acme_domains | join(' ') }}"
 Environment="KEY_TYPE={{ lego_keytype }}"
-Environment="IONOS_API_KEY={{ lego_ionos_api_key }}"
+Environment="CLOUDFLARE_DNS_API_TOKEN={{ lego_cloudflare_api_key }}"
 Environment="DNS_RESOLVER={{ lego_dns_resolver }}"
 ExecStart={{ lego_manager_script_path }}
 User=root
