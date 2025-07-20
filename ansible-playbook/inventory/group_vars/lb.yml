@@ -53,7 +53,7 @@ keepalived_config_vrrp_instance: VG
 lego_keytype: rsa4096
 lego_cert_path: /etc/ssl/lego
 lego_acme_email: ""
-lego_dns_resolver: 1.1.1.1:53
+lego_dns_resolver: "8.8.8.8:53,1.1.1.1:53"
 lego_acme_provider: cloudflare
 lego_cloudflare_api_key: ""
 lego_manager_script_path: /usr/local/bin/manage_lego_certs.sh

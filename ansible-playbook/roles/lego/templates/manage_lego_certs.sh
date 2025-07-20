@@ -22,6 +22,7 @@ for DOMAIN in $DOMAINS; do
             --domains "$DOMAIN" \
             --key-type "$KEY_TYPE" \
             --dns.resolvers "$DNS_RESOLVER" \
+            --dns.propagation-wait "60s" \
             --path "$LEGO_PATH" \
             run
     else
@@ -37,6 +38,7 @@ for DOMAIN in $DOMAINS; do
                 --domains "$DOMAIN" \
                 --key-type "$KEY_TYPE" \
                 --dns.resolvers "$DNS_RESOLVER" \
+                --dns.propagation-wait "60s" \
                 --path "$LEGO_PATH" \
                 renew
         else
