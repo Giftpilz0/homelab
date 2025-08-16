@@ -14,12 +14,12 @@ locals {
 
 
 module "networks" {
-  source = "./modules/networks"
+  source   = "./modules/networks"
   networks = var.networks
 }
 
 module "vms" {
-  source = "./modules/vms"
-  vms             = local.processed_vms
+  source     = "./modules/vms"
+  vms        = local.processed_vms
   depends_on = [module.networks]
 }
