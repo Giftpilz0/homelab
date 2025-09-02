@@ -33,10 +33,25 @@ firewalld_rules_ports:
 ######################################
 ### giftpilz0.general.user
 
-user_username: "{{ ansible_user }}"
-user_groups: adm
-user_shell: /bin/bash
-user_home: true
+admin_group: "{{ 'wheel' if ansible_os_family == 'RedHat' else 'sudo' }}"
+
+user_key_target_users:
+  - root
+
+user:
+  - user_username: "{{ ansible_user }}"
+    user_groups:
+      - "{{ admin_group }}"
+      - "{{ user_username }}"
+    user_home: true
+    user_shell: "/bin/bash"
+    user_comment: "{{ user_username }}"
+    user_install_key_to_targets: true
+    user_sudo_pwless: true
+    user_state: present
+    user_password: "{{ user_password }}"
+    user_pub:
+      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOAhl7NUVzPjYfk/rB+dS0i6wDPkB5EtlZSfVwGdrWsg"
 
 ######################################
 ### giftpilz0.server.keepalived
