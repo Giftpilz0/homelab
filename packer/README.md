@@ -30,3 +30,13 @@ To use this packer project to create Proxmox VM templates, follow these steps:
    packer build almalinux.pkr.hcl
    ```
 1. Packer will execute the build process, which involves creating a Proxmox VM, provisioning it with AlmaLinux, and preparing it as a template.
+
+## Secrets Management
+
+```bash
+# Edit secrets
+sops edit sops-secret.yaml
+
+# Decrypt and use with packer
+sops exec-env sops-secret.yaml 'packer build almalinux.pkr.hcl'
+```
