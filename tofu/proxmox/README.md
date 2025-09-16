@@ -5,12 +5,11 @@ This project uses OpenTofu to automate the deployment of a set of Proxmox virtua
 ## Getting Started
 
 1. Install OpenTofu on your local machine. You can download it from [opentofu.org](https://opentofu.org/docs/intro/install/).
-1. Navigate to the 'nodes' directory:
 1. Initialize OpenTofu:
    ```bash
    tofu init
    ```
-1. Review and customize the OpenTofu configuration files in the 'nodes' directory.
+1. Review and customize the OpenTofu configuration files.
 1. Plan the OpenTofu deployment to ensure everything is configured correctly:
    ```bash
    tofu plan
