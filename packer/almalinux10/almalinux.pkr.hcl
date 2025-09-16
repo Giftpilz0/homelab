@@ -1,27 +1,28 @@
 packer {
   required_plugins {
     name = {
-      # https://github.com/hashicorp/packer-plugin-proxmox/issues/307
-      # source  = "github.com/hashicorp/proxmox"
-      source  = "github.com/badsectorlabs/proxmox"
-      version = "= 1.2.3"
+      source  = "github.com/hashicorp/proxmox"
+      version = "1.2.3"
     }
   }
 }
 
-variable "proxmox_url" {
-  type    = string
-  default = "https://192.168.50.10:8006/api2/json"
+variable "sops_secrets" {
+  type = object({
+    proxmox_config_username = env("proxmox_config_username")
+    proxmox_config_password = env("proxmox_config_password")
+    proxmox_config_endpoint = env("proxmox_config_endpoint")
+  })
+  default = {
+    proxmox_config_username = "root@pam"
+    proxmox_config_password = ""
+    proxmox_config_endpoint = ""
+  }
 }
 
 variable "proxmox_user" {
   type    = string
   default = "root@pam"
-}
-
-variable "proxmox_password" {
-  type      = string
-  sensitive = true
 }
 
 variable "almalinux_iso_url" {
@@ -35,9 +36,9 @@ variable "almalinux_sha256sum_url" {
 }
 
 source "proxmox-iso" "almalinux10" {
-  proxmox_url              = var.proxmox_url
-  username                 = var.proxmox_user
-  password                 = var.proxmox_password
+  proxmox_url              = var.sops_secrets.proxmox_config_endpoint
+  username                 = var.sops_secrets.proxmox_config_username
+  password                 = var.sops_secrets.proxmox_config_password
   insecure_skip_tls_verify = true
   unmount_iso              = true
   cloud_init               = true
