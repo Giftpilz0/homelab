@@ -1,0 +1,86 @@
+# =============================================================================
+# GLOBAL CONFIGURATION
+# =============================================================================
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+# =============================================================================
+# ENTRYPOINTS
+# =============================================================================
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+
+  websecure:
+    address: ":443"
+    http:
+      middlewares:
+        - security-headers@file
+        - rate-limit@file
+
+{% if traefik_dashboard_enabled | default(false) %}
+  traefik:
+    address: ":{{ traefik_dashboard_port }}"
+{% endif %}
+
+{% if traefik_tcp_entrypoints is defined %}
+{% for entrypoint in traefik_tcp_entrypoints %}
+  {{ entrypoint.name }}:
+    address: ":{{ entrypoint.port }}"
+{% endfor %}
+{% endif %}
+
+{% if traefik_acme_enabled %}
+# =============================================================================
+# CERTIFICATES RESOLVERS
+# =============================================================================
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: "{{ traefik_acme_email }}"
+      storage: "/acme/acme.json"
+      caServer: "{{ traefik_acme_ca_server }}"
+{% if traefik_acme_challenge_type == 'dns' %}
+      dnsChallenge:
+        provider: {{ traefik_acme_dns_provider }}
+        propagation:
+            delayBeforeChecks: 60
+{% elif traefik_acme_challenge_type == 'http' %}
+      httpChallenge:
+        entryPoint: web
+{% endif %}
+{% endif %}
+
+# =============================================================================
+# PROVIDERS
+# =============================================================================
+providers:
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+# =============================================================================
+# API AND DASHBOARD
+# =============================================================================
+api:
+  dashboard: {{ traefik_dashboard_enabled }}
+  insecure: {{ traefik_api_insecure }}
+  debug: {{ traefik_api_debug }}
+
+# =============================================================================
+# LOGGING
+# =============================================================================
+log:
+  level: {{ traefik_log_level }}
+  format: {{ traefik_log_format }}
+
+accessLog:
+  format: {{ traefik_access_log_format }}
+  bufferingSize: {{ traefik_access_log_buffer_size }}

@@ -1,0 +1,15 @@
+[Unit]
+Description=Vaultwarden Container
+
+[Container]
+ContainerName=vaultwarden
+Image=docker.io/vaultwarden/server:latest
+
+Pod=vaultwarden.pod
+
+AutoUpdate=registry
+
+Environment=DOMAIN={{ vaultwarden_domain }}
+Environment=ADMIN_TOKEN={{ vaultwarden_admin_token }}
+
+Volume=vaultwarden-data.volume:/data

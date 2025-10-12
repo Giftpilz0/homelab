@@ -1,0 +1,21 @@
+---
+namespace: giftpilz0
+name: homelab
+version: 1.0.0
+
+description: giftpilz0 homelab collection
+readme: README.md
+license:
+  - GPL-3.0-only
+
+authors:
+  - Moritz Schmidt <schmidtmoritz404@gmail.com>
+
+tags:
+  - linux
+
+dependencies:
+  ansible.posix: ">=2.1.0"
+  community.general: ">=10.7.3"
+
+repository: https://github.com/giftpilz0/homelab

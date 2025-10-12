@@ -1,0 +1,15 @@
+[Unit]
+Description=Vaultwarden Pod
+
+[Pod]
+PodName=vaultwarden-pod
+
+Network=quadlet
+
+# PublishPort=80:80
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

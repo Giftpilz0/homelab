@@ -1,0 +1,109 @@
+---
+# yamllint disable rule:line-length
+
+######################################
+### giftpilz0.general.timezone
+
+timezone_timezone: Europe/Berlin
+
+######################################
+### giftpilz0.general.packages
+
+packages_rpmfusion_package_state: skip
+packages_python_package_state: skip
+packages_flatpak_repo_state: skip
+
+packages_additional_package:
+  - epel-release
+  - mkpasswd
+  - nfs-utils
+  - nmap
+  - bash-completion
+  # - fastfetch
+
+######################################
+### giftpilz0.general.user
+
+admin_group: "{{ 'wheel' if ansible_os_family == 'RedHat' else 'sudo' }}"
+
+user:
+  - user_username: "serveradmin"
+    user_groups:
+      - "{{ admin_group }}"
+      - serveradmin
+    user_home: true
+    user_shell: "/bin/bash"
+    user_comment: "serveradmin"
+    user_install_key_to_targets: true
+    user_sudo_pwless: true
+    user_state: present
+    user_password: "!"
+    user_pub:
+      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOAhl7NUVzPjYfk/rB+dS0i6wDPkB5EtlZSfVwGdrWsg"
+
+######################################
+### giftpilz0.general.firewalld
+
+firewalld_zones_define:
+  - zone: server
+    source: 192.168.60.0/24
+  - zone: server-kubernetes
+    source: 192.168.65.0/24
+  - zone: server-lb
+    source: 192.168.70.0/24
+  - zone: clients
+    source: 192.168.10.0/24
+  - zone: clients
+    source: 192.168.15.0/24
+
+firewalld_rules_services:
+  - service: ssh
+    zone: clients
+    state: enabled
+  - service: http
+    zone: clients
+    state: enabled
+  - service: https
+    zone: clients
+    state: enabled
+
+firewalld_rules_ports:
+  - port: 6443
+    protocol: tcp
+    zone: server-kubernetes
+    state: enabled
+
+######################################
+### giftpilz0.kubernetes.k3s
+
+k3s_version: v1.33.1+k3s1
+k3s_vip_api_endpoint: 192.168.65.230
+k3s_extra_server_args:
+  --tls-san {{ k3s_vip_api_endpoint }} --service-cidr {{ k3s_service_cidr }} --cluster-cidr {{ k3s_cluster_cidr }} --flannel-backend=none
+  --disable-network-policy --disable-helm-controller --disable metrics-server --disable servicelb --disable traefik --selinux
+
+k3s_kube_vip_iface: eth0
+k3s_service_cidr: 10.43.0.0/16
+k3s_cluster_cidr: 10.42.0.0/16
+
+cilium_config_kubeproxyreplacement: true
+cilium_config_k8sclientratelimit_qps: 30
+cilium_config_k8sclientratelimit_burst: 150
+cilium_config_rolloutciliumpods: true
+cilium_config_l2announcements_enabled: true
+cilium_config_ingresscontroller_enabled: true
+cilium_config_ingresscontroller_default: true
+cilium_config_gatewayapi_enabled: true
+cilium_config_hostfirewall_enabled: false
+cilium_config_hubble_enabled: true
+cilium_config_hubble_relay_enabled: true
+cilium_config_hubble_relay_rolloutpods: true
+cilium_config_hubble_ui_enabled: true
+cilium_config_hubble_ui_rolloutpods: true
+cilium_config_ipam_operator_clusterpoolipv4podcidrlist:
+  ["{{ k3s_cluster_cidr }}"]
+cilium_config_ipv4_enabled: true
+cilium_config_ipv6_enabled: false
+cilium_config_egressgateway_enabled: false
+cilium_config_operator_enabled: true
+cilium_config_operator_rolloutpods: true

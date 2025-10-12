@@ -1,0 +1,5 @@
+---
+podman_user: "{{ ansible_user }}"
+
+vaultwarden_domain: ""
+vaultwarden_admin_token: ""

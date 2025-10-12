@@ -1,0 +1,17 @@
+---
+- name: Install/update collections
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  become: false
+  tasks:
+    - name: Install/update collections from requirements.yml
+      ansible.builtin.command:
+        cmd: ansible-galaxy collection install -r requirements.yml --force
+      register: collection_update
+      changed_when: "'was installed successfully' in collection_update.stdout"
+
+    - name: Display collection update results
+      ansible.builtin.debug:
+        var: collection_update.stdout_lines
+      when: collection_update.stdout_lines is defined

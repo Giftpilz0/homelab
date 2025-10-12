@@ -1,0 +1,16 @@
+[Unit]
+Description=Homeassistant Container
+
+[Container]
+ContainerName=homeassistant
+Image=ghcr.io/home-assistant/home-assistant:latest
+
+Pod=homeassistant.pod
+
+AutoUpdate=registry
+
+Volume=homeassistant-config.volume:/config
+
+Volume=/dev/serial/by-id/usb-ITEAD_SONOFF_Zigbee_3.0_USB_Dongle_Plus_V2_20230804114425-if00:/dev/ttyACM0
+Annotation=run.oci.keep_original_groups=1
+SecurityLabelType=spc_t

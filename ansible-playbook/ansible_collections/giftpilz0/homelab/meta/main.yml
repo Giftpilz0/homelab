@@ -1,0 +1,7 @@
+---
+galaxy_info:
+  standalone: true
+  min_ansible_version: ">=2.16.0"
+  license: GPL-3.0-only
+  description: giftpilz0 homelab collection
+  author: Moritz Schmidt <schmidtmoritz404@gmail.com>

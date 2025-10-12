@@ -1,0 +1,20 @@
+[Unit]
+Description=Traefik Container
+
+[Container]
+ContainerName=traefik
+Image=docker.io/library/traefik:latest
+
+Pod=traefik.pod
+
+AutoUpdate=registry
+
+{% if traefik_environment_vars is defined %}
+{% for env_name, env_value in traefik_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
+
+Volume=traefik-acme.volume:/acme/
+Volume=%h/.config/containers/systemd/traefik/dynamic.yaml:/etc/traefik/dynamic/dynamic.yaml:Z
+Volume=%h/.config/containers/systemd/traefik/traefik.yaml:/etc/traefik/traefik.yaml:Z

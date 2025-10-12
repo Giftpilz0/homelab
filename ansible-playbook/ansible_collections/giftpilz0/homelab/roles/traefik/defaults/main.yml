@@ -1,0 +1,78 @@
+---
+podman_user: "{{ ansible_user }}"
+
+# ACME
+# traefik_environment_vars:
+#   CLOUDFLARE_DNS_API_TOKEN: "example"
+
+traefik_acme_enabled: true
+traefik_acme_email: ""
+traefik_acme_ca_server: "https://acme-v02.api.letsencrypt.org/directory"
+traefik_acme_challenge_type: http # dns or http
+traefik_acme_dns_provider: "cloudflare"
+
+# API & Dashboard
+traefik_dashboard_port: 9000
+traefik_dashboard_enabled: false
+traefik_api_insecure: false
+traefik_api_debug: false
+
+# Ratelimit
+traefik_rate_limit_average: 100
+traefik_rate_limit_burst: 200
+traefik_rate_limit_period: 5
+
+# Logging
+traefik_log_level: "WARN"
+traefik_log_format: "json"
+
+traefik_access_log_format: "json"
+traefik_access_log_buffer_size: 10
+
+# Custom middlewares
+# traefik_custom_middlewares:
+#   auth-basic:
+#     basicAuth:
+#       users:
+#         - "admin:$2y$10$..."
+
+# TCP entrypoints
+# traefik_tcp_entrypoints:
+#   - name: mysql
+#     port: 3306
+#   - name: postgres
+#     port: 5432
+
+# HTTP services
+# traefik_http_services:
+#   - name: webapp
+#     domain: app.example.com
+#     rule: "Host(`app.example.com`)"
+#     servers:
+#       - url: "http://192.168.1.100:8080"
+#     tls_enabled: true
+#     acme_enabled: true
+#     middlewares:
+#       - "auth-basic@file"
+#     sans:
+#       - "app1.example.com"
+#       - "app2.example.com"
+#     health_check:
+#       path: "/health"
+#       interval: "30s"
+
+# TCP services
+# traefik_tcp_services:
+#   - name: mysql-primary
+#     domain: "db.example.com"
+#     rule: "HostSNI(`db.example.com`)"
+#     entrypoints:
+#       - mysql
+#     servers:
+#       - address: "192.168.1.200:3306"
+#     tls_enabled: true
+#     acme_enabled: true
+#     tls_passthrough: false
+#     sans:
+#       - "app1.example.com"
+#       - "app2.example.com"

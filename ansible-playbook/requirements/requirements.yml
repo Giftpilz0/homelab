@@ -1,0 +1,20 @@
+---
+collections:
+  - name: giftpilz0.general
+    source: git+https://github.com/Giftpilz0/ansible-collection-general.git
+    type: git
+    version: main
+
+  - name: giftpilz0.server
+    source: git+https://github.com/Giftpilz0/ansible-collection-server.git
+    type: git
+    version: main
+
+  - name: giftpilz0.kubernetes
+    source: git+https://github.com/Giftpilz0/ansible-collection-kubernetes.git
+    type: git
+    version: main
+
+  - name: giftpilz0.homelab
+    source: ../ansible_collections/giftpilz0/homelab
+    type: dir
