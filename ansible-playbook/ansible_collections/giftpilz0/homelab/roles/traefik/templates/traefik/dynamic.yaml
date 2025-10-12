@@ -1,0 +1,150 @@
+# =============================================================================
+# TLS CONFIGURATION
+# =============================================================================
+tls:
+  options:
+    default:
+      sniStrict: true
+
+  stores:
+    default: {}
+
+# =============================================================================
+# MIDDLEWARE
+# =============================================================================
+http:
+  middlewares:
+    security-headers:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Proto: "https"
+        customResponseHeaders:
+          X-Robots-Tag: "noindex,nofollow,nosnippet"
+
+    rate-limit:
+      rateLimit:
+        average: {{ traefik_rate_limit_average }}
+        burst: {{ traefik_rate_limit_burst }}
+        period: {{ traefik_rate_limit_period }}
+
+{% if traefik_custom_middlewares is defined %}
+{% for middleware_name, middleware_config in traefik_custom_middlewares.items() %}
+    {{ middleware_name }}:
+{{ middleware_config | to_nice_yaml(indent=2) | indent(6, True) }}
+{% endfor %}
+{% endif %}
+
+  # =============================================================================
+  # HTTP ROUTERS
+  # =============================================================================
+  routers:
+{% if traefik_http_services is defined %}
+{% for service in traefik_http_services %}
+    {{ service.name }}-router:
+      rule: "{{ service.rule }}"
+      entryPoints:
+{% for entrypoint in service.entrypoints | default(['websecure']) %}
+        - {{ entrypoint }}
+{% endfor %}
+      service: {{ service.name }}-service
+{% if service.middlewares is defined %}
+      middlewares:
+{% for middleware in service.middlewares %}
+        - {{ middleware }}
+{% endfor %}
+{% endif %}
+{% if service.acme_enabled | default(traefik_acme_enabled) %}
+      tls:
+        certResolver: letsencrypt
+{% if service.sans is defined %}
+        domains:
+          - main: "{{ service.domain }}"
+            sans:
+{% for san in service.sans %}
+              - "{{ san }}"
+{% endfor %}
+{% endif %}
+{% elif service.tls_enabled | default(false) %}
+      tls: {}
+{% endif %}
+
+{% endfor %}
+{% endif %}
+
+  # =============================================================================
+  # HTTP SERVICES
+  # =============================================================================
+  services:
+{% if traefik_http_services is defined %}
+{% for service in traefik_http_services %}
+    {{ service.name }}-service:
+      loadBalancer:
+        servers:
+{% for server in service.servers %}
+          - url: "{{ server.url }}"
+{% endfor %}
+{% if service.health_check is defined %}
+        healthCheck:
+          path: "{{ service.health_check.path }}"
+          interval: "{{ service.health_check.interval | default('30s') }}"
+          timeout: "{{ service.health_check.timeout | default('5s') }}"
+          scheme: "{{ service.health_check.scheme | default('http') }}"
+          method: "{{ service.health_check.method | default('GET') }}"
+{% if service.health_check.port is defined %}
+          port: {{ service.health_check.port }}
+{% endif %}
+{% endif %}
+
+{% endfor %}
+{% endif %}
+
+{% if traefik_tcp_services is defined %}
+# =============================================================================
+# TCP CONFIGURATION
+# =============================================================================
+tcp:
+  # =============================================================================
+  # TCP ROUTERS
+  # =============================================================================
+  routers:
+{% for service in traefik_tcp_services %}
+    {{ service.name }}-tcp-router:
+      rule: "{{ service.rule }}"
+      entryPoints:
+{% for entrypoint in service.entrypoints %}
+        - {{ entrypoint }}
+{% endfor %}
+      service: {{ service.name }}-tcp-service
+{% if service.tls_enabled | default(false) %}
+      tls:
+{% if service.acme_enabled | default(false) %}
+        certResolver: letsencrypt
+{% if service.sans is defined %}
+        domains:
+          - main: "{{ service.domain }}"
+            sans:
+{% for san in service.sans %}
+              - "{{ san }}"
+{% endfor %}
+{% endif %}
+{% else %}
+        passthrough: {{ service.tls_passthrough | default(false) }}
+{% endif %}
+{% endif %}
+
+{% endfor %}
+
+  # =============================================================================
+  # TCP SERVICES
+  # =============================================================================
+  services:
+{% for service in traefik_tcp_services %}
+    {{ service.name }}-tcp-service:
+      loadBalancer:
+        servers:
+{% for server in service.servers %}
+          - address: "{{ server.address }}"
+{% endfor %}
+
+{% endfor %}
+{% endif %}

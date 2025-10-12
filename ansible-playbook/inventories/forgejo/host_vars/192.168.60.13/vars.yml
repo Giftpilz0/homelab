@@ -1,0 +1,48 @@
+---
+######################################
+### giftpilz0.general.firewalld
+
+firewalld_zones_define:
+  - zone: server
+    source: 192.168.60.0/24
+  - zone: server-kubernetes
+    source: 192.168.65.0/24
+  - zone: server-lb
+    source: 192.168.70.0/24
+  - zone: clients
+    source: 192.168.10.0/24
+  - zone: clients
+    source: 192.168.15.0/24
+
+firewalld_rules_services:
+  - service: ssh
+    zone: clients
+    state: enabled
+  - service: http
+    zone: clients
+    state: enabled
+  - service: https
+    zone: clients
+    state: enabled
+
+######################################
+### giftpilz0.server.podman, giftpilz0.homelab.forgejo
+
+podman_user: "container"
+
+######################################
+### giftpilz0.homelab.traefik
+
+traefik_acme_challenge_type: dns
+traefik_acme_dns_provider: "cloudflare"
+traefik_log_level: "WARN"
+
+# HTTP services
+traefik_http_services:
+  - name: forgejo
+    domain: forgejo.nixpi.de
+    rule: "Host(`forgejo.nixpi.de`)"
+    servers:
+      - url: "http://forgejo-pod:3000"
+    tls_enabled: true
+    acme_enabled: true

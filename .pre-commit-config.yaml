@@ -18,11 +18,11 @@ repos:
           - mdformat-footnote
 
   - repo: https://github.com/ansible/ansible-lint
-    rev: v25.8.2
+    rev: v25.9.2
     hooks:
       - id: ansible-lint
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.100.0
+    rev: v1.101.1
     hooks:
       - id: terraform_fmt

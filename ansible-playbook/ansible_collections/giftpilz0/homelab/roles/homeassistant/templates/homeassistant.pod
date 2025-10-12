@@ -1,0 +1,15 @@
+[Unit]
+Description=Homeassistant Pod
+
+[Pod]
+PodName=homeassistant-pod
+
+Network=quadlet
+
+# PublishPort=8123:8123
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

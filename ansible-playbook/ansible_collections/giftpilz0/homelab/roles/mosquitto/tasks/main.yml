@@ -1,0 +1,78 @@
+---
+- name: "Mosquitto: Enable lingering"
+  become: true
+  ansible.builtin.command: loginctl enable-linger {{ podman_user }}
+  register: podman_lingering
+  changed_when: podman_lingering.rc != 0
+
+- name: "Mosquitto: Configure unprivileged port range for rootless containers"
+  become: true
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_unprivileged_port_start
+    value: "80"
+    sysctl_set: true
+    sysctl_file: /etc/sysctl.d/99-rootless-ports.conf
+    reload: true
+
+- name: "Mosquitto: Create podman network"
+  become: true
+  become_user: "{{ podman_user }}"
+  containers.podman.podman_network:
+    name: quadlet
+
+- name: "Mosquitto: Create quadlet directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0755"
+
+- name: "Mosquitto: Create directory structure"
+  become: true
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd/{{ item.path }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode }}"
+  with_community.general.filetree: "templates/"
+  when: item.state == 'directory'
+
+- name: "Mosquitto: Template quadlet files"
+  become: true
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/{{ item.path }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode }}"
+  with_community.general.filetree: "templates/"
+  when: item.state == 'file'
+
+- name: "Mosquitto: systemd daemon reload"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    daemon_reload: true
+    scope: user
+
+- name: "Mosquitto: Start pod service"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: mosquitto-pod.service
+    enabled: true
+    state: started
+    scope: user
+
+- name: "Mosquitto: Enable podman-auto-update timer"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: podman-auto-update.timer
+    enabled: true
+    state: started
+    scope: user

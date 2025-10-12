@@ -5,11 +5,11 @@ terraform {
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = "0.83.2"
+      version = "0.84.1"
     }
     sops = {
       source  = "nobbs/sops"
-      version = "0.3.0"
+      version = "0.3.1"
     }
   }
 }
@@ -21,10 +21,9 @@ locals {
 }
 
 provider "proxmox" {
-  endpoint = var.proxmox_config.endpoint
-  insecure = var.proxmox_config.insecure
-  username = var.proxmox_config.username
-  password = var.proxmox_config.password
+  insecure  = var.proxmox_config.insecure
+  endpoint  = local.secrets.data.proxmox_config_endpoint
+  api_token = local.secrets.data.proxmox_api_token
   ssh {
     agent    = var.proxmox_config.ssh.agent
     username = var.proxmox_config.ssh.username
@@ -37,13 +36,12 @@ provider "proxmox" {
 variable "proxmox_config" {
   description = "Proxmox configuration"
   type = object({
-    endpoint = string
-    insecure = optional(bool, true)
-    username = string
-    password = string
+    endpoint  = optional(string)
+    api_token = optional(string)
+    insecure  = optional(bool, true)
     ssh = optional(object({
       agent    = optional(bool, true)
-      username = string
+      username = optional(string)
     }))
   })
   sensitive = true
@@ -98,6 +96,9 @@ variable "vms" {
     on_boot         = optional(bool, false)
     template        = optional(bool, false)
     stop_on_destroy = optional(bool, false)
+    machine         = optional(string)
+    bios            = optional(string)
+    scsi_hardware   = optional(string)
 
     # Clone configuration
     clone = optional(object({
@@ -261,6 +262,8 @@ resource "proxmox_virtual_environment_sdn_zone_vlan" "vlan_zones" {
 resource "proxmox_virtual_environment_vm" "vms" {
   for_each = local.processed_vms
 
+  node_name       = each.value.node_name
+  vm_id           = each.value.vm_id
   name            = each.value.name
   description     = each.value.description
   tags            = each.value.tags
@@ -268,9 +271,19 @@ resource "proxmox_virtual_environment_vm" "vms" {
   on_boot         = each.value.on_boot
   template        = each.value.template
   stop_on_destroy = each.value.stop_on_destroy
+  machine         = each.value.machine
+  bios            = each.value.bios
+  scsi_hardware   = each.value.scsi_hardware
 
-  node_name = each.value.node_name
-  vm_id     = each.value.vm_id
+  # Clone configuration
+  dynamic "clone" {
+    for_each = each.value.clone != null ? [each.value.clone] : []
+    content {
+      vm_id     = clone.value.vm_id
+      node_name = clone.value.node_name
+      full      = clone.value.full
+    }
+  }
 
   # CPU configuration
   cpu {

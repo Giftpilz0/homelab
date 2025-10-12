@@ -1,0 +1,24 @@
+[Unit]
+Description=Traefik Pod
+
+[Pod]
+PodName=traefik-pod
+
+Network=quadlet
+
+PublishPort=80:80
+PublishPort=443:443
+{% if traefik_dashboard_enabled %}
+PublishPort={{ traefik_dashboard_port }}:{{ traefik_dashboard_port }}
+{% endif %}
+{% if traefik_tcp_entrypoints is defined %}
+{% for entrypoint in traefik_tcp_entrypoints %}
+PublishPort={{ entrypoint.port }}:{{ entrypoint.port }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

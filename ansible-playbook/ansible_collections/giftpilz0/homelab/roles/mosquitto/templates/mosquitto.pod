@@ -1,0 +1,16 @@
+[Unit]
+Description=Mosquitto Pod
+
+[Pod]
+PodName=mosquitto-pod
+
+Network=quadlet
+
+# PublishPort=1883:1883
+# PublishPort=9001:9001
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

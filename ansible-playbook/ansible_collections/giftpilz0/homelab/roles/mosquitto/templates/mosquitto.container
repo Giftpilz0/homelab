@@ -1,0 +1,13 @@
+[Unit]
+Description=Mosquitto Container
+
+[Container]
+ContainerName=mosquitto
+Image=docker.io/library/eclipse-mosquitto:latest
+
+Pod=mosquitto.pod
+
+AutoUpdate=registry
+
+Volume=%h/.config/containers/systemd/mosquitto/pwfile:/mosquitto/config/pwfile:Z
+Volume=%h/.config/containers/systemd/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:Z

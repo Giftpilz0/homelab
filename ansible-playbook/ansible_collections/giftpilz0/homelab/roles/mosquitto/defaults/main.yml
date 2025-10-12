@@ -1,0 +1,4 @@
+---
+podman_user: "{{ ansible_user }}"
+
+mosquitto_pwfile_user: ""

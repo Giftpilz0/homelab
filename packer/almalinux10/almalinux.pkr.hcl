@@ -7,17 +7,19 @@ packer {
   }
 }
 
-variable "sops_secrets" {
-  type = object({
-    proxmox_config_username = env("proxmox_config_username")
-    proxmox_config_password = env("proxmox_config_password")
-    proxmox_config_endpoint = env("proxmox_config_endpoint")
-  })
-  default = {
-    proxmox_config_username = "root@pam"
-    proxmox_config_password = ""
-    proxmox_config_endpoint = ""
-  }
+variable "proxmox_config_username" {
+  type    = string
+  default = env("proxmox_config_username")
+}
+
+variable "proxmox_config_password" {
+  type    = string
+  default = env("proxmox_config_password")
+}
+
+variable "proxmox_config_endpoint" {
+  type    = string
+  default = env("proxmox_config_endpoint")
 }
 
 variable "proxmox_user" {
@@ -36,9 +38,9 @@ variable "almalinux_sha256sum_url" {
 }
 
 source "proxmox-iso" "almalinux10" {
-  proxmox_url              = var.sops_secrets.proxmox_config_endpoint
-  username                 = var.sops_secrets.proxmox_config_username
-  password                 = var.sops_secrets.proxmox_config_password
+  proxmox_url              = var.proxmox_config_endpoint
+  username                 = var.proxmox_config_username
+  password                 = var.proxmox_config_password
   insecure_skip_tls_verify = true
   unmount_iso              = true
   cloud_init               = true
@@ -50,7 +52,7 @@ source "proxmox-iso" "almalinux10" {
   machine                  = "q35"
 
   boot_command   = ["<wait><wait>e<down><down><end><bs><bs><bs><bs><bs>inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux.ks<leftCtrlOn>x<leftCtrlOff>"]
-  boot_wait      = "3s"
+  boot_wait      = "10s"
   http_directory = "http"
   ssh_username   = "root"
   ssh_password   = "packer"
