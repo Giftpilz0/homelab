@@ -1,0 +1,24 @@
+[Unit]
+Description=OpenCloud Container
+
+[Container]
+ContainerName=opencloud
+Image=docker.io/opencloudeu/opencloud-rolling:latest
+
+Pod=opencloud.pod
+
+AutoUpdate=registry
+
+{% if opencloud_environment_vars is defined %}
+{% for env_name, env_value in opencloud_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
+
+Environment=IDM_ADMIN_PASSWORD={{ opencloud_admin_password }}
+Environment=OPEN_CLOUD_LOG_LEVEL={{ opencloud_log_level }}
+Environment=OC_URL={{ opencloud_domain }}
+Environment=PROXY_HTTP_ADDR=0.0.0.0:9200
+
+Volume=opencloud-config.volume:/etc/opencloud/
+Volume=opencloud-data.volume:/var/lib/opencloud/
