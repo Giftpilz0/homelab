@@ -647,13 +647,13 @@ vms = {
     }
 
     cpu = {
-      cores   = 2
+      cores   = 4
       sockets = 1
       type    = "host"
     }
 
     memory = {
-      dedicated = 2048
+      dedicated = 4096
     }
 
     operating_system = {
