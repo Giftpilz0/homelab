@@ -1,0 +1,8 @@
+---
+- name: "Authentik: Restart pod service"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: authentik-pod.service
+    state: restarted
+    scope: user

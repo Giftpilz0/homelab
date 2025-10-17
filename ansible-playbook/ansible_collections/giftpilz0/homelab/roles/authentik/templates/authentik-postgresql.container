@@ -1,0 +1,20 @@
+[Unit]
+Description=Authentik PostgreSQL Container
+
+[Container]
+ContainerName=authentik-postgresql
+Image=docker.io/library/postgres:{{ postgresql_version }}
+
+Pod=authentik.pod
+
+{% if authentik_postgresql_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+{% if authentik_postgresql_environment_vars is defined %}
+{% for env_name, env_value in authentik_postgresql_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
+
+Volume=authentik-postgresql.volume:/var/lib/postgresql/data

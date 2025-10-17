@@ -1,0 +1,23 @@
+[Unit]
+Description=Authentik Server Container
+After=authentik-postgresql.service authentik-cache.service
+
+[Container]
+ContainerName=authentik-server
+Image=ghcr.io/goauthentik/server:{{ authentik_version }}
+
+Pod=authentik.pod
+
+{% if authentik_server_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+{% if authentik_server_environment_vars is defined %}
+{% for env_name, env_value in authentik_server_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
+
+Volume=authentik-media.volume:/media
+Volume=authentik-templates.volume:/templates
+Volume=authentik-certs.volume:/certs
