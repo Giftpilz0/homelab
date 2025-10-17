@@ -1,0 +1,13 @@
+[Unit]
+Description=Authentik Pod
+
+[Pod]
+PodName=authentik-pod
+
+Network=quadlet
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target
