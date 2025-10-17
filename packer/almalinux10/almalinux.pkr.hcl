@@ -22,11 +22,6 @@ variable "proxmox_config_endpoint" {
   default = env("proxmox_config_endpoint")
 }
 
-variable "proxmox_user" {
-  type    = string
-  default = "root@pam"
-}
-
 variable "almalinux_iso_url" {
   type    = string
   default = "https://repo.almalinux.org/almalinux/10/isos/x86_64/AlmaLinux-10.0-x86_64-boot.iso"
@@ -42,7 +37,6 @@ source "proxmox-iso" "almalinux10" {
   username                 = var.proxmox_config_username
   password                 = var.proxmox_config_password
   insecure_skip_tls_verify = true
-  unmount_iso              = true
   cloud_init               = true
   cloud_init_storage_pool  = "local-lvm"
   template_name            = "packer-almalinux"
@@ -62,6 +56,7 @@ source "proxmox-iso" "almalinux10" {
     iso_checksum     = "file:${var.almalinux_sha256sum_url}"
     iso_url          = "${var.almalinux_iso_url}"
     iso_download_pve = true
+    unmount          = true
   }
 
   scsi_controller = "virtio-scsi-single"
