@@ -6,8 +6,6 @@ PodName=vaultwarden-pod
 
 Network=quadlet
 
-# PublishPort=80:80
-
 [Service]
 Restart=always
 

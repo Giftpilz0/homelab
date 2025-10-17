@@ -58,6 +58,8 @@
     mode: "{{ item.mode }}"
   with_community.general.filetree: "templates/"
   when: item.state == 'file'
+  notify:
+    - "Homeassistant: Restart pod service"
 
 - name: "Homeassistant: systemd daemon reload"
   become: true

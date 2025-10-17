@@ -1,9 +1,15 @@
 ---
 podman_user: "{{ ansible_user }}"
 
-# opencloud_environment_vars:
-#   EXAMPLE: "value"
+# Versions
+opencloud_version: "3"
 
-opencloud_domain: ""
-opencloud_admin_password: ""
-opencloud_log_level: "WARN"
+# Autoupdate
+opencloud_autoupdate: true
+
+# Environment
+opencloud_environment_vars:
+  IDM_ADMIN_PASSWORD: "{{ opencloud_admin_password }}"
+  OPEN_CLOUD_LOG_LEVEL: "{{ opencloud_log_level }}"
+  OC_URL: "{{ opencloud_domain }}"
+  PROXY_HTTP_ADDR: 0.0.0.0:9200

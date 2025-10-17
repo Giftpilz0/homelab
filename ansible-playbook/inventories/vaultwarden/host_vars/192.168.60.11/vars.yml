@@ -29,6 +29,11 @@ firewalld_rules_services:
 ### giftpilz0.server.podman, giftpilz0.homelab.vaultwarden
 
 podman_user: "container"
+
+vaultwarden_version: "1.34.3-alpine"
+
+vaultwarden_autoupdate: true
+
 vaultwarden_domain: "https://vaultwarden.nixpi.de/"
 
 ######################################

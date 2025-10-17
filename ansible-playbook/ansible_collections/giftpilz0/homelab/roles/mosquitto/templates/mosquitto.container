@@ -3,11 +3,20 @@ Description=Mosquitto Container
 
 [Container]
 ContainerName=mosquitto
-Image=docker.io/library/eclipse-mosquitto:latest
+Image=docker.io/library/eclipse-mosquitto:{{ mosquitto_version }}
 
 Pod=mosquitto.pod
 
+{% if mosquitto_autoupdate %}
 AutoUpdate=registry
+{% endif %}
 
-Volume=%h/.config/containers/systemd/mosquitto/pwfile:/mosquitto/config/pwfile:Z
+{% if mosquitto_environment_vars is defined %}
+{% for env_name, env_value in mosquitto_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
+
+Volume=%h/.config/containers/systemd/mosquitto/passwd:/mosquitto/config/passwd:Z
 Volume=%h/.config/containers/systemd/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:Z
+Volume=mosquitto-data.volume:/mosquitto/data

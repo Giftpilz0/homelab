@@ -51,6 +51,8 @@
     mode: "{{ item.mode }}"
   with_community.general.filetree: "templates/"
   when: item.state == 'file'
+  notify:
+    - "Mosquitto: Restart pod service"
 
 - name: "Mosquitto: systemd daemon reload"
   become: true

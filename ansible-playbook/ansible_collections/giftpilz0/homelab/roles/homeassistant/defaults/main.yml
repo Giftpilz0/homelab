@@ -1,2 +1,15 @@
 ---
 podman_user: "{{ ansible_user }}"
+
+# Versions
+homeassistant_version: "2025.10"
+
+# Autoupdate
+homeassistant_autoupdate: true
+
+# Environment
+homeassistant_environment_vars:
+  TZ: Europe/Berlin
+
+# Config
+# homeassistant_device: "/dev/serial/by-id/usb-ITEAD_SONOFF_Zigbee_3.0_USB_Dongle_Plus_V2_20230804114425-if00:/dev/ttyACM0"

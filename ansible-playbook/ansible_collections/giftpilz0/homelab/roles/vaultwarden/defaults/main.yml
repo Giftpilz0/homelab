@@ -1,5 +1,13 @@
 ---
 podman_user: "{{ ansible_user }}"
 
-vaultwarden_domain: ""
-vaultwarden_admin_token: ""
+# Versions
+vaultwarden_version: "1.34.3-alpine"
+
+# Autoupdate
+vaultwarden_autoupdate: true
+
+# Environment
+vaultwarden_environment_vars:
+  DOMAIN: "{{ vaultwarden_domain }}"
+  ADMIN_TOKEN: "{{ vaultwarden_admin_token }}"

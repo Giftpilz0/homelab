@@ -51,6 +51,8 @@
     mode: "{{ item.mode }}"
   with_community.general.filetree: "templates/"
   when: item.state == 'file'
+  notify:
+    - "OpenCloud: Restart pod service"
 
 - name: "OpenCloud: systemd daemon reload"
   become: true

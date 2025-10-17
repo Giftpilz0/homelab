@@ -50,12 +50,27 @@ firewalld_rules_ports:
 
 podman_user: "container"
 
+mosquitto_version: "2"
+homeassistant_version: "2025.10"
+
+mosquitto_autoupdate: true
+homeassistant_autoupdate: true
+
+homeassistant_device: "/dev/serial/by-id/usb-ITEAD_SONOFF_Zigbee_3.0_USB_Dongle_Plus_V2_20230804114425-if00:/dev/ttyACM0"
+
 ######################################
 ### giftpilz0.homelab.traefik
 
 traefik_acme_challenge_type: dns
 traefik_acme_dns_provider: "cloudflare"
 traefik_log_level: "WARN"
+
+# TCP entrypoints
+traefik_tcp_entrypoints:
+  - name: mqtt-tls
+    port: 8883
+  - name: mqtt
+    port: 1883
 
 # HTTP services
 traefik_http_services:
@@ -67,12 +82,13 @@ traefik_http_services:
     tls_enabled: true
     acme_enabled: true
 
-# TCP entrypoints
-traefik_tcp_entrypoints:
   - name: mqtt-websocket
-    port: 9001
-  - name: mqtt
-    port: 1883
+    domain: mqtt.nixpi.de
+    rule: "Host(`mqtt.nixpi.de`)"
+    servers:
+      - url: "http://mosquitto-pod:9001"
+    tls_enabled: true
+    acme_enabled: true
 
 # TCP services
 traefik_tcp_services:
@@ -87,13 +103,13 @@ traefik_tcp_services:
     acme_enabled: false
     tls_passthrough: false
 
-  - name: mqtt-websocket
+  - name: mqtt
     domain: "mqtt.nixpi.de"
     rule: "HostSNI(`*`)"
     entrypoints:
-      - mqtt-websocket
+      - mqtt-tls
     servers:
-      - address: "mosquitto-pod:9001"
-    tls_enabled: false
-    acme_enabled: false
+      - address: "mosquitto-pod:1883"
+    tls_enabled: true
+    acme_enabled: true
     tls_passthrough: false
