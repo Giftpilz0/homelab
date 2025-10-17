@@ -8,7 +8,7 @@ mosquitto_version: "2"
 mosquitto_autoupdate: true
 
 # Environment
-mosquitto_environment_vars: []
+mosquitto_environment_vars: {}
 
 # Config
-mosquitto_pwfile_users: []
+mosquitto_pwfile_users: {}
