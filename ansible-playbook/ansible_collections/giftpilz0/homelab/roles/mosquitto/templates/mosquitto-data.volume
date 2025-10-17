@@ -1,0 +1,4 @@
+[Unit]
+Description=Mosquitto Data Volume
+
+[Volume]

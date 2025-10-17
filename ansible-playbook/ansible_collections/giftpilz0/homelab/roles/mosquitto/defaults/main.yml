@@ -1,4 +1,14 @@
 ---
 podman_user: "{{ ansible_user }}"
 
-mosquitto_pwfile_user: ""
+# Versions
+mosquitto_version: "2"
+
+# Autoupdate
+mosquitto_autoupdate: true
+
+# Environment
+mosquitto_environment_vars: []
+
+# Config
+mosquitto_pwfile_users: []

@@ -1,0 +1,8 @@
+---
+- name: "Vaultwarden: Restart pod service"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: vaultwarden-pod.service
+    state: restarted
+    scope: user

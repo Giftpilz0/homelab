@@ -6,8 +6,6 @@ PodName=homeassistant-pod
 
 Network=quadlet
 
-# PublishPort=8123:8123
-
 [Service]
 Restart=always
 

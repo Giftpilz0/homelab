@@ -3,14 +3,24 @@ Description=Homeassistant Container
 
 [Container]
 ContainerName=homeassistant
-Image=ghcr.io/home-assistant/home-assistant:latest
+Image=ghcr.io/home-assistant/home-assistant:{{ homeassistant_version }}
 
 Pod=homeassistant.pod
 
+{% if homeassistant_autoupdate %}
 AutoUpdate=registry
+{% endif %}
 
-Volume=homeassistant-config.volume:/config
+{% if homeassistant_environment_vars is defined %}
+{% for env_name, env_value in homeassistant_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
 
-Volume=/dev/serial/by-id/usb-ITEAD_SONOFF_Zigbee_3.0_USB_Dongle_Plus_V2_20230804114425-if00:/dev/ttyACM0
+{% if homeassistant_device is defined %}
+Volume={{ homeassistant_device }}
 Annotation=run.oci.keep_original_groups=1
 SecurityLabelType=spc_t
+{% endif %}
+
+Volume=homeassistant-data.volume:/config

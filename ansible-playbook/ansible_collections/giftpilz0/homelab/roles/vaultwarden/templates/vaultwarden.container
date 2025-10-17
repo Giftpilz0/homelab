@@ -3,13 +3,18 @@ Description=Vaultwarden Container
 
 [Container]
 ContainerName=vaultwarden
-Image=docker.io/vaultwarden/server:latest
+Image=docker.io/vaultwarden/server:{{ vaultwarden_version }}
 
 Pod=vaultwarden.pod
 
+{% if vaultwarden_autoupdate %}
 AutoUpdate=registry
+{% endif %}
 
-Environment=DOMAIN={{ vaultwarden_domain }}
-Environment=ADMIN_TOKEN={{ vaultwarden_admin_token }}
+{% if vaultwarden_environment_vars is defined %}
+{% for env_name, env_value in vaultwarden_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
 
 Volume=vaultwarden-data.volume:/data
