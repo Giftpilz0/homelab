@@ -59,4 +59,4 @@ authentik_postgresql_environment_vars:
   POSTGRES_PASSWORD: "{{ authentik_db_password }}"
   PGDATA: /var/lib/postgresql/data/pgdata
 
-authentik_cache_environment_vars: []
+authentik_cache_environment_vars: {}

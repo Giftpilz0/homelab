@@ -103,9 +103,9 @@ traefik_tcp_services:
     acme_enabled: false
     tls_passthrough: false
 
-  - name: mqtt
+  - name: mqtt-tls
     domain: "mqtt.nixpi.de"
-    rule: "HostSNI(`*`)"
+    rule: "HostSNI(`mqtt.nixpi.de`)"
     entrypoints:
       - mqtt-tls
     servers:
