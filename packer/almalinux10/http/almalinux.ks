@@ -32,6 +32,7 @@ rootpw --plaintext packer
 @minimal-environment
 cloud-utils-growpart
 qemu-guest-agent
+epel-release
 cloud-init
 tar
 %end
