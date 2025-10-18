@@ -46,7 +46,7 @@ source "proxmox-iso" "almalinux10" {
   machine                  = "q35"
 
   boot_command   = ["<wait><wait>e<down><down><end><bs><bs><bs><bs><bs>inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux.ks<leftCtrlOn>x<leftCtrlOff>"]
-  boot_wait      = "10s"
+  boot_wait      = "30s"
   http_directory = "http"
   ssh_username   = "root"
   ssh_password   = "packer"
