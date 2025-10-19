@@ -1,10 +1,12 @@
 ---
 - name: "Profile: Install fastfetch"
+  become: true
   ansible.builtin.package:
     name: fastfetch
     state: present
 
 - name: "Profile: Create systemwide fastfetch config script"
+  become: true
   ansible.builtin.copy:
     dest: /etc/profile.d/fastfetch.sh
     content: |
