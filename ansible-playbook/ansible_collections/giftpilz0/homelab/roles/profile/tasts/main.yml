@@ -1,0 +1,17 @@
+---
+- name: "Profile: Install fastfetch"
+  ansible.builtin.package:
+    name: fastfetch
+    state: present
+
+- name: "Profile: Create systemwide fastfetch config script"
+  ansible.builtin.copy:
+    dest: /etc/profile.d/fastfetch.sh
+    content: |
+      #!/bin/bash
+      if command -v fastfetch >/dev/null 2>&1; then
+        fastfetch
+      fi
+    mode: "0755"
+    owner: root
+    group: root

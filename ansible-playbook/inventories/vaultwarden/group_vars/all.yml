@@ -19,7 +19,6 @@ packages_additional_package:
   - nfs-utils
   - nmap
   - bash-completion
-  # - fastfetch
 
 ######################################
 ### giftpilz0.general.user

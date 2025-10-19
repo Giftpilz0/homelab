@@ -7,5 +7,6 @@
     - role: giftpilz0.general.autoupgrade
     - role: giftpilz0.general.firewalld
     - role: giftpilz0.general.packages
+    - role: giftpilz0.homelab.profile
     - role: giftpilz0.general.timezone
     - role: giftpilz0.kubernetes.k3s
