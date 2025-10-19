@@ -61,7 +61,7 @@ source "proxmox-iso" "almalinux10" {
 
   efi_config {
     pre_enrolled_keys = true
-    efi_storage_pool  = "local"
+    efi_storage_pool  = "local-lvm"
     efi_format        = "raw"
     efi_type          = "4m"
   }
