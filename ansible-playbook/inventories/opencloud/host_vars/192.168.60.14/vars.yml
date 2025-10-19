@@ -29,10 +29,13 @@ firewalld_rules_services:
 ### giftpilz0.server.podman, giftpilz0.homelab.opencloud
 
 podman_user: "container"
+
+opencloud_version: "3"
+
+opencloud_autoupdate: true
+
 opencloud_domain: "https://opencloud.nixpi.de/"
 opencloud_log_level: "WARN"
-opencloud_environment_vars:
-  PROXY_TLS: false
 
 ######################################
 ### giftpilz0.homelab.traefik

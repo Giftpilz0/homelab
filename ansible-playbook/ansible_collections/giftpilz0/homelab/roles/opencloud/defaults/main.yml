@@ -13,3 +13,4 @@ opencloud_environment_vars:
   OPEN_CLOUD_LOG_LEVEL: "{{ opencloud_log_level }}"
   OC_URL: "{{ opencloud_domain }}"
   PROXY_HTTP_ADDR: 0.0.0.0:9200
+  PROXY_TLS: false
