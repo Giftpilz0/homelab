@@ -1,6 +1,6 @@
 ---
 - name: Configure hosts - authentik
-  hosts: authentik
+  hosts: k3s
   roles:
     - role: giftpilz0.general.user
     - role: giftpilz0.general.update
@@ -9,4 +9,4 @@
     - role: giftpilz0.general.packages
     - role: giftpilz0.homelab.profile
     - role: giftpilz0.general.timezone
-    - role: giftpilz0.kubernetes.k3s
+    # - role: giftpilz0.kubernetes.k3s

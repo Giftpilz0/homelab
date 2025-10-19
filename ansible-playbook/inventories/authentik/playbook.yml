@@ -11,4 +11,4 @@
     - role: giftpilz0.general.timezone
     - role: giftpilz0.server.podman
     - role: giftpilz0.homelab.traefik
-    - role: giftpilz0.homelab.authentik
+    # - role: giftpilz0.homelab.authentik
