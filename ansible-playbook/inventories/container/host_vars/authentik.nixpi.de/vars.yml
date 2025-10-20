@@ -30,6 +30,17 @@ firewalld_rules_services:
 
 podman_user: "container"
 
+valkey_version: "8-alpine"
+postgresql_version: "18-alpine"
+authentik_version: "2025.8"
+
+authentik_cache_autoupdate: true
+authentik_postgresql_autoupdate: true
+authentik_server_autoupdate: true
+authentik_worker_autoupdate: true
+
+authentik_domain: "authentik.nixpi.de"
+
 ######################################
 ### giftpilz0.homelab.traefik
 
@@ -43,6 +54,6 @@ traefik_http_services:
     domain: authentik.nixpi.de
     rule: "Host(`authentik.nixpi.de`)"
     servers:
-      - url: "http://authentik-pod:80"
+      - url: "http://authentik-pod:9000"
     tls_enabled: true
     acme_enabled: true
