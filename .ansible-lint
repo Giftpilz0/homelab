@@ -5,3 +5,4 @@ exclude_paths:
 
 skip_list:
   - yaml[comments]
+  - var-naming[no-role-prefix]
