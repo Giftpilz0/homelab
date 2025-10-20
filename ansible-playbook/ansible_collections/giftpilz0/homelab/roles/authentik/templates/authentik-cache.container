@@ -3,7 +3,7 @@ Description=Authentik Cache Container
 
 [Container]
 ContainerName=authentik-cache
-Image=valkey/valkey:{{ valkey_version }}
+Image=docker.io/valkey/valkey:{{ valkey_version }}
 Exec=valkey-server --supervised systemd
 
 Pod=authentik.pod

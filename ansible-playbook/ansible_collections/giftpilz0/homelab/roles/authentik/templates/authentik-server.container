@@ -5,6 +5,7 @@ After=authentik-postgresql.service authentik-cache.service
 [Container]
 ContainerName=authentik-server
 Image=ghcr.io/goauthentik/server:{{ authentik_version }}
+Exec=server
 
 Pod=authentik.pod
 

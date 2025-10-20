@@ -17,4 +17,4 @@ Environment={{ env_name }}={{ env_value }}
 {% endfor %}
 {% endif %}
 
-Volume=authentik-postgresql.volume:/var/lib/postgresql/data
+Volume=authentik-postgresql.volume:/var/lib/postgresql
