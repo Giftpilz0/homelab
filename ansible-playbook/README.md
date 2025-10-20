@@ -6,6 +6,5 @@ This Ansible playbook automates the configuration of previously provisioned virt
 
 ```bash
 cd inventories/{{ inventory_name }}/
-export ANSIBLE_PIPELINING=True
 ./run.sh
 ```
