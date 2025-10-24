@@ -34,7 +34,7 @@ opencloud_version: "3"
 
 opencloud_autoupdate: true
 
-opencloud_domain: "https://opencloud.nixpi.de/"
+opencloud_domain: "https://opencloud.nixpi.de"
 opencloud_log_level: "WARN"
 
 ######################################
