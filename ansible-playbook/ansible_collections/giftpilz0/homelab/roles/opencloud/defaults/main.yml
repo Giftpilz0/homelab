@@ -12,5 +12,6 @@ opencloud_environment_vars:
   IDM_ADMIN_PASSWORD: "{{ opencloud_admin_password }}"
   OPEN_CLOUD_LOG_LEVEL: "{{ opencloud_log_level }}"
   OC_URL: "{{ opencloud_domain }}"
+  OC_CORS_ALLOW_ORIGINS: "{{ opencloud_domain }}"
   PROXY_HTTP_ADDR: 0.0.0.0:9200
   PROXY_TLS: false
