@@ -29,6 +29,11 @@ traefik_log_format: "json"
 traefik_access_log_format: "json"
 traefik_access_log_buffer_size: 10
 
+# Transport
+traefik_transport_timeouts_enabled: false
+traefik_transport_read_timeout: "12h"
+traefik_transport_write_timeout: "12h"
+traefik_transport_idle_timeout: "3m"
 # Custom middlewares
 # traefik_custom_middlewares:
 #   auth-basic:
