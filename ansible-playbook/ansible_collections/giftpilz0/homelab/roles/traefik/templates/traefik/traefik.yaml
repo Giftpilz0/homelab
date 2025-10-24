@@ -20,6 +20,13 @@ entryPoints:
 
   websecure:
     address: ":443"
+{% if traefik_transport_timeouts_enabled | default(false) %}
+    transport:
+      respondingTimeouts:
+        readTimeout: "{{ traefik_transport_read_timeout }}"
+        writeTimeout: "{{ traefik_transport_write_timeout }}"
+        idleTimeout: "{{ traefik_transport_idle_timeout }}"
+{% endif %}
     http:
       middlewares:
         - security-headers@file
