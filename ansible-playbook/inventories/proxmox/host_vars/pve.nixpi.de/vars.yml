@@ -1,0 +1,25 @@
+---
+######################################
+### giftpilz0.homelab.snapper
+
+snapper_configs:
+  - name: backup
+    path: /media/data/backup
+    allow_users: "backup"
+    sync_acl: "yes"
+    timeline_create: "yes"
+    timeline_cleanup: "yes"
+    timeline_min_age: 3600
+    timeline_limit_hourly: 5
+    timeline_limit_daily: 7
+    timeline_limit_weekly: 4
+    timeline_limit_monthly: 6
+    timeline_limit_yearly: 3
+    number_cleanup: "yes"
+
+# Enable/disable snapper timers
+snapper_enable_timeline_timer: true
+snapper_enable_cleanup_timer: true
+
+# Automatically add .snapshots to fstab
+snapper_add_to_fstab: true
