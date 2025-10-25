@@ -1,0 +1,44 @@
+---
+- name: "Snapper: Create configurations"
+  ansible.builtin.command:
+    cmd: "snapper -c {{ item.name }} create-config {{ item.path }}"
+    creates: "/etc/snapper/configs/{{ item.name }}"
+  loop: "{{ snapper_configs }}"
+
+- name: "Snapper: Wait for .snapshots subvolumes to be created"
+  ansible.builtin.wait_for:
+    path: "{{ item.path }}/.snapshots"
+    state: present
+    timeout: 10
+  loop: "{{ snapper_configs }}"
+
+- name: "Snapper: Configure settings"
+  ansible.builtin.command:
+    cmd: >
+      snapper -c {{ item.name }} set-config
+      {% if item.allow_users is defined %}ALLOW_USERS="{{ item.allow_users }}"{% endif %}
+      {% if item.sync_acl is defined %}SYNC_ACL={{ item.sync_acl | ternary('yes', 'no') }}{% endif %}
+      {% if item.timeline_create is defined %}TIMELINE_CREATE={{ item.timeline_create | ternary('yes', 'no') }}{% endif %}
+      {% if item.timeline_cleanup is defined %}TIMELINE_CLEANUP={{ item.timeline_cleanup | ternary('yes', 'no') }}{% endif %}
+      {% if item.timeline_min_age is defined %}TIMELINE_MIN_AGE={{ item.timeline_min_age }}{% endif %}
+      {% if item.timeline_limit_hourly is defined %}TIMELINE_LIMIT_HOURLY={{ item.timeline_limit_hourly }}{% endif %}
+      {% if item.timeline_limit_daily is defined %}TIMELINE_LIMIT_DAILY={{ item.timeline_limit_daily }}{% endif %}
+      {% if item.timeline_limit_weekly is defined %}TIMELINE_LIMIT_WEEKLY={{ item.timeline_limit_weekly }}{% endif %}
+      {% if item.timeline_limit_monthly is defined %}TIMELINE_LIMIT_MONTHLY={{ item.timeline_limit_monthly }}{% endif %}
+      {% if item.timeline_limit_yearly is defined %}TIMELINE_LIMIT_YEARLY={{ item.timeline_limit_yearly }}{% endif %}
+      {% if item.number_cleanup is defined %}NUMBER_CLEANUP={{ item.number_cleanup | ternary('yes', 'no') }}{% endif %}
+  loop: "{{ snapper_configs }}"
+  register: snapper_set_config
+  changed_when: snapper_set_config.rc == 0
+
+- name: "Snapper: Enable and start timeline timer"
+  ansible.builtin.systemd:
+    name: snapper-timeline.timer
+    enabled: "{{ snapper_enable_timeline_timer }}"
+    state: "{{ snapper_enable_timeline_timer | ternary('started', 'stopped') }}"
+
+- name: "Snapper: Enable and start cleanup timer"
+  ansible.builtin.systemd:
+    name: snapper-cleanup.timer
+    enabled: "{{ snapper_enable_cleanup_timer }}"
+    state: "{{ snapper_enable_cleanup_timer | ternary('started', 'stopped') }}"

@@ -1,0 +1,40 @@
+---
+- name: "Snapper: Get filesystem UUID for each config path"
+  ansible.builtin.shell: |
+    set -o pipefail
+    DEVICE=$(findmnt -n -o SOURCE {{ item.path }} | cut -d'[' -f1)
+    lsblk -no UUID "$DEVICE"
+  args:
+    executable: /bin/bash
+  register: config_uuids
+  changed_when: false
+  check_mode: false
+  loop: "{{ snapper_configs }}"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: "Snapper: Add .snapshots subvolumes to fstab"
+  ansible.posix.mount:
+    path: "{{ item.item.path }}/.snapshots"
+    src: "UUID={{ item.stdout }}"
+    fstype: btrfs
+    opts: "subvol={{ item.item.name }}/.snapshots"
+    state: present
+    dump: "0"
+    passno: "0"
+  loop: "{{ config_uuids.results }}"
+  loop_control:
+    label: "{{ item.item.path }}"
+
+- name: "Snapper: Mount .snapshots subvolumes"
+  ansible.posix.mount:
+    path: "{{ item.item.path }}/.snapshots"
+    src: "UUID={{ item.stdout }}"
+    fstype: btrfs
+    opts: "subvol={{ item.item.name }}/.snapshots"
+    state: mounted
+    dump: "0"
+    passno: "0"
+  loop: "{{ config_uuids.results }}"
+  loop_control:
+    label: "{{ item.item.path }}"
