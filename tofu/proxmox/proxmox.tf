@@ -243,7 +243,7 @@ resource "proxmox_virtual_environment_sdn_zone_vlan" "vlan_zones" {
   for_each = local.flattened_sdn_zones
 
   id     = each.value.zone_key
-  nodes  = [each.value.node_name]
+  # nodes  = [each.value.node_name]
   bridge = proxmox_virtual_environment_network_linux_bridge.bridges[each.value.bridge_key].name
 
   mtu         = each.value.mtu
@@ -261,6 +261,14 @@ resource "proxmox_virtual_environment_sdn_zone_vlan" "vlan_zones" {
 # VM resources
 resource "proxmox_virtual_environment_vm" "vms" {
   for_each = local.processed_vms
+
+  lifecycle {
+    ignore_changes = [
+      efi_disk,
+      clone,
+      usb,
+    ]
+  }
 
   node_name       = each.value.node_name
   vm_id           = each.value.vm_id
