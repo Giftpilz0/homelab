@@ -149,7 +149,7 @@ vms = {
     }
 
     memory = {
-      dedicated = 2024
+      dedicated = 4096
     }
 
     operating_system = {
@@ -317,7 +317,7 @@ vms = {
     }
 
     memory = {
-      dedicated = 2048
+      dedicated = 4096
     }
 
     operating_system = {
@@ -401,7 +401,7 @@ vms = {
     }
 
     memory = {
-      dedicated = 2048
+      dedicated = 4096
     }
 
     operating_system = {
@@ -485,7 +485,7 @@ vms = {
     }
 
     memory = {
-      dedicated = 4096
+      dedicated = 6144
     }
 
     operating_system = {
