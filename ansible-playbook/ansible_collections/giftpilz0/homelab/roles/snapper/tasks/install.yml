@@ -1,0 +1,11 @@
+---
+- name: "Snapper: Install snapper"
+  ansible.builtin.package:
+    name: snapper
+    state: present
+
+- name: "Snapper: Verify btrfs filesystem is present"
+  ansible.builtin.command: btrfs filesystem show
+  register: btrfs_check
+  changed_when: false
+  failed_when: btrfs_check.rc != 0
