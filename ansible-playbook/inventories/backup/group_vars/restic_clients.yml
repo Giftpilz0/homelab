@@ -1,0 +1,35 @@
+---
+######################################
+### giftpilz0.homelab.restic
+
+restic_mode: client
+
+restic_user: backup
+restic_user_home: /home/backup
+
+restic_server_host: pve.nixpi.de
+
+restic_repositories:
+  - name: podman-volumes
+    password: "{{ restic_repo_password }}"
+    backup_paths:
+      - /home/container/.local/share/containers/storage/volumes
+    exclude_patterns: []
+    schedule: "*-*-* 02:00:00"
+    retention:
+      keep_daily: 14
+      keep_weekly: 8
+      keep_monthly: 12
+      keep_yearly: 3
+
+  - name: podman-configs
+    password: "{{ restic_repo_password }}"
+    backup_paths:
+      - /home/container/.config/containers/systemd
+    exclude_patterns: []
+    schedule: "*-*-* 01:00:00"
+    retention:
+      keep_daily: 14
+      keep_weekly: 8
+      keep_monthly: 12
+      keep_yearly: 3

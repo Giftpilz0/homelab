@@ -1,0 +1,21 @@
+---
+- name: "Restic: Install restic from package manager"
+  become: true
+  ansible.builtin.package:
+    name: restic
+    state: present
+
+- name: "Restic: Detect architecture"
+  ansible.builtin.set_fact:
+    restic_arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
+
+- name: "Restic: Download resticprofile"
+  become: true
+  ansible.builtin.unarchive:
+    src: "https://github.com/creativeprojects/resticprofile/releases/download/v{{ resticprofile_version }}/resticprofile_{{ resticprofile_version }}_linux_{{ restic_arch }}.tar.gz"
+    dest: /usr/local/bin
+    remote_src: true
+    mode: "0755"
+    owner: root
+    group: root
+    creates: /usr/local/bin/resticprofile

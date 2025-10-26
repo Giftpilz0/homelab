@@ -1,0 +1,86 @@
+---
+- name: "Restic: Ensure server .ssh directory exists"
+  become: true
+  ansible.builtin.file:
+    path: "{{ restic_user_home }}/.ssh"
+    state: directory
+    owner: "{{ restic_user }}"
+    group: "{{ restic_user }}"
+    mode: "0700"
+
+- name: "Restic: Add client public keys to authorized_keys"
+  become: true
+  ansible.posix.authorized_key:
+    user: "{{ restic_user }}"
+    key: "{{ hostvars[item]['restic_public_key'] }}"
+    comment: "restic-backup-{{ item }}"
+    state: present
+  loop: "{{ groups['restic_clients'] | default([]) }}"
+  when:
+    - groups['restic_clients'] is defined
+    - hostvars[item]['restic_public_key'] is defined
+
+- name: "Restic: Create base repository directory"
+  become: true
+  ansible.builtin.file:
+    path: "{{ restic_server_repo_base }}"
+    state: directory
+    owner: "{{ restic_user }}"
+    group: "{{ restic_user }}"
+    mode: "0750"
+
+- name: "Restic: Create client repository directories"
+  become: true
+  ansible.builtin.file:
+    path: "{{ restic_server_repo_base }}/{{ item }}"
+    state: directory
+    owner: "{{ restic_user }}"
+    group: "{{ restic_user }}"
+    mode: "0750"
+  loop: "{{ groups['restic_clients'] | default([]) }}"
+  when: groups['restic_clients'] is defined
+
+- name: "Restic: Download rest-server"
+  become: true
+  ansible.builtin.unarchive:
+    src: "https://github.com/restic/rest-server/releases/download/v{{ rest_server_version }}/rest-server_{{ rest_server_version }}_linux_{{ restic_arch }}.tar.gz"
+    dest: /tmp
+    remote_src: true
+
+- name: "Restic: Install rest-server binary"
+  become: true
+  ansible.builtin.copy:
+    src: "/tmp/rest-server_{{ rest_server_version }}_linux_{{ restic_arch }}/rest-server"
+    dest: /usr/local/bin/rest-server
+    mode: "0755"
+    owner: root
+    group: root
+    remote_src: true
+
+- name: "Restic: Clean up rest-server temporary files"
+  become: true
+  ansible.builtin.file:
+    path: "/tmp/rest-server_{{ rest_server_version }}_linux_{{ restic_arch }}"
+    state: absent
+
+- name: "Restic: Create rest-server systemd service"
+  become: true
+  ansible.builtin.template:
+    src: rest-server.service.j2
+    dest: /etc/systemd/system/rest-server.service
+    mode: "0644"
+    owner: root
+    group: root
+
+#- name: "Restic: Reload systemd"
+#  become: true
+#  ansible.builtin.systemd:
+#    daemon_reload: true
+
+- name: "Restic: Enable and start rest-server"
+  become: true
+  ansible.builtin.systemd:
+    name: rest-server
+    enabled: true
+    state: started
+    daemon_reload: true

@@ -1,11 +1,21 @@
 ---
 ######################################
+### giftpilz0.homelab.restic
+
+restic_mode: server
+
+restic_user: backup
+restic_user_home: /home/backup
+
+restic_server_repo_base: /media/data/backup/restic
+
+######################################
 ### giftpilz0.homelab.snapper
 
 snapper_configs:
   - name: backup
     path: /media/data/backup
-    allow_users: "backup"
+    allow_users: "{{ restic_user }}"
     sync_acl: "yes"
     timeline_create: "yes"
     timeline_cleanup: "yes"
@@ -17,9 +27,6 @@ snapper_configs:
     timeline_limit_yearly: 3
     number_cleanup: "yes"
 
-# Enable/disable snapper timers
 snapper_enable_timeline_timer: true
 snapper_enable_cleanup_timer: true
-
-# Automatically add .snapshots to fstab
 snapper_add_to_fstab: true

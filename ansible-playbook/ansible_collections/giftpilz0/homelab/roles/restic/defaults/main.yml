@@ -1,0 +1,40 @@
+---
+resticprofile_version: "0.32.0"
+rest_server_version: "0.14.0"
+
+# Mode: 'client', 'server', or 'both'
+restic_mode: client
+
+# User configuration
+restic_user: backup
+restic_user_home: "/home/{{ restic_user }}"
+
+# Path configuration
+restic_config_dir: "/etc/resticprofile"
+restic_cache_dir: "/var/cache/restic"
+restic_log_dir: "{{ restic_config_dir }}/logs"
+restic_password_dir: "{{ restic_config_dir }}/passwords"
+
+# SSH configuration
+restic_ssh_key_type: ed25519
+restic_ssh_key_path: "{{ restic_user_home }}/.ssh/id_{{ restic_ssh_key_type }}"
+
+# Server configuration
+restic_server_repo_base: "/var/lib/restic"
+restic_server_host: "" # Define in inventory/group_vars
+
+# Client repositories (define in group_vars/host_vars)
+restic_repositories: []
+# Example:
+# restic_repositories:
+#   - name: podman-volumes
+#     password: "SecurePasswordHere"
+#     backup_paths:
+#       - /home/container/.local/share/containers/storage/volumes
+#     exclude_patterns: []
+#     schedule: "*-*-* 02:00:00"
+#     retention:
+#       keep_daily: 14
+#       keep_weekly: 8
+#       keep_monthly: 12
+#       keep_yearly: 3

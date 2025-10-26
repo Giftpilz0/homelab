@@ -1,0 +1,31 @@
+---
+- name: "Restic: Ensure .ssh directory exists"
+  become: true
+  ansible.builtin.file:
+    path: "{{ restic_user_home }}/.ssh"
+    state: directory
+    owner: "{{ restic_user }}"
+    group: "{{ restic_user }}"
+    mode: "0700"
+
+- name: "Restic: Generate SSH key pair"
+  become: true
+  community.crypto.openssh_keypair:
+    path: "{{ restic_ssh_key_path }}"
+    type: "{{ restic_ssh_key_type }}"
+    comment: "restic-backup-{{ inventory_hostname }}"
+    owner: "{{ restic_user }}"
+    group: "{{ restic_user }}"
+    mode: "0600"
+    state: present
+  register: ssh_keypair
+
+- name: "Restic: Read SSH public key"
+  become: true
+  ansible.builtin.slurp:
+    src: "{{ restic_ssh_key_path }}.pub"
+  register: client_public_key
+
+- name: "Restic: Store public key as fact"
+  ansible.builtin.set_fact:
+    restic_public_key: "{{ client_public_key.content | b64decode | trim }}"
