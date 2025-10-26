@@ -1,0 +1,98 @@
+---
+- name: "Restic: Scan server SSH host keys"
+  ansible.builtin.command:
+    cmd: "ssh-keyscan -p 22 {{ restic_server_host }}"
+  register: ssh_host_key_raw
+  changed_when: false
+  failed_when: ssh_host_key_raw.rc != 0
+  when:
+    - restic_server_host is defined
+
+- name: "Restic: Filter valid host keys"
+  ansible.builtin.set_fact:
+    ssh_host_keys: "{{ ssh_host_key_raw.stdout_lines | select('match', '^[^#].*') | select('search', '\\S') | list }}"
+  when: ssh_host_key_raw is defined and ssh_host_key_raw.stdout_lines is defined
+
+- name: "Restic: Add server to known_hosts"
+  become: true
+  ansible.builtin.lineinfile:
+    path: "{{ restic_user_home }}/.ssh/known_hosts"
+    line: "{{ item }}"
+    create: true
+    owner: "{{ restic_user }}"
+    group: "{{ restic_user }}"
+    mode: "0644"
+    state: present
+  loop: "{{ ssh_host_keys }}"
+  when:
+    - ssh_host_keys is defined
+    - item | length > 0
+
+- name: "Restic: Create configuration directory"
+  become: true
+  ansible.builtin.file:
+    path: "{{ restic_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "Restic: Create logs directory"
+  become: true
+  ansible.builtin.file:
+    path: "{{ restic_log_dir }}"
+    state: directory
+    owner: "{{ restic_user }}"
+    group: "{{ restic_user }}"
+    mode: "0755"
+
+- name: "Restic: Create password directory"
+  become: true
+  ansible.builtin.file:
+    path: "{{ restic_password_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: "Restic: Create repository password files"
+  become: true
+  ansible.builtin.copy:
+    content: "{{ item.password }}"
+    dest: "{{ restic_password_dir }}/{{ item.name }}.txt"
+    owner: root
+    group: root
+    mode: "0600"
+  loop: "{{ restic_repositories }}"
+  no_log: true
+  when: restic_repositories | length > 0
+
+- name: "Restic: Create cache directories"
+  become: true
+  ansible.builtin.file:
+    path: "{{ restic_cache_dir }}/{{ item.name }}"
+    state: directory
+    owner: "{{ restic_user }}"
+    group: "{{ restic_user }}"
+    mode: "0755"
+  loop: "{{ restic_repositories }}"
+  when: restic_repositories | length > 0
+
+- name: "Restic: Create resticprofile configuration"
+  become: true
+  ansible.builtin.template:
+    src: profiles.yml.j2
+    dest: "{{ restic_config_dir }}/profiles.yml"
+    owner: root
+    group: root
+    mode: "0644"
+  when: restic_repositories | length > 0
+
+- name: "Restic: Schedule backup jobs"
+  become: true
+  become_user: "{{ restic_user }}"
+  ansible.builtin.shell: "cd {{ restic_user_home }} && /usr/bin/sudo /usr/local/bin/resticprofile --config {{ restic_config_dir }}/profiles.yml --name {{ item.name }} schedule"
+  loop: "{{ restic_repositories }}"
+  register: schedule_result
+  changed_when: "'schedule created' in schedule_result.stdout or 'schedule updated' in schedule_result.stdout"
+  when: restic_repositories | length > 0

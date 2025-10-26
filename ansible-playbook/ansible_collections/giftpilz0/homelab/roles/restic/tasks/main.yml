@@ -1,0 +1,19 @@
+---
+- name: "Restic: Include installation tasks"
+  ansible.builtin.include_tasks: install.yml
+  tags: [restic, install]
+
+- name: "Restic: Include SSH setup tasks"
+  ansible.builtin.include_tasks: ssh-setup.yml
+  when: restic_mode in ['client', 'both']
+  tags: [restic, ssh]
+
+- name: "Restic: Include server tasks"
+  ansible.builtin.include_tasks: server.yml
+  when: restic_mode in ['server', 'both']
+  tags: [restic, server]
+
+- name: "Restic: Include client tasks"
+  ansible.builtin.include_tasks: client.yml
+  when: restic_mode in ['client', 'both']
+  tags: [restic, client]

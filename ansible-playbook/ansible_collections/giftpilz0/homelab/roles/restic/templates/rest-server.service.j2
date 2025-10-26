@@ -1,0 +1,19 @@
+[Unit]
+Description=Restic REST Server
+After=network.target
+Documentation=https://github.com/restic/rest-server
+
+[Service]
+Type=simple
+User={{ restic_user }}
+Group={{ restic_user }}
+
+ExecStart=/usr/local/bin/rest-server \
+  --path {{ restic_server_repo_base }} \
+  --no-auth
+
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
