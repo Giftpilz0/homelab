@@ -17,3 +17,22 @@
     mode: "0755"
     owner: root
     group: root
+
+- name: "Profile: Get all user accounts from passwd"
+  ansible.builtin.getent:
+    database: passwd
+
+- name: "Profile: Suppress default login messages for all users with valid shells"
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.value.4 }}/.hushlogin"
+    state: touch
+    owner: "{{ item.key }}"
+    group: "{{ item.value.2 }}"
+    mode: "0644"
+    modification_time: preserve
+    access_time: preserve
+  loop: "{{ getent_passwd | dict2items }}"
+  when:
+    - getent_passwd is defined
+    - item.value.5 in ['/bin/bash', '/bin/sh', '/bin/zsh', '/usr/bin/bash', '/usr/bin/zsh']
