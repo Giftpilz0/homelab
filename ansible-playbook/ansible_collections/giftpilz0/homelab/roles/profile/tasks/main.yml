@@ -22,17 +22,27 @@
   ansible.builtin.getent:
     database: passwd
 
-- name: "Profile: Suppress default login messages for all users with valid shells"
-  become: true
-  ansible.builtin.file:
-    path: "{{ item.value.4 }}/.hushlogin"
-    state: touch
-    owner: "{{ item.key }}"
-    group: "{{ item.value.2 }}"
-    mode: "0644"
-    modification_time: preserve
-    access_time: preserve
+- name: "Profile: Check if home directories exist"
+  ansible.builtin.stat:
+    path: "{{ item.value.4 }}"
   loop: "{{ getent_passwd | dict2items }}"
+  register: home_dirs_stat
   when:
     - getent_passwd is defined
     - item.value.5 in ['/bin/bash', '/bin/sh', '/bin/zsh', '/usr/bin/bash', '/usr/bin/zsh']
+
+- name: "Profile: Suppress default login messages for all users with valid shells"
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.item.value.4 }}/.hushlogin"
+    state: touch
+    owner: "{{ item.item.key }}"
+    group: "{{ item.item.value.2 }}"
+    mode: "0644"
+    modification_time: preserve
+    access_time: preserve
+  loop: "{{ home_dirs_stat.results }}"
+  when:
+    - item is not skipped
+    - item.stat.exists
+    - item.stat.isdir
