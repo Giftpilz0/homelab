@@ -2,9 +2,9 @@
 podman_user: "{{ ansible_user }}"
 
 # Versions
-valkey_version: "8-alpine"
+valkey_version: "9-alpine"
 postgresql_version: "18-alpine"
-authentik_version: "2025.8"
+authentik_version: "2025.10"
 
 # Autoupdate
 authentik_cache_autoupdate: true

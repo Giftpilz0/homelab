@@ -30,9 +30,9 @@ firewalld_rules_services:
 
 podman_user: "container"
 
-valkey_version: "8-alpine"
+valkey_version: "9-alpine"
 postgresql_version: "18-alpine"
-authentik_version: "2025.8"
+authentik_version: "2025.10"
 
 authentik_cache_autoupdate: true
 authentik_postgresql_autoupdate: true
