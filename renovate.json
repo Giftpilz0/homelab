@@ -1,6 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": [
+    "config:recommended"
+  ],
   "customManagers": [
     {
       "customType": "regex",
@@ -102,15 +104,23 @@
   "packageRules": [
     {
       "description": "Group all Ansible Docker version updates",
-      "matchManagers": ["regex"],
+      "matchManagers": [
+        "custom.regex"
+      ],
       "groupName": "Ansible Docker Versions",
       "commitMessageTopic": "Docker versions in Ansible vars"
     },
     {
       "description": "Explicitly allow major updates for regex-managed Docker deps",
-      "matchManagers": ["regex"],
-      "matchDatasources": ["docker"],
-      "matchUpdateTypes": ["major"],
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "enabled": true
     }
   ]
