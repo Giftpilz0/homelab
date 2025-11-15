@@ -5,11 +5,11 @@
     {
       "customType": "regex",
       "description": "Update OpenCloud Docker image in Ansible vars",
-      "fileMatch": [
-        "(^|/)defaults/main\\.ya?ml$",
-        "(^|/)group_vars/.+\\.ya?ml$",
-        "(^|/)host_vars/.+\\.ya?ml$",
-        "(^|/)vars/.+\\.ya?ml$"
+      "managerFilePatterns": [
+        "/(^|/)defaults/main\\.ya?ml$/",
+        "/(^|/)group_vars/.+\\.ya?ml$/",
+        "/(^|/)host_vars/.+\\.ya?ml$/",
+        "/(^|/)vars/.+\\.ya?ml$/"
       ],
       "matchStrings": [
         "opencloud_version:\\s*\"(?<currentValue>[^\"]+)\""
@@ -21,11 +21,11 @@
     {
       "customType": "regex",
       "description": "Update Mosquitto Docker image in Ansible vars",
-      "fileMatch": [
-        "(^|/)defaults/main\\.ya?ml$",
-        "(^|/)group_vars/.+\\.ya?ml$",
-        "(^|/)host_vars/.+\\.ya?ml$",
-        "(^|/)vars/.+\\.ya?ml$"
+      "managerFilePatterns": [
+        "/(^|/)defaults/main\\.ya?ml$/",
+        "/(^|/)group_vars/.+\\.ya?ml$/",
+        "/(^|/)host_vars/.+\\.ya?ml$/",
+        "/(^|/)vars/.+\\.ya?ml$/"
       ],
       "matchStrings": [
         "mosquitto_version:\\s*\"(?<currentValue>[^\"]+)\""
@@ -36,28 +36,28 @@
     },
     {
       "customType": "regex",
-      "description": "Update Home Assistant Docker image in Ansible vars",
-      "fileMatch": [
-        "(^|/)defaults/main\\.ya?ml$",
-        "(^|/)group_vars/.+\\.ya?ml$",
-        "(^|/)host_vars/.+\\.ya?ml$",
-        "(^|/)vars/.+\\.ya?ml$"
+      "description": "Update Home Assistant Docker image in Ansible vars (ghcr.io)",
+      "managerFilePatterns": [
+        "/(^|/)defaults/main\\.ya?ml$/",
+        "/(^|/)group_vars/.+\\.ya?ml$/",
+        "/(^|/)host_vars/.+\\.ya?ml$/",
+        "/(^|/)vars/.+\\.ya?ml$/"
       ],
       "matchStrings": [
         "homeassistant_version:\\s*\"(?<currentValue>[^\"]+)\""
       ],
       "datasourceTemplate": "docker",
-      "depNameTemplate": "homeassistant/home-assistant",
+      "depNameTemplate": "ghcr.io/home-assistant/home-assistant",
       "versioningTemplate": "docker"
     },
     {
       "customType": "regex",
       "description": "Update Valkey Docker image in Ansible vars",
-      "fileMatch": [
-        "(^|/)defaults/main\\.ya?ml$",
-        "(^|/)group_vars/.+\\.ya?ml$",
-        "(^|/)host_vars/.+\\.ya?ml$",
-        "(^|/)vars/.+\\.ya?ml$"
+      "managerFilePatterns": [
+        "/(^|/)defaults/main\\.ya?ml$/",
+        "/(^|/)group_vars/.+\\.ya?ml$/",
+        "/(^|/)host_vars/.+\\.ya?ml$/",
+        "/(^|/)vars/.+\\.ya?ml$/"
       ],
       "matchStrings": [
         "valkey_version:\\s*\"(?<currentValue>[^\"]+)\""
@@ -69,11 +69,11 @@
     {
       "customType": "regex",
       "description": "Update PostgreSQL Docker image in Ansible vars",
-      "fileMatch": [
-        "(^|/)defaults/main\\.ya?ml$",
-        "(^|/)group_vars/.+\\.ya?ml$",
-        "(^|/)host_vars/.+\\.ya?ml$",
-        "(^|/)vars/.+\\.ya?ml$"
+      "managerFilePatterns": [
+        "/(^|/)defaults/main\\.ya?ml$/",
+        "/(^|/)group_vars/.+\\.ya?ml$/",
+        "/(^|/)host_vars/.+\\.ya?ml$/",
+        "/(^|/)vars/.+\\.ya?ml$/"
       ],
       "matchStrings": [
         "postgresql_version:\\s*\"(?<currentValue>[^\"]+)\""
@@ -84,18 +84,18 @@
     },
     {
       "customType": "regex",
-      "description": "Update Authentik Docker image in Ansible vars",
-      "fileMatch": [
-        "(^|/)defaults/main\\.ya?ml$",
-        "(^|/)group_vars/.+\\.ya?ml$",
-        "(^|/)host_vars/.+\\.ya?ml$",
-        "(^|/)vars/.+\\.ya?ml$"
+      "description": "Update Authentik Docker image in Ansible vars (ghcr.io)",
+      "managerFilePatterns": [
+        "/(^|/)defaults/main\\.ya?ml$/",
+        "/(^|/)group_vars/.+\\.ya?ml$/",
+        "/(^|/)host_vars/.+\\.ya?ml$/",
+        "/(^|/)vars/.+\\.ya?ml$/"
       ],
       "matchStrings": [
         "authentik_version:\\s*\"(?<currentValue>[^\"]+)\""
       ],
       "datasourceTemplate": "docker",
-      "depNameTemplate": "goauthentik/server",
+      "depNameTemplate": "ghcr.io/goauthentik/server",
       "versioningTemplate": "docker"
     }
   ],
@@ -107,10 +107,11 @@
       "commitMessageTopic": "Docker versions in Ansible vars"
     },
     {
-      "description": "Enable digest pinning for some images",
+      "description": "Explicitly allow major updates for regex-managed Docker deps",
+      "matchManagers": ["regex"],
       "matchDatasources": ["docker"],
-      "matchPackageNames": ["postgres", "valkey/valkey"],
-      "pinDigests": true
+      "matchUpdateTypes": ["major"],
+      "enabled": true
     }
   ]
 }
