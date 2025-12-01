@@ -30,7 +30,7 @@ firewalld_rules_services:
 
 podman_user: "container"
 
-opencloud_version: "3"
+opencloud_version: "4"
 
 opencloud_autoupdate: true
 
