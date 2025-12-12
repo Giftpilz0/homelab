@@ -2,7 +2,7 @@
 podman_user: "{{ ansible_user }}"
 
 # Versions
-homeassistant_version: "2025.11"
+homeassistant_version: "2025.12"
 
 # Autoupdate
 homeassistant_autoupdate: true

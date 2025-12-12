@@ -23,4 +23,5 @@ Annotation=run.oci.keep_original_groups=1
 SecurityLabelType=spc_t
 {% endif %}
 
+Volume=%h/.config/containers/systemd/homeassistant/8n0t5d.py:/usr/local/lib/python3.13/site-packages/deebot_client/hardware/8n0t5d.py:Z
 Volume=homeassistant-data.volume:/config
