@@ -535,4 +535,88 @@ vms = {
 
     serial_devices = []
   }
+
+  "bumper" = {
+    node_name       = "pve"
+    vm_id           = 4005
+    name            = "bumper"
+    description     = "Bumper Server"
+    tags            = ["container", "docker", "production"]
+    started         = true
+    on_boot         = true
+    template        = false
+    stop_on_destroy = false
+    machine         = "q35"
+    bios            = "ovmf"
+    scsi_hardware   = "virtio-scsi-single"
+
+    clone = {
+      vm_id     = 101
+      node_name = "pve"
+      full      = true
+    }
+
+    agent = {
+      enabled = true
+      trim    = false
+      type    = "virtio"
+    }
+
+    cpu = {
+      cores   = 4
+      sockets = 1
+      type    = "host"
+    }
+
+    memory = {
+      dedicated = 4096
+    }
+
+    operating_system = {
+      type = "l26"
+    }
+
+    disks = [
+      {
+        datastore_id = "local-lvm"
+        file_format  = "raw"
+        interface    = "scsi0"
+        iothread     = true
+        discard      = "on"
+        size         = 20
+      }
+    ]
+
+    network_devices = [
+      {
+        bridge   = "misc"
+        model    = "virtio"
+        firewall = true
+      }
+    ]
+
+    cloud_init = {
+      datastore_id = "local-lvm"
+
+      user_account = {
+        username = "serveradmin"
+        keys     = []
+      }
+
+      ip_configs = [
+        {
+          ipv4 = {
+            address = "192.168.60.15/24"
+            gateway = "192.168.60.1"
+          }
+        }
+      ]
+
+      dns = {
+        servers = ["192.168.60.1"]
+      }
+    }
+
+    serial_devices = []
+  }
 }

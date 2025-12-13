@@ -1,0 +1,144 @@
+---
+- name: "Bumper: Create build directory"
+  become: true
+  ansible.builtin.file:
+    path: "/tmp/bumper-build"
+    state: directory
+    mode: "0755"
+
+- name: "Bumper: Clone bumper repository"
+  become: true
+  ansible.builtin.git:
+    repo: "https://github.com/MVladislav/bumper.git"
+    dest: "/tmp/bumper-build"
+    version: "{{ bumper_commit }}"
+    force: true
+    depth: 1
+
+- name: "Bumper: Copy custom productIotMap.json"
+  become: true
+  ansible.builtin.copy:
+    src: "files/productIotMap.json"
+    dest: "/tmp/bumper-build/bumper/web/plugins/api/pim/productIotMap.json"
+    mode: "0644"
+
+- name: "Bumper: Copy custom configNetAllResponse.json"
+  become: true
+  ansible.builtin.copy:
+    src: "files/configNetAllResponse.json"
+    dest: "/tmp/bumper-build/bumper/web/plugins/api/pim/configNetAllResponse.json"
+    mode: "0644"
+
+- name: "Bumper: Copy custom configGroupsResponse.json"
+  become: true
+  ansible.builtin.copy:
+    src: "files/configGroupsResponse.json"
+    dest: "/tmp/bumper-build/bumper/web/plugins/api/pim/configGroupsResponse.json"
+    mode: "0644"
+
+- name: "Bumper: Copy custom server.py"
+  become: true
+  ansible.builtin.copy:
+    src: "files/server.py"
+    dest: "/tmp/bumper-build/bumper/web/server.py"
+    mode: "0644"
+
+- name: "Bumper: Build custom podman image"
+  become: true
+  become_user: "{{ podman_user }}"
+  containers.podman.podman_image:
+    name: "localhost/bumper-custom"
+    tag: "{{ ansible_date_time.epoch }}"
+    path: "/tmp/bumper-build"
+    build:
+      file: "/tmp/bumper-build/Dockerfile"
+      format: oci
+      cache: false
+      force_rm: true
+  register: bumper_image_build
+
+- name: "Bumper: Clean up build directory"
+  become: true
+  ansible.builtin.file:
+    path: "/tmp/bumper-build"
+    state: absent
+
+- name: "Bumper: Enable lingering"
+  become: true
+  ansible.builtin.command: loginctl enable-linger {{ podman_user }}
+  register: podman_lingering
+  changed_when: podman_lingering.rc != 0
+
+- name: "Bumper: Configure unprivileged port range for rootless containers"
+  become: true
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_unprivileged_port_start
+    value: "80"
+    sysctl_set: true
+    sysctl_file: /etc/sysctl.d/99-rootless-ports.conf
+    reload: true
+
+- name: "Bumper: Create podman network"
+  become: true
+  become_user: "{{ podman_user }}"
+  containers.podman.podman_network:
+    name: quadlet
+
+- name: "Bumper: Create quadlet directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0755"
+
+- name: "Bumper: Create directory structure"
+  become: true
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd/{{ item.path }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode }}"
+  with_community.general.filetree: "templates/"
+  when: item.state == 'directory'
+
+- name: "Bumper: Template quadlet files"
+  become: true
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/{{ item.path }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode }}"
+  with_community.general.filetree: "templates/"
+  when: item.state == 'file'
+  notify:
+    - "Bumper: Restart pod service"
+
+- name: "Bumper: systemd daemon reload"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    daemon_reload: true
+    scope: user
+
+- name: "Bumper: Start pod service"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: bumper-pod.service
+    enabled: true
+    state: started
+    scope: user
+
+- name: "Bumper: Enable podman-auto-update timer"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: podman-auto-update.timer
+    enabled: true
+    state: started
+    scope: user

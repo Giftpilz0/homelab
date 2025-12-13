@@ -1,0 +1,20 @@
+---
+podman_user: "{{ ansible_user }}"
+
+# Versions
+bumper_version: "latest"
+bumper_commit: "b071ed1bcb2bd12ec1ba4b29f653f3f27509db02"
+
+# Autoupdate
+bumper_autoupdate: true
+
+# Environment
+bumper_environment_vars:
+  TZ: Europe/Berlin
+  WEB_SERVER_HTTPS_PORT: 8443 # 443
+  WEB_SERVER_LISTEN_PORT: 8007
+  MQTT_LISTEN_PORT_TLS: 443 # 8883
+  MQTT_LISTEN_PORT: 1883
+  XMPP_LISTEN_PORT_TLS: 5223
+  DEBUG_BUMPER_VERBOSE: 2
+  DEBUG_BUMPER_LEVEL: "INFO"

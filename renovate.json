@@ -1,8 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ],
+  "extends": ["config:recommended"],
   "customManagers": [
     {
       "customType": "regex",
@@ -13,9 +11,7 @@
         "/(^|/)host_vars/.+\\.ya?ml$/",
         "/(^|/)vars/.+\\.ya?ml$/"
       ],
-      "matchStrings": [
-        "opencloud_version:\\s*\"(?<currentValue>[^\"]+)\""
-      ],
+      "matchStrings": ["opencloud_version:\\s*\"(?<currentValue>[^\"]+)\""],
       "datasourceTemplate": "docker",
       "depNameTemplate": "opencloudeu/opencloud",
       "versioningTemplate": "docker"
@@ -29,9 +25,7 @@
         "/(^|/)host_vars/.+\\.ya?ml$/",
         "/(^|/)vars/.+\\.ya?ml$/"
       ],
-      "matchStrings": [
-        "mosquitto_version:\\s*\"(?<currentValue>[^\"]+)\""
-      ],
+      "matchStrings": ["mosquitto_version:\\s*\"(?<currentValue>[^\"]+)\""],
       "datasourceTemplate": "docker",
       "depNameTemplate": "eclipse-mosquitto",
       "versioningTemplate": "docker"
@@ -45,11 +39,23 @@
         "/(^|/)host_vars/.+\\.ya?ml$/",
         "/(^|/)vars/.+\\.ya?ml$/"
       ],
-      "matchStrings": [
-        "homeassistant_version:\\s*\"(?<currentValue>[^\"]+)\""
-      ],
+      "matchStrings": ["homeassistant_version:\\s*\"(?<currentValue>[^\"]+)\""],
       "datasourceTemplate": "docker",
       "depNameTemplate": "ghcr.io/home-assistant/home-assistant",
+      "versioningTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Update Home Bumper Docker image in Ansible vars (ghcr.io)",
+      "managerFilePatterns": [
+        "/(^|/)defaults/main\\.ya?ml$/",
+        "/(^|/)group_vars/.+\\.ya?ml$/",
+        "/(^|/)host_vars/.+\\.ya?ml$/",
+        "/(^|/)vars/.+\\.ya?ml$/"
+      ],
+      "matchStrings": ["bumper_version:\\s*\"(?<currentValue>[^\"]+)\""],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "ghcr.io/mvladislav/bumper",
       "versioningTemplate": "docker"
     },
     {
@@ -61,9 +67,7 @@
         "/(^|/)host_vars/.+\\.ya?ml$/",
         "/(^|/)vars/.+\\.ya?ml$/"
       ],
-      "matchStrings": [
-        "valkey_version:\\s*\"(?<currentValue>[^\"]+)\""
-      ],
+      "matchStrings": ["valkey_version:\\s*\"(?<currentValue>[^\"]+)\""],
       "datasourceTemplate": "docker",
       "depNameTemplate": "valkey/valkey",
       "versioningTemplate": "docker"
@@ -77,9 +81,7 @@
         "/(^|/)host_vars/.+\\.ya?ml$/",
         "/(^|/)vars/.+\\.ya?ml$/"
       ],
-      "matchStrings": [
-        "postgresql_version:\\s*\"(?<currentValue>[^\"]+)\""
-      ],
+      "matchStrings": ["postgresql_version:\\s*\"(?<currentValue>[^\"]+)\""],
       "datasourceTemplate": "docker",
       "depNameTemplate": "postgres",
       "versioningTemplate": "docker"
@@ -93,9 +95,7 @@
         "/(^|/)host_vars/.+\\.ya?ml$/",
         "/(^|/)vars/.+\\.ya?ml$/"
       ],
-      "matchStrings": [
-        "authentik_version:\\s*\"(?<currentValue>[^\"]+)\""
-      ],
+      "matchStrings": ["authentik_version:\\s*\"(?<currentValue>[^\"]+)\""],
       "datasourceTemplate": "docker",
       "depNameTemplate": "ghcr.io/goauthentik/server",
       "versioningTemplate": "docker"
@@ -104,23 +104,15 @@
   "packageRules": [
     {
       "description": "Group all Ansible Docker version updates",
-      "matchManagers": [
-        "custom.regex"
-      ],
+      "matchManagers": ["custom.regex"],
       "groupName": "Ansible Docker Versions",
       "commitMessageTopic": "Docker versions in Ansible vars"
     },
     {
       "description": "Explicitly allow major updates for regex-managed Docker deps",
-      "matchManagers": [
-        "custom.regex"
-      ],
-      "matchDatasources": [
-        "docker"
-      ],
-      "matchUpdateTypes": [
-        "major"
-      ],
+      "matchManagers": ["custom.regex"],
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["major"],
       "enabled": true
     }
   ]

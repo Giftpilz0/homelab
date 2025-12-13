@@ -41,3 +41,9 @@
   roles:
     - role: giftpilz0.homelab.traefik
     - role: giftpilz0.homelab.vaultwarden
+
+- name: Configure hosts - bumper
+  hosts: bumper
+  roles:
+    - role: giftpilz0.homelab.traefik
+    - role: giftpilz0.homelab.bumper
