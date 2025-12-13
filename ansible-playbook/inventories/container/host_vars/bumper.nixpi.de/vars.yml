@@ -1,0 +1,74 @@
+---
+######################################
+### giftpilz0.general.firewalld
+
+firewalld_zones_define:
+  - zone: server
+    source: 192.168.60.0/24
+  - zone: server-kubernetes
+    source: 192.168.65.0/24
+  - zone: server-lb
+    source: 192.168.70.0/24
+  - zone: clients
+    source: 192.168.10.0/24
+  - zone: clients
+    source: 192.168.15.0/24
+  - zone: iot-untrusted
+    source: 192.168.20.0/24
+
+firewalld_rules_services:
+  - service: ssh
+    zone: clients
+    state: enabled
+
+firewalld_rules_ports:
+  - port: 8443 # https
+    protocol: tcp
+    zone: clients
+    state: enabled
+  - port: 8007 # http
+    protocol: tcp
+    zone: clients
+    state: enabled
+  - port: 8443 # https
+    protocol: tcp
+    zone: server
+    state: enabled
+  - port: 8007 # http
+    protocol: tcp
+    zone: server
+    state: enabled
+  - port: 443 # mqtts
+    protocol: tcp
+    zone: server
+    state: enabled
+  - port: 1883 # mqtt
+    protocol: tcp
+    zone: server
+    state: enabled
+  - port: 8443 # https
+    protocol: tcp
+    zone: iot-untrusted
+    state: enabled
+  - port: 8007 # http
+    protocol: tcp
+    zone: iot-untrusted
+    state: enabled
+  - port: 443 # mqtts
+    protocol: tcp
+    zone: iot-untrusted
+    state: enabled
+  - port: 1883 # mqtt
+    protocol: tcp
+    zone: iot-untrusted
+    state: enabled
+
+######################################
+### giftpilz0.server.podman, giftpilz0.homelab.homeassistant
+
+podman_user: "container"
+
+bumper_version: "latest"
+bumper_commit: "b071ed1bcb2bd12ec1ba4b29f653f3f27509db02"
+
+bumper_autoupdate: true

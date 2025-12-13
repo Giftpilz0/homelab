@@ -1,0 +1,18 @@
+[Unit]
+Description=Bumper Pod
+
+[Pod]
+PodName=bumper-pod
+
+Network=pasta
+
+PublishPort=443:443
+PublishPort=1883:1883
+PublishPort=8443:8443
+PublishPort=8007:8007
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target
