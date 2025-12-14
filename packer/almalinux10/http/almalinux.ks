@@ -1,6 +1,6 @@
-url --url="https://repo.almalinux.org/almalinux/10/BaseOS/x86_64/os/"
-repo --name="AppStream" --baseurl="https://repo.almalinux.org/almalinux/10/AppStream/x86_64/os/"
-repo --name="Extras" --baseurl="https://repo.almalinux.org/almalinux/10/extras/x86_64/os/"
+url --url="https://repo.almalinux.org/almalinux/10.1/BaseOS/x86_64/os/"
+repo --name="AppStream" --baseurl="https://repo.almalinux.org/almalinux/10.1/AppStream/x86_64/os/"
+repo --name="Extras" --baseurl="https://repo.almalinux.org/almalinux/10.1/extras/x86_64/os/"
 
 text
 eula --agreed
