@@ -24,12 +24,12 @@ variable "proxmox_config_endpoint" {
 
 variable "almalinux_iso_url" {
   type    = string
-  default = "https://repo.almalinux.org/almalinux/10/isos/x86_64/AlmaLinux-10.0-x86_64-boot.iso"
+  default = "https://repo.almalinux.org/almalinux/10/isos/x86_64/AlmaLinux-10.1-x86_64-boot.iso"
 }
 
 variable "almalinux_sha256sum_url" {
   type    = string
-  default = "https://repo.almalinux.org/almalinux/10.0/isos/x86_64/CHECKSUM"
+  default = "https://repo.almalinux.org/almalinux/10.1/isos/x86_64/CHECKSUM"
 }
 
 source "proxmox-iso" "almalinux10" {
