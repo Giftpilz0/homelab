@@ -1,0 +1,59 @@
+[Unit]
+Description=Forgejo OAuth Init Sidecar
+After=forgejo.service
+
+[Container]
+ContainerName=forgejo-oauth-init
+Image=codeberg.org/forgejo/forgejo:{{ forgejo_version }}
+
+Pod=forgejo.pod
+User=1000:1000
+
+{% if forgejo_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+{% if forgejo_environment_vars is defined %}
+{% for env_name, env_value in forgejo_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
+
+Volume=forgejo-data.volume:/data:z
+
+Exec=/bin/sh -c 'CONFIG="/data/gitea/conf/app.ini"; \
+echo "Waiting for Forgejo..."; \
+for i in $(seq 1 60); do \
+  wget -q --spider http://localhost:3000/ 2>/dev/null && break; \
+  sleep 5; \
+done; \
+test -f "$CONFIG" || exit 1; \
+sleep 10; \
+echo "Checking OAuth source..."; \
+if forgejo --config "$CONFIG" admin auth list | grep -q "$OAUTH_NAME"; then \
+  echo "Updating existing OAuth source..."; \
+  AUTH_ID=$(forgejo --config "$CONFIG" admin auth list | grep "$OAUTH_NAME" | cut -f1); \
+  forgejo --config "$CONFIG" admin auth update-oauth \
+    --id "$AUTH_ID" \
+    --name "$OAUTH_NAME" \
+    --provider "openidConnect" \
+    --key "$OAUTH_CLIENT_ID" \
+    --secret "$OAUTH_CLIENT_SECRET" \
+    --auto-discover-url "$OAUTH_DISCOVERY_URL" \
+    --scopes "$OAUTH_SCOPES" \
+    --skip-local-2fa false && echo "Updated"; \
+else \
+  echo "Creating new OAuth source..."; \
+  forgejo --config "$CONFIG" admin auth add-oauth \
+    --name "$OAUTH_NAME" \
+    --provider "openidConnect" \
+    --key "$OAUTH_CLIENT_ID" \
+    --secret "$OAUTH_CLIENT_SECRET" \
+    --auto-discover-url "$OAUTH_DISCOVERY_URL" \
+    --scopes "$OAUTH_SCOPES" \
+    --skip-local-2fa false && echo "Created"; \
+fi'
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes

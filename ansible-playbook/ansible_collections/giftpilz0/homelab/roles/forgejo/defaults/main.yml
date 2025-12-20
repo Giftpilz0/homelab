@@ -1,0 +1,77 @@
+---
+podman_user: "{{ ansible_user }}"
+
+# Versions
+postgresql_version: "18-alpine"
+forgejo_version: "13"
+
+# Autoupdate
+forgejo_postgresql_autoupdate: true
+forgejo_autoupdate: true
+
+# Environment
+forgejo_db_password: ""
+forgejo_domain: ""
+forgejo_oauth_client_id: ""
+forgejo_oauth_client_secret: ""
+forgejo_oauth_domain: ""
+forgejo_oauth_name: ""
+
+forgejo_environment_vars:
+  USER_UID: "1000"
+  USER_GID: "1000"
+
+  # DEFAULT section
+  APP_NAME: "Forgejo"
+  APP_SLOGAN: ""
+
+  # Server section
+  FORGEJO__server__DOMAIN: "{{ forgejo_domain }}"
+  FORGEJO__server__ROOT_URL: "https://{{ forgejo_domain }}/"
+  FORGEJO__server__PROTOCOL: "http"
+  FORGEJO__server__HTTP_PORT: "3000"
+  FORGEJO__server__SSH_PORT: "2222"
+  FORGEJO__server__OFFLINE_MODE: false
+
+  # Log section
+  FORGEJO__log__LEVEL: "{{ forgejo_log_level | default('Info') }}"
+
+  # Database section
+  FORGEJO__database__DB_TYPE: "postgres"
+  FORGEJO__database__HOST: "127.0.0.1:5432"
+  FORGEJO__database__NAME: "{{ forgejo_db_name | default('forgejo') }}"
+  FORGEJO__database__USER: "{{ forgejo_db_user | default('forgejo') }}"
+  FORGEJO__database__PASSWD: "{{ forgejo_db_password }}"
+
+  # Security section
+  FORGEJO__security__LOGIN_REMEMBER_DAYS: "14"
+  FORGEJO__security__INSTALL_LOCK: true
+
+  # Service Configuration
+  FORGEJO__service__DISABLE_REGISTRATION: true
+  FORGEJO__service__ALLOW_ONLY_EXTERNAL_REGISTRATION: true
+  FORGEJO__service__SHOW_REGISTRATION_BUTTON: false
+  FORGEJO__service__ENABLE_INTERNAL_SIGNIN: false
+
+  # OAuth2 Client section
+  FORGEJO__oauth2_client__ENABLE_AUTO_REGISTRATION: true
+  FORGEJO__oauth2_client__USERNAME: "preferred_username"
+  FORGEJO__oauth2_client__UPDATE_AVATAR: true
+  FORGEJO__oauth2_client__ACCOUNT_LINKING: "auto"
+  FORGEJO__oauth2_client__OPENID_CONNECT_SCOPES: '"profile email"'
+
+  # OpenID section
+  FORGEJO__openid__ENABLE_OPENID_SIGNIN: false
+  FORGEJO__openid__ENABLE_OPENID_SIGNUP: false
+
+  # OAuth Source Configuration
+  OAUTH_NAME: "{{ forgejo_oauth_name }}"
+  OAUTH_CLIENT_ID: "{{ forgejo_oauth_client_id }}"
+  OAUTH_CLIENT_SECRET: "{{ forgejo_oauth_client_secret }}"
+  OAUTH_DISCOVERY_URL: "https://{{ forgejo_oauth_domain }}/.well-known/openid-configuration"
+  OAUTH_SCOPES: "openid profile email"
+
+forgejo_postgresql_environment_vars:
+  POSTGRES_DB: "{{ forgejo_db_name | default('forgejo') }}"
+  POSTGRES_USER: "{{ forgejo_db_user | default('forgejo') }}"
+  POSTGRES_PASSWORD: "{{ forgejo_db_password }}"

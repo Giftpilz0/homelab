@@ -46,6 +46,20 @@
     },
     {
       "customType": "regex",
+      "description": "Update Forgejo Docker image in Ansible vars (codeberg.org)",
+      "managerFilePatterns": [
+        "/(^|/)defaults/main\\.ya?ml$/",
+        "/(^|/)group_vars/.+\\.ya?ml$/",
+        "/(^|/)host_vars/.+\\.ya?ml$/",
+        "/(^|/)vars/.+\\.ya?ml$/"
+      ],
+      "matchStrings": ["forgejo_version:\\s*\"(?<currentValue>[^\"]+)\""],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "codeberg.org/forgejo/forgejo",
+      "versioningTemplate": "docker"
+    },
+    {
+      "customType": "regex",
       "description": "Update Home Bumper Docker image in Ansible vars (ghcr.io)",
       "managerFilePatterns": [
         "/(^|/)defaults/main\\.ya?ml$/",

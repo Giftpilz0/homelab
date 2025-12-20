@@ -11,12 +11,6 @@
     - role: giftpilz0.general.timezone
     - role: giftpilz0.server.podman
 
-- name: Configure hosts - authentik
-  hosts: authentik
-  roles:
-    - role: giftpilz0.homelab.traefik
-    - role: giftpilz0.homelab.authentik
-
 - name: Configure hosts - forgejo
   hosts: forgejo
   roles:
@@ -45,5 +39,4 @@
 - name: Configure hosts - bumper
   hosts: bumper
   roles:
-    - role: giftpilz0.homelab.traefik
     - role: giftpilz0.homelab.bumper
