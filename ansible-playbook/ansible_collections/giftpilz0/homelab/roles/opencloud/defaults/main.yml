@@ -8,6 +8,10 @@ opencloud_version: "4"
 opencloud_autoupdate: true
 
 # Environment
+opencloud_domain: ""
+opencloud_admin_password: ""
+opencloud_log_level: "info"
+
 opencloud_environment_vars:
   IDM_ADMIN_PASSWORD: "{{ opencloud_admin_password }}"
   OPEN_CLOUD_LOG_LEVEL: "{{ opencloud_log_level }}"
@@ -15,3 +19,67 @@ opencloud_environment_vars:
   OC_CORS_ALLOW_ORIGINS: "{{ opencloud_domain }}"
   PROXY_HTTP_ADDR: 0.0.0.0:9200
   PROXY_TLS: false
+
+# OIDC Clients Configuration
+opencloud_standard_clients:
+  - id: web
+    name: "OpenCloud Web App"
+    trusted: true
+    secret: ""
+    redirect_uris:
+      - "{{ opencloud_domain }}/"
+      - "{{ opencloud_domain }}/oidc-callback.html"
+      - "{{ opencloud_domain }}/oidc-silent-redirect.html"
+    post_logout_redirect_uris: []
+    origins:
+      - "{{ opencloud_domain }}"
+    application_type: ""
+
+  - id: OpenCloudDesktop
+    name: "OpenCloud Desktop Client"
+    trusted: false
+    secret: ""
+    redirect_uris:
+      - "http://127.0.0.1"
+      - "http://localhost"
+    post_logout_redirect_uris: []
+    origins: []
+    application_type: "native"
+
+  - id: OpenCloudAndroid
+    name: "OpenCloud Android App"
+    trusted: false
+    secret: ""
+    redirect_uris:
+      - "oc://android.opencloud.eu"
+    post_logout_redirect_uris:
+      - "oc://android.opencloud.eu"
+    origins: []
+    application_type: "native"
+
+  - id: OpenCloudIOS
+    name: "OpenCloud iOS App"
+    trusted: false
+    secret: ""
+    redirect_uris:
+      - "oc://ios.opencloud.eu"
+    post_logout_redirect_uris:
+      - "oc://ios.opencloud.eu"
+    origins: []
+    application_type: "native"
+
+  # Custom OIDC Clients
+  # opencloud_custom_clients:
+  # - id: forgejo
+  #   name: "forgejo"
+  #   trusted: false
+  #   secret: "{{ forgejo_oauth_client_secret }}"
+  #   redirect_uris:
+  #     - "https://{{ forgejo_domain }}/user/oauth2/opencloud/callback"
+  #   post_logout_redirect_uris: []
+  #   origins:
+  #     - "https://{{ forgejo_domain }}"
+  #   application_type: "web"
+
+# Merge OIDC clients
+opencloud_oidc_clients: "{{ opencloud_standard_clients + opencloud_custom_clients }}"

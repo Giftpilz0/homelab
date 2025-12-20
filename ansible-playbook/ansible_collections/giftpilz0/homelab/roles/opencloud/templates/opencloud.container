@@ -19,3 +19,4 @@ Environment={{ env_name }}={{ env_value }}
 
 Volume=opencloud-config.volume:/etc/opencloud/
 Volume=opencloud-data.volume:/var/lib/opencloud/
+Volume=%h/.config/containers/systemd/opencloud/idp.yaml:/etc/opencloud/idp.yaml:Z
