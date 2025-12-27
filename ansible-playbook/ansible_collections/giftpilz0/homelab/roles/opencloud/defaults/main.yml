@@ -19,6 +19,7 @@ opencloud_environment_vars:
   OC_CORS_ALLOW_ORIGINS: "{{ opencloud_domain }}"
   PROXY_HTTP_ADDR: 0.0.0.0:9200
   PROXY_TLS: false
+  FRONTEND_ARCHIVER_MAX_SIZE: 4294967296
 
 # OIDC Clients Configuration
 opencloud_standard_clients:
