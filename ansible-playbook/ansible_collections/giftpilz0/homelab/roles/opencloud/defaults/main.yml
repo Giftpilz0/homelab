@@ -20,6 +20,7 @@ opencloud_environment_vars:
   PROXY_HTTP_ADDR: 0.0.0.0:9200
   PROXY_TLS: false
   FRONTEND_ARCHIVER_MAX_SIZE: 4294967296
+  THUMBNAILS_MAX_CONCURRENT_REQUESTS: 64
 
 # OIDC Clients Configuration
 opencloud_standard_clients:
