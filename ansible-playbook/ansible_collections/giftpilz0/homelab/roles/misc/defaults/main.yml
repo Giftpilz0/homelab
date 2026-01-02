@@ -1,0 +1,15 @@
+---
+podman_user: "{{ ansible_user }}"
+
+# Versions
+misc_version: "latest"
+misc_commit: "db16ab7ca40f6e1e98e6e7a3947fb9e2aa04f527"
+
+# Autoupdate
+misc_autoupdate: true
+
+# Environment
+misc_environment_vars:
+  TZ: "Europe/Berlin"
+  LOGLEVEL: "INFO"
+  PORT: 8080

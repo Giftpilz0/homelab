@@ -1,0 +1,38 @@
+---
+######################################
+### giftpilz0.general.firewalld
+
+firewalld_zones_define:
+  - zone: server
+    source: 192.168.60.0/24
+  - zone: server-kubernetes
+    source: 192.168.65.0/24
+  - zone: server-lb
+    source: 192.168.70.0/24
+  - zone: clients
+    source: 192.168.10.0/24
+  - zone: clients
+    source: 192.168.15.0/24
+  - zone: clients
+    source: 192.168.45.0/24
+
+firewalld_rules_services:
+  - service: ssh
+    zone: clients
+    state: enabled
+
+firewalld_rules_ports:
+  - port: 8080
+    protocol: tcp
+    zone: clients
+    state: enabled
+
+######################################
+### giftpilz0.server.podman, giftpilz0.homelab.misc
+
+podman_user: "container"
+
+misc_version: "latest"
+misc_commit: "db16ab7ca40f6e1e98e6e7a3947fb9e2aa04f527"
+
+misc_autoupdate: true

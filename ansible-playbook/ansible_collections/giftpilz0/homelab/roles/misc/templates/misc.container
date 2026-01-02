@@ -1,0 +1,18 @@
+[Unit]
+Description=Misc Container
+
+[Container]
+ContainerName=misc
+Image=localhost/misc-custom:{{ misc_version }}
+
+Pod=misc.pod
+
+{% if misc_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+{% if misc_environment_vars is defined %}
+{% for env_name, env_value in misc_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}

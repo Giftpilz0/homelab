@@ -1,0 +1,15 @@
+[Unit]
+Description=Misc Pod
+
+[Pod]
+PodName=misc-pod
+
+Network=quadlet
+
+PublishPort=8080:8080
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

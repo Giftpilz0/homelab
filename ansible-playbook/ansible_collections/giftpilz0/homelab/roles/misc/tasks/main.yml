@@ -1,75 +1,47 @@
 ---
-- name: "Bumper: Create build directory"
+- name: "Misc: Create build directory"
   become: true
   ansible.builtin.file:
-    path: "/tmp/bumper-build"
+    path: "/tmp/misc-build"
     state: directory
     mode: "0755"
 
-- name: "Bumper: Clone bumper repository"
+- name: "Misc: Clone misc repository"
   become: true
   ansible.builtin.git:
-    repo: "https://github.com/MVladislav/bumper.git"
-    dest: "/tmp/bumper-build"
-    version: "{{ bumper_commit }}"
+    repo: "https://forgejo.nixpi.de/moritz/service-misc.git"
+    dest: "/tmp/misc-build"
+    version: "{{ misc_commit }}"
     force: true
     depth: 1
 
-- name: "Bumper: Copy custom productIotMap.json"
-  become: true
-  ansible.builtin.copy:
-    src: "files/productIotMap.json"
-    dest: "/tmp/bumper-build/bumper/web/plugins/api/pim/productIotMap.json"
-    mode: "0644"
-
-- name: "Bumper: Copy custom configNetAllResponse.json"
-  become: true
-  ansible.builtin.copy:
-    src: "files/configNetAllResponse.json"
-    dest: "/tmp/bumper-build/bumper/web/plugins/api/pim/configNetAllResponse.json"
-    mode: "0644"
-
-- name: "Bumper: Copy custom configGroupsResponse.json"
-  become: true
-  ansible.builtin.copy:
-    src: "files/configGroupsResponse.json"
-    dest: "/tmp/bumper-build/bumper/web/plugins/api/pim/configGroupsResponse.json"
-    mode: "0644"
-
-- name: "Bumper: Copy custom server.py"
-  become: true
-  ansible.builtin.copy:
-    src: "files/server.py"
-    dest: "/tmp/bumper-build/bumper/web/server.py"
-    mode: "0644"
-
-- name: "Bumper: Build custom podman image"
+- name: "Misc: Build custom podman image"
   become: true
   become_user: "{{ podman_user }}"
   containers.podman.podman_image:
-    name: "localhost/bumper-custom"
+    name: "localhost/misc-custom"
     tag: "latest"
-    path: "/tmp/bumper-build"
+    path: "/tmp/misc-build"
     build:
-      file: "/tmp/bumper-build/Dockerfile"
+      file: "/tmp/misc-build/docker/docker-minimal/Dockerfile"
       format: oci
       cache: false
       force_rm: true
-  register: bumper_image_build
+  register: misc_image_build
 
-- name: "Bumper: Clean up build directory"
+- name: "Misc: Clean up build directory"
   become: true
   ansible.builtin.file:
-    path: "/tmp/bumper-build"
+    path: "/tmp/misc-build"
     state: absent
 
-- name: "Bumper: Enable lingering"
+- name: "Misc: Enable lingering"
   become: true
   ansible.builtin.command: loginctl enable-linger {{ podman_user }}
   register: podman_lingering
   changed_when: podman_lingering.rc != 0
 
-- name: "Bumper: Configure unprivileged port range for rootless containers"
+- name: "Misc: Configure unprivileged port range for rootless containers"
   become: true
   ansible.posix.sysctl:
     name: net.ipv4.ip_unprivileged_port_start
@@ -78,13 +50,13 @@
     sysctl_file: /etc/sysctl.d/99-rootless-ports.conf
     reload: true
 
-- name: "Bumper: Create podman network"
+- name: "Misc: Create podman network"
   become: true
   become_user: "{{ podman_user }}"
   containers.podman.podman_network:
     name: quadlet
 
-- name: "Bumper: Create quadlet directory"
+- name: "Misc: Create quadlet directory"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.file:
@@ -94,7 +66,7 @@
     group: "{{ podman_user }}"
     mode: "0755"
 
-- name: "Bumper: Create directory structure"
+- name: "Misc: Create directory structure"
   become: true
   ansible.builtin.file:
     path: "/home/{{ podman_user }}/.config/containers/systemd/{{ item.path }}"
@@ -105,7 +77,7 @@
   with_community.general.filetree: "templates/"
   when: item.state == 'directory'
 
-- name: "Bumper: Template quadlet files"
+- name: "Misc: Template quadlet files"
   become: true
   ansible.builtin.template:
     src: "{{ item.src }}"
@@ -116,25 +88,25 @@
   with_community.general.filetree: "templates/"
   when: item.state == 'file'
   notify:
-    - "Bumper: Restart pod service"
+    - "Misc: Restart pod service"
 
-- name: "Bumper: systemd daemon reload"
+- name: "Misc: systemd daemon reload"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.systemd:
     daemon_reload: true
     scope: user
 
-- name: "Bumper: Start pod service"
+- name: "Misc: Start pod service"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.systemd:
-    name: bumper-pod.service
+    name: misc-pod.service
     enabled: true
     state: started
     scope: user
 
-- name: "Bumper: Enable podman-auto-update timer"
+- name: "Misc: Enable podman-auto-update timer"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.systemd:
