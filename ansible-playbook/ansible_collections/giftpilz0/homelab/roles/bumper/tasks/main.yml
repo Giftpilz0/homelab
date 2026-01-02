@@ -48,7 +48,7 @@
   become_user: "{{ podman_user }}"
   containers.podman.podman_image:
     name: "localhost/bumper-custom"
-    tag: "{{ ansible_date_time.epoch }}"
+    tag: "latest"
     path: "/tmp/bumper-build"
     build:
       file: "/tmp/bumper-build/Dockerfile"

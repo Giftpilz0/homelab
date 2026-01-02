@@ -1,0 +1,21 @@
+---
+# API token for basic auth
+cfdyndns_api_token: ""
+
+# Update URL (made for https://github.com/willswire/unifi-ddns)
+cfdyndns_update_url: ""
+
+# Cloudflare trace endpoint
+cfdyndns_cloudflare_trace_url: "https://cloudflare.com/cdn-cgi/trace"
+
+# File paths
+cfdyndns_script_path: "/usr/local/bin/ip_updater.py"
+cfdyndns_state_dir: "/var/lib/cfdyndns"
+cfdyndns_last_ip_file: "{{ cfdyndns_state_dir }}/last_ip"
+
+# Timer (check interval)
+cfdyndns_check_interval: "5min"
+cfdyndns_on_boot_delay: "1min"
+
+# Python requests package
+cfdyndns_python_requests_package: "python3-requests"

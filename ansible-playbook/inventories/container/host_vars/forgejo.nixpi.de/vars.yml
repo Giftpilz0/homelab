@@ -24,6 +24,12 @@ firewalld_rules_services:
   - service: https
     zone: clients
     state: enabled
+  - service: http
+    zone: server
+    state: enabled
+  - service: https
+    zone: server
+    state: enabled
 
 ######################################
 ### giftpilz0.server.podman, giftpilz0.homelab.forgejo

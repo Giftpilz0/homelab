@@ -64,7 +64,7 @@ firewalld_rules_ports:
     state: enabled
 
 ######################################
-### giftpilz0.server.podman, giftpilz0.homelab.homeassistant
+### giftpilz0.server.podman, giftpilz0.homelab.bumper
 
 podman_user: "container"
 

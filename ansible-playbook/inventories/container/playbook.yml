@@ -40,3 +40,9 @@
   hosts: bumper
   roles:
     - role: giftpilz0.homelab.bumper
+
+- name: Configure hosts - misc
+  hosts: misc
+  roles:
+    - role: giftpilz0.homelab.misc
+    - role: giftpilz0.homelab.cfdyndns

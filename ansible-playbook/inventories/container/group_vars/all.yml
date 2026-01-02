@@ -14,11 +14,12 @@ packages_python_package_state: skip
 packages_flatpak_repo_state: skip
 
 packages_additional_package:
+  - bash-completion
   - epel-release
+  - git-core
   - mkpasswd
   - nfs-utils
   - nmap
-  - bash-completion
 
 ######################################
 ### giftpilz0.general.user

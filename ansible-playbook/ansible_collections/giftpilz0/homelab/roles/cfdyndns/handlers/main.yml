@@ -1,0 +1,11 @@
+---
+- name: "Cfdyndns: Reload systemd"
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: "Cfdyndns: Restart timer"
+  become: true
+  ansible.builtin.systemd:
+    name: cfdyndns.timer
+    state: restarted
