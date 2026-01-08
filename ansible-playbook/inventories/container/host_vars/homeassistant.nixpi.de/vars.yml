@@ -51,7 +51,7 @@ firewalld_rules_ports:
 podman_user: "container"
 
 mosquitto_version: "2"
-homeassistant_version: "2025.12"
+homeassistant_version: "2026.1"
 
 mosquitto_autoupdate: true
 homeassistant_autoupdate: true
