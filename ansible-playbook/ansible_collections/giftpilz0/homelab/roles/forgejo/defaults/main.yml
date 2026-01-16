@@ -3,7 +3,7 @@ podman_user: "{{ ansible_user }}"
 
 # Versions
 postgresql_version: "18-alpine"
-forgejo_version: "13"
+forgejo_version: "14"
 
 # Autoupdate
 forgejo_postgresql_autoupdate: true
