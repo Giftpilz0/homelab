@@ -37,7 +37,7 @@ firewalld_rules_services:
 podman_user: "container"
 
 postgresql_version: "18-alpine"
-forgejo_version: "13"
+forgejo_version: "14"
 
 forgejo_postgresql_autoupdate: true
 forgejo_autoupdate: true
