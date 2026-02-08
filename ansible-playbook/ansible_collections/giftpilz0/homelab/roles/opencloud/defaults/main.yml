@@ -2,7 +2,7 @@
 podman_user: "{{ ansible_user }}"
 
 # Versions
-opencloud_version: "4"
+opencloud_version: "5"
 
 # Autoupdate
 opencloud_autoupdate: true
