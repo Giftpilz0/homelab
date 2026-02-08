@@ -3,7 +3,7 @@ podman_user: "{{ ansible_user }}"
 
 # Versions
 bumper_version: "latest"
-bumper_commit: "b071ed1bcb2bd12ec1ba4b29f653f3f27509db02"
+bumper_commit: "86bf91be27bf23bddc1e122013713d1c8f7ca53a"
 
 # Autoupdate
 bumper_autoupdate: true
