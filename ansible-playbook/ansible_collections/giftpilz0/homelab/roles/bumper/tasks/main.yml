@@ -15,34 +15,6 @@
     force: true
     depth: 1
 
-- name: "Bumper: Copy custom productIotMap.json"
-  become: true
-  ansible.builtin.copy:
-    src: "files/productIotMap.json"
-    dest: "/tmp/bumper-build/bumper/web/plugins/api/pim/productIotMap.json"
-    mode: "0644"
-
-- name: "Bumper: Copy custom configNetAllResponse.json"
-  become: true
-  ansible.builtin.copy:
-    src: "files/configNetAllResponse.json"
-    dest: "/tmp/bumper-build/bumper/web/plugins/api/pim/configNetAllResponse.json"
-    mode: "0644"
-
-- name: "Bumper: Copy custom configGroupsResponse.json"
-  become: true
-  ansible.builtin.copy:
-    src: "files/configGroupsResponse.json"
-    dest: "/tmp/bumper-build/bumper/web/plugins/api/pim/configGroupsResponse.json"
-    mode: "0644"
-
-- name: "Bumper: Copy custom server.py"
-  become: true
-  ansible.builtin.copy:
-    src: "files/server.py"
-    dest: "/tmp/bumper-build/bumper/web/server.py"
-    mode: "0644"
-
 - name: "Bumper: Build custom podman image"
   become: true
   become_user: "{{ podman_user }}"
