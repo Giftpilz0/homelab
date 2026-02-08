@@ -13,7 +13,7 @@
       ],
       "matchStrings": ["opencloud_version:\\s*\"(?<currentValue>[^\"]+)\""],
       "datasourceTemplate": "docker",
-      "depNameTemplate": "opencloudeu/opencloud",
+      "depNameTemplate": "opencloudeu/opencloud-rolling",
       "versioningTemplate": "docker"
     },
     {
