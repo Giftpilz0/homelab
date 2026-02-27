@@ -6,6 +6,10 @@ PodName=homeassistant-pod
 
 Network={{ homeassistant_network_name }}
 
+{% if homeassistant_envoy_enabled and homeassistant_envoy_external %}
+PublishPort=8123:8123
+{% endif %}
+
 [Service]
 Restart=always
 

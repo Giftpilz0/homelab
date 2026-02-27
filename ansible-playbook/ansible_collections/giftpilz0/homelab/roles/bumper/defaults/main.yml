@@ -10,9 +10,20 @@ bumper_proxy_env: "{{ (['https_proxy=' ~ bumper_proxy_https] + (['http_proxy=' ~
 
 # Network
 bumper_network_enabled: true
-bumper_network_name: "bumper-internal"
+bumper_network_name: "pasta"
 bumper_network_driver: "bridge"
 bumper_network_internal: false
+
+# Envoy
+bumper_envoy_enabled: true
+bumper_envoy_version: "1.37"
+bumper_envoy_external: true
+
+# Service Discovery (future)
+# bumper_discovery_enabled: false
+# bumper_discovery_type: "etcd"
+# bumper_discovery_etcd_host: ""
+# bumper_discovery_etcd_port: 2379
 
 # Build
 bumper_version: "latest"
@@ -24,10 +35,10 @@ bumper_autoupdate: true
 # Environment
 bumper_environment_vars:
   TZ: Europe/Berlin
-  WEB_SERVER_HTTPS_PORT: 8443 # 443
-  WEB_SERVER_LISTEN_PORT: 8007
-  MQTT_LISTEN_PORT_TLS: 443 # 8883
-  MQTT_LISTEN_PORT: 1883
+  WEB_SERVER_HTTPS_PORT: 8443
+  WEB_SERVER_LISTEN_PORT: "{{ '0.0.0.0:8007' if not bumper_envoy_enabled else '127.0.0.1:8007' }}"
+  MQTT_LISTEN_PORT_TLS: 443
+  MQTT_LISTEN_PORT: "{{ '0.0.0.0:1883' if not bumper_envoy_enabled else '127.0.0.1:1883' }}"
   XMPP_LISTEN_PORT_TLS: 5223
   DEBUG_BUMPER_VERBOSE: 2
   DEBUG_BUMPER_LEVEL: "INFO"

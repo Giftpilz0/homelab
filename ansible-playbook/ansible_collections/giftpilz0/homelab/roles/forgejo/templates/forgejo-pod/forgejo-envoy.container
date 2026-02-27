@@ -1,0 +1,19 @@
+{% if forgejo_envoy_enabled %}
+[Unit]
+Description=Forgejo Envoy Proxy
+After=forgejo.service
+
+[Container]
+ContainerName=forgejo-envoy
+Image=docker.io/envoyproxy/envoy:v{{ forgejo_envoy_version }}
+
+Pod=forgejo.pod
+
+Volume=%h/.config/containers/systemd/forgejo-pod/config/envoy.yaml:/etc/envoy/envoy.yaml:ro
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target
+{% endif %}

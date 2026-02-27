@@ -6,6 +6,10 @@ PodName=vaultwarden-pod
 
 Network={{ vaultwarden_network_name }}
 
+{% if vaultwarden_envoy_enabled and vaultwarden_envoy_external %}
+PublishPort=80:80
+{% endif %}
+
 [Service]
 Restart=always
 

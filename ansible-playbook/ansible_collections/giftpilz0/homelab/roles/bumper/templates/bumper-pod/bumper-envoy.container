@@ -1,0 +1,19 @@
+{% if bumper_envoy_enabled %}
+[Unit]
+Description=Bumper Envoy Proxy
+After=bumper.service
+
+[Container]
+ContainerName=bumper-envoy
+Image=docker.io/envoyproxy/envoy:v{{ bumper_envoy_version }}
+
+Pod=bumper.pod
+
+Volume=%h/.config/containers/systemd/bumper-pod/config/envoy.yaml:/etc/envoy/envoy.yaml:ro
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target
+{% endif %}

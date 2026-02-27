@@ -6,10 +6,13 @@ PodName=bumper-pod
 
 Network={{ bumper_network_name }}
 
+{% if bumper_envoy_enabled and bumper_envoy_external %}
 PublishPort=443:443
 PublishPort=1883:1883
+PublishPort=5223:5223
 PublishPort=8443:8443
 PublishPort=8007:8007
+{% endif %}
 
 [Service]
 Restart=always

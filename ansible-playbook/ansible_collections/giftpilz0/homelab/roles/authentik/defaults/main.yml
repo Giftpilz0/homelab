@@ -14,6 +14,17 @@ authentik_network_name: "authentik-internal"
 authentik_network_driver: "bridge"
 authentik_network_internal: false
 
+# Envoy
+authentik_envoy_enabled: true
+authentik_envoy_version: "1.37"
+authentik_envoy_external: true
+
+# Service Discovery (future)
+# authentik_discovery_enabled: false
+# authentik_discovery_type: "etcd"  # etcd, consul, etc.
+# authentik_discovery_etcd_host: ""
+# authentik_discovery_etcd_port: 2379
+
 # Versions
 valkey_version: "9-alpine"
 postgresql_version: "18-alpine"
@@ -60,8 +71,8 @@ authentik_worker_environment_vars:
 
 authentik_server_environment_vars:
   <<: *authentik_base_env
-  COMPOSE_PORT_HTTP: "{{ authentik_listen_http | default('0.0.0.0:9000') }}"
-  COMPOSE_PORT_HTTPS: "{{ authentik_listen_https | default('0.0.0.0:9443') }}"
+  COMPOSE_PORT_HTTP: "{{ authentik_listen_http | default('0.0.0.0:9000' if not authentik_envoy_enabled else '127.0.0.1:9000') }}"
+  COMPOSE_PORT_HTTPS: "{{ authentik_listen_https | default('0.0.0.0:9443' if not authentik_envoy_enabled else '127.0.0.1:9443') }}"
 
 authentik_postgresql_environment_vars:
   POSTGRES_DB: "{{ authentik_db_name | default('authentik') }}"

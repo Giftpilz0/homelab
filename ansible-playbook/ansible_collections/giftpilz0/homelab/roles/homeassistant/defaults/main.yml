@@ -14,6 +14,17 @@ homeassistant_network_name: "homeassistant-internal"
 homeassistant_network_driver: "bridge"
 homeassistant_network_internal: false
 
+# Envoy
+homeassistant_envoy_enabled: true
+homeassistant_envoy_version: "1.37"
+homeassistant_envoy_external: true
+
+# Service Discovery (future)
+# homeassistant_discovery_enabled: false
+# homeassistant_discovery_type: "etcd"
+# homeassistant_discovery_etcd_host: ""
+# homeassistant_discovery_etcd_port: 2379
+
 # Versions
 homeassistant_version: "2026.2"
 

@@ -6,6 +6,10 @@ PodName=opencloud-pod
 
 Network={{ opencloud_network_name }}
 
+{% if opencloud_envoy_enabled and opencloud_envoy_external %}
+PublishPort=9200:9200
+{% endif %}
+
 [Service]
 Restart=always
 

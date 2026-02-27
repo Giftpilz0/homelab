@@ -6,6 +6,11 @@ PodName=authentik-pod
 
 Network={{ authentik_network_name }}
 
+{% if authentik_envoy_enabled and authentik_envoy_external %}
+PublishPort=9000:9000
+PublishPort=9443:9443
+{% endif %}
+
 [Service]
 Restart=always
 

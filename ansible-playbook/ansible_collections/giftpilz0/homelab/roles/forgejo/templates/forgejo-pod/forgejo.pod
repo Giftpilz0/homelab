@@ -6,6 +6,11 @@ PodName=forgejo-pod
 
 Network={{ forgejo_network_name }}
 
+{% if forgejo_envoy_enabled and forgejo_envoy_external %}
+PublishPort=3000:3000
+PublishPort=2222:22
+{% endif %}
+
 [Service]
 Restart=always
 

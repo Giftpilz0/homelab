@@ -1,0 +1,49 @@
+static_resources:
+  listeners:
+    - name: listener_mqtt
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 1883
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.mqtt_proxy
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.mqtt_proxy.v3.MqttProxy
+                stat_prefix: mqtt
+                upstream:
+                  cluster: mosquitto
+
+    - name: listener_mqtts
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 8883
+      filter_chains:
+        - tls_context:
+            common_tls_context:
+              tls_params:
+                tls_minimum_protocol_version: TLSv1_2
+              alpn_protocols:
+                - mqtt
+          filters:
+            - name: envoy.filters.network.mqtt_proxy
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.mqtt_proxy.v3.MqttProxy
+                stat_prefix: mqtts
+                upstream:
+                  cluster: mosquitto
+
+  clusters:
+    - name: mosquitto
+      type: STATIC
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: mosquitto
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: 127.0.0.1
+                      port_value: 1883

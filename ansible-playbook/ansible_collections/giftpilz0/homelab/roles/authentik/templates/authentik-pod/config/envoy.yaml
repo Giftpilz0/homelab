@@ -1,0 +1,113 @@
+static_resources:
+  listeners:
+    - name: listener_http
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 9000
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: ingress_http
+                access_log:
+                  - name: envoy.access_loggers.stdout
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.access_loggers.stdout.v3.StdoutAccessLog
+                      log_format:
+                        text_format: "[%START_TIME%] \"%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%\" %RESPONSE_CODE% %RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %REQ(X-FORWARDED-FOR)% %REQ(USER-AGENT)% %REQ(X-REQUEST-ID)% %RESPONSE_CODE_DETAILS% %CONNECTION_TERMINATION_DETAILS% %UPSTREAM_CLUSTER% %UPSTREAM_HOST%\n"
+                route_config:
+                  name: local_route
+                  virtual_hosts:
+                    - name: local_service
+                      domains: ["*"]
+                      routes:
+                        - match:
+                            prefix: "/"
+                          route:
+                            cluster: authentik_server
+                            prefix_rewrite: "/"
+                            retry_policy:
+                              retry_on: "5xx,reset,connect-failure"
+                              num_retries: 3
+                            rate_limits:
+                              - stage: 0
+                                actions:
+                                  - request_headers:
+                                      header_name: "x-envoy-external-address"
+                                      descriptor_key: "remote_address"
+                http_filters:
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+
+    - name: listener_https
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 9443
+      filter_chains:
+        - tls_context:
+            common_tls_context:
+              tls_params:
+                tls_minimum_protocol_version: TLSv1_2
+                tls_maximum_protocol_version: TLSv1_3
+              alpn_protocols:
+                - h2
+                - http/1.1
+          filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: ingress_https
+                access_log:
+                  - name: envoy.access_loggers.stdout
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.access_loggers.stdout.v3.StdoutAccessLog
+                      log_format:
+                        text_format: "[%START_TIME%] \"%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%\" %RESPONSE_CODE% %RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %REQ(X-FORWARDED-FOR)% %REQ(USER-AGENT)% %REQ(X-REQUEST-ID)% %RESPONSE_CODE_DETAILS% %CONNECTION_TERMINATION_DETAILS% %UPSTREAM_CLUSTER% %UPSTREAM_HOST%\n"
+                route_config:
+                  name: local_route_https
+                  virtual_hosts:
+                    - name: local_service_https
+                      domains: ["*"]
+                      routes:
+                        - match:
+                            prefix: "/"
+                          route:
+                            cluster: authentik_server
+                            prefix_rewrite: "/"
+                            retry_policy:
+                              retry_on: "5xx,reset,connect-failure"
+                              num_retries: 3
+                            rate_limits:
+                              - stage: 0
+                                actions:
+                                  - request_headers:
+                                      header_name: "x-envoy-external-address"
+                                      descriptor_key: "remote_address"
+                http_filters:
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+
+  clusters:
+    - name: authentik_server
+      type: STATIC
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: authentik_server
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: 127.0.0.1
+                      port_value: 9000
+
+# statsd endpoint (optional, for metrics)
+# stats_config:
+#   stats_tags:
+#     - tag_name: envoy.cluster_name
+#       fixed_value: authentik_cluster

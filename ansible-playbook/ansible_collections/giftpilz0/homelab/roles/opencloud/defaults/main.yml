@@ -14,6 +14,17 @@ opencloud_network_name: "opencloud-internal"
 opencloud_network_driver: "bridge"
 opencloud_network_internal: false
 
+# Envoy
+opencloud_envoy_enabled: true
+opencloud_envoy_version: "1.37"
+opencloud_envoy_external: true
+
+# Service Discovery (future)
+# opencloud_discovery_enabled: false
+# opencloud_discovery_type: "etcd"
+# opencloud_discovery_etcd_host: ""
+# opencloud_discovery_etcd_port: 2379
+
 # Versions
 opencloud_version: "5"
 
@@ -30,7 +41,7 @@ opencloud_environment_vars:
   OPEN_CLOUD_LOG_LEVEL: "{{ opencloud_log_level }}"
   OC_URL: "{{ opencloud_domain }}"
   OC_CORS_ALLOW_ORIGINS: "{{ opencloud_domain }}"
-  PROXY_HTTP_ADDR: 0.0.0.0:9200
+  PROXY_HTTP_ADDR: "{{ '0.0.0.0:9200' if not opencloud_envoy_enabled else '127.0.0.1:9200' }}"
   PROXY_TLS: false
   FRONTEND_ARCHIVER_MAX_SIZE: 4294967296
   THUMBNAILS_MAX_CONCURRENT_REQUESTS: 64

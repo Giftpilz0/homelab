@@ -1,0 +1,19 @@
+{% if authentik_envoy_enabled %}
+[Unit]
+Description=Authentik Envoy Proxy
+After=authentik-server.service
+
+[Container]
+ContainerName=authentik-envoy
+Image=docker.io/envoyproxy/envoy:v{{ authentik_envoy_version }}
+
+Pod=authentik.pod
+
+Volume=%h/.config/containers/systemd/authentik-pod/config/envoy.yaml:/etc/envoy/envoy.yaml:ro
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target
+{% endif %}

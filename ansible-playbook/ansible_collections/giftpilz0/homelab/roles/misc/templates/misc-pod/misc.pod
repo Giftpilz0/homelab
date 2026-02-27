@@ -6,7 +6,9 @@ PodName=misc-pod
 
 Network={{ misc_network_name }}
 
+{% if misc_envoy_enabled and misc_envoy_external %}
 PublishPort=8080:8080
+{% endif %}
 
 [Service]
 Restart=always

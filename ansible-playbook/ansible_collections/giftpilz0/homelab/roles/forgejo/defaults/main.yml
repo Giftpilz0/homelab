@@ -14,6 +14,17 @@ forgejo_network_name: "forgejo-internal"
 forgejo_network_driver: "bridge"
 forgejo_network_internal: false
 
+# Envoy
+forgejo_envoy_enabled: true
+forgejo_envoy_version: "1.37"
+forgejo_envoy_external: true
+
+# Service Discovery (future)
+# forgejo_discovery_enabled: false
+# forgejo_discovery_type: "etcd"
+# forgejo_discovery_etcd_host: ""
+# forgejo_discovery_etcd_port: 2379
+
 # Versions
 postgresql_version: "18-alpine"
 forgejo_version: "14"
@@ -42,8 +53,9 @@ forgejo_environment_vars:
   FORGEJO__server__DOMAIN: "{{ forgejo_domain }}"
   FORGEJO__server__ROOT_URL: "https://{{ forgejo_domain }}/"
   FORGEJO__server__PROTOCOL: "http"
-  FORGEJO__server__HTTP_PORT: "3000"
-  FORGEJO__server__SSH_PORT: "2222"
+  FORGEJO__server__HTTP_PORT: "{{ '0.0.0.0:3000' if not forgejo_envoy_enabled else '127.0.0.1:3000' }}"
+  FORGEJO__server__SSH_PORT: "{{ '0.0.0.0:2222' if not forgejo_envoy_enabled else '127.0.0.1:2222' }}"
+
   FORGEJO__server__OFFLINE_MODE: false
 
   # Log section

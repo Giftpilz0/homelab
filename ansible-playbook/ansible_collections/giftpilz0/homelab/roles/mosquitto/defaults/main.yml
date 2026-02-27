@@ -14,6 +14,17 @@ mosquitto_network_name: "mosquitto-internal"
 mosquitto_network_driver: "bridge"
 mosquitto_network_internal: false
 
+# Envoy
+mosquitto_envoy_enabled: true
+mosquitto_envoy_version: "1.37"
+mosquitto_envoy_external: true
+
+# Service Discovery (future)
+# mosquitto_discovery_enabled: false
+# mosquitto_discovery_type: "etcd"
+# mosquitto_discovery_etcd_host: ""
+# mosquitto_discovery_etcd_port: 2379
+
 # Versions
 mosquitto_version: "2"
 

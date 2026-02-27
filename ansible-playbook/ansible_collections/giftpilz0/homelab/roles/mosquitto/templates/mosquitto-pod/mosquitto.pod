@@ -6,6 +6,12 @@ PodName=mosquitto-pod
 
 Network={{ mosquitto_network_name }}
 
+{% if mosquitto_envoy_enabled and mosquitto_envoy_external %}
+PublishPort=1883:1883
+PublishPort=8883:8883
+PublishPort=9001:9001
+{% endif %}
+
 [Service]
 Restart=always
 
