@@ -1,0 +1,7 @@
+[Unit]
+Description=Traefik Internal Network
+
+[Network]
+NetworkName={{ traefik_network_name }}
+Driver={{ traefik_network_driver }}
+Internal={{ traefik_network_internal | bool | lower }}

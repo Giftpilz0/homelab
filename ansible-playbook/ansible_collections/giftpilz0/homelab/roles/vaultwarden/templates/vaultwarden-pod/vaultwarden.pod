@@ -1,0 +1,13 @@
+[Unit]
+Description=Vaultwarden Pod
+
+[Pod]
+PodName=vaultwarden-pod
+
+Network={{ vaultwarden_network_name }}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

@@ -1,7 +1,20 @@
 ---
 podman_user: "{{ ansible_user }}"
 
-# Versions
+# Proxy
+bumper_proxy_enabled: false
+bumper_proxy_http: ""
+bumper_proxy_https: ""
+bumper_proxy_no_proxy: ""
+bumper_proxy_env: "{{ (['https_proxy=' ~ bumper_proxy_https] + (['http_proxy=' ~ bumper_proxy_http] if bumper_proxy_http else []) + (['no_proxy=' ~ bumper_proxy_no_proxy] if bumper_proxy_no_proxy else [])) if bumper_proxy_enabled else [] }}"
+
+# Network
+bumper_network_enabled: true
+bumper_network_name: "bumper-internal"
+bumper_network_driver: "bridge"
+bumper_network_internal: false
+
+# Build
 bumper_version: "latest"
 bumper_commit: "86bf91be27bf23bddc1e122013713d1c8f7ca53a"
 

@@ -1,0 +1,5 @@
+[containers]
+http_proxy = false
+
+[engine]
+{{ "env=[" ~ opencloud_proxy_env | join(",") ~ "]" if opencloud_proxy_enabled and opencloud_proxy_env else "env=[]" }}

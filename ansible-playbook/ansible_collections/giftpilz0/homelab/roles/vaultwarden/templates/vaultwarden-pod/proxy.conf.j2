@@ -1,0 +1,5 @@
+[containers]
+http_proxy = false
+
+[engine]
+{{ "env=[" ~ vaultwarden_proxy_env | join(",") ~ "]" if vaultwarden_proxy_enabled and vaultwarden_proxy_env else "env=[]" }}

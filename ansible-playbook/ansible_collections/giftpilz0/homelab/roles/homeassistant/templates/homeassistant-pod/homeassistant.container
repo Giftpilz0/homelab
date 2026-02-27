@@ -1,0 +1,27 @@
+[Unit]
+Description=Homeassistant Container
+
+[Container]
+ContainerName=homeassistant
+Image=ghcr.io/home-assistant/home-assistant:{{ homeassistant_version }}
+
+Pod=homeassistant.pod
+
+{% if homeassistant_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+{% if homeassistant_environment_vars is defined %}
+{% for env_name, env_value in homeassistant_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
+
+{% if homeassistant_device is defined %}
+Volume={{ homeassistant_device }}
+Annotation=run.oci.keep_original_groups=1
+SecurityLabelType=spc_t
+{% endif %}
+
+Volume=%h/.config/containers/systemd/homeassistant-pod/config/8n0t5d.py:/usr/local/lib/python3.13/site-packages/deebot_client/hardware/8n0t5d.py:Z
+Volume=homeassistant-data.volume:/config

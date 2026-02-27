@@ -1,0 +1,5 @@
+[containers]
+http_proxy = false
+
+[engine]
+{{ "env=[" ~ traefik_proxy_env | join(",") ~ "]" if traefik_proxy_enabled and traefik_proxy_env else "env=[]" }}

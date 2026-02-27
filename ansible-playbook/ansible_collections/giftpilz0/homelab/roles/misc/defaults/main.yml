@@ -1,7 +1,20 @@
 ---
 podman_user: "{{ ansible_user }}"
 
-# Versions
+# Proxy
+misc_proxy_enabled: false
+misc_proxy_http: ""
+misc_proxy_https: ""
+misc_proxy_no_proxy: ""
+misc_proxy_env: "{{ (['https_proxy=' ~ misc_proxy_https] + (['http_proxy=' ~ misc_proxy_http] if misc_proxy_http else []) + (['no_proxy=' ~ misc_proxy_no_proxy] if misc_proxy_no_proxy else [])) if misc_proxy_enabled else [] }}"
+
+# Network
+misc_network_enabled: true
+misc_network_name: "misc-internal"
+misc_network_driver: "bridge"
+misc_network_internal: false
+
+# Build
 misc_version: "latest"
 misc_commit: "db16ab7ca40f6e1e98e6e7a3947fb9e2aa04f527"
 

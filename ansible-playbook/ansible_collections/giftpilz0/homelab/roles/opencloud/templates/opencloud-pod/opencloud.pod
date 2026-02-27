@@ -1,0 +1,13 @@
+[Unit]
+Description=OpenCloud Pod
+
+[Pod]
+PodName=opencloud-pod
+
+Network={{ opencloud_network_name }}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

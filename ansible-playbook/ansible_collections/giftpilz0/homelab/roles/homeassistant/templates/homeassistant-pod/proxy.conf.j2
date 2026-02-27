@@ -1,0 +1,5 @@
+[containers]
+http_proxy = false
+
+[engine]
+{{ "env=[" ~ homeassistant_proxy_env | join(",") ~ "]" if homeassistant_proxy_enabled and homeassistant_proxy_env else "env=[]" }}

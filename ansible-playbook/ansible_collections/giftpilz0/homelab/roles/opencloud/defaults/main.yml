@@ -1,6 +1,19 @@
 ---
 podman_user: "{{ ansible_user }}"
 
+# Proxy
+opencloud_proxy_enabled: false
+opencloud_proxy_http: ""
+opencloud_proxy_https: ""
+opencloud_proxy_no_proxy: ""
+opencloud_proxy_env: "{{ (['https_proxy=' ~ opencloud_proxy_https] + (['http_proxy=' ~ opencloud_proxy_http] if opencloud_proxy_http else []) + (['no_proxy=' ~ opencloud_proxy_no_proxy] if opencloud_proxy_no_proxy else [])) if opencloud_proxy_enabled else [] }}"
+
+# Network
+opencloud_network_enabled: true
+opencloud_network_name: "opencloud-internal"
+opencloud_network_driver: "bridge"
+opencloud_network_internal: false
+
 # Versions
 opencloud_version: "5"
 

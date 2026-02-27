@@ -1,0 +1,13 @@
+[Unit]
+Description=Homeassistant Pod
+
+[Pod]
+PodName=homeassistant-pod
+
+Network={{ homeassistant_network_name }}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

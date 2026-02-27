@@ -1,10 +1,23 @@
 ---
 podman_user: "{{ ansible_user }}"
 
+# Proxy
+authentik_proxy_enabled: false
+authentik_proxy_http: ""
+authentik_proxy_https: ""
+authentik_proxy_no_proxy: ""
+authentik_proxy_env: "{{ (['https_proxy=' ~ authentik_proxy_https] + (['http_proxy=' ~ authentik_proxy_http] if authentik_proxy_http else []) + (['no_proxy=' ~ authentik_proxy_no_proxy] if authentik_proxy_no_proxy else [])) if authentik_proxy_enabled else [] }}"
+
+# Network
+authentik_network_enabled: true
+authentik_network_name: "authentik-internal"
+authentik_network_driver: "bridge"
+authentik_network_internal: false
+
 # Versions
 valkey_version: "9-alpine"
 postgresql_version: "18-alpine"
-authentik_version: "2025.12"
+authentik_version: "2026.02"
 
 # Autoupdate
 authentik_cache_autoupdate: true

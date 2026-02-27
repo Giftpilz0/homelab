@@ -1,0 +1,7 @@
+[Unit]
+Description=Misc Internal Network
+
+[Network]
+NetworkName={{ misc_network_name }}
+Driver={{ misc_network_driver }}
+Internal={{ misc_network_internal | bool | lower }}

@@ -1,0 +1,5 @@
+[containers]
+http_proxy = false
+
+[engine]
+{{ "env=[" ~ mosquitto_proxy_env | join(",") ~ "]" if mosquitto_proxy_enabled and mosquitto_proxy_env else "env=[]" }}

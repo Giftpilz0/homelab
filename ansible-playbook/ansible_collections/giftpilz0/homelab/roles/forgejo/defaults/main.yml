@@ -1,6 +1,19 @@
 ---
 podman_user: "{{ ansible_user }}"
 
+# Proxy
+forgejo_proxy_enabled: false
+forgejo_proxy_http: ""
+forgejo_proxy_https: ""
+forgejo_proxy_no_proxy: ""
+forgejo_proxy_env: "{{ (['https_proxy=' ~ forgejo_proxy_https] + (['http_proxy=' ~ forgejo_proxy_http] if forgejo_proxy_http else []) + (['no_proxy=' ~ forgejo_proxy_no_proxy] if forgejo_proxy_no_proxy else [])) if forgejo_proxy_enabled else [] }}"
+
+# Network
+forgejo_network_enabled: true
+forgejo_network_name: "forgejo-internal"
+forgejo_network_driver: "bridge"
+forgejo_network_internal: false
+
 # Versions
 postgresql_version: "18-alpine"
 forgejo_version: "14"

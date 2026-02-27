@@ -1,6 +1,19 @@
 ---
 podman_user: "{{ ansible_user }}"
 
+# Proxy
+mosquitto_proxy_enabled: false
+mosquitto_proxy_http: ""
+mosquitto_proxy_https: ""
+mosquitto_proxy_no_proxy: ""
+mosquitto_proxy_env: "{{ (['https_proxy=' ~ mosquitto_proxy_https] + (['http_proxy=' ~ mosquitto_proxy_http] if mosquitto_proxy_http else []) + (['no_proxy=' ~ mosquitto_proxy_no_proxy] if mosquitto_proxy_no_proxy else [])) if mosquitto_proxy_enabled else [] }}"
+
+# Network
+mosquitto_network_enabled: true
+mosquitto_network_name: "mosquitto-internal"
+mosquitto_network_driver: "bridge"
+mosquitto_network_internal: false
+
 # Versions
 mosquitto_version: "2"
 

@@ -1,4 +1,30 @@
 ---
+- name: "Misc: Create Podman config directory"
+  become: true
+  ansible.builtin.file:
+    path: /etc/containers/containers.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "Misc: Deploy podman proxy configuration"
+  become: true
+  ansible.builtin.template:
+    src: "misc-pod/proxy.conf.j2"
+    dest: "/etc/containers/containers.conf.d/proxy.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  when: misc_proxy_enabled
+
+- name: "Misc: Delete quadlet directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd/misc-pod"
+    state: absent
+
 - name: "Misc: Create build directory"
   become: true
   ansible.builtin.file:
@@ -27,6 +53,11 @@
       format: oci
       cache: false
       force_rm: true
+    force: true
+    env:
+      https_proxy: "{{ misc_proxy_https if misc_proxy_enabled else '' }}"
+      http_proxy: "{{ misc_proxy_http if misc_proxy_enabled else '' }}"
+      no_proxy: "{{ misc_proxy_no_proxy if misc_proxy_enabled else '' }}"
   register: misc_image_build
 
 - name: "Misc: Clean up build directory"
@@ -50,12 +81,6 @@
     sysctl_file: /etc/sysctl.d/99-rootless-ports.conf
     reload: true
 
-- name: "Misc: Create podman network"
-  become: true
-  become_user: "{{ podman_user }}"
-  containers.podman.podman_network:
-    name: quadlet
-
 - name: "Misc: Create quadlet directory"
   become: true
   become_user: "{{ podman_user }}"
@@ -68,27 +93,27 @@
 
 - name: "Misc: Create directory structure"
   become: true
+  become_user: "{{ podman_user }}"
   ansible.builtin.file:
-    path: "/home/{{ podman_user }}/.config/containers/systemd/{{ item.path }}"
+    path: "/home/{{ podman_user }}/.config/containers/systemd/misc-pod/{{ item.path }}"
     state: directory
     owner: "{{ podman_user }}"
     group: "{{ podman_user }}"
     mode: "{{ item.mode }}"
-  with_community.general.filetree: "templates/"
+  with_community.general.filetree: "templates/misc-pod/"
   when: item.state == 'directory'
 
 - name: "Misc: Template quadlet files"
   become: true
+  become_user: "{{ podman_user }}"
   ansible.builtin.template:
     src: "{{ item.src }}"
-    dest: "/home/{{ podman_user }}/.config/containers/systemd/{{ item.path }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/misc-pod/{{ item.path }}"
     owner: "{{ podman_user }}"
     group: "{{ podman_user }}"
     mode: "{{ item.mode }}"
-  with_community.general.filetree: "templates/"
+  with_community.general.filetree: "templates/misc-pod/"
   when: item.state == 'file'
-  notify:
-    - "Misc: Restart pod service"
 
 - name: "Misc: systemd daemon reload"
   become: true
