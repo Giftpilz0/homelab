@@ -1,0 +1,12 @@
+[Unit]
+Description=SPIRE Server Pod
+
+[Pod]
+PodName=spire-pod
+PublishPort=8081:8081
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

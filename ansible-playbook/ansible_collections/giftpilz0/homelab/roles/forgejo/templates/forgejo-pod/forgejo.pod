@@ -1,0 +1,19 @@
+[Unit]
+Description=Forgejo Pod
+
+[Pod]
+PodName=forgejo-pod
+
+Network={{ forgejo_network_name }}
+
+{% if forgejo_port_map_enabled %}
+{% for port_mapping in forgejo_port_map %}
+PublishPort={{ port_mapping }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

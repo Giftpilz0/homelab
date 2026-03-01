@@ -1,0 +1,19 @@
+{% if opencloud_spire_enabled | default(false) %}
+[Unit]
+Description=OpenCloud SPIRE Agent
+After=opencloud.service
+
+[Container]
+ContainerName=opencloud-spire-agent
+Image=ghcr.io/spiffe/spire-agent:{{ opencloud_spire_agent_version }}
+
+Pod=opencloud.pod
+
+Volume=%h/.config/containers/systemd/spire-pod/config/bundle.crt:/run/spire/agent/bootstrap.crt:Z
+Volume=%h/.config/containers/systemd/opencloud-pod/config/spire-agent.conf:/etc/spire/agent/agent.conf:Z
+Volume=%h/.config/containers/systemd/opencloud-pod/data:/run/spire/data:Z
+Volume=%h/.config/containers/systemd/opencloud-pod/token:/run/spire/agent/token:Z
+Volume=opencloud-spire-sockets:/run/spire/agent:Z
+
+Exec=/opt/spire/bin/spire-agent run -config /etc/spire/agent/agent.conf -joinToken $(cat /run/spire/agent/token)
+{% endif %}

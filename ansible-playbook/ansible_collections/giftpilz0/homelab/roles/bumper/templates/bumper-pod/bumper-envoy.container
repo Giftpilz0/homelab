@@ -1,0 +1,18 @@
+{% if bumper_envoy_enabled %}
+[Unit]
+Description=Bumper Envoy Proxy
+After=bumper.service
+
+[Container]
+ContainerName=bumper-envoy
+Image=docker.io/envoyproxy/envoy:v{{ bumper_envoy_version }}
+
+Pod=bumper.pod
+
+Volume=%h/.config/containers/systemd/bumper-pod/config/envoy.yaml:/etc/envoy/envoy.yaml:Z
+Volume=%h/.config/containers/systemd/bumper-pod/config/bumper.crt:/etc/envoy/certs/bumper.crt:Z
+Volume=%h/.config/containers/systemd/bumper-pod/config/bumper.key:/etc/envoy/certs/bumper.key:Z
+{% if bumper_spire_enabled %}
+Volume=bumper-spire-sockets:/run/spire/agent:Z
+{% endif %}
+{% endif %}

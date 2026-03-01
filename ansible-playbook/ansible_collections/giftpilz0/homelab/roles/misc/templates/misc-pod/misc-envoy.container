@@ -1,0 +1,16 @@
+{% if misc_envoy_enabled %}
+[Unit]
+Description=Misc Envoy Proxy
+After=misc.service
+
+[Container]
+ContainerName=misc-envoy
+Image=docker.io/envoyproxy/envoy:v{{ misc_envoy_version }}
+
+Pod=misc.pod
+
+Volume=%h/.config/containers/systemd/misc-pod/config/envoy.yaml:/etc/envoy/envoy.yaml:Z
+{% if misc_spire_enabled %}
+Volume=misc-spire-sockets:/run/spire/agent:Z
+{% endif %}
+{% endif %}

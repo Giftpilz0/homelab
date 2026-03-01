@@ -1,0 +1,7 @@
+[Unit]
+Description=Homeassistant Internal Network
+
+[Network]
+NetworkName={{ homeassistant_network_name }}
+Driver={{ homeassistant_network_driver }}
+Internal={{ homeassistant_network_internal | bool | lower }}

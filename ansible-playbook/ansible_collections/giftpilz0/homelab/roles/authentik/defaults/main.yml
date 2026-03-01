@@ -1,10 +1,37 @@
 ---
 podman_user: "{{ ansible_user }}"
 
+# Proxy
+authentik_proxy_enabled: false
+authentik_proxy_http: ""
+authentik_proxy_https: ""
+authentik_proxy_no_proxy: ""
+authentik_proxy_env: "{{ (['https_proxy=' ~ authentik_proxy_https] + (['http_proxy=' ~ authentik_proxy_http] if authentik_proxy_http else []) + (['no_proxy=' ~ authentik_proxy_no_proxy] if authentik_proxy_no_proxy else [])) if authentik_proxy_enabled else [] }}"
+
+# Network
+authentik_network_enabled: true
+authentik_network_name: "authentik-internal"
+authentik_network_driver: "bridge"
+authentik_network_internal: false
+
+# Envoy
+authentik_envoy_enabled: true
+authentik_envoy_version: "1.37"
+
+# SPIRE - experimental (not yet implemented)
+authentik_spire_enabled: false
+authentik_spire_agent_version: "1.14.1"
+
+# Port mapping: host_port:container_port
+authentik_port_map_enabled: true
+authentik_port_map:
+  - "9000:9000"
+  - "9443:9443"
+
 # Versions
 valkey_version: "9-alpine"
 postgresql_version: "18-alpine"
-authentik_version: "2025.12"
+authentik_version: "2026.02"
 
 # Autoupdate
 authentik_cache_autoupdate: true
@@ -47,8 +74,8 @@ authentik_worker_environment_vars:
 
 authentik_server_environment_vars:
   <<: *authentik_base_env
-  COMPOSE_PORT_HTTP: "{{ authentik_listen_http | default('0.0.0.0:9000') }}"
-  COMPOSE_PORT_HTTPS: "{{ authentik_listen_https | default('0.0.0.0:9443') }}"
+  COMPOSE_PORT_HTTP: "{{ authentik_listen_http | default('0.0.0.0:9000' if not authentik_envoy_enabled else '127.0.0.1:9000') }}"
+  COMPOSE_PORT_HTTPS: "{{ authentik_listen_https | default('0.0.0.0:9443' if not authentik_envoy_enabled else '127.0.0.1:9443') }}"
 
 authentik_postgresql_environment_vars:
   POSTGRES_DB: "{{ authentik_db_name | default('authentik') }}"

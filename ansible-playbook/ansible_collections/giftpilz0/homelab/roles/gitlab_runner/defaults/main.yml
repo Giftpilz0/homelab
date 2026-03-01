@@ -1,0 +1,27 @@
+---
+podman_user: "{{ ansible_user }}"
+
+# Proxy
+gitlab_runner_proxy_enabled: false
+gitlab_runner_proxy_http: ""
+gitlab_runner_proxy_https: ""
+gitlab_runner_proxy_no_proxy: ""
+gitlab_runner_proxy_env: "{{ (['https_proxy=' ~ gitlab_runner_proxy_https] + (['http_proxy=' ~ gitlab_runner_proxy_http] if gitlab_runner_proxy_http else []) + (['no_proxy=' ~ gitlab_runner_proxy_no_proxy] if gitlab_runner_proxy_no_proxy else [])) if gitlab_runner_proxy_enabled else [] }}"
+
+# Network
+gitlab_runner_network_enabled: true
+gitlab_runner_network_name: "gitlab-runner-internal"
+gitlab_runner_network_driver: "bridge"
+gitlab_runner_network_internal: false
+
+# Versions
+gitlab_runner_version: "2"
+
+# Autoupdate
+gitlab_runner_autoupdate: true
+
+# Environment
+gitlab_runner_environment_vars: {}
+
+# Config
+gitlab_runner_pwfile_users: {}

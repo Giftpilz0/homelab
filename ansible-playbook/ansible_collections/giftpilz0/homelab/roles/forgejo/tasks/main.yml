@@ -1,9 +1,34 @@
 ---
+- name: "Forgejo: Create Podman config directory"
+  become: true
+  ansible.builtin.file:
+    path: /etc/containers/containers.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "Forgejo: Deploy podman proxy configuration"
+  become: true
+  ansible.builtin.template:
+    src: "forgejo-pod/proxy.conf.j2"
+    dest: "/etc/containers/containers.conf.d/proxy.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  when: forgejo_proxy_enabled
+
+- name: "Forgejo: Delete quadlet directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd/forgejo-pod"
+    state: absent
+
 - name: "Forgejo: Enable lingering"
   become: true
   ansible.builtin.command: loginctl enable-linger {{ podman_user }}
-  register: podman_lingering
-  changed_when: podman_lingering.rc != 0
+  changed_when: true
 
 - name: "Forgejo: Configure unprivileged port range for rootless containers"
   become: true
@@ -13,12 +38,6 @@
     sysctl_set: true
     sysctl_file: /etc/sysctl.d/99-rootless-ports.conf
     reload: true
-
-- name: "Forgejo: Create podman network"
-  become: true
-  become_user: "{{ podman_user }}"
-  containers.podman.podman_network:
-    name: quadlet
 
 - name: "Forgejo: Create quadlet directory"
   become: true
@@ -30,29 +49,59 @@
     group: "{{ podman_user }}"
     mode: "0755"
 
+- name: "Forgejo: Create SPIRE token directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd/forgejo-pod/token"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0700"
+  when: forgejo_spire_enabled
+
 - name: "Forgejo: Create directory structure"
   become: true
+  become_user: "{{ podman_user }}"
   ansible.builtin.file:
-    path: "/home/{{ podman_user }}/.config/containers/systemd/{{ item.path }}"
+    path: "/home/{{ podman_user }}/.config/containers/systemd/forgejo-pod/{{ item.path }}"
     state: directory
     owner: "{{ podman_user }}"
     group: "{{ podman_user }}"
     mode: "{{ item.mode }}"
-  with_community.general.filetree: "templates/"
+  with_community.general.filetree: "templates/forgejo-pod/"
   when: item.state == 'directory'
 
 - name: "Forgejo: Template quadlet files"
   become: true
+  become_user: "{{ podman_user }}"
   ansible.builtin.template:
     src: "{{ item.src }}"
-    dest: "/home/{{ podman_user }}/.config/containers/systemd/{{ item.path }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/forgejo-pod/{{ item.path }}"
     owner: "{{ podman_user }}"
     group: "{{ podman_user }}"
     mode: "{{ item.mode }}"
-  with_community.general.filetree: "templates/"
+  with_community.general.filetree: "templates/forgejo-pod/"
   when: item.state == 'file'
-  notify:
-    - "Forgejo: Restart pod service"
+
+- name: "Forgejo: Copy SPIRE join token"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    src: "{{ podman_user }}/.config/containers/systemd/spire-pod/tokens/forgejo.token"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/forgejo-pod/token"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0600"
+    remote_src: true
+  when: forgejo_spire_enabled
+  failed_when: false
+
+- name: "Forgejo: Create SPIRE socket volume"
+  containers.podman.podman_volume:
+    name: forgejo-spire-sockets
+    state: present
+  when: forgejo_spire_enabled
 
 - name: "Forgejo: systemd daemon reload"
   become: true

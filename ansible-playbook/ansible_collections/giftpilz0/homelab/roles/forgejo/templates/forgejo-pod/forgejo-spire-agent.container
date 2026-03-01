@@ -1,0 +1,19 @@
+{% if forgejo_spire_enabled %}
+[Unit]
+Description=Forgejo SPIRE Agent
+After=forgejo.service
+
+[Container]
+ContainerName=forgejo-spire-agent
+Image=ghcr.io/spiffe/spire-agent:{{ forgejo_spire_agent_version }}
+
+Pod=forgejo.pod
+
+Volume=%h/.config/containers/systemd/spire-pod/config/bundle.crt:/run/spire/agent/bootstrap.crt:Z
+Volume=%h/.config/containers/systemd/forgejo-pod/config/spire-agent.conf:/etc/spire/agent/agent.conf:Z
+Volume=%h/.config/containers/systemd/forgejo-pod/data:/run/spire/data:Z
+Volume=%h/.config/containers/systemd/forgejo-pod/token:/run/spire/agent/token:Z
+Volume=forgejo-spire-sockets:/run/spire/agent:Z
+
+Exec=/opt/spire/bin/spire-agent run -config /etc/spire/agent/agent.conf -joinToken $(cat /run/spire/agent/token)
+{% endif %}

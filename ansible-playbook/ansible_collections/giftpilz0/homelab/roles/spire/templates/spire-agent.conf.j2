@@ -1,0 +1,21 @@
+agent {
+	data_dir = "/run/spire/data"
+	log_level = "{{ spire_agent_log_level | default('DEBUG') }}"
+	server_address = "spire-server"
+	server_port = "{{ spire_server_port | default(8081) }}"
+	socket_path = "/run/spire/agent/agent.sock"
+	trust_bundle_path = "/run/spire/agent/bootstrap.crt"
+	trust_domain = "{{ spire_trust_domain | default('homelab.local') }}"
+}
+
+plugins {
+	KeyManager "disk" {
+		plugin_data {
+			directory = "/run/spire/data"
+		}
+	}
+	WorkloadAttestor "unix" {
+		plugin_data {
+		}
+	}
+}

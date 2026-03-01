@@ -1,0 +1,7 @@
+[Unit]
+Description=Forgejo Internal Network
+
+[Network]
+NetworkName={{ forgejo_network_name }}
+Driver={{ forgejo_network_driver }}
+Internal={{ forgejo_network_internal | bool | lower }}

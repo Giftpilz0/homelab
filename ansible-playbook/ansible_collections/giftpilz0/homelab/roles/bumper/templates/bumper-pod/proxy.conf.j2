@@ -1,0 +1,5 @@
+[containers]
+http_proxy = false
+
+[engine]
+{{ "env=[" ~ bumper_proxy_env | join(",") ~ "]" if bumper_proxy_enabled and bumper_proxy_env else "env=[]" }}

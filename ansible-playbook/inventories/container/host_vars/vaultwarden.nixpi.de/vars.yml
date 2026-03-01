@@ -30,6 +30,31 @@ firewalld_rules_services:
 
 podman_user: "container"
 
+# Proxy
+vaultwarden_proxy_enabled: false
+vaultwarden_proxy_http: ""
+vaultwarden_proxy_https: ""
+vaultwarden_proxy_no_proxy: ""
+
+# Network
+vaultwarden_network_enabled: true
+vaultwarden_network_name: "vaultwarden-internal"
+vaultwarden_network_driver: "bridge"
+vaultwarden_network_internal: false
+
+# Envoy
+vaultwarden_envoy_enabled: true
+vaultwarden_envoy_version: "1.37"
+
+# SPIRE
+vaultwarden_spire_enabled: false
+vaultwarden_spire_agent_version: "1.14.1"
+
+# Port mapping
+vaultwarden_port_map_enabled: true
+vaultwarden_port_map:
+  - "80:80"
+
 vaultwarden_version: "1.34.3-alpine"
 
 vaultwarden_autoupdate: true
@@ -39,11 +64,6 @@ vaultwarden_domain: "https://vaultwarden.nixpi.de/"
 ######################################
 ### giftpilz0.homelab.traefik
 
-traefik_acme_challenge_type: dns
-traefik_acme_dns_provider: "cloudflare"
-traefik_log_level: "WARN"
-
-# HTTP services
 traefik_http_services:
   - name: vaultwarden
     domain: vaultwarden.nixpi.de

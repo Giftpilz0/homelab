@@ -1,0 +1,19 @@
+{% if misc_spire_enabled %}
+[Unit]
+Description=Misc SPIRE Agent
+After=misc.service
+
+[Container]
+ContainerName=misc-spire-agent
+Image=ghcr.io/spiffe/spire-agent:{{ misc_spire_agent_version }}
+
+Pod=misc.pod
+
+Volume=%h/.config/containers/systemd/spire-pod/config/bundle.crt:/run/spire/agent/bootstrap.crt:Z
+Volume=%h/.config/containers/systemd/misc-pod/config/spire-agent.conf:/etc/spire/agent/agent.conf:Z
+Volume=%h/.config/containers/systemd/misc-pod/data:/run/spire/data:Z
+Volume=%h/.config/containers/systemd/misc-pod/token:/run/spire/agent/token:Z
+Volume=misc-spire-sockets:/run/spire/agent:Z
+
+Exec=/opt/spire/bin/spire-agent run -config /etc/spire/agent/agent.conf -joinToken $(cat /run/spire/agent/token)
+{% endif %}

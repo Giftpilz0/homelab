@@ -36,6 +36,32 @@ firewalld_rules_services:
 
 podman_user: "container"
 
+# Proxy
+forgejo_proxy_enabled: false
+forgejo_proxy_http: ""
+forgejo_proxy_https: ""
+forgejo_proxy_no_proxy: ""
+
+# Network
+forgejo_network_enabled: true
+forgejo_network_name: "forgejo-internal"
+forgejo_network_driver: "bridge"
+forgejo_network_internal: false
+
+# Envoy
+forgejo_envoy_enabled: true
+forgejo_envoy_version: "1.37"
+
+# SPIRE
+forgejo_spire_enabled: false
+forgejo_spire_agent_version: "1.14.1"
+
+# Port mapping
+forgejo_port_map_enabled: true
+forgejo_port_map:
+  - "3000:3000"
+  - "2222:2222"
+
 postgresql_version: "18-alpine"
 forgejo_version: "14"
 
@@ -50,11 +76,6 @@ forgejo_oauth_name: "opencloud"
 ######################################
 ### giftpilz0.homelab.traefik
 
-traefik_acme_challenge_type: dns
-traefik_acme_dns_provider: "cloudflare"
-traefik_log_level: "WARN"
-
-# HTTP services
 traefik_http_services:
   - name: forgejo
     domain: forgejo.nixpi.de

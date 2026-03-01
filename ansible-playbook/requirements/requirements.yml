@@ -15,6 +15,10 @@ collections:
     type: git
     version: main
 
+  - name: containers.podman
+
+  - name: ansible.posix
+
   - name: giftpilz0.homelab
     source: ../ansible_collections/giftpilz0/homelab
     type: dir

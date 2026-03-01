@@ -1,0 +1,16 @@
+{% if opencloud_envoy_enabled %}
+[Unit]
+Description=OpenCloud Envoy Proxy
+After=opencloud.service
+
+[Container]
+ContainerName=opencloud-envoy
+Image=docker.io/envoyproxy/envoy:v{{ opencloud_envoy_version }}
+
+Pod=opencloud.pod
+
+Volume=%h/.config/containers/systemd/opencloud-pod/config/envoy.yaml:/etc/envoy/envoy.yaml:Z
+{% if opencloud_spire_enabled %}
+Volume=opencloud-spire-sockets:/run/spire/agent:Z
+{% endif %}
+{% endif %}

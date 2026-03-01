@@ -1,7 +1,28 @@
 ---
 podman_user: "{{ ansible_user }}"
 
-# ACME
+# Proxy
+traefik_proxy_enabled: false
+traefik_proxy_http: ""
+traefik_proxy_https: ""
+traefik_proxy_no_proxy: ""
+traefik_proxy_env: "{{ (['https_proxy=' ~ traefik_proxy_https] + (['http_proxy=' ~ traefik_proxy_http] if traefik_proxy_http else []) + (['no_proxy=' ~ traefik_proxy_no_proxy] if traefik_proxy_no_proxy else [])) if traefik_proxy_enabled else [] }}"
+
+# Network
+traefik_network_enabled: true
+traefik_network_name: "traefik-internal"
+traefik_network_driver: "bridge"
+traefik_network_internal: false
+
+# Version
+traefik_version: "latest"
+
+# Autoupdate
+traefik_autoupdate: true
+
+# Environment
+traefik_environment_vars: {}
+
 # traefik_environment_vars:
 #   CLOUDFLARE_DNS_API_TOKEN: "example"
 
@@ -10,12 +31,6 @@ traefik_acme_email: ""
 traefik_acme_ca_server: "https://acme-v02.api.letsencrypt.org/directory"
 traefik_acme_challenge_type: http # dns or http
 traefik_acme_dns_provider: "cloudflare"
-
-# API & Dashboard
-traefik_dashboard_port: 9000
-traefik_dashboard_enabled: false
-traefik_api_insecure: false
-traefik_api_debug: false
 
 # Ratelimit
 traefik_rate_limit_average: 100

@@ -1,7 +1,37 @@
 ---
 podman_user: "{{ ansible_user }}"
 
-# Versions
+# Proxy
+bumper_proxy_enabled: false
+bumper_proxy_http: ""
+bumper_proxy_https: ""
+bumper_proxy_no_proxy: ""
+bumper_proxy_env: "{{ (['https_proxy=' ~ bumper_proxy_https] + (['http_proxy=' ~ bumper_proxy_http] if bumper_proxy_http else []) + (['no_proxy=' ~ bumper_proxy_no_proxy] if bumper_proxy_no_proxy else [])) if bumper_proxy_enabled else [] }}"
+
+# Network
+bumper_network_enabled: true
+bumper_network_name: "bumper-internal"
+bumper_network_driver: "bridge"
+bumper_network_internal: false
+
+# Envoy
+bumper_envoy_enabled: true
+bumper_envoy_version: "1.37"
+
+# SPIRE - experimental (not yet implemented)
+bumper_spire_enabled: false
+bumper_spire_agent_version: "1.14.1"
+
+# Port mapping: host_port:container_port
+bumper_port_map_enabled: true
+bumper_port_map:
+  - "443:443"
+  - "1883:1883"
+  - "5223:5223"
+  - "8007:8007"
+  - "8443:8443"
+
+# Build
 bumper_version: "latest"
 bumper_commit: "86bf91be27bf23bddc1e122013713d1c8f7ca53a"
 
@@ -11,10 +41,10 @@ bumper_autoupdate: true
 # Environment
 bumper_environment_vars:
   TZ: Europe/Berlin
-  WEB_SERVER_HTTPS_PORT: 8443 # 443
-  WEB_SERVER_LISTEN_PORT: 8007
-  MQTT_LISTEN_PORT_TLS: 443 # 8883
-  MQTT_LISTEN_PORT: 1883
-  XMPP_LISTEN_PORT_TLS: 5223
+  WEB_SERVER_HTTPS_PORT: "{{ '0.0.0.0:8443' if not bumper_envoy_enabled else '127.0.0.1:8443' }}"
+  WEB_SERVER_LISTEN_PORT: "{{ '0.0.0.0:8007' if not bumper_envoy_enabled else '127.0.0.1:8007' }}"
+  MQTT_LISTEN_PORT_TLS: "{{ '0.0.0.0:443' if not bumper_envoy_enabled else '127.0.0.1:443' }}"
+  MQTT_LISTEN_PORT: "{{ '0.0.0.0:1883' if not bumper_envoy_enabled else '127.0.0.1:1883' }}"
+  XMPP_LISTEN_PORT_TLS: "{{ '0.0.0.0:5223' if not bumper_envoy_enabled else '127.0.0.1:5223' }}"
   DEBUG_BUMPER_VERBOSE: 2
   DEBUG_BUMPER_LEVEL: "INFO"

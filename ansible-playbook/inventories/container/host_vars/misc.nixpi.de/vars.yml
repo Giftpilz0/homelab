@@ -32,6 +32,31 @@ firewalld_rules_ports:
 
 podman_user: "container"
 
+# Proxy
+misc_proxy_enabled: false
+misc_proxy_http: ""
+misc_proxy_https: ""
+misc_proxy_no_proxy: ""
+
+# Network
+misc_network_enabled: true
+misc_network_name: "misc-internal"
+misc_network_driver: "bridge"
+misc_network_internal: false
+
+# Envoy
+misc_envoy_enabled: true
+misc_envoy_version: "1.37"
+
+# SPIRE
+misc_spire_enabled: false
+misc_spire_agent_version: "1.14.1"
+
+# Port mapping
+misc_port_map_enabled: true
+misc_port_map:
+  - "8080:8080"
+
 misc_version: "latest"
 misc_commit: "db16ab7ca40f6e1e98e6e7a3947fb9e2aa04f527"
 

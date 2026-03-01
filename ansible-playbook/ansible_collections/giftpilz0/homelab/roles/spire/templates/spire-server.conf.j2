@@ -1,0 +1,40 @@
+server {
+	bind_address = "0.0.0.0"
+	bind_port = "{{ spire_server_port }}"
+	socket_path = "/run/spire/server/private/api.sock"
+	trust_domain = "{{ spire_trust_domain }}"
+	data_dir = "/run/spire/data"
+	log_level = "{{ spire_server_log_level }}"
+	ca_subject = {
+		country = ["US"],
+		organization = "SPIFFE",
+		common_name = "",
+	}
+}
+
+plugins {
+	DataStore "sql" {
+		plugin_data {
+			database_type = "sqlite3"
+			connection_string = "/run/spire/data/datastore.sqlite3"
+		}
+	}
+	NodeAttestor "join_token" {
+		plugin_data {
+		}
+	}
+{% if spire_server_mode | default('distributed') == 'distributed' %}
+	UpstreamCA "disk" {
+		plugin_data {
+			ca_path = "/run/spire/conf/ca/server-ca.key"
+			cert_path = "/run/spire/conf/ca/server-ca.crt"
+		}
+	}
+{% else %}
+	KeyManager "disk" {
+		plugin_data {
+			keys_path = "/run/spire/data/keys.json"
+		}
+	}
+{% endif %}
+}

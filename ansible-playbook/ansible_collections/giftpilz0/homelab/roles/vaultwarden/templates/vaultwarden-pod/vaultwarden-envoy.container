@@ -1,0 +1,16 @@
+{% if vaultwarden_envoy_enabled %}
+[Unit]
+Description=Vaultwarden Envoy Proxy
+After=vaultwarden.service
+
+[Container]
+ContainerName=vaultwarden-envoy
+Image=docker.io/envoyproxy/envoy:v{{ vaultwarden_envoy_version }}
+
+Pod=vaultwarden.pod
+
+Volume=%h/.config/containers/systemd/vaultwarden-pod/config/envoy.yaml:/etc/envoy/envoy.yaml:Z
+{% if vaultwarden_spire_enabled %}
+Volume=vaultwarden-spire-sockets:/run/spire/agent:Z
+{% endif %}
+{% endif %}

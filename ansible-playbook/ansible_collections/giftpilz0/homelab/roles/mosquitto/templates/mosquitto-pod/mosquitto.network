@@ -1,0 +1,7 @@
+[Unit]
+Description=Mosquitto Internal Network
+
+[Network]
+NetworkName={{ mosquitto_network_name }}
+Driver={{ mosquitto_network_driver }}
+Internal={{ mosquitto_network_internal | bool | lower }}

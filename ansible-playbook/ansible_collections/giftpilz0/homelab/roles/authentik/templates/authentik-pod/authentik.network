@@ -1,0 +1,7 @@
+[Unit]
+Description=Authentik Internal Network
+
+[Network]
+NetworkName={{ authentik_network_name }}
+Driver={{ authentik_network_driver }}
+Internal={{ authentik_network_internal | bool | lower }}

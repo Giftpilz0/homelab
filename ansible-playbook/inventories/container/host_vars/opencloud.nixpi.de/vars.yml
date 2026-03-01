@@ -36,6 +36,31 @@ firewalld_rules_services:
 
 podman_user: "container"
 
+# Proxy
+opencloud_proxy_enabled: false
+opencloud_proxy_http: ""
+opencloud_proxy_https: ""
+opencloud_proxy_no_proxy: ""
+
+# Network
+opencloud_network_enabled: true
+opencloud_network_name: "opencloud-internal"
+opencloud_network_driver: "bridge"
+opencloud_network_internal: false
+
+# Envoy
+opencloud_envoy_enabled: true
+opencloud_envoy_version: "1.37"
+
+# SPIRE
+opencloud_spire_enabled: false
+opencloud_spire_agent_version: "1.14.1"
+
+# Port mapping
+opencloud_port_map_enabled: true
+opencloud_port_map:
+  - "9200:9200"
+
 opencloud_version: "5"
 
 opencloud_autoupdate: true
@@ -58,16 +83,11 @@ opencloud_custom_clients:
 ######################################
 ### giftpilz0.homelab.traefik
 
-traefik_acme_challenge_type: dns
-traefik_acme_dns_provider: "cloudflare"
-traefik_log_level: "WARN"
-
 traefik_transport_timeouts_enabled: true
 traefik_transport_read_timeout: "12h"
 traefik_transport_write_timeout: "12h"
 traefik_transport_idle_timeout: "3m"
 
-# HTTP services
 traefik_http_services:
   - name: opencloud
     domain: opencloud.nixpi.de

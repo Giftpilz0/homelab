@@ -1,0 +1,19 @@
+{% if authentik_spire_enabled %}
+[Unit]
+Description=Authentik SPIRE Agent
+After=authentik-server.service
+
+[Container]
+ContainerName=authentik-spire-agent
+Image=ghcr.io/spiffe/spire-agent:{{ authentik_spire_agent_version }}
+
+Pod=authentik.pod
+
+Volume=%h/.config/containers/systemd/spire-pod/config/bundle.crt:/run/spire/agent/bootstrap.crt:Z
+Volume=%h/.config/containers/systemd/authentik-pod/config/spire-agent.conf:/etc/spire/agent/agent.conf:Z
+Volume=%h/.config/containers/systemd/authentik-pod/data:/run/spire/data:Z
+Volume=%h/.config/containers/systemd/authentik-pod/token:/run/spire/agent/token:Z
+Volume=authentik-spire-sockets:/run/spire/agent:Z
+
+Exec=/opt/spire/bin/spire-agent run -config /etc/spire/agent/agent.conf -joinToken $(cat /run/spire/agent/token)
+{% endif %}

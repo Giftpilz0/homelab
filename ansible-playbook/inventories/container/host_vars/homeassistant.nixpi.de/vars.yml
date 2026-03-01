@@ -50,6 +50,31 @@ firewalld_rules_ports:
 
 podman_user: "container"
 
+# Proxy
+homeassistant_proxy_enabled: false
+homeassistant_proxy_http: ""
+homeassistant_proxy_https: ""
+homeassistant_proxy_no_proxy: ""
+
+# Network
+homeassistant_network_enabled: true
+homeassistant_network_name: "homeassistant-internal"
+homeassistant_network_driver: "bridge"
+homeassistant_network_internal: false
+
+# Envoy
+homeassistant_envoy_enabled: true
+homeassistant_envoy_version: "1.37"
+
+# SPIRE
+homeassistant_spire_enabled: false
+homeassistant_spire_agent_version: "1.14.1"
+
+# Port mapping
+homeassistant_port_map_enabled: true
+homeassistant_port_map:
+  - "8123:8123"
+
 mosquitto_version: "2"
 homeassistant_version: "2026.2"
 
@@ -57,6 +82,7 @@ mosquitto_autoupdate: true
 homeassistant_autoupdate: true
 
 homeassistant_device: "/dev/serial/by-id/usb-ITEAD_SONOFF_Zigbee_3.0_USB_Dongle_Plus_V2_20230804114425-if00:/dev/ttyACM0"
+homeassistant_deebot_module: "true"
 
 ######################################
 ### giftpilz0.homelab.traefik

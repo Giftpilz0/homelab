@@ -1,0 +1,19 @@
+[Unit]
+Description=Vaultwarden Pod
+
+[Pod]
+PodName=vaultwarden-pod
+
+Network={{ vaultwarden_network_name }}
+
+{% if vaultwarden_port_map_enabled %}
+{% for port_mapping in vaultwarden_port_map %}
+PublishPort={{ port_mapping }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

@@ -1,0 +1,16 @@
+{% if mosquitto_envoy_enabled %}
+[Unit]
+Description=Mosquitto Envoy Proxy
+After=mosquitto.service
+
+[Container]
+ContainerName=mosquitto-envoy
+Image=docker.io/envoyproxy/envoy:v{{ mosquitto_envoy_version }}
+
+Pod=mosquitto.pod
+
+Volume=%h/.config/containers/systemd/mosquitto-pod/config/envoy.yaml:/etc/envoy/envoy.yaml:Z
+{% if mosquitto_spire_enabled %}
+Volume=mosquitto-spire-sockets:/run/spire/agent:Z
+{% endif %}
+{% endif %}

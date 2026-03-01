@@ -1,0 +1,7 @@
+[Unit]
+Description=Gitlab-runner Internal Network
+
+[Network]
+NetworkName={{ gitlab_runner_network_name }}
+Driver={{ gitlab_runner_network_driver }}
+Internal={{ gitlab_runner_network_internal | bool | lower }}

@@ -57,3 +57,10 @@ user:
     user_state: present
     user_password: "!"
     user_pub: []
+
+######################################
+### giftpilz0.homelab.traefik (common)
+
+traefik_acme_challenge_type: dns
+traefik_acme_dns_provider: "cloudflare"
+traefik_log_level: "WARN"

@@ -1,0 +1,261 @@
+---
+- name: "SPIRE: Enable lingering"
+  become: true
+  ansible.builtin.command: loginctl enable-linger {{ podman_user }}
+  register: podman_lingering
+  changed_when: podman_lingering.rc != 0
+
+- name: "SPIRE: Create quadlet directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd/spire-pod"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0755"
+
+- name: "SPIRE: Create directory structure"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd/spire-pod/{{ item }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0700"
+  with_items:
+    - config
+    - data
+    - tokens
+    - ca
+
+- name: "SPIRE: Deploy SPIRE Server config"
+  ansible.builtin.template:
+    src: spire-server.conf.j2
+    dest: "{{ podman_user }}/.config/containers/systemd/spire-pod/config/server.conf"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0600"
+  become: true
+  become_user: "{{ podman_user }}"
+
+- name: "SPIRE: Template quadlet files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/spire-pod/{{ item.path }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode }}"
+  with_community.general.filetree: "templates/spire-pod/"
+  when: item.state == 'file'
+
+- name: "SPIRE: Check if CA already exists (for distributed mode)"
+  ansible.builtin.stat:
+    path: "{{ podman_user }}/.config/containers/systemd/spire-pod/ca/server-ca.key"
+  register: ca_exists
+  when: spire_server_mode | default('distributed') == 'distributed'
+
+- name: "SPIRE: Generate CA on first node"
+  block:
+    - name: "SPIRE: Generate CA key"
+      ansible.builtin.command:
+        cmd: "openssl genrsa -out {{ podman_user }}/.config/containers/systemd/spire-pod/ca/server-ca.key 4096"
+      changed_when: true
+
+    - name: "SPIRE: Generate CA certificate"
+      ansible.builtin.command:
+        cmd: >
+          openssl req -x509 -new -nodes -key {{ podman_user }}/.config/containers/systemd/spire-pod/ca/server-ca.key
+          -sha256 -days 3650 -out {{ podman_user }}/.config/containers/systemd/spire-pod/ca/server-ca.crt
+          -subj "/CN= SPIRE Server CA"
+      changed_when: true
+
+    - name: "SPIRE: Set CA permissions"
+      become: true
+      become_user: "{{ podman_user }}"
+      ansible.builtin.file:
+        path: "{{ podman_user }}/.config/containers/systemd/spire-pod/ca"
+        mode: "0700"
+  when:
+    - spire_server_mode | default('distributed') == 'distributed'
+    - not ca_exists.stat.exists
+
+- name: "SPIRE: Distribute CA to other nodes"
+  block:
+    - name: "SPIRE: Fetch CA from first node"
+      ansible.builtin.fetch:
+        src: "{{ podman_user }}/.config/containers/systemd/spire-pod/ca/server-ca.key"
+        dest: "/tmp/spire-ca/server-ca.key"
+        flat: true
+      delegate_to: "{{ groups[spire_certificate_distribution_group][0] }}"
+      when: inventory_hostname != groups[spire_certificate_distribution_group][0]
+
+    - name: "SPIRE: Fetch CA cert from first node"
+      ansible.builtin.fetch:
+        src: "{{ podman_user }}/.config/containers/systemd/spire-pod/ca/server-ca.crt"
+        dest: "/tmp/spire-ca/server-ca.crt"
+        flat: true
+      delegate_to: "{{ groups[spire_certificate_distribution_group][0] }}"
+
+    - name: "SPIRE: Copy CA to this node"
+      become: true
+      ansible.builtin.copy:
+        src: "/tmp/spire-ca/server-ca.key"
+        dest: "{{ podman_user }}/.config/containers/systemd/spire-pod/ca/server-ca.key"
+        owner: "{{ podman_user }}"
+        group: "{{ podman_user }}"
+        mode: "0600"
+      when: inventory_hostname != groups[spire_certificate_distribution_group][0]
+
+    - name: "SPIRE: Copy CA cert to this node"
+      become: true
+      ansible.builtin.copy:
+        src: "/tmp/spire-ca/server-ca.crt"
+        dest: "{{ podman_user }}/.config/containers/systemd/spire-pod/ca/server-ca.crt"
+        owner: "{{ podman_user }}"
+        group: "{{ podman_user }}"
+        mode: "0644"
+      when: inventory_hostname != groups[spire_certificate_distribution_group][0]
+  when:
+    - spire_server_mode | default('distributed') == 'distributed'
+    - spire_distribute_certs | default(true)
+    - groups[spire_certificate_distribution_group] is defined
+    - groups[spire_certificate_distribution_group] | length > 1
+    - inventory_hostname != groups[spire_certificate_distribution_group][0]
+
+- name: "SPIRE: systemd daemon reload"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    daemon_reload: true
+    scope: user
+
+- name: "SPIRE: Start pod service"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: spire-pod.service
+    enabled: true
+    state: started
+    scope: user
+
+- name: "SPIRE: Wait for Server to be ready"
+  ansible.builtin.wait_for:
+    port: "{{ spire_server_port }}"
+    delay: 5
+    timeout: 60
+
+- name: "SPIRE: Fetch trust bundle"
+  ansible.builtin.command:
+    cmd: "podman exec spire-server /opt/spire/bin/spire-server bundle show -format pem"
+  register: spire_bundle_result
+  changed_when: false
+  retries: 5
+  delay: 2
+  until: spire_bundle_result.rc == 0
+
+- name: "SPIRE: Save trust bundle"
+  ansible.builtin.copy:
+    content: "{{ spire_bundle_result.stdout }}"
+    dest: "{{ podman_user }}/.config/containers/systemd/spire-pod/config/bundle.crt"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0644"
+  become: true
+  become_user: "{{ podman_user }}"
+
+- name: "SPIRE: Create join tokens and registration entries"
+  block:
+    - name: "SPIRE: Generate join token for {{ item.name }}"
+      ansible.builtin.command:
+        cmd: "podman exec spire-server /opt/spire/bin/spire-server token generate -spiffeID spiffe://{{ spire_trust_domain }}/{{ item.name }}"
+      register: token_result
+      changed_when: false
+
+    - name: "SPIRE: Save join token to file"
+      ansible.builtin.copy:
+        content: "{{ token_result.stdout }}"
+        dest: "{{ podman_user }}/.config/containers/systemd/spire-pod/tokens/{{ item.name }}.token"
+        owner: "{{ podman_user }}"
+        group: "{{ podman_user }}"
+        mode: "0600"
+      become: true
+
+    - name: "SPIRE: Build entry create command for {{ item.name }}"
+      ansible.builtin.set_fact:
+        entry_cmd: >
+          podman exec spire-server /opt/spire/bin/spire-server entry create
+          -parentID spiffe://{{ spire_trust_domain }}/spire/agent/join_token/{{ token_result.stdout.split(':')[-1] }}
+          -spiffeID spiffe://{{ spire_trust_domain }}/{{ item.name }}
+          -selector unix:user:{{ item.user }}
+          {% if item.dns is defined and item.dns %}
+          {% for dns_name in item.dns %}
+          -dns {{ dns_name }}
+          {% endfor %}
+          {% endif %}
+
+    - name: "SPIRE: Create registration entry for {{ item.name }}"
+      ansible.builtin.command:
+        cmd: "{{ entry_cmd }}"
+      register: entry_result
+      changed_when: false
+      failed_when: entry_result.rc != 0 and 'already exists' not in entry_result.stderr
+  loop: "{{ spire_workloads }}"
+  when: spire_server_enabled | default(true)
+  run_once: true
+  delegate_to: "{{ groups[spire_certificate_distribution_group][0] }}"
+
+- name: "SPIRE: Distribute tokens to all nodes"
+  block:
+    - name: "SPIRE: Fetch tokens from first node"
+      ansible.builtin.fetch:
+        src: "{{ podman_user }}/.config/containers/systemd/spire-pod/tokens/{{ item.name }}.token"
+        dest: "/tmp/spire-tokens/{{ item.name }}.token"
+        flat: true
+      delegate_to: "{{ groups[spire_certificate_distribution_group][0] }}"
+      loop: "{{ spire_workloads }}"
+
+    - name: "SPIRE: Copy tokens to all nodes"
+      become: true
+      ansible.builtin.copy:
+        src: "/tmp/spire-tokens/{{ item.1.name }}.token"
+        dest: "/home/{{ podman_user }}/.config/containers/systemd/spire-pod/tokens/{{ item.1.name }}.token"
+        owner: "{{ podman_user }}"
+        group: "{{ podman_user }}"
+        mode: "0600"
+      loop: "{{ groups[spire_certificate_distribution_group] | product(spire_workloads) | list }}"
+      when: inventory_hostname != groups[spire_certificate_distribution_group][0]
+  when:
+    - spire_server_enabled | default(true)
+    - spire_distribute_certs | default(true)
+    - groups[spire_certificate_distribution_group] is defined
+    - groups[spire_certificate_distribution_group] | length > 1
+
+- name: "SPIRE: Distribute trust bundle to all nodes"
+  block:
+    - name: "SPIRE: Fetch bundle from first node"
+      ansible.builtin.fetch:
+        src: "{{ podman_user }}/.config/containers/systemd/spire-pod/config/bundle.crt"
+        dest: "/tmp/spire-tokens/bundle.crt"
+        flat: true
+      delegate_to: "{{ groups[spire_certificate_distribution_group][0] }}"
+      register: bundle_fetch
+
+    - name: "SPIRE: Copy bundle to all nodes"
+      become: true
+      ansible.builtin.copy:
+        src: "/tmp/spire-tokens/bundle.crt"
+        dest: "/home/{{ podman_user }}/.config/containers/systemd/spire-pod/config/bundle.crt"
+        owner: "{{ podman_user }}"
+        group: "{{ podman_user }}"
+        mode: "0644"
+      loop: "{{ groups[spire_certificate_distribution_group] }}"
+      when: inventory_hostname != groups[spire_certificate_distribution_group][0]
+  when:
+    - spire_server_enabled | default(true)
+    - spire_distribute_certs | default(true)
+    - groups[spire_certificate_distribution_group] is defined
+    - groups[spire_certificate_distribution_group] | length > 1

@@ -1,9 +1,34 @@
 ---
+- name: "OpenCloud: Create Podman config directory"
+  become: true
+  ansible.builtin.file:
+    path: /etc/containers/containers.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "OpenCloud: Deploy podman proxy configuration"
+  become: true
+  ansible.builtin.template:
+    src: "opencloud-pod/proxy.conf.j2"
+    dest: "/etc/containers/containers.conf.d/proxy.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  when: opencloud_proxy_enabled
+
+- name: "OpenCloud: Delete quadlet directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd/opencloud-pod"
+    state: absent
+
 - name: "OpenCloud: Enable lingering"
   become: true
   ansible.builtin.command: loginctl enable-linger {{ podman_user }}
-  register: podman_lingering
-  changed_when: podman_lingering.rc != 0
+  changed_when: true
 
 - name: "OpenCloud: Configure unprivileged port range for rootless containers"
   become: true
@@ -13,12 +38,6 @@
     sysctl_set: true
     sysctl_file: /etc/sysctl.d/99-rootless-ports.conf
     reload: true
-
-- name: "OpenCloud: Create podman network"
-  become: true
-  become_user: "{{ podman_user }}"
-  containers.podman.podman_network:
-    name: quadlet
 
 - name: "OpenCloud: Create quadlet directory"
   become: true
@@ -30,29 +49,59 @@
     group: "{{ podman_user }}"
     mode: "0755"
 
+- name: "OpenCloud: Create SPIRE token directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd/opencloud-pod/token"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0700"
+  when: opencloud_spire_enabled | default(false)
+
 - name: "OpenCloud: Create directory structure"
   become: true
+  become_user: "{{ podman_user }}"
   ansible.builtin.file:
-    path: "/home/{{ podman_user }}/.config/containers/systemd/{{ item.path }}"
+    path: "/home/{{ podman_user }}/.config/containers/systemd/opencloud-pod/{{ item.path }}"
     state: directory
     owner: "{{ podman_user }}"
     group: "{{ podman_user }}"
     mode: "{{ item.mode }}"
-  with_community.general.filetree: "templates/"
+  with_community.general.filetree: "templates/opencloud-pod/"
   when: item.state == 'directory'
 
 - name: "OpenCloud: Template quadlet files"
   become: true
+  become_user: "{{ podman_user }}"
   ansible.builtin.template:
     src: "{{ item.src }}"
-    dest: "/home/{{ podman_user }}/.config/containers/systemd/{{ item.path }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/opencloud-pod/{{ item.path }}"
     owner: "{{ podman_user }}"
     group: "{{ podman_user }}"
     mode: "{{ item.mode }}"
-  with_community.general.filetree: "templates/"
+  with_community.general.filetree: "templates/opencloud-pod/"
   when: item.state == 'file'
-  notify:
-    - "OpenCloud: Restart pod service"
+
+- name: "OpenCloud: Copy SPIRE join token"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    src: "{{ podman_user }}/.config/containers/systemd/spire-pod/tokens/opencloud.token"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/opencloud-pod/token"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0600"
+    remote_src: true
+  when: opencloud_spire_enabled | default(false)
+  failed_when: false
+
+- name: "OpenCloud: Create SPIRE socket volume"
+  containers.podman.podman_volume:
+    name: opencloud-spire-sockets
+    state: present
+  when: opencloud_spire_enabled | default(false)
 
 - name: "OpenCloud: systemd daemon reload"
   become: true

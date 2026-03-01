@@ -1,0 +1,13 @@
+[Unit]
+Description=SPIRE Server
+After=spire.pod
+
+[Container]
+ContainerName=spire-server
+Image=ghcr.io/spiffe/spire-server:{{ spire_server_version }}
+Pod=spire-pod
+
+Volume=%h/.config/containers/systemd/spire-pod/config/server.conf:/etc/spire/server/spire-server.conf:Z
+Volume=%h/.config/containers/systemd/spire-pod/data:/run/spire/data:Z
+Volume=%h/.config/containers/systemd/spire-pod/server-socket:/run/spire/server/private:Z
+Volume=%h/.config/containers/systemd/spire-pod/ca:/run/spire/conf/ca:Z

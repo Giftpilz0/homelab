@@ -1,0 +1,16 @@
+{% if homeassistant_envoy_enabled %}
+[Unit]
+Description=Homeassistant Envoy Proxy
+After=homeassistant.service
+
+[Container]
+ContainerName=homeassistant-envoy
+Image=docker.io/envoyproxy/envoy:v{{ homeassistant_envoy_version }}
+
+Pod=homeassistant.pod
+
+Volume=%h/.config/containers/systemd/homeassistant-pod/config/envoy.yaml:/etc/envoy/envoy.yaml:Z
+{% if homeassistant_spire_enabled %}
+Volume=homeassistant-spire-sockets:/run/spire/agent:Z
+{% endif %}
+{% endif %}

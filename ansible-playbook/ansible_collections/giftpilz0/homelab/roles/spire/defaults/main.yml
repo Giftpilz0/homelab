@@ -1,0 +1,47 @@
+---
+podman_user: "{{ ansible_user }}"
+
+# SPIRE Server
+spire_server_enabled: false
+spire_server_version: "1.14.1"
+spire_server_port: 8081
+spire_server_log_level: "DEBUG"
+
+# SPIRE Server Mode
+# "central" - Single SPIRE server, workloads connect via network (spire_server_address)
+# "distributed" - SPIRE server runs on every node, local connection (localhost)
+spire_server_mode: "distributed"
+
+# SPIRE Server Address (only used in central mode)
+# For single node: "localhost" or "127.0.0.1"
+# For multi-node central: IP or hostname of the node running SPIRE server
+spire_server_address: "{{ ansible_host | default('localhost') }}"
+
+# SPIRE Trust Domain (your identity namespace)
+spire_trust_domain: "homelab.local"
+
+# SPIRE Agent (sidecar for each pod)
+spire_agent_enabled: false
+spire_agent_version: "1.14.1"
+spire_agent_log_level: "DEBUG"
+
+# Multi-node distribution
+# Set to true on all nodes - CA and tokens will be distributed from first node
+spire_distribute_certs: true
+
+# The Ansible group that contains all nodes that need SPIRE certificates
+spire_certificate_distribution_group: "{{ inventory_hostname | default('all') }}"
+
+# Dynamic workload registration
+# Add new services here - they will be automatically registered with SPIRE
+# Each entry: { name: "servicename", user: "uid", dns: ["optional","dns","names"] }
+spire_workloads:
+  - { name: "authentik", user: "1000", dns: ["authentik"] }
+  - { name: "bumper", user: "1000", dns: ["bumper"] }
+  - { name: "forgejo", user: "1000", dns: ["forgejo"] }
+  - { name: "homeassistant", user: "1000", dns: ["homeassistant"] }
+  - { name: "misc", user: "1000", dns: [] }
+  - { name: "mosquitto", user: "1000", dns: ["mosquitto"] }
+  - { name: "opencloud", user: "1000", dns: ["opencloud"] }
+  - { name: "traefik", user: "1000", dns: ["traefik"] }
+  - { name: "vaultwarden", user: "1000", dns: ["vaultwarden"] }

@@ -1,0 +1,19 @@
+{% if vaultwarden_spire_enabled %}
+[Unit]
+Description=Vaultwarden SPIRE Agent
+After=vaultwarden.service
+
+[Container]
+ContainerName=vaultwarden-spire-agent
+Image=ghcr.io/spiffe/spire-agent:{{ vaultwarden_spire_agent_version }}
+
+Pod=vaultwarden.pod
+
+Volume=%h/.config/containers/systemd/spire-pod/config/bundle.crt:/run/spire/agent/bootstrap.crt:Z
+Volume=%h/.config/containers/systemd/vaultwarden-pod/config/spire-agent.conf:/etc/spire/agent/agent.conf:Z
+Volume=%h/.config/containers/systemd/vaultwarden-pod/data:/run/spire/data:Z
+Volume=%h/.config/containers/systemd/vaultwarden-pod/token:/run/spire/agent/token:Z
+Volume=vaultwarden-spire-sockets:/run/spire/agent:Z
+
+Exec=/opt/spire/bin/spire-agent run -config /etc/spire/agent/agent.conf -joinToken $(cat /run/spire/agent/token)
+{% endif %}
