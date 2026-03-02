@@ -2,4 +2,8 @@
 http_proxy = false
 
 [engine]
-{{ "env=[" ~ authentik_proxy_env | join(",") ~ "]" if authentik_proxy_enabled and authentik_proxy_env else "env=[]" }}
+{% if authentik_proxy_enabled and authentik_proxy_env %}
+env = ["{{ authentik_proxy_env | join('","') }}"]
+{% else %}
+env = []
+{% endif %}

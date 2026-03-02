@@ -2,4 +2,8 @@
 http_proxy = false
 
 [engine]
-{{ "env=[" ~ traefik_proxy_env | join(",") ~ "]" if traefik_proxy_enabled and traefik_proxy_env else "env=[]" }}
+{% if traefik_proxy_enabled and traefik_proxy_env %}
+env = ["{{ traefik_proxy_env | join('","') }}"]
+{% else %}
+env = []
+{% endif %}

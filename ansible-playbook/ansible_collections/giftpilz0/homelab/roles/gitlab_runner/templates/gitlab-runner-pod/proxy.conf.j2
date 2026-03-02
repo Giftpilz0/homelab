@@ -2,4 +2,8 @@
 http_proxy = false
 
 [engine]
-{{ "env=[" ~ gitlab_runner_proxy_env | join(",") ~ "]" if gitlab_runner_proxy_enabled and gitlab_runner_proxy_env else "env=[]" }}
+{% if gitlab_runner_proxy_enabled and gitlab_runner_proxy_env %}
+env = ["{{ gitlab_runner_proxy_env | join('","') }}"]
+{% else %}
+env = []
+{% endif %}

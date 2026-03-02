@@ -2,4 +2,8 @@
 http_proxy = false
 
 [engine]
-{{ "env=[" ~ forgejo_proxy_env | join(",") ~ "]" if forgejo_proxy_enabled and forgejo_proxy_env else "env=[]" }}
+{% if forgejo_proxy_enabled and forgejo_proxy_env %}
+env = ["{{ forgejo_proxy_env | join('","') }}"]
+{% else %}
+env = []
+{% endif %}
