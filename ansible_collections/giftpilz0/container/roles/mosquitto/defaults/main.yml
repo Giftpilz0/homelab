@@ -1,0 +1,39 @@
+---
+podman_user: "{{ ansible_user }}"
+
+# Proxy
+mosquitto_proxy_enabled: false
+mosquitto_proxy_http: ""
+mosquitto_proxy_https: ""
+mosquitto_proxy_no_proxy: ""
+mosquitto_proxy_env: "{{ (['https_proxy=' ~ mosquitto_proxy_https] + (['http_proxy=' ~ mosquitto_proxy_http] if mosquitto_proxy_http else []) + (['no_proxy=' ~ mosquitto_proxy_no_proxy] if mosquitto_proxy_no_proxy else [])) if mosquitto_proxy_enabled else [] }}"
+
+# Network
+mosquitto_network_enabled: true
+mosquitto_network_driver: "bridge"
+mosquitto_network_internal: false
+
+# Network to join even when _network_enabled: false
+mosquitto_network_name: "mosquitto-internal"
+
+# Envoy
+mosquitto_envoy_enabled: true
+mosquitto_envoy_version: "1.37-latest"
+
+# Port mapping: host_port:container_port
+mosquitto_port_map_enabled: true
+mosquitto_port_map:
+  - "1883:1883"
+  - "9001:9001"
+
+# Versions
+mosquitto_version: "2"
+
+# Autoupdate
+mosquitto_autoupdate: true
+
+# Environment
+mosquitto_environment_vars: {}
+
+# Config
+mosquitto_pwfile_users: {}

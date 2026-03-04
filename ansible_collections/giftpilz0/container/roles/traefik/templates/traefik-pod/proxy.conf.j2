@@ -1,0 +1,9 @@
+[containers]
+http_proxy = false
+
+[engine]
+{% if traefik_proxy_enabled and traefik_proxy_env %}
+env = ["{{ traefik_proxy_env | join('","') }}"]
+{% else %}
+env = []
+{% endif %}

@@ -1,0 +1,26 @@
+[Unit]
+Description=Vaultwarden Container
+
+[Container]
+ContainerName=vaultwarden
+Image=docker.io/vaultwarden/server:{{ vaultwarden_version }}
+
+Pod=vaultwarden.pod
+
+{% if vaultwarden_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+{% if vaultwarden_environment_vars is defined %}
+{% for env_name, env_value in vaultwarden_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
+
+{% if vaultwarden_proxy_enabled %}
+{% for env_var in vaultwarden_proxy_env %}
+Environment={{ env_var }}
+{% endfor %}
+{% endif %}
+
+Volume=vaultwarden-data.volume:/data

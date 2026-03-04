@@ -1,0 +1,119 @@
+---
+- name: "Gitlab_runner: Create Podman config directory"
+  become: true
+  ansible.builtin.file:
+    path: /etc/containers/containers.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "Gitlab_runner: Deploy podman proxy configuration"
+  become: true
+  ansible.builtin.template:
+    src: "gitlab-runner-pod/proxy.conf.j2"
+    dest: "/etc/containers/containers.conf.d/proxy.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  when: gitlab_runner_proxy_enabled
+
+- name: "Gitlab_runner: Delete quadlet directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd/gitlab-runner-pod"
+    state: absent
+
+- name: "Gitlab_runner: Enable lingering"
+  become: true
+  ansible.builtin.command: loginctl enable-linger {{ podman_user }}
+  changed_when: true
+
+- name: "Gitlab_runner: Configure unprivileged port range for rootless containers"
+  become: true
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_unprivileged_port_start
+    value: "80"
+    sysctl_set: true
+    sysctl_file: /etc/sysctl.d/99-rootless-ports.conf
+    reload: true
+
+- name: "Gitlab_runner: Create quadlet directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0755"
+
+- name: "Gitlab_runner: Create directory structure"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd/gitlab-runner-pod/{{ item.path }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode }}"
+  with_community.general.filetree: "templates/gitlab-runner-pod/"
+  when: item.state == 'directory'
+
+- name: "Gitlab_runner: Template quadlet files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/gitlab-runner-pod/{{ item.path }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode }}"
+  with_community.general.filetree: "templates/gitlab-runner-pod/"
+  when: item.state == 'file'
+
+- name: "Gitlab_runner: systemd daemon reload"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    daemon_reload: true
+    scope: user
+
+- name: "Gitlab_runner: Start network service"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: gitlab-runner-network.service
+    enabled: true
+    state: restarted
+    scope: user
+  when: gitlab_runner_network_enabled
+
+- name: "Gitlab_runner: Start pod service"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: gitlab-runner-pod.service
+    enabled: true
+    state: restarted
+    scope: user
+
+- name: "Gitlab_runner: Enable podman-auto-update timer"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: podman-auto-update.timer
+    enabled: true
+    state: started
+    scope: user
+
+- name: "Gitlab_runner: Enable podman socket"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd_service:
+    scope: user
+    name: podman.socket
+    state: started
+    enabled: true
+  register: gitlab_runner_podman_socket

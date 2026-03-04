@@ -1,0 +1,28 @@
+---
+namespace: giftpilz0
+name: kubernetes
+version: 1.0.0
+
+description: Ansible collection for kubernetes cluster
+readme: README.md
+license:
+  - GPL-3.0-only
+
+authors:
+  - Moritz Schmidt <schmidtmoritz404@gmail.com>
+
+tags:
+  - cilium
+  - flux
+  - helm
+  - linux
+  - k3s
+  - k9s
+  - kubernetes
+
+dependencies:
+  ansible.posix: ">=1.0.0"
+  community.general: ">=1.0.0"
+  kubernetes.core: ">=1.0.0"
+
+repository: https://github.com/giftpilz0/homelab

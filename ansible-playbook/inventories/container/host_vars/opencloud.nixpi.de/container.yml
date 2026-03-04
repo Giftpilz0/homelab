@@ -1,0 +1,99 @@
+---
+podman_user: "container"
+
+######################################
+### giftpilz0.container.opencloud
+
+# Proxy
+opencloud_proxy_enabled: false
+opencloud_proxy_http: ""
+opencloud_proxy_https: ""
+opencloud_proxy_no_proxy: ""
+
+# Network
+opencloud_network_enabled: true
+opencloud_network_driver: "bridge"
+opencloud_network_internal: false
+
+# Network to join even when _network_enabled: false
+opencloud_network_name: "opencloud-internal"
+
+# Envoy
+opencloud_envoy_enabled: false
+opencloud_envoy_version: "1.37-latest"
+
+# Port mapping: host_port:container_port
+opencloud_port_map_enabled: true
+opencloud_port_map:
+  - "9200:9200"
+
+# Versions
+opencloud_version: "5"
+
+# Autoupdate
+opencloud_autoupdate: true
+
+# Environment
+opencloud_domain: "https://opencloud.nixpi.de"
+opencloud_log_level: "WARN"
+
+opencloud_custom_clients:
+  - id: forgejo
+    name: "forgejo"
+    trusted: false
+    secret: "{{ forgejo_oauth_client_secret }}"
+    redirect_uris:
+      - "https://forgejo.nixpi.de/user/oauth2/opencloud/callback"
+    post_logout_redirect_uris: []
+    origins:
+      - "https://forgejo.nixpi.de"
+    application_type: "web"
+
+######################################
+### giftpilz0.container.traefik
+
+# Proxy
+traefik_proxy_enabled: false
+traefik_proxy_http: ""
+traefik_proxy_https: ""
+traefik_proxy_no_proxy: ""
+
+# Network
+traefik_network_enabled: false
+traefik_network_driver: "bridge"
+traefik_network_internal: false
+
+# Network to join even when _network_enabled: false
+traefik_network_name: "opencloud-internal"
+
+# Version
+traefik_version: "v3.6"
+
+# Autoupdate
+traefik_autoupdate: true
+
+# ACME
+traefik_acme_enabled: true
+traefik_acme_ca_server: "https://acme-v02.api.letsencrypt.org/directory"
+traefik_acme_challenge_type: dns
+traefik_acme_dns_provider: "cloudflare"
+traefik_acme_eab_enabled: false
+
+# Logging
+traefik_log_level: "INFO"
+
+# Transport
+traefik_transport_timeouts_enabled: true
+traefik_transport_read_timeout: "12h"
+traefik_transport_write_timeout: "12h"
+traefik_transport_idle_timeout: "3m"
+
+# HTTP services
+traefik_http_services:
+  - name: opencloud
+    domain: opencloud.nixpi.de
+    rule: "Host(`opencloud.nixpi.de`)"
+    servers:
+      - url: "http://opencloud-pod:9200"
+    tls_enabled: true
+    acme_enabled: true

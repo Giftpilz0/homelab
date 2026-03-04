@@ -1,0 +1,30 @@
+---
+# defaults file for cilium
+
+cilium_version: 1.19.1
+cilium_repo_url: https://helm.cilium.io
+cilium_kubeconfig: /etc/rancher/k3s/k3s.yaml
+
+cilium_config_kubeproxyreplacement: true
+cilium_config_k8sclientratelimit_qps: 30
+cilium_config_k8sclientratelimit_burst: 150
+cilium_config_rolloutciliumpods: true
+cilium_config_l2announcements_enabled: false
+cilium_config_bgp_enabled: false
+cilium_config_bgpcontrolplane_enabled: false
+cilium_config_ingresscontroller_enabled: true
+cilium_config_ingresscontroller_default: true
+cilium_config_gatewayapi_enabled: true
+cilium_config_hostfirewall_enabled: true
+cilium_config_hubble_enabled: true
+cilium_config_hubble_relay_enabled: true
+cilium_config_hubble_relay_rolloutpods: true
+cilium_config_hubble_ui_enabled: true
+cilium_config_hubble_ui_rolloutpods: true
+cilium_config_ipam_mode: cluster-pool
+cilium_config_ipam_operator_clusterpoolipv4podcidrlist: [10.0.0.0/8]
+cilium_config_ipv4_enabled: true
+cilium_config_ipv6_enabled: false
+cilium_config_egressgateway_enabled: false
+cilium_config_operator_enabled: true
+cilium_config_operator_rolloutpods: false

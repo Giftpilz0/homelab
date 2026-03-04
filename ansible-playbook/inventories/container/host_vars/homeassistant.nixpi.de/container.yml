@@ -1,0 +1,122 @@
+---
+podman_user: "container"
+
+######################################
+### giftpilz0.container.homeassistant
+
+# Proxy
+homeassistant_proxy_enabled: false
+homeassistant_proxy_http: ""
+homeassistant_proxy_https: ""
+homeassistant_proxy_no_proxy: ""
+
+# Network
+homeassistant_network_enabled: true
+homeassistant_network_driver: "bridge"
+homeassistant_network_internal: false
+
+# Network to join even when _network_enabled: false
+homeassistant_network_name: "homeassistant-internal"
+
+# Envoy
+homeassistant_envoy_enabled: false
+homeassistant_envoy_version: "1.37-latest"
+
+# Port mapping: host_port:container_port
+homeassistant_port_map_enabled: true
+homeassistant_port_map:
+  - "8123:8123"
+
+# Versions
+mosquitto_version: "2"
+homeassistant_version: "2026.2"
+
+# Autoupdate
+mosquitto_autoupdate: true
+homeassistant_autoupdate: true
+
+# Environment
+homeassistant_device: "/dev/serial/by-id/usb-ITEAD_SONOFF_Zigbee_3.0_USB_Dongle_Plus_V2_20230804114425-if00:/dev/ttyACM0"
+homeassistant_deebot_module: "true"
+
+######################################
+### giftpilz0.container.traefik
+
+# Proxy
+traefik_proxy_enabled: false
+traefik_proxy_http: ""
+traefik_proxy_https: ""
+traefik_proxy_no_proxy: ""
+
+# Network
+traefik_network_enabled: false
+traefik_network_driver: "bridge"
+traefik_network_internal: false
+
+# Network to join even when _network_enabled: false
+traefik_network_name: "homeassistant-internal"
+
+# Version
+traefik_version: "v3.6"
+
+# Autoupdate
+traefik_autoupdate: true
+
+# ACME
+traefik_acme_enabled: true
+traefik_acme_ca_server: "https://acme-v02.api.letsencrypt.org/directory"
+traefik_acme_challenge_type: dns
+traefik_acme_dns_provider: "cloudflare"
+traefik_acme_eab_enabled: false
+
+# Logging
+traefik_log_level: "INFO"
+
+# TCP entrypoints
+traefik_tcp_entrypoints:
+  - name: mqtt-tls
+    port: 8883
+  - name: mqtt
+    port: 1883
+
+# HTTP services
+traefik_http_services:
+  - name: homeassistant
+    domain: homeassistant.nixpi.de
+    rule: "Host(`homeassistant.nixpi.de`)"
+    servers:
+      - url: "http://homeassistant-pod:8123"
+    tls_enabled: true
+    acme_enabled: true
+
+  - name: mqtt-websocket
+    domain: mqtt.nixpi.de
+    rule: "Host(`mqtt.nixpi.de`)"
+    servers:
+      - url: "http://mosquitto-pod:9001"
+    tls_enabled: true
+    acme_enabled: true
+
+# TCP services
+traefik_tcp_services:
+  - name: mqtt
+    domain: "mqtt.nixpi.de"
+    rule: "HostSNI(`*`)"
+    entrypoints:
+      - mqtt
+    servers:
+      - address: "mosquitto-pod:1883"
+    tls_enabled: false
+    acme_enabled: false
+    tls_passthrough: false
+
+  - name: mqtt-tls
+    domain: "mqtt.nixpi.de"
+    rule: "HostSNI(`mqtt.nixpi.de`)"
+    entrypoints:
+      - mqtt-tls
+    servers:
+      - address: "mosquitto-pod:1883"
+    tls_enabled: true
+    acme_enabled: true
+    tls_passthrough: false

@@ -1,0 +1,41 @@
+---
+kubeProxyReplacement: {{ cilium_config_kubeproxyreplacement }}
+k8sClientRateLimit:
+  qps: {{ cilium_config_k8sclientratelimit_qps }}
+  burst: {{ cilium_config_k8sclientratelimit_burst }}
+rollOutCiliumPods: {{ cilium_config_rolloutciliumpods }}
+l2announcements:
+  enabled: {{ cilium_config_l2announcements_enabled }}
+bgp:
+  enabled: {{ cilium_config_bgp_enabled }}
+bgpControlPlane:
+  enabled: {{ cilium_config_bgpcontrolplane_enabled }}
+ingressController:
+  enabled: {{ cilium_config_ingresscontroller_enabled }}
+  default: {{ cilium_config_ingresscontroller_default }}
+gatewayAPI:
+  enabled: {{ cilium_config_gatewayapi_enabled }}
+hostFirewall:
+  enabled: {{ cilium_config_hostfirewall_enabled }}
+hubble:
+  enabled: {{ cilium_config_hubble_enabled }}
+  relay:
+    enabled: {{ cilium_config_hubble_relay_enabled }}
+    rollOutPods: {{ cilium_config_hubble_relay_rolloutpods }}
+  ui:
+    enabled: {{ cilium_config_hubble_ui_enabled }}
+    rollOutPods: {{ cilium_config_hubble_ui_rolloutpods }}
+ipam:
+  mode: {{ cilium_config_ipam_mode }}
+  operator:
+    clusterPoolIPv4PodCIDRList: {{ cilium_config_ipam_operator_clusterpoolipv4podcidrlist }}
+ipv4:
+  enabled: {{ cilium_config_ipv4_enabled }}
+ipv6:
+  enabled: {{ cilium_config_ipv6_enabled }}
+egressGateway:
+  enabled: {{ cilium_config_egressgateway_enabled }}
+operator:
+  enabled: {{ cilium_config_operator_enabled }}
+  rollOutPods: {{ cilium_config_operator_rolloutpods }}
+  replicas: 1

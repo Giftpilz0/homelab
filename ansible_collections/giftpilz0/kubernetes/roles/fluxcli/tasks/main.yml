@@ -1,0 +1,31 @@
+---
+# tasks file for fluxcli
+
+######################################
+### packages
+
+- name: "Fluxcli: Manage directory"
+  become: true
+  ansible.builtin.file:
+    name: "{{ fluxcli_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when:
+    - fluxcli_bin_state != 'skip'
+
+- name: "Fluxcli: Download"
+  become: true
+  ansible.builtin.unarchive:
+    src: "{{ fluxcli_url }}"
+    dest: "{{ fluxcli_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+    remote_src: true
+    extra_opts:
+      - --add-file
+      - flux
+  when:
+    - fluxcli_bin_state != 'skip'

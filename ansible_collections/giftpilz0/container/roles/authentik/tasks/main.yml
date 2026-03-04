@@ -1,0 +1,109 @@
+---
+- name: "Authentik: Create Podman config directory"
+  become: true
+  ansible.builtin.file:
+    path: /etc/containers/containers.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "Authentik: Deploy podman proxy configuration"
+  become: true
+  ansible.builtin.template:
+    src: "authentik-pod/proxy.conf.j2"
+    dest: "/etc/containers/containers.conf.d/proxy.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  when: authentik_proxy_enabled
+
+- name: "Authentik: Delete quadlet directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd/authentik-pod"
+    state: absent
+
+- name: "Authentik: Enable lingering"
+  become: true
+  ansible.builtin.command: loginctl enable-linger {{ podman_user }}
+  changed_when: true
+
+- name: "Authentik: Configure unprivileged port range for rootless containers"
+  become: true
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_unprivileged_port_start
+    value: "80"
+    sysctl_set: true
+    sysctl_file: /etc/sysctl.d/99-rootless-ports.conf
+    reload: true
+
+- name: "Authentik: Create quadlet directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0755"
+
+- name: "Authentik: Create directory structure"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd/authentik-pod/{{ item.path }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode }}"
+  with_community.general.filetree: "templates/authentik-pod/"
+  when: item.state == 'directory'
+
+- name: "Authentik: Template quadlet files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/authentik-pod/{{ item.path }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode }}"
+  with_community.general.filetree: "templates/authentik-pod/"
+  when: item.state == 'file'
+
+- name: "Authentik: systemd daemon reload"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    daemon_reload: true
+    scope: user
+
+- name: "Authentik: Start network service"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: authentik-network.service
+    enabled: true
+    state: restarted
+    scope: user
+  when: authentik_network_enabled
+
+- name: "Authentik: Start pod service"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: authentik-pod.service
+    enabled: true
+    state: restarted
+    scope: user
+
+- name: "Authentik: Enable podman-auto-update timer"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: podman-auto-update.timer
+    enabled: true
+    state: started
+    scope: user

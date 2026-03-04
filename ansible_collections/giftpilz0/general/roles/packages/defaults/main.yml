@@ -1,0 +1,35 @@
+---
+# defaults file for packages
+
+packages_rpmfusion_package_state: skip
+packages_rpmfusion_package:
+  - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ ansible_distribution_major_version }}.noarch.rpm
+  - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ ansible_distribution_major_version }}.noarch.rpm
+
+packages_package_state: present
+packages_package:
+  - curl
+  - mkpasswd
+  - python3-pip
+  - rsync
+  - zstd
+
+packages_flatpak_repos:
+  - name: flathub
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+    state: present
+
+packages_flatpak_repos_remove: [] # ["flathub", "fedora"]
+
+packages_flatpak_package: []
+#  - name: org.gnome.gedit
+#    state: present
+
+packages_copr_repos: []
+#  - name: "giftpilz0/misc"
+#    state: "skip"
+
+packages_additional_package_state: present
+packages_additional_package: []
+packages_python_package_state: present
+packages_python_package: []

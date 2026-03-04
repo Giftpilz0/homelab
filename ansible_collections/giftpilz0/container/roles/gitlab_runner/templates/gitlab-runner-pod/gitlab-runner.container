@@ -1,0 +1,27 @@
+[Unit]
+Description=Gitlab-runner Container
+
+[Container]
+ContainerName=gitlab-runner
+Image=docker.io/gitlab/gitlab-runner:{{ gitlab_runner_version }}
+
+Pod=gitlab-runner.pod
+
+{% if gitlab_runner_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+{% if gitlab_runner_environment_vars is defined %}
+{% for env_name, env_value in gitlab_runner_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
+
+{% if gitlab_runner_proxy_enabled %}
+{% for env_var in gitlab_runner_proxy_env %}
+Environment={{ env_var }}
+{% endfor %}
+{% endif %}
+
+Volume=%h/.config/containers/systemd/gitlab-runner-pod/config/config.toml:/etc/gitlab-runner/config.toml:Z
+Volume=/run/user/%U/podman/podman.sock:/var/run/docker.sock:Z

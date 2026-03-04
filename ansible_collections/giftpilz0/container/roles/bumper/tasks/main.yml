@@ -1,0 +1,150 @@
+---
+- name: "Bumper: Create Podman config directory"
+  become: true
+  ansible.builtin.file:
+    path: /etc/containers/containers.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "Bumper: Deploy podman proxy configuration"
+  become: true
+  ansible.builtin.template:
+    src: "bumper-pod/proxy.conf.j2"
+    dest: "/etc/containers/containers.conf.d/proxy.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  when: bumper_proxy_enabled
+
+- name: "Bumper: Delete quadlet directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd/bumper-pod"
+    state: absent
+
+- name: "Bumper: Create build directory"
+  become: true
+  ansible.builtin.file:
+    path: "/tmp/bumper-build"
+    state: directory
+    mode: "0755"
+
+- name: "Bumper: Clone bumper repository"
+  become: true
+  ansible.builtin.git:
+    repo: "https://github.com/MVladislav/bumper.git"
+    dest: "/tmp/bumper-build"
+    version: "{{ bumper_commit }}"
+    force: true
+    depth: 1
+
+- name: "Bumper: Build custom podman image"
+  become: true
+  become_user: "{{ podman_user }}"
+  containers.podman.podman_image:
+    name: "localhost/bumper-custom"
+    tag: "latest"
+    path: "/tmp/bumper-build"
+    build:
+      file: "/tmp/bumper-build/Dockerfile"
+      format: oci
+      cache: false
+      force_rm: true
+    force: true
+  environment:
+    https_proxy: "{{ bumper_proxy_https if bumper_proxy_enabled else '' }}"
+    http_proxy: "{{ bumper_proxy_http if bumper_proxy_enabled else '' }}"
+    no_proxy: "{{ bumper_proxy_no_proxy if bumper_proxy_enabled else '' }}"
+  register: bumper_image_build
+
+- name: "Bumper: Clean up build directory"
+  become: true
+  ansible.builtin.file:
+    path: "/tmp/bumper-build"
+    state: absent
+
+- name: "Bumper: Enable lingering"
+  become: true
+  ansible.builtin.command: loginctl enable-linger {{ podman_user }}
+  changed_when: true
+
+- name: "Bumper: Configure unprivileged port range for rootless containers"
+  become: true
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_unprivileged_port_start
+    value: "80"
+    sysctl_set: true
+    sysctl_file: /etc/sysctl.d/99-rootless-ports.conf
+    reload: true
+
+- name: "Bumper: Create quadlet directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0755"
+
+- name: "Bumper: Create directory structure"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd/bumper-pod/{{ item.path }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode }}"
+  with_community.general.filetree: "templates/bumper-pod/"
+  when: item.state == 'directory'
+
+- name: "Bumper: Template quadlet files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/bumper-pod/{{ item.path }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode }}"
+  with_community.general.filetree: "templates/bumper-pod/"
+  when: item.state == 'file'
+
+- name: "Bumper: systemd daemon reload"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    daemon_reload: true
+    scope: user
+
+- name: "Bumper: Start network service"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: bumper-network.service
+    enabled: true
+    state: restarted
+    scope: user
+  when: bumper_network_enabled
+
+- name: "Bumper: Start pod service"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: bumper-pod.service
+    enabled: true
+    state: restarted
+    scope: user
+
+- name: "Bumper: Enable podman-auto-update timer"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: podman-auto-update.timer
+    enabled: true
+    state: started
+    scope: user

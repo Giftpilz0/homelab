@@ -1,0 +1,9 @@
+{% if bumper_network_enabled %}
+[Unit]
+Description=Bumper Internal Network
+
+[Network]
+NetworkName={{ bumper_network_name }}
+Driver={{ bumper_network_driver }}
+Internal={{ bumper_network_internal | bool | lower }}
+{% endif %}

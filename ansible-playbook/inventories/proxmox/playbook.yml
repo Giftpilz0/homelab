@@ -5,5 +5,5 @@
     - role: giftpilz0.general.update
     - role: giftpilz0.general.autoupgrade
     - role: giftpilz0.general.packages
-    - role: giftpilz0.homelab.profile
     - role: giftpilz0.general.timezone
+    - role: giftpilz0.misc.profile

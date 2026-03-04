@@ -1,0 +1,32 @@
+---
+# tasks file for helm
+
+######################################
+### packages
+
+- name: "Helm: Manage directory"
+  become: true
+  ansible.builtin.file:
+    name: "{{ helm_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when:
+    - helm_bin_state != 'skip'
+
+- name: "Helm: Download"
+  become: true
+  ansible.builtin.unarchive:
+    src: "{{ helm_url }}"
+    dest: "{{ helm_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+    remote_src: true
+    extra_opts:
+      - --add-file
+      - linux-{{ helm_arch }}/helm
+      - --strip-components=1
+  when:
+    - helm_bin_state != 'skip'

@@ -1,0 +1,10 @@
+---
+# handlers file for nfs
+
+- name: "NFS: Exportfs"
+  become: true
+  ansible.builtin.command: exportfs -a
+  register: nfs_reload
+  changed_when: nfs_reload.rc != 0
+  when:
+    - nfs_package_state != 'absent'

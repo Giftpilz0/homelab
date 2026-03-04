@@ -1,0 +1,19 @@
+---
+# tasks file for timezone
+
+######################################
+### packages
+
+- name: "Timezone: Manage packages"
+  become: true
+  ansible.builtin.package:
+    name: "{{ timezone_package }}"
+    state: "{{ timezone_package_state }}"
+
+######################################
+### jobs
+
+- name: "Timezone: Set timezone"
+  become: true
+  community.general.timezone:
+    name: "{{ timezone_timezone }}"

@@ -1,0 +1,83 @@
+---
+podman_user: "container"
+
+######################################
+### giftpilz0.container.vaultwarden
+
+# Proxy
+vaultwarden_proxy_enabled: false
+vaultwarden_proxy_http: ""
+vaultwarden_proxy_https: ""
+vaultwarden_proxy_no_proxy: ""
+
+# Network
+vaultwarden_network_enabled: true
+vaultwarden_network_driver: "bridge"
+vaultwarden_network_internal: false
+
+# Network to join even when _network_enabled: false
+vaultwarden_network_name: "vaultwarden-internal"
+
+# Envoy
+vaultwarden_envoy_enabled: false
+vaultwarden_envoy_version: "1.37-latest"
+
+# Port mapping: host_port:container_port
+vaultwarden_port_map_enabled: true
+vaultwarden_port_map:
+  - "80:80"
+
+# Versions
+vaultwarden_version: "1.34.3-alpine"
+
+# Autoupdate
+vaultwarden_autoupdate: true
+
+# Environment
+vaultwarden_domain: "https://vaultwarden.nixpi.de/"
+
+######################################
+### giftpilz0.container.traefik
+
+# Proxy
+traefik_proxy_enabled: false
+traefik_proxy_http: ""
+traefik_proxy_https: ""
+traefik_proxy_no_proxy: ""
+
+# Network
+traefik_network_enabled: false
+traefik_network_driver: "bridge"
+traefik_network_internal: false
+
+# Network to join even when _network_enabled: false
+traefik_network_name: "vaultwarden-internal"
+
+# Version
+traefik_version: "v3.6"
+
+# Autoupdate
+traefik_autoupdate: true
+
+# ACME
+traefik_acme_enabled: true
+traefik_acme_ca_server: "https://acme-v02.api.letsencrypt.org/directory"
+traefik_acme_challenge_type: dns
+traefik_acme_dns_provider: "cloudflare"
+traefik_acme_eab_enabled: false
+
+# Logging
+traefik_log_level: "INFO"
+
+# HTTP services
+traefik_http_services:
+  - name: vaultwarden
+    domain: vaultwarden.nixpi.de
+    rule: "Host(`vaultwarden.nixpi.de`)"
+    servers:
+      - url: "http://vaultwarden-pod:80"
+    tls_enabled: true
+    acme_enabled: true
+    health_check:
+      path: "/alive"
+      interval: "30s"

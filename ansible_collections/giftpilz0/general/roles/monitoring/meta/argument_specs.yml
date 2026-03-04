@@ -1,0 +1,50 @@
+---
+argument_specs:
+  main:
+    short_description: The main entry point for the monitoring role.
+    options:
+      monitoring_agent_package_state:
+        type: str
+        required: false
+        choices:
+          - present
+          - absent
+          - latest
+          - skip
+        description: monitoring_agent_package_state
+
+      monitoring_agent_arch:
+        type: str
+        required: false
+        description: monitoring_agent_arch
+
+      monitoring_agent_tag:
+        type: str
+        required: false
+        description: monitoring_agent_tag
+
+      monitoring_agent_package:
+        type: list
+        elements: str
+        required: false
+        description: monitoring_agent_package
+
+      monitoring_agent_service_name:
+        type: str
+        required: false
+        description: monitoring_agent_service_name
+
+      monitoring_agent_service_state:
+        type: str
+        required: false
+        choices:
+          - reloaded
+          - restarted
+          - started
+          - stopped
+        description: monitoring_agent_service_state
+
+      monitoring_agent_service_enabled:
+        type: bool
+        required: false
+        description: monitoring_agent_service_enabled

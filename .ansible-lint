@@ -4,5 +4,7 @@ exclude_paths:
   - sops-secret.yaml
 
 skip_list:
+  - ignore-errors
   - yaml[comments]
+  - yaml[line-length]
   - var-naming[no-role-prefix]

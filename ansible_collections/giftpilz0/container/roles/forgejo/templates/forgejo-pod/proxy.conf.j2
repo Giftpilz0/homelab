@@ -1,0 +1,9 @@
+[containers]
+http_proxy = false
+
+[engine]
+{% if forgejo_proxy_enabled and forgejo_proxy_env %}
+env = ["{{ forgejo_proxy_env | join('","') }}"]
+{% else %}
+env = []
+{% endif %}

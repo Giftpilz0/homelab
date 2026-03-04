@@ -1,0 +1,9 @@
+[containers]
+http_proxy = false
+
+[engine]
+{% if opencloud_proxy_enabled and opencloud_proxy_env %}
+env = ["{{ opencloud_proxy_env | join('","') }}"]
+{% else %}
+env = []
+{% endif %}

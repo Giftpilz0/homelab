@@ -1,0 +1,19 @@
+[Unit]
+Description=Misc Pod
+
+[Pod]
+PodName=misc-pod
+
+Network={{ misc_network_name }}
+
+{% if misc_port_map_enabled %}
+{% for port_mapping in misc_port_map %}
+PublishPort={{ port_mapping }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

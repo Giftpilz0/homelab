@@ -7,11 +7,13 @@ This project serves as a configuration repository for my homelab setup. It inclu
 The project directory structure is as follows:
 
 ```
+├── ansible_collections
 ├── ansible-playbook
 ├── packer
 └── tofu
 ```
 
+- **ansible_collections**: Directory containing Ansible collections.
 - **ansible-playbook**: Directory containing Ansible playbooks and related files for configuring and managing virtual machines.
 - **packer**: Directory containing packer configurations for building virtual machine templates used in the homelab environment.
 - **tofu**: Directory containing OpenTofu configurations used to deploy and manage the Homelab infrastructure.

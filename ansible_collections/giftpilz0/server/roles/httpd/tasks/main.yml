@@ -1,0 +1,43 @@
+---
+# tasks file for httpd
+
+######################################
+### packages
+
+- name: "Httpd: Gather package facts"
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: "Httpd: Manage dependencies"
+  become: true
+  ansible.builtin.package:
+    name: "{{ httpd_package }}"
+    state: "{{ httpd_package_state }}"
+
+######################################
+### services
+
+- name: "Httpd: Manage services"
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ httpd_service_name }}"
+    state: "{{ httpd_service_state }}"
+    enabled: "{{ httpd_service_enabled }}"
+  when:
+    - httpd_package_state != 'absent'
+
+######################################
+### jobs
+
+- name: "Httpd: Manage firewall"
+  ansible.builtin.include_role:
+    name: giftpilz0.general.firewalld
+  vars:
+    firewalld_rules_services:
+      - service: "{{ httpd_firewalld_service }}"
+        zone: "{{ httpd_firewalld_zone }}"
+        state: "{{ httpd_firewalld_state }}"
+  when:
+    - "'firewalld' in ansible_facts.packages"
+    - httpd_firewalld_state != 'skip'
+    - httpd_package_state != 'absent'

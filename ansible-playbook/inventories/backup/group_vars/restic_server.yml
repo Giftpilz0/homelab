@@ -1,6 +1,6 @@
 ---
 ######################################
-### giftpilz0.homelab.restic
+### giftpilz0.misc.restic
 
 restic_mode: server
 
@@ -10,7 +10,7 @@ restic_user_home: /home/backup
 restic_server_repo_base: /media/data/backup/restic
 
 ######################################
-### giftpilz0.homelab.snapper
+### giftpilz0.misc.snapper
 
 snapper_configs:
   - name: backup

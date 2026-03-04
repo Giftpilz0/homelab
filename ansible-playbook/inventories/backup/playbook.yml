@@ -7,9 +7,9 @@
 - name: Configure hosts - restic_server
   hosts: restic_server
   roles:
-    - role: giftpilz0.homelab.snapper
+    - role: giftpilz0.misc.snapper
 
 - name: Configure hosts - all
   hosts: all
   roles:
-    - role: giftpilz0.homelab.restic
+    - role: giftpilz0.misc.restic
