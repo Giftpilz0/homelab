@@ -48,7 +48,7 @@ vaultwarden_envoy_version: "1.37"
 
 # SPIRE
 vaultwarden_spire_enabled: false
-vaultwarden_spire_agent_version: "1.14.1"
+vaultwarden_spire_agent_version: "1.14.2"
 
 # Port mapping
 vaultwarden_port_map_enabled: true

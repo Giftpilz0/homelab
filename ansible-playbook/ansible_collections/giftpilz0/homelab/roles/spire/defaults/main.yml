@@ -3,7 +3,7 @@ podman_user: "{{ ansible_user }}"
 
 # SPIRE Server
 spire_server_enabled: false
-spire_server_version: "1.14.1"
+spire_server_version: "1.14.2"
 spire_server_port: 8081
 spire_server_log_level: "DEBUG"
 
@@ -22,7 +22,7 @@ spire_trust_domain: "homelab.local"
 
 # SPIRE Agent (sidecar for each pod)
 spire_agent_enabled: false
-spire_agent_version: "1.14.1"
+spire_agent_version: "1.14.2"
 spire_agent_log_level: "DEBUG"
 
 # Multi-node distribution

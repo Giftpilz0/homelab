@@ -54,7 +54,7 @@ opencloud_envoy_version: "1.37"
 
 # SPIRE
 opencloud_spire_enabled: false
-opencloud_spire_agent_version: "1.14.1"
+opencloud_spire_agent_version: "1.14.2"
 
 # Port mapping
 opencloud_port_map_enabled: true

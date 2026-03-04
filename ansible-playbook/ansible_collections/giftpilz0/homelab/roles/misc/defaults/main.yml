@@ -20,7 +20,7 @@ misc_envoy_version: "1.37"
 
 # SPIRE - experimental (not yet implemented)
 misc_spire_enabled: false
-misc_spire_agent_version: "1.14.1"
+misc_spire_agent_version: "1.14.2"
 
 # Port mapping: host_port:container_port
 misc_port_map_enabled: true

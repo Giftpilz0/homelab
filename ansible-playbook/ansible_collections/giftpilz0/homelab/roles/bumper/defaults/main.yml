@@ -20,7 +20,7 @@ bumper_envoy_version: "1.37"
 
 # SPIRE - experimental (not yet implemented)
 bumper_spire_enabled: false
-bumper_spire_agent_version: "1.14.1"
+bumper_spire_agent_version: "1.14.2"
 
 # Port mapping: host_port:container_port
 bumper_port_map_enabled: true
