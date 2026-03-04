@@ -1,0 +1,31 @@
+---
+namespace: giftpilz0
+name: general
+version: 1.0.0
+
+description: Ansible collection for general linux tasks
+readme: README.md
+license:
+  - GPL-3.0-only
+
+authors:
+  - Moritz Schmidt <schmidtmoritz404@gmail.com>
+
+tags:
+  - linux
+  - autoupgrade
+  - timezone
+  - update
+  - monitoring
+  - packages
+  - pcp
+  - firewalld
+  - git
+  - user
+  - sysutil
+
+dependencies:
+  ansible.posix: ">=1.0.0"
+  community.general: ">=1.0.0"
+
+repository: https://github.com/giftpilz0/homelab

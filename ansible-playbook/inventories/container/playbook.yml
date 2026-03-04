@@ -7,42 +7,42 @@
     - role: giftpilz0.general.autoupgrade
     - role: giftpilz0.general.firewalld
     - role: giftpilz0.general.packages
-    - role: giftpilz0.homelab.profile
     - role: giftpilz0.general.timezone
     - role: giftpilz0.server.podman
+    - role: giftpilz0.misc.profile
 
 - name: Configure hosts - forgejo
   hosts: forgejo
   roles:
-    - role: giftpilz0.homelab.traefik
-    - role: giftpilz0.homelab.forgejo
+    - role: giftpilz0.container.traefik
+    - role: giftpilz0.container.forgejo
 
 - name: Configure hosts - homeassistant
   hosts: homeassistant
   roles:
-    - role: giftpilz0.homelab.traefik
-    - role: giftpilz0.homelab.mosquitto
-    - role: giftpilz0.homelab.homeassistant
+    - role: giftpilz0.container.traefik
+    - role: giftpilz0.container.mosquitto
+    - role: giftpilz0.container.homeassistant
 
 - name: Configure hosts - opencloud
   hosts: opencloud
   roles:
-    - role: giftpilz0.homelab.traefik
-    - role: giftpilz0.homelab.opencloud
+    - role: giftpilz0.container.traefik
+    - role: giftpilz0.container.opencloud
 
 - name: Configure hosts - vaultwarden
   hosts: vaultwarden
   roles:
-    - role: giftpilz0.homelab.traefik
-    - role: giftpilz0.homelab.vaultwarden
+    - role: giftpilz0.container.traefik
+    - role: giftpilz0.container.vaultwarden
 
 - name: Configure hosts - bumper
   hosts: bumper
   roles:
-    - role: giftpilz0.homelab.bumper
+    - role: giftpilz0.container.bumper
 
 - name: Configure hosts - misc
   hosts: misc
   roles:
-    - role: giftpilz0.homelab.misc
-    - role: giftpilz0.homelab.cfdyndns
+    - role: giftpilz0.container.misc
+    - role: giftpilz0.misc.cfdyndns

@@ -1,0 +1,83 @@
+---
+podman_user: "{{ ansible_user }}"
+
+# Proxy
+authentik_proxy_enabled: false
+authentik_proxy_http: ""
+authentik_proxy_https: ""
+authentik_proxy_no_proxy: ""
+authentik_proxy_env: "{{ (['https_proxy=' ~ authentik_proxy_https] + (['http_proxy=' ~ authentik_proxy_http] if authentik_proxy_http else []) + (['no_proxy=' ~ authentik_proxy_no_proxy] if authentik_proxy_no_proxy else [])) if authentik_proxy_enabled else [] }}"
+
+# Network
+authentik_network_enabled: true
+authentik_network_driver: "bridge"
+authentik_network_internal: false
+
+# Network to join even when _network_enabled: false
+authentik_network_name: "authentik-internal"
+
+# Envoy
+authentik_envoy_enabled: true
+authentik_envoy_version: "1.37-latest"
+
+# Port mapping: host_port:container_port
+authentik_port_map_enabled: true
+authentik_port_map:
+  - "9000:9000"
+  - "9443:9443"
+
+# Versions
+valkey_version: "9-alpine"
+postgresql_version: "18-alpine"
+authentik_version: "2026.02"
+
+# Autoupdate
+authentik_cache_autoupdate: true
+authentik_postgresql_autoupdate: true
+authentik_server_autoupdate: true
+authentik_worker_autoupdate: true
+
+# Environment
+
+# Required Variables
+authentik_secret_key: "" # openssl rand -base64 60 | tr -d '\n'
+authentik_db_password: ""
+authentik_domain: ""
+
+authentik_base_environment_vars: &authentik_base_env
+  AUTHENTIK_SECRET_KEY: "{{ authentik_secret_key }}"
+  AUTHENTIK_POSTGRESQL__HOST: 127.0.0.1
+  AUTHENTIK_POSTGRESQL__PORT: 5432
+  AUTHENTIK_POSTGRESQL__NAME: "{{ authentik_db_name | default('authentik') }}"
+  AUTHENTIK_POSTGRESQL__USER: "{{ authentik_db_user | default('authentik') }}"
+  AUTHENTIK_POSTGRESQL__PASSWORD: "{{ authentik_db_password }}"
+  AUTHENTIK_COOKIE_DOMAIN: "{{ authentik_domain }}"
+  AUTHENTIK_REDIS__HOST: 127.0.0.1
+  AUTHENTIK_REDIS__PORT: 6379
+  AUTHENTIK_LOG_LEVEL: "{{ authentik_log_level | default('info') }}"
+  AUTHENTIK_ERROR_REPORTING__ENABLED: "{{ authentik_error_reporting | default('false') }}"
+  AUTHENTIK_DISABLE_UPDATE_CHECK: "{{ authentik_disable_update_check | default('true') }}"
+  # AUTHENTIK_EMAIL__HOST: "{{ authentik_email_host }}"
+  # AUTHENTIK_EMAIL__PORT: "{{ authentik_email_port | default('587') }}"
+  # AUTHENTIK_EMAIL__USERNAME: "{{ authentik_email_username }}"
+  # AUTHENTIK_EMAIL__PASSWORD: "{{ authentik_email_password }}"
+  # AUTHENTIK_EMAIL__USE_TLS: "{{ authentik_email_use_tls | default('true') }}"
+  # AUTHENTIK_EMAIL__FROM: "{{ authentik_email_from }}"
+
+authentik_worker_environment_vars:
+  <<: *authentik_base_env
+  AUTHENTIK_BOOTSTRAP_PASSWORD: "{{ authentik_bootstrap_password | default('') }}"
+  AUTHENTIK_BOOTSTRAP_TOKEN: "{{ authentik_bootstrap_token | default('') }}"
+  AUTHENTIK_BOOTSTRAP_EMAIL: "{{ authentik_bootstrap_email | default('akadmin@localhost') }}"
+
+authentik_server_environment_vars:
+  <<: *authentik_base_env
+  COMPOSE_PORT_HTTP: "{{ authentik_listen_http | default('0.0.0.0:9000' if not authentik_envoy_enabled else '127.0.0.1:9000') }}"
+  COMPOSE_PORT_HTTPS: "{{ authentik_listen_https | default('0.0.0.0:9443' if not authentik_envoy_enabled else '127.0.0.1:9443') }}"
+
+authentik_postgresql_environment_vars:
+  POSTGRES_DB: "{{ authentik_db_name | default('authentik') }}"
+  POSTGRES_USER: "{{ authentik_db_user | default('authentik') }}"
+  POSTGRES_PASSWORD: "{{ authentik_db_password }}"
+
+authentik_cache_environment_vars: {}

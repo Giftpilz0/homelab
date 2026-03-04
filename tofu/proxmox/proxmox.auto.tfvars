@@ -28,6 +28,36 @@ networks = {
       "sdn" = {}
     }
   }
+
+  "k8s" = {
+    node_name   = "pve"
+    bridge_name = "k8s"
+    vlan_aware  = true
+    comment     = "Bridge for Kubernetes networks"
+    ports       = []
+
+    network = "192.168.65.10/24"
+    gateway = "192.168.65.1"
+
+    sdn_vlan_zone = {
+      "k8s" = {}
+    }
+  }
+
+  "misc" = {
+    node_name   = "pve"
+    bridge_name = "misc"
+    vlan_aware  = true
+    comment     = "Bridge for miscellaneous container workloads"
+    ports       = []
+
+    network = "192.168.60.10/24"
+    gateway = "192.168.60.1"
+
+    sdn_vlan_zone = {
+      "misc" = {}
+    }
+  }
 }
 
 # VMs Configuration

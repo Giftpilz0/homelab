@@ -1,0 +1,104 @@
+---
+# tasks file for user
+
+######################################
+### jobs
+
+- name: "User: Load variables file"
+  ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+
+- name: "User: Unsupported distribution"
+  ansible.builtin.fail:
+    msg: "{{ ansible_os_family }} is not supported"
+  when: user_mkpasswd_package is undefined
+
+- name: "User: Manage group"
+  become: true
+  ansible.builtin.group:
+    name: "{{ item.user_username }}"
+    state: "{{ item.user_state }}"
+  with_items: "{{ user }}"
+
+- name: "User: Install mkpasswd"
+  become: true
+  ansible.builtin.package:
+    name: "{{ user_mkpasswd_package }}"
+    state: present
+
+- name: "User: Hash passwords"
+  ansible.builtin.command: mkpasswd "{{ item.user_password }}"
+  register: user_hashed_passwords
+  changed_when: false
+  loop: "{{ user }}"
+  when:
+    - item.user_password != "!"
+
+- name: "User: Create password hash mapping"
+  ansible.builtin.set_fact:
+    user_password_map: "{{ user_password_map | default({}) | combine({item.item.user_username: item.stdout}) }}"
+  loop: "{{ user_hashed_passwords.results }}"
+  when:
+    - item is not skipped
+    - item.stdout is defined
+
+- name: "User: Allow passwordless sudo"
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/ansible_users
+    regexp: "#? *{{ item.user_username }} "
+    line: "{{ item.user_username }} ALL=(ALL) NOPASSWD: ALL"
+    create: true
+    mode: "0440"
+    group: root
+    owner: root
+    backup: true
+  with_items: "{{ user }}"
+  when:
+    - item.user_sudo_pwless
+
+- name: "User: Disallow passwordless sudo"
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/ansible_users
+    regexp: "#? *{{ item.user_username }} "
+    line: "# {{ item.user_username }} ALL=(ALL) NOPASSWD: ALL"
+    create: true
+    mode: "0440"
+    group: root
+    owner: root
+    backup: true
+  with_items: "{{ user }}"
+  when:
+    - not item.user_sudo_pwless
+
+- name: "User: Manage user"
+  become: true
+  ansible.builtin.user:
+    name: "{{ item.user_username }}"
+    group: "{{ item.user_username }}"
+    groups: "{{ item.user_groups | default({}) }}"
+    create_home: "{{ item.user_home | default({}) }}"
+    shell: "{{ item.user_shell | default({}) }}"
+    password: "{{ user_password_map[item.user_username] | default('!') }}"
+    state: "{{ item.user_state }}"
+    comment: "{{ item.user_comment }}"
+  with_items: "{{ user }}"
+
+- name: "User: Add authorized_keys"
+  become: true
+  ansible.posix.authorized_key:
+    user: "{{ item.0.user_username }}"
+    key: "{{ item.1 }}"
+    state: present
+  loop: "{{ user | subelements('user_pub', skip_missing=True) }}"
+
+- name: "User: Add authorized_keys to specified users"
+  become: true
+  ansible.posix.authorized_key:
+    user: "{{ item.0 }}"
+    key: "{{ item.1.1 }}"
+    state: present
+  loop: "{{ user_key_target_users | default([]) | product(user | subelements('user_pub', skip_missing=True)) | list }}"
+  when:
+    - user_key_target_users | length > 0
+    - item.1.0.user_install_key_to_targets | default(true)

@@ -1,0 +1,32 @@
+---
+argument_specs:
+  main:
+    short_description: The main entry point for the k9s role.
+    options:
+      k9s_bin_state:
+        type: str
+        required: false
+        choices:
+          - present
+          - skip
+        description: k9s_bin_state
+
+      k9s_url:
+        type: str
+        required: false
+        description: k9s_url
+
+      k9s_arch:
+        type: str
+        required: false
+        description: k9s_arch
+
+      k9s_tag:
+        type: str
+        required: false
+        description: k9s_tag
+
+      k9s_path:
+        type: str
+        required: false
+        description: k9s_path

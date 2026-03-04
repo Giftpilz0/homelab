@@ -1,0 +1,271 @@
+---
+# tasks file for K3s
+
+######################################
+### prereq
+
+- name: "K3s: Gather package facts"
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: "K3s: Manage kernel modules"
+  become: true
+  ansible.builtin.copy:
+    content: ""
+    dest: /etc/modules-load.d/k3s.conf
+    force: false
+    mode: "0644"
+
+- name: "K3s: Manage kernel modules"
+  become: true
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - br_netfilter
+
+- name: "K3s: Manage kernel modules"
+  become: true
+  ansible.builtin.blockinfile:
+    block: |
+      br_netfilter
+    path: /etc/modules-load.d/k3s.conf
+    state: present
+
+- name: "K3s: Manage Sysctl"
+  become: true
+  ansible.builtin.copy:
+    content: ""
+    dest: /etc/sysctl.d/k3s.conf
+    force: false
+    mode: "0644"
+
+- name: "K3s: Manage Sysctl"
+  become: true
+  ansible.posix.sysctl:
+    name: "{{ item }}"
+    value: "1"
+    state: present
+    reload: true
+  loop:
+    - net.bridge.bridge-nf-call-iptables
+    - net.bridge.bridge-nf-call-ip6tables
+    - net.ipv4.ip_forward
+    - net.ipv6.conf.all.forwarding
+
+- name: "K3s: Manage Sysctl"
+  become: true
+  ansible.builtin.blockinfile:
+    block: |
+      net.bridge.bridge-nf-call-iptables = 1
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.ipv4.ip_forward = 1
+      net.ipv6.conf.all.forwarding = 1
+    path: /etc/sysctl.d/k3s.conf
+    state: present
+
+- name: "K3s: Download install script"
+  become: true
+  ansible.builtin.get_url:
+    url: https://get.k3s.io/
+    dest: /usr/local/bin/k3s-install.sh
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "K3s: Download binary"
+  become: true
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s-install.sh
+  environment:
+    INSTALL_K3S_SKIP_START: "true"
+    INSTALL_K3S_VERSION: "{{ k3s_version }}"
+  changed_when: true
+
+- name: "K3s: Create manifests directory"
+  become: true
+  ansible.builtin.file:
+    path: /var/lib/rancher/k3s/server/manifests
+    state: directory
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: "K3s: Manage firewall"
+  ansible.builtin.include_role:
+    name: giftpilz0.general.firewalld
+  vars:
+    firewalld_rules_services:
+      - service: kubelet
+        zone: "{{ k3s_firewalld_zone }}"
+        state: "{{ k3s_firewalld_state }}"
+      - service: kube-control-plane
+        zone: "{{ k3s_firewalld_zone }}"
+        state: "{{ k3s_firewalld_state }}"
+    firewalld_rules_ports:
+      - port: 8472 # cilium VXLAN
+        protocol: udp
+        zone: "{{ k3s_firewalld_zone }}"
+        state: "{{ k3s_firewalld_state }}"
+      - port: 4240 # cilium-health
+        protocol: tcp
+        zone: "{{ k3s_firewalld_zone }}"
+        state: "{{ k3s_firewalld_state }}"
+      - port: 4244 # hubble server
+        protocol: tcp
+        zone: "{{ k3s_firewalld_zone }}"
+        state: "{{ k3s_firewalld_state }}"
+      - port: 4245 # hubble relay
+        protocol: tcp
+        zone: "{{ k3s_firewalld_zone }}"
+        state: "{{ k3s_firewalld_state }}"
+    firewalld_zones_define:
+      - zone: trusted
+        source: "{{ k3s_service_cidr }}"
+      - zone: trusted
+        source: "{{ k3s_cluster_cidr }}"
+  when:
+    - "'firewalld' in ansible_facts.packages"
+    - k3s_firewalld_state != 'skip'
+
+- name: "K3s: Install helm"
+  ansible.builtin.include_role:
+    name: giftpilz0.kubernetes.helm
+
+- name: "K3s: Install fluxcli"
+  ansible.builtin.include_role:
+    name: giftpilz0.kubernetes.fluxcli
+
+- name: "K3s: Install k9s"
+  ansible.builtin.include_role:
+    name: giftpilz0.kubernetes.k9s
+
+######################################
+### initialize cluster
+
+- name: "K3s: Init first server node"
+  become: true
+  when: inventory_hostname == groups['k3s'][0]
+  block:
+    - name: "K3s: Download kube-vip manifest"
+      become: true
+      ansible.builtin.get_url:
+        url: https://kube-vip.io/manifests/rbac.yaml
+        dest: /var/lib/rancher/k3s/server/manifests/kube-vip-rbac.yaml
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: "K3s: Copy kube-vip manifest to first master"
+      become: true
+      ansible.builtin.template:
+        src: vip.yaml.j2
+        dest: /var/lib/rancher/k3s/server/manifests/kube-vip.yaml
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: "K3s: Copy K3s service"
+      ansible.builtin.template:
+        src: k3s-cluster-init.service.j2
+        dest: /etc/systemd/system/{{ k3s_service_name }}
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: "K3s: Enable and check K3s service"
+      become: true
+      ansible.builtin.systemd:
+        name: "{{ k3s_service_name }}"
+        daemon_reload: true
+        state: "{{ k3s_service_state }}"
+        enabled: "{{ k3s_service_enabled }}"
+
+    - name: "K3s: Pause to allow server startup"
+      ansible.builtin.pause:
+        seconds: 10
+
+    - name: "K3s: Install cilium"
+      ansible.builtin.include_role:
+        name: giftpilz0.kubernetes.cilium
+
+    - name: "K3s: Restart K3s service"
+      become: true
+      ansible.builtin.systemd:
+        name: "{{ k3s_service_name }}"
+        state: restarted
+
+    - name: "K3s: Pause to allow server startup"
+      ansible.builtin.pause:
+        seconds: 10
+
+######################################
+### join nodes
+
+- name: "K3s: Start other server if any and verify status"
+  when:
+    - inventory_hostname != groups['k3s'][0]
+  block:
+    - name: "K3s: Copy K3s service"
+      become: true
+      ansible.builtin.template:
+        src: k3s.service.j2
+        dest: /etc/systemd/system/{{ k3s_service_name }}
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: "K3s: Enable and check K3s service"
+      become: true
+      ansible.builtin.systemd:
+        name: "{{ k3s_service_name }}"
+        daemon_reload: true
+        state: "{{ k3s_service_state }}"
+        enabled: "{{ k3s_service_enabled }}"
+
+    - name: "K3s: Verify that all server nodes joined"
+      become: true
+      ansible.builtin.command:
+        cmd: >
+          /usr/local/bin/k3s kubectl get nodes -l "node-role.kubernetes.io/control-plane=true" -o=jsonpath="{.items[*].metadata.name}"
+      register: k3s_nodes
+      until: k3s_nodes.rc == 0 and (nodes.stdout.split() | length) == (groups['k3s'] | length)
+      retries: 10
+      delay: 10
+      changed_when: false
+
+######################################
+### kubeconfig
+
+- name: "K3s: Setup kubectl for user"
+  block:
+    - name: "K3s: Create kubectl symlink"
+      become: true
+      when: lookup('fileglob', '/usr/local/bin/kubectl', errors='warn') | length == 0
+      ansible.builtin.file:
+        src: /usr/local/bin/k3s
+        dest: /usr/local/bin/kubectl
+        state: link
+
+    - name: "K3s: Create directory .kube"
+      ansible.builtin.file:
+        path: ~{{ ansible_user }}/.kube
+        state: directory
+        owner: "{{ ansible_user }}"
+        mode: "0750"
+
+    - name: "K3s: Copy config file to user home directory"
+      become: true
+      ansible.builtin.copy:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: ~{{ ansible_user }}/.kube/config
+        remote_src: true
+        owner: "{{ ansible_user }}"
+        mode: "0600"
+
+    - name: "K3s: Configure default KUBECONFIG for user"
+      ansible.builtin.lineinfile:
+        path: ~{{ ansible_user }}/.bashrc
+        regexp: export KUBECONFIG=~/.kube/config
+        line: export KUBECONFIG=~/.kube/config
+        state: present

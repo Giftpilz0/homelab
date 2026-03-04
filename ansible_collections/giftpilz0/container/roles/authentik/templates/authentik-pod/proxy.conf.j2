@@ -1,0 +1,9 @@
+[containers]
+http_proxy = false
+
+[engine]
+{% if authentik_proxy_enabled and authentik_proxy_env %}
+env = ["{{ authentik_proxy_env | join('","') }}"]
+{% else %}
+env = []
+{% endif %}

@@ -1,0 +1,31 @@
+[Unit]
+Description=Bumper Container
+
+[Container]
+ContainerName=bumper
+Image=localhost/bumper-custom:{{ bumper_version }}
+
+Pod=bumper.pod
+
+{% if bumper_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+{% if bumper_environment_vars is defined %}
+{% for env_name, env_value in bumper_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
+
+{% if bumper_proxy_enabled %}
+{% for env_var in bumper_proxy_env %}
+Environment={{ env_var }}
+{% endfor %}
+{% endif %}
+
+Volume=%h/.config/containers/systemd/bumper-pod/config/bumper.key:/bumper/certs/bumper.key:Z
+Volume=%h/.config/containers/systemd/bumper-pod/config/bumper.crt:/bumper/certs/bumper.crt:Z
+Volume=%h/.config/containers/systemd/bumper-pod/config/ca.key:/bumper/certs/ca.key:Z
+Volume=%h/.config/containers/systemd/bumper-pod/config/ca.crt:/bumper/certs/ca.crt:Z
+Volume=%h/.config/containers/systemd/bumper-pod/config/ca.pem:/bumper/certs/ca.pem:Z
+Volume=bumper-data.volume:/bumper/data

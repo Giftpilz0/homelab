@@ -1,0 +1,19 @@
+[Unit]
+Description=OpenCloud Pod
+
+[Pod]
+PodName=opencloud-pod
+
+Network={{ opencloud_network_name }}
+
+{% if opencloud_port_map_enabled %}
+{% for port_mapping in opencloud_port_map %}
+PublishPort={{ port_mapping }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

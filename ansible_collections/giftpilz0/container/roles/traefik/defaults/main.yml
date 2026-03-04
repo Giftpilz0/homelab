@@ -1,0 +1,99 @@
+---
+podman_user: "{{ ansible_user }}"
+
+# Proxy
+traefik_proxy_enabled: false
+traefik_proxy_http: ""
+traefik_proxy_https: ""
+traefik_proxy_no_proxy: ""
+traefik_proxy_env: "{{ (['https_proxy=' ~ traefik_proxy_https] + (['http_proxy=' ~ traefik_proxy_http] if traefik_proxy_http else []) + (['no_proxy=' ~ traefik_proxy_no_proxy] if traefik_proxy_no_proxy else [])) if traefik_proxy_enabled else [] }}"
+
+# Network
+traefik_network_enabled: true
+traefik_network_driver: "bridge"
+traefik_network_internal: false
+
+# Network to join even when _network_enabled: false
+traefik_network_name: "traefik-internal"
+
+# Version
+traefik_version: "v3.6"
+
+# Autoupdate
+traefik_autoupdate: true
+
+# Environment
+traefik_environment_vars: {}
+
+# traefik_environment_vars:
+#   CLOUDFLARE_DNS_API_TOKEN: "example"
+
+# ACME
+traefik_acme_enabled: true
+traefik_acme_email: ""
+traefik_acme_ca_server: "https://acme-v02.api.letsencrypt.org/directory"
+traefik_acme_challenge_type: http # dns, http or tls
+traefik_acme_dns_provider: "cloudflare"
+traefik_acme_eab_enabled: false
+traefik_acme_eab_kid: ""
+traefik_acme_eab_hmac: ""
+
+# Logging
+traefik_log_level: "WARN"
+traefik_log_format: "json"
+
+traefik_access_log_format: "json"
+traefik_access_log_buffer_size: 10
+
+# Transport
+traefik_transport_timeouts_enabled: false
+traefik_transport_read_timeout: "12h"
+traefik_transport_write_timeout: "12h"
+traefik_transport_idle_timeout: "3m"
+# Custom middlewares
+# traefik_custom_middlewares:
+#   auth-basic:
+#     basicAuth:
+#       users:
+#         - "admin:$2y$10$..."
+
+# TCP entrypoints
+# traefik_tcp_entrypoints:
+#   - name: mysql
+#     port: 3306
+#   - name: postgres
+#     port: 5432
+
+# HTTP services
+# traefik_http_services:
+#   - name: webapp
+#     domain: app.example.com
+#     rule: "Host(`app.example.com`)"
+#     servers:
+#       - url: "http://192.168.1.100:8080"
+#     tls_enabled: true
+#     acme_enabled: true
+#     middlewares:
+#       - "auth-basic@file"
+#     sans:
+#       - "app1.example.com"
+#       - "app2.example.com"
+#     health_check:
+#       path: "/health"
+#       interval: "30s"
+
+# TCP services
+# traefik_tcp_services:
+#   - name: mysql-primary
+#     domain: "db.example.com"
+#     rule: "HostSNI(`db.example.com`)"
+#     entrypoints:
+#       - mysql
+#     servers:
+#       - address: "192.168.1.200:3306"
+#     tls_enabled: true
+#     acme_enabled: true
+#     tls_passthrough: false
+#     sans:
+#       - "app1.example.com"
+#       - "app2.example.com"

@@ -1,0 +1,8 @@
+---
+# defaults file for k9s
+
+k9s_bin_state: present
+k9s_url: https://github.com/derailed/k9s/releases/download/v{{ k9s_tag }}/k9s_Linux_{{ k9s_arch }}.tar.gz
+k9s_arch: amd64
+k9s_tag: 0.50.18
+k9s_path: /usr/local/sbin

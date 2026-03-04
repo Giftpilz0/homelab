@@ -1,0 +1,48 @@
+---
+# tasks file for monitoring
+
+######################################
+### monitoring
+
+- name: "Monitoring: Gather package facts"
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: "Monitoring: Manage alloy repository keys"
+  become: true
+  ansible.builtin.rpm_key:
+    key: https://rpm.grafana.com/gpg.key
+    state: "{{ monitoring_agent_package_state }}"
+    fingerprint: B53A E77B ADB6 30A6 8304 6005 963F A277 1045 8545
+  when:
+    - monitoring_agent_package_state != 'skip'
+
+- name: "Monitoring: Download alloy"
+  become: true
+  ansible.builtin.package:
+    name: "{{ monitoring_agent_package }}"
+    state: "{{ monitoring_agent_package_state }}"
+  when:
+    - monitoring_agent_package_state != 'skip'
+
+- name: "Monitoring: Manage alloy config"
+  become: true
+  ansible.builtin.template:
+    src: config.alloy.j2
+    dest: "{{ monitoring_agent_config_path }}"
+    owner: root
+    group: alloy
+    mode: "0640"
+  when:
+    - monitoring_agent_package_state != 'skip'
+  notify:
+    - "Monitoring: Restart Agent"
+
+- name: "Monitoring: Manage service"
+  become: true
+  ansible.builtin.service:
+    name: "{{ monitoring_agent_service_name }}"
+    state: "{{ monitoring_agent_service_state }}"
+    enabled: "{{ monitoring_agent_service_enabled }}"
+  when:
+    - monitoring_agent_package_state != 'skip'

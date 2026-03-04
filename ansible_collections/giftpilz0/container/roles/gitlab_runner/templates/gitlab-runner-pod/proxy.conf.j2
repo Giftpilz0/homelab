@@ -1,0 +1,9 @@
+[containers]
+http_proxy = false
+
+[engine]
+{% if gitlab_runner_proxy_enabled and gitlab_runner_proxy_env %}
+env = ["{{ gitlab_runner_proxy_env | join('","') }}"]
+{% else %}
+env = []
+{% endif %}

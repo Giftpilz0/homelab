@@ -1,4 +1,4 @@
 *tfstate
-.terraform*
 .ansible
+.terraform*
 terraform.tfstate.backup

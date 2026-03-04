@@ -1,0 +1,86 @@
+---
+podman_user: "container"
+
+######################################
+### giftpilz0.container.forgejo
+
+# Proxy
+forgejo_proxy_enabled: false
+forgejo_proxy_http: ""
+forgejo_proxy_https: ""
+forgejo_proxy_no_proxy: ""
+
+# Network
+forgejo_network_enabled: true
+forgejo_network_driver: "bridge"
+forgejo_network_internal: false
+
+# Network to join even when _network_enabled: false
+forgejo_network_name: "forgejo-internal"
+
+# Envoy
+forgejo_envoy_enabled: false
+forgejo_envoy_version: "1.37-latest"
+
+# Port mapping: host_port:container_port
+forgejo_port_map_enabled: true
+forgejo_port_map:
+  - "3000:3000"
+  - "2222:2222"
+
+# Versions
+postgresql_version: "18-alpine"
+forgejo_version: "14"
+
+# Autoupdate
+forgejo_postgresql_autoupdate: true
+forgejo_autoupdate: true
+
+# Environment
+forgejo_domain: "forgejo.nixpi.de"
+forgejo_oauth_client_id: "forgejo"
+forgejo_oauth_domain: "opencloud.nixpi.de"
+forgejo_oauth_name: "opencloud"
+
+######################################
+### giftpilz0.container.traefik
+
+# Proxy
+traefik_proxy_enabled: false
+traefik_proxy_http: ""
+traefik_proxy_https: ""
+traefik_proxy_no_proxy: ""
+
+# Network
+traefik_network_enabled: false
+traefik_network_driver: "bridge"
+traefik_network_internal: false
+
+# Network to join even when _network_enabled: false
+traefik_network_name: "forgejo-internal"
+
+# Version
+traefik_version: "v3.6"
+
+# Autoupdate
+traefik_autoupdate: true
+
+# ACME
+traefik_acme_enabled: true
+traefik_acme_ca_server: "https://acme-v02.api.letsencrypt.org/directory"
+traefik_acme_challenge_type: dns
+traefik_acme_dns_provider: "cloudflare"
+traefik_acme_eab_enabled: false
+
+# Logging
+traefik_log_level: "INFO"
+
+# HTTP services
+traefik_http_services:
+  - name: forgejo
+    domain: forgejo.nixpi.de
+    rule: "Host(`forgejo.nixpi.de`)"
+    servers:
+      - url: "http://forgejo-pod:3000"
+    tls_enabled: true
+    acme_enabled: true

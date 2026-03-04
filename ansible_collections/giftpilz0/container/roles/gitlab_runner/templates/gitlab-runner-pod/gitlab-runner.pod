@@ -1,0 +1,13 @@
+[Unit]
+Description=Gitlab-runner Pod
+
+[Pod]
+PodName=gitlab-runner-pod
+
+Network={{ gitlab_runner_network_name }}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

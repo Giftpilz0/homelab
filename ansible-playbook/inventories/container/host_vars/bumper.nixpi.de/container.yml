@@ -1,0 +1,39 @@
+---
+podman_user: "container"
+
+######################################
+### giftpilz0.container.bumper
+
+# Proxy
+bumper_proxy_enabled: false
+bumper_proxy_http: ""
+bumper_proxy_https: ""
+bumper_proxy_no_proxy: ""
+
+# Network
+bumper_network_enabled: true
+bumper_network_driver: "bridge"
+bumper_network_internal: false
+
+# Network to join even when _network_enabled: false
+bumper_network_name: "bumper-internal"
+
+# Envoy
+bumper_envoy_enabled: false
+bumper_envoy_version: "1.37-latest"
+
+# Port mapping: host_port:container_port
+bumper_port_map_enabled: true
+bumper_port_map:
+  - "443:443"
+  - "1883:1883"
+  - "5223:5223"
+  - "8007:8007"
+  - "8443:8443"
+
+# Versions
+bumper_version: "latest"
+bumper_commit: "86bf91be27bf23bddc1e122013713d1c8f7ca53a"
+
+# Autoupdate
+bumper_autoupdate: true

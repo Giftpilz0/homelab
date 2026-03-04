@@ -1,0 +1,39 @@
+---
+podman_user: "{{ ansible_user }}"
+
+# Proxy
+vaultwarden_proxy_enabled: false
+vaultwarden_proxy_http: ""
+vaultwarden_proxy_https: ""
+vaultwarden_proxy_no_proxy: ""
+vaultwarden_proxy_env: "{{ (['https_proxy=' ~ vaultwarden_proxy_https] + (['http_proxy=' ~ vaultwarden_proxy_http] if vaultwarden_proxy_http else []) + (['no_proxy=' ~ vaultwarden_proxy_no_proxy] if vaultwarden_proxy_no_proxy else [])) if vaultwarden_proxy_enabled else [] }}"
+
+# Network
+vaultwarden_network_enabled: true
+vaultwarden_network_driver: "bridge"
+vaultwarden_network_internal: false
+
+# Network to join even when _network_enabled: false
+vaultwarden_network_name: "vaultwarden-internal"
+
+# Envoy
+vaultwarden_envoy_enabled: true
+vaultwarden_envoy_version: "1.37-latest"
+
+# Port mapping: host_port:container_port
+vaultwarden_port_map_enabled: true
+vaultwarden_port_map:
+  - "80:80"
+
+# Versions
+vaultwarden_version: "1.34.3-alpine"
+
+# Autoupdate
+vaultwarden_autoupdate: true
+
+# Environment
+vaultwarden_environment_vars:
+  DOMAIN: "{{ vaultwarden_domain }}"
+  ADMIN_TOKEN: "{{ vaultwarden_admin_token }}"
+  ROCKET_ADDRESS: "{{ '0.0.0.0' if not vaultwarden_envoy_enabled else '127.0.0.1' }}"
+  ROCKET_PORT: "80"

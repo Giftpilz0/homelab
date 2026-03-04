@@ -1,0 +1,27 @@
+[Unit]
+Description=Forgejo Container
+After=forgejo-postgresql.service
+
+[Container]
+ContainerName=forgejo
+Image=codeberg.org/forgejo/forgejo:{{ forgejo_version }}
+
+Pod=forgejo.pod
+
+{% if forgejo_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+{% if forgejo_environment_vars is defined %}
+{% for env_name, env_value in forgejo_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
+
+{% if forgejo_proxy_enabled %}
+{% for env_var in forgejo_proxy_env %}
+Environment={{ env_var }}
+{% endfor %}
+{% endif %}
+
+Volume=forgejo-data.volume:/data

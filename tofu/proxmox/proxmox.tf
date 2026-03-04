@@ -5,7 +5,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = "0.94.0"
+      version = "0.97.1"
     }
     sops = {
       source  = "nobbs/sops"
@@ -242,7 +242,7 @@ resource "proxmox_virtual_environment_network_linux_bridge" "bridges" {
 resource "proxmox_virtual_environment_sdn_zone_vlan" "vlan_zones" {
   for_each = local.flattened_sdn_zones
 
-  id     = each.value.zone_key
+  id = each.value.zone_key
   # nodes  = [each.value.node_name]
   bridge = proxmox_virtual_environment_network_linux_bridge.bridges[each.value.bridge_key].name
 

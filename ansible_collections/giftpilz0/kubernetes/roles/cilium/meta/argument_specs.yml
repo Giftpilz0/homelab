@@ -1,0 +1,135 @@
+---
+argument_specs:
+  # main.yml entry point
+  main:
+    short_description: The main entry point for the cilium role.
+    options:
+      cilium_version:
+        type: str
+        required: false
+        description: cilium_version
+
+      cilium_repo_url:
+        type: str
+        required: false
+        description: cilium_repo_url
+
+      cilium_kubeconfig:
+        type: str
+        required: false
+        description: cilium_kubeconfig
+
+      cilium_config_kubeproxyreplacement:
+        type: bool
+        required: false
+        description: cilium_config_kubeproxyreplacement
+
+      cilium_config_k8sclientratelimit_qps:
+        type: int
+        required: false
+        description: cilium_config_k8sclientratelimit_qps
+
+      cilium_config_k8sclientratelimit_burst:
+        type: int
+        required: false
+        description: cilium_config_k8sclientratelimit_burst
+
+      cilium_config_rolloutciliumpods:
+        type: bool
+        required: false
+        description: cilium_config_rolloutciliumpods
+
+      cilium_config_l2announcements_enabled:
+        type: bool
+        required: false
+        description: cilium_config_l2announcements_enabled
+
+      cilium_config_bgp_enabled:
+        type: bool
+        required: false
+        description: cilium_config_bgp_enabled
+
+      cilium_config_bgpcontrolplane_enabled:
+        type: bool
+        required: false
+        description: cilium_config_bgpcontrolplane_enabled
+
+      cilium_config_ingresscontroller_enabled:
+        type: bool
+        required: false
+        description: cilium_config_ingresscontroller_enabled
+
+      cilium_config_ingresscontroller_default:
+        type: bool
+        required: false
+        description: cilium_config_ingresscontroller_default
+
+      cilium_config_gatewayapi_enabled:
+        type: bool
+        required: false
+        description: cilium_config_gatewayapi_enabled
+
+      cilium_config_hostfirewall_enabled:
+        type: bool
+        required: false
+        description: cilium_config_hostfirewall_enabled
+
+      cilium_config_hubble_enabled:
+        type: bool
+        required: false
+        description: cilium_config_hubble_enabled
+
+      cilium_config_hubble_relay_enabled:
+        type: bool
+        required: false
+        description: cilium_config_hubble_relay_enabled
+
+      cilium_config_hubble_relay_rolloutpods:
+        type: bool
+        required: false
+        description: cilium_config_hubble_relay_rolloutpods
+
+      cilium_config_hubble_ui_enabled:
+        type: bool
+        required: false
+        description: cilium_config_hubble_ui_enabled
+
+      cilium_config_hubble_ui_rolloutpods:
+        type: bool
+        required: false
+        description: cilium_config_hubble_ui_rolloutpods
+
+      cilium_config_ipam_mode:
+        type: str
+        required: false
+        description: cilium_config_ipam_mode
+
+      cilium_config_ipam_operator_clusterpoolipv4podcidrlist:
+        type: list
+        required: false
+        description: cilium_config_ipam_operator_clusterpoolipv4podcidrlist
+
+      cilium_config_ipv4_enabled:
+        type: bool
+        required: false
+        description: cilium_config_ipv4_enabled
+
+      cilium_config_ipv6_enabled:
+        type: bool
+        required: false
+        description: cilium_config_ipv6_enabled
+
+      cilium_config_egressgateway_enabled:
+        type: bool
+        required: false
+        description: cilium_config_egressgateway_enabled
+
+      cilium_config_operator_enabled:
+        type: bool
+        required: false
+        description: cilium_config_operator_enabled
+
+      cilium_config_operator_rolloutpods:
+        type: bool
+        required: false
+        description: cilium_config_operator_rolloutpods

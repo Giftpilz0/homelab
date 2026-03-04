@@ -32,7 +32,7 @@
     },
     {
       "customType": "regex",
-      "description": "Update Home Assistant Docker image in Ansible vars (ghcr.io)",
+      "description": "Update Home Assistant Docker image in Ansible vars",
       "managerFilePatterns": [
         "/(^|/)defaults/main\\.ya?ml$/",
         "/(^|/)group_vars/.+\\.ya?ml$/",
@@ -46,7 +46,7 @@
     },
     {
       "customType": "regex",
-      "description": "Update Forgejo Docker image in Ansible vars (codeberg.org)",
+      "description": "Update Forgejo Docker image in Ansible vars",
       "managerFilePatterns": [
         "/(^|/)defaults/main\\.ya?ml$/",
         "/(^|/)group_vars/.+\\.ya?ml$/",
@@ -60,7 +60,7 @@
     },
     {
       "customType": "regex",
-      "description": "Update Home Bumper Docker image in Ansible vars (ghcr.io)",
+      "description": "Update Home Bumper Docker image in Ansible vars",
       "managerFilePatterns": [
         "/(^|/)defaults/main\\.ya?ml$/",
         "/(^|/)group_vars/.+\\.ya?ml$/",
@@ -102,7 +102,7 @@
     },
     {
       "customType": "regex",
-      "description": "Update Authentik Docker image in Ansible vars (ghcr.io)",
+      "description": "Update Authentik Docker image in Ansible vars",
       "managerFilePatterns": [
         "/(^|/)defaults/main\\.ya?ml$/",
         "/(^|/)group_vars/.+\\.ya?ml$/",
@@ -112,6 +112,48 @@
       "matchStrings": ["authentik_version:\\s*\"(?<currentValue>[^\"]+)\""],
       "datasourceTemplate": "docker",
       "depNameTemplate": "ghcr.io/goauthentik/server",
+      "versioningTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Update Envoy Docker image in Ansible vars",
+      "managerFilePatterns": [
+        "/(^|/)defaults/main\\.ya?ml$/",
+        "/(^|/)group_vars/.+\\.ya?ml$/",
+        "/(^|/)host_vars/.+\\.ya?ml$/",
+        "/(^|/)vars/.+\\.ya?ml$/"
+      ],
+      "matchStrings": ["_envoy_version:\\s*\"(?<currentValue>[^\"]+)\""],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "docker.io/envoyproxy/envoy",
+      "versioningTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Update SPIRE Server Docker image in Ansible vars",
+      "managerFilePatterns": [
+        "/(^|/)defaults/main\\.ya?ml$/",
+        "/(^|/)group_vars/.+\\.ya?ml$/",
+        "/(^|/)host_vars/.+\\.ya?ml$/",
+        "/(^|/)vars/.+\\.ya?ml$/"
+      ],
+      "matchStrings": ["spire_server_version:\\s*\"(?<currentValue>[^\"]+)\""],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "ghcr.io/spiffe/spire-server",
+      "versioningTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Update SPIRE Agent Docker image in Ansible vars",
+      "managerFilePatterns": [
+        "/(^|/)defaults/main\\.ya?ml$/",
+        "/(^|/)group_vars/.+\\.ya?ml$/",
+        "/(^|/)host_vars/.+\\.ya?ml$/",
+        "/(^|/)vars/.+\\.ya?ml$/"
+      ],
+      "matchStrings": ["spire_agent_version:\\s*\"(?<currentValue>[^\"]+)\""],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "ghcr.io/spiffe/spire-agent",
       "versioningTemplate": "docker"
     }
   ],

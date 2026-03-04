@@ -1,0 +1,26 @@
+[Unit]
+Description=Forgejo PostgreSQL Container
+
+[Container]
+ContainerName=forgejo-postgresql
+Image=docker.io/library/postgres:{{ postgresql_version }}
+
+Pod=forgejo.pod
+
+{% if forgejo_postgresql_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+{% if forgejo_postgresql_environment_vars is defined %}
+{% for env_name, env_value in forgejo_postgresql_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
+
+{% if forgejo_proxy_enabled %}
+{% for env_var in forgejo_proxy_env %}
+Environment={{ env_var }}
+{% endfor %}
+{% endif %}
+
+Volume=forgejo-postgresql.volume:/var/lib/postgresql
