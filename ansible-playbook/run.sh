@@ -58,7 +58,7 @@ main() {
     gum confirm "Run playbook for '$INVENTORY_DIR'?" || exit 0
 
     echo -e "[${BLUE}ℹ${NC}] Installing Ansible requirements..."
-    ansible-playbook "./requirements/install-requirements.yml" || {
+    ansible-playbook "./requirements/install-requirements.yaml" || {
         echo -e "[${RED}✘${NC}] Failed to install requirements"
         exit 1
     }
@@ -70,7 +70,7 @@ main() {
     trap "encrypt_sops_files < '$sops_files_list'; rm -f '$sops_files_list'" EXIT
 
     echo -e "[${BLUE}ℹ${NC}] Running playbook with decrypted secrets..."
-    ansible-playbook "./inventories/$INVENTORY_DIR/playbook.yml" --ask-become-pass "$@" -i "./inventories/$INVENTORY_DIR/hosts/hosts.yml"
+    ansible-playbook "./inventories/$INVENTORY_DIR/playbook.yaml" --ask-become-pass "$@" -i "./inventories/$INVENTORY_DIR/hosts/hosts.yaml"
 
     echo -e "[${GREEN}✔${NC}] Playbook completed"
 }

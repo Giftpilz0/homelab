@@ -1,10 +1,10 @@
 ---
 - name: "Snapper: Include installation tasks"
-  ansible.builtin.include_tasks: install.yml
+  ansible.builtin.include_tasks: install.yaml
 
 - name: "Snapper: Include configuration tasks"
-  ansible.builtin.include_tasks: configure.yml
+  ansible.builtin.include_tasks: configure.yaml
 
 - name: "Snapper: Include mount tasks"
-  ansible.builtin.include_tasks: mount.yml
+  ansible.builtin.include_tasks: mount.yaml
   when: snapper_add_to_fstab | bool

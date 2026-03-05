@@ -1,6 +1,6 @@
 ---
 exclude_paths:
-  - secrets.yml
+  - secrets.yaml
   - sops-secret.yaml
 
 skip_list:

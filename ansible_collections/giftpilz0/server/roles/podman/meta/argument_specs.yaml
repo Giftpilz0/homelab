@@ -1,6 +1,6 @@
 ---
 argument_specs:
-  # main.yml entry point
+  # main.yaml entry point
   main:
     short_description: The main entry point for the podman role.
     options:

@@ -5,7 +5,7 @@
 ### jobs
 
 - name: "User: Load variables file"
-  ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+  ansible.builtin.include_vars: "{{ ansible_os_family }}.yaml"
 
 - name: "User: Unsupported distribution"
   ansible.builtin.fail:
