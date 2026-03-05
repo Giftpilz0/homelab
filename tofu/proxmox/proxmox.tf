@@ -17,7 +17,7 @@ terraform {
 provider "sops" {}
 
 locals {
-  secrets = provider::sops::file("sops-secret.yaml")
+  secrets = provider::sops::file("secrets.yaml")
 }
 
 provider "proxmox" {
