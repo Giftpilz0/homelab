@@ -5,9 +5,9 @@
   connection: local
   become: false
   tasks:
-    - name: Install/update collections from requirements.yml
+    - name: Install/update collections from requirements.yaml
       ansible.builtin.command:
-        cmd: ansible-galaxy collection install -r requirements.yml --force
+        cmd: ansible-galaxy collection install -r requirements.yaml --force
       register: collection_update
       changed_when: "'was installed successfully' in collection_update.stdout"
 

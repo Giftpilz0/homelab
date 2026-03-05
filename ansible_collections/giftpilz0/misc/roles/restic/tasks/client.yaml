@@ -81,8 +81,8 @@
 - name: "Restic: Create resticprofile configuration"
   become: true
   ansible.builtin.template:
-    src: profiles.yml.j2
-    dest: "{{ restic_config_dir }}/profiles.yml"
+    src: profiles.yaml.j2
+    dest: "{{ restic_config_dir }}/profiles.yaml"
     owner: root
     group: root
     mode: "0644"
@@ -91,7 +91,7 @@
 - name: "Restic: Schedule backup jobs"
   become: true
   become_user: "{{ restic_user }}"
-  ansible.builtin.shell: "cd {{ restic_user_home }} && /usr/bin/sudo /usr/local/bin/resticprofile --config {{ restic_config_dir }}/profiles.yml --name {{ item.name }} schedule"
+  ansible.builtin.shell: "cd {{ restic_user_home }} && /usr/bin/sudo /usr/local/bin/resticprofile --config {{ restic_config_dir }}/profiles.yaml --name {{ item.name }} schedule"
   loop: "{{ restic_repositories }}"
   register: schedule_result
   changed_when: "'schedule created' in schedule_result.stdout or 'schedule updated' in schedule_result.stdout"

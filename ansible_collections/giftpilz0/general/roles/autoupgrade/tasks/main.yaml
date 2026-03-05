@@ -2,7 +2,7 @@
 # tasks file for autoupgrade
 
 - name: "Autoupgrade: Load variables file"
-  ansible.builtin.include_vars: "vars/{{ ansible_os_family }}.yml"
+  ansible.builtin.include_vars: "vars/{{ ansible_os_family }}.yaml"
 
 ######################################
 ### packages
