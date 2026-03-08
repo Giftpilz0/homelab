@@ -24,8 +24,8 @@ vaultwarden_envoy_version: "1.37-latest"
 
 # Port mapping: host_port:container_port
 vaultwarden_port_map_enabled: true
-vaultwarden_port_map:
-  - "80:80"
+vaultwarden_port_map: {}
+#  - "80:80"
 
 # Versions
 vaultwarden_version: "1.34.3-alpine"

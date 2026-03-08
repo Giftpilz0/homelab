@@ -36,4 +36,4 @@ misc_autoupdate: true
 misc_environment_vars:
   TZ: "Europe/Berlin"
   LOGLEVEL: "INFO"
-  PORT: "{{ '0.0.0.0:8080' if not misc_envoy_enabled else '127.0.0.1:8080' }}"
+  PORT: 8080 #"{{ '0.0.0.0:8080' if not misc_envoy_enabled else '127.0.0.1:8080' }}"

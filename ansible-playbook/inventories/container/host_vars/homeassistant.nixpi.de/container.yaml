@@ -24,20 +24,51 @@ homeassistant_envoy_version: "1.37-latest"
 
 # Port mapping: host_port:container_port
 homeassistant_port_map_enabled: true
-homeassistant_port_map:
-  - "8123:8123"
+homeassistant_port_map: {}
+#  - "8123:8123"
 
 # Versions
-mosquitto_version: "2"
 homeassistant_version: "2026.2"
 
 # Autoupdate
-mosquitto_autoupdate: true
 homeassistant_autoupdate: true
 
 # Environment
 homeassistant_device: "/dev/serial/by-id/usb-ITEAD_SONOFF_Zigbee_3.0_USB_Dongle_Plus_V2_20230804114425-if00:/dev/ttyACM0"
 homeassistant_deebot_module: "true"
+
+######################################
+### giftpilz0.container.mosquitto
+
+# Proxy
+mosquitto_proxy_enabled: false
+mosquitto_proxy_http: ""
+mosquitto_proxy_https: ""
+mosquitto_proxy_no_proxy: ""
+
+# Network
+mosquitto_network_enabled: true
+mosquitto_network_driver: "bridge"
+mosquitto_network_internal: false
+
+# Network to join even when _network_enabled: false
+mosquitto_network_name: "homeassistant-internal"
+
+# Envoy
+mosquitto_envoy_enabled: false
+mosquitto_envoy_version: "1.37-latest"
+
+# Port mapping: host_port:container_port
+mosquitto_port_map_enabled: true
+mosquitto_port_map: {}
+#  - "1883:1883"
+#  - "9001:9001"
+
+# Versions
+mosquitto_version: "2"
+
+# Autoupdate
+mosquitto_autoupdate: true
 
 ######################################
 ### giftpilz0.container.traefik
