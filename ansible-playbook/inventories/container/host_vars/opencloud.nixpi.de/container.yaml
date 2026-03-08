@@ -24,8 +24,8 @@ opencloud_envoy_version: "1.37-latest"
 
 # Port mapping: host_port:container_port
 opencloud_port_map_enabled: true
-opencloud_port_map:
-  - "9200:9200"
+opencloud_port_map: {}
+#  - "9200:9200"
 
 # Versions
 opencloud_version: "5"

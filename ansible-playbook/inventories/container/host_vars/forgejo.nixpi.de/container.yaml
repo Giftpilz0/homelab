@@ -24,9 +24,9 @@ forgejo_envoy_version: "1.37-latest"
 
 # Port mapping: host_port:container_port
 forgejo_port_map_enabled: true
-forgejo_port_map:
-  - "3000:3000"
-  - "2222:2222"
+forgejo_port_map: {}
+#  - "3000:3000"
+#  - "2222:2222"
 
 # Versions
 postgresql_version: "18-alpine"
