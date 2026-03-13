@@ -24,3 +24,6 @@ Environment={{ env_var }}
 {% endif %}
 
 Volume=vaultwarden-data.volume:/data
+
+[Service]
+Restart=always

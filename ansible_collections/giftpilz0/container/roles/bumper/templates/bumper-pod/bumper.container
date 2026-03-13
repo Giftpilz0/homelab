@@ -29,3 +29,6 @@ Volume=%h/.config/containers/systemd/bumper-pod/config/ca.key:/bumper/certs/ca.k
 Volume=%h/.config/containers/systemd/bumper-pod/config/ca.crt:/bumper/certs/ca.crt:Z
 Volume=%h/.config/containers/systemd/bumper-pod/config/ca.pem:/bumper/certs/ca.pem:Z
 Volume=bumper-data.volume:/bumper/data
+
+[Service]
+Restart=always

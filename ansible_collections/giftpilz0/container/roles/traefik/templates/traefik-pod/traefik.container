@@ -26,3 +26,6 @@ Environment={{ env_var }}
 Volume=traefik-acme.volume:/acme/
 Volume=%h/.config/containers/systemd/traefik-pod/config/dynamic.yaml:/etc/traefik/dynamic/dynamic.yaml:Z
 Volume=%h/.config/containers/systemd/traefik-pod/config/traefik.yaml:/etc/traefik/traefik.yaml:Z
+
+[Service]
+Restart=always

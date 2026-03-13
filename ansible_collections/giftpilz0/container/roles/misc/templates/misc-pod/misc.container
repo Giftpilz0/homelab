@@ -22,3 +22,6 @@ Environment={{ env_name }}={{ env_value }}
 Environment={{ env_var }}
 {% endfor %}
 {% endif %}
+
+[Service]
+Restart=always
