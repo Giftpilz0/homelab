@@ -26,3 +26,6 @@ Environment={{ env_var }}
 Volume=%h/.config/containers/systemd/mosquitto-pod/config/passwd:/mosquitto/config/passwd:Z
 Volume=%h/.config/containers/systemd/mosquitto-pod/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:Z
 Volume=mosquitto-data.volume:/mosquitto/data
+
+[Service]
+Restart=always

@@ -24,3 +24,6 @@ Environment={{ env_var }}
 {% endif %}
 
 Volume=forgejo-postgresql.volume:/var/lib/postgresql
+
+[Service]
+Restart=always

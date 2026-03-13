@@ -25,3 +25,6 @@ Environment={{ env_var }}
 
 Volume=%h/.config/containers/systemd/gitlab-runner-pod/config/config.toml:/etc/gitlab-runner/config.toml:Z
 Volume=/run/user/%U/podman/podman.sock:/var/run/docker.sock:Z
+
+[Service]
+Restart=always

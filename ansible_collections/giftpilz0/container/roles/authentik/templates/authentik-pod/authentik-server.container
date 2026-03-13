@@ -28,3 +28,6 @@ Environment={{ env_var }}
 Volume=authentik-media.volume:/media
 Volume=authentik-templates.volume:/templates
 Volume=authentik-certs.volume:/certs
+
+[Service]
+Restart=always

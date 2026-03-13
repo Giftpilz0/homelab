@@ -25,3 +25,6 @@ Environment={{ env_var }}
 {% endif %}
 
 Volume=forgejo-data.volume:/data
+
+[Service]
+Restart=always
