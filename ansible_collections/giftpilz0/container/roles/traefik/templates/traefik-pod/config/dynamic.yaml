@@ -75,6 +75,9 @@ http:
 {% for service in traefik_http_services %}
     {{ service.name }}-service:
       loadBalancer:
+{% if service.large_downloads | default(false) %}
+        serversTransport: {{ service.name }}-transport
+{% endif %}
         servers:
 {% for server in service.servers %}
           - url: "{{ server.url }}"
@@ -92,6 +95,32 @@ http:
 {% endif %}
 
 {% endfor %}
+{% endif %}
+
+  # =============================================================================
+  # SERVERS TRANSPORTS
+  # =============================================================================
+{% if traefik_http_services is defined %}
+{% set has_large_download_service = namespace(found=false) %}
+{% for service in traefik_http_services %}
+{% if service.large_downloads | default(false) %}
+{% set has_large_download_service.found = true %}
+{% endif %}
+{% endfor %}
+{% if has_large_download_service.found %}
+  serversTransports:
+{% for service in traefik_http_services %}
+{% if service.large_downloads | default(false) %}
+    {{ service.name }}-transport:
+      forwardingTimeouts:
+        dialTimeout: "30s"
+        responseHeaderTimeout: "0s"
+        idleConnTimeout: "90s"
+        readIdleTimeout: "12h"
+        pingTimeout: "15s"
+{% endif %}
+{% endfor %}
+{% endif %}
 {% endif %}
 
 {% if traefik_tcp_services is defined %}
