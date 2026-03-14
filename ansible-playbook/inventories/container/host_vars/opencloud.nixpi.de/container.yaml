@@ -97,3 +97,4 @@ traefik_http_services:
       - url: "http://opencloud-pod:9200"
     tls_enabled: true
     acme_enabled: true
+    large_downloads: true
