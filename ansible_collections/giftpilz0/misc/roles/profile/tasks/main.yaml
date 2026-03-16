@@ -1,9 +1,34 @@
 ---
+- name: "Profile: Check if fastfetch is available in repos (Debian-based)"
+  ansible.builtin.command:
+    cmd: "apt-cache show fastfetch"
+  register: apt_check
+  failed_when: false
+  changed_when: false
+  when: ansible_os_family == "Debian"
+
+- name: "Profile: Check if fastfetch is available in repos (RHEL-based)"
+  ansible.builtin.command:
+    cmd: "dnf info fastfetch"
+  register: rpm_check
+  failed_when: false
+  changed_when: false
+  when: ansible_os_family == "RedHat"
+
+- name: "Profile: Set fastfetch availability fact"
+  ansible.builtin.set_fact:
+    fastfetch_available: >-
+      {{
+        (ansible_os_family == 'Debian'  and apt_check.rc | default(1) == 0) or
+        (ansible_os_family == 'RedHat'  and rpm_check.rc | default(1) == 0)
+      }}
+
 - name: "Profile: Install fastfetch"
   become: true
   ansible.builtin.package:
     name: fastfetch
     state: present
+  when: fastfetch_available
 
 - name: "Profile: Create systemwide fastfetch config script"
   become: true
