@@ -28,7 +28,7 @@ homeassistant_port_map: {}
 #  - "8123:8123"
 
 # Versions
-homeassistant_version: "2026.3"
+homeassistant_version: "2026.4"
 
 # Autoupdate
 homeassistant_autoupdate: true
