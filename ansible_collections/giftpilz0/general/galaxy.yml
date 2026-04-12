@@ -22,7 +22,6 @@ tags:
   - firewalld
   - git
   - user
-  - sysutil
 
 dependencies:
   ansible.posix: ">=1.0.0"
