@@ -8,19 +8,34 @@ traefik_proxy_https: ""
 traefik_proxy_no_proxy: ""
 traefik_proxy_env: "{{ (['https_proxy=' ~ traefik_proxy_https] + (['http_proxy=' ~ traefik_proxy_http] if traefik_proxy_http else []) + (['no_proxy=' ~ traefik_proxy_no_proxy] if traefik_proxy_no_proxy else [])) if traefik_proxy_enabled else [] }}"
 
-# Network
-traefik_network_enabled: true
-traefik_network_driver: "bridge"
-traefik_network_internal: false
-
-# Network to join even when _network_enabled: false
-traefik_network_name: "traefik-internal"
-
 # Version
 traefik_version: "v3.6"
 
 # Autoupdate
 traefik_autoupdate: true
+
+# Bind IP for traefik published ports. Defaults to the primary interface so that
+# traefik does not claim loopback (127.0.0.1), leaving it free for service pods.
+traefik_bind_ip: "{{ ansible_default_ipv4.address }}"
+
+# Internal ports traefik listens on inside its container. These are remapped to the
+# standard ports (80/443) via PublishPort. Using non-standard internal ports ensures
+# pasta's -T forwarding (which binds ports on the container loopback) never clashes
+# with traefik's own listeners, even when services use container-port 80 or 443.
+traefik_http_internal_port: 8880
+traefik_https_internal_port: 8843
+
+# Pasta TCP port forwarding: host ports to splice into the traefik container namespace.
+# Services that publish to 127.0.0.1:HOST_PORT must be listed here so pasta can forward
+# them via --network=pasta:-T,HOST_PORT (podman quadlet Network= syntax).
+# IMPORTANT: HOST_PORT must NOT equal any port traefik itself listens on inside its
+# container (80, 443, or any traefik_tcp_entrypoints port). Pasta binds HOST_PORT on the
+# container's loopback for forwarding — if that matches traefik's own listener, traefik
+# will fail to start with "address already in use".
+# Example: vaultwarden container:80 → host:8080 (not 80), pasta -T,8080 → traefik ok.
+# Combine the svc_pasta_tcp_ports from each service role you are using, e.g.:
+#   traefik_pasta_tcp_ports: "{{ forgejo_pasta_tcp_ports + opencloud_pasta_tcp_ports }}"
+traefik_pasta_tcp_ports: []
 
 # Environment
 traefik_environment_vars: {}
@@ -50,12 +65,33 @@ traefik_transport_timeouts_enabled: false
 traefik_transport_read_timeout: "12h"
 traefik_transport_write_timeout: "12h"
 traefik_transport_idle_timeout: "3m"
-# Custom middlewares
+
+# HTTP to HTTPS redirect (entrypoint-level global redirect)
+traefik_http_redirect_https: true
+
+# Redirect middlewares (path or regex-based HTTP redirects)
+# Each entry renders as a traefik redirectRegex middleware.
+# Simple form: from/to  (useful for path redirects like / → /ui)
+# Full form:   regex/replacement  (for complex URL rewrites)
+#
+# traefik_middlewares_redirect:
+#   root-to-ui:
+#     from: "^/$"
+#     to: "/ui"
+#     permanent: false
+#   non-www-to-www:
+#     regex: "^https?://example\\.com/(.*)"
+#     replacement: "https://www.example.com/${1}"
+#     permanent: true
+traefik_middlewares_redirect: {}
+
+# Custom middlewares (arbitrary traefik middleware definitions)
 # traefik_custom_middlewares:
 #   auth-basic:
 #     basicAuth:
 #       users:
 #         - "admin:$2y$10$..."
+traefik_custom_middlewares: {}
 
 # TCP entrypoints
 # traefik_tcp_entrypoints:
@@ -70,11 +106,16 @@ traefik_transport_idle_timeout: "3m"
 #     domain: app.example.com
 #     rule: "Host(`app.example.com`)"
 #     servers:
-#       - url: "http://192.168.1.100:8080"
+#       - url: "http://127.0.0.1:8080"   # host loopback via pasta splice
 #     tls_enabled: true
 #     acme_enabled: true
 #     middlewares:
 #       - "auth-basic@file"
+#     # Per-service redirect shortcut (auto-creates and applies redirectRegex middleware):
+#     redirect:
+#       from: "^/$"       # regex to match (e.g. ^/$ to match root only)
+#       to: "/ui"         # replacement path
+#       permanent: false  # true for 301, false for 302
 #     sans:
 #       - "app1.example.com"
 #       - "app2.example.com"

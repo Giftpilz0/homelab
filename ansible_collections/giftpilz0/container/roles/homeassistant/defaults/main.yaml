@@ -16,14 +16,16 @@ homeassistant_network_internal: false
 # Network to join even when _network_enabled: false
 homeassistant_network_name: "homeassistant-internal"
 
-# Envoy
-homeassistant_envoy_enabled: true
-homeassistant_envoy_version: "1.37-latest"
-
 # Port mapping: host_port:container_port
+# Bind to loopback so only traefik (via pasta splice) can reach the service.
+homeassistant_bind_ip: "127.0.0.1"
 homeassistant_port_map_enabled: true
 homeassistant_port_map:
-  - "8123:8123"
+  - "{{ homeassistant_bind_ip }}:8123:8123"
+
+# Pasta TCP ports to forward into traefik's container namespace
+homeassistant_pasta_tcp_ports:
+  - 8123
 
 # Versions
 homeassistant_version: "2026.4"

@@ -4,5 +4,5 @@
 fluxcli_bin_state: present
 fluxcli_url: https://github.com/fluxcd/flux2/releases/download/v{{ fluxcli_tag }}/flux_{{ fluxcli_tag }}_linux_{{ fluxcli_arch }}.tar.gz
 fluxcli_arch: amd64
-fluxcli_tag: 2.8.1
+fluxcli_tag: 2.8.5
 fluxcli_path: /usr/local/sbin

@@ -4,13 +4,13 @@ Description=Traefik Pod
 [Pod]
 PodName=traefik-pod
 
-Network={{ traefik_network_name }}
+Network=pasta{% if traefik_pasta_tcp_ports | default([]) | length > 0 %}:{% for port in traefik_pasta_tcp_ports %}-T,{{ port }}{% if not loop.last %},{% endif %}{% endfor %}{% endif %}
 
-PublishPort=80:80
-PublishPort=443:443
+PublishPort={{ traefik_bind_ip }}:80:{{ traefik_http_internal_port }}
+PublishPort={{ traefik_bind_ip }}:443:{{ traefik_https_internal_port }}
 {% if traefik_tcp_entrypoints is defined %}
 {% for entrypoint in traefik_tcp_entrypoints %}
-PublishPort={{ entrypoint.port }}:{{ entrypoint.port }}
+PublishPort={{ traefik_bind_ip }}:{{ entrypoint.port }}:{{ entrypoint.internal_port | default(entrypoint.port) }}
 {% endfor %}
 {% endif %}
 

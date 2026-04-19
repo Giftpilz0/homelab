@@ -16,15 +16,18 @@ authentik_network_internal: false
 # Network to join even when _network_enabled: false
 authentik_network_name: "authentik-internal"
 
-# Envoy
-authentik_envoy_enabled: true
-authentik_envoy_version: "1.37-latest"
-
 # Port mapping: host_port:container_port
+# Bind to loopback so only traefik (via pasta splice) can reach the service.
+authentik_bind_ip: "127.0.0.1"
 authentik_port_map_enabled: true
 authentik_port_map:
-  - "9000:9000"
-  - "9443:9443"
+  - "{{ authentik_bind_ip }}:9000:9000"
+  - "{{ authentik_bind_ip }}:9443:9443"
+
+# Pasta TCP ports to forward into traefik's container namespace
+authentik_pasta_tcp_ports:
+  - 9000
+  - 9443
 
 # Versions
 valkey_version: "9-alpine"
@@ -72,8 +75,8 @@ authentik_worker_environment_vars:
 
 authentik_server_environment_vars:
   <<: *authentik_base_env
-  COMPOSE_PORT_HTTP: "{{ authentik_listen_http | default('0.0.0.0:9000' if not authentik_envoy_enabled else '127.0.0.1:9000') }}"
-  COMPOSE_PORT_HTTPS: "{{ authentik_listen_https | default('0.0.0.0:9443' if not authentik_envoy_enabled else '127.0.0.1:9443') }}"
+  COMPOSE_PORT_HTTP: "{{ authentik_listen_http | default('0.0.0.0:9000') }}"
+  COMPOSE_PORT_HTTPS: "{{ authentik_listen_https | default('0.0.0.0:9443') }}"
 
 authentik_postgresql_environment_vars:
   POSTGRES_DB: "{{ authentik_db_name | default('authentik') }}"

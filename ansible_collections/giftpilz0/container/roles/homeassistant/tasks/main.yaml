@@ -60,12 +60,12 @@
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.file:
-    path: "/home/{{ podman_user }}/.config/containers/systemd/homeassistant-pod/{{ item.path }}"
+    path: "/home/{{ podman_user }}/.config/containers/systemd/{{ item.path }}"
     state: directory
     owner: "{{ podman_user }}"
     group: "{{ podman_user }}"
     mode: "{{ item.mode }}"
-  with_community.general.filetree: "templates/homeassistant-pod/"
+  with_community.general.filetree: "templates/"
   when: item.state == 'directory'
 
 - name: "Homeassistant: Template quadlet files"
@@ -73,11 +73,11 @@
   become_user: "{{ podman_user }}"
   ansible.builtin.template:
     src: "{{ item.src }}"
-    dest: "/home/{{ podman_user }}/.config/containers/systemd/homeassistant-pod/{{ item.path }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/{{ item.path }}"
     owner: "{{ podman_user }}"
     group: "{{ podman_user }}"
     mode: "{{ item.mode }}"
-  with_community.general.filetree: "templates/homeassistant-pod/"
+  with_community.general.filetree: "templates/"
   when: item.state == 'file'
 
 - name: "Homeassistant: systemd daemon reload"
@@ -114,3 +114,8 @@
     enabled: true
     state: started
     scope: user
+
+- name: "Homeassistant: Configure traefik"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.traefik
+  when: traefik_http_services is defined or traefik_tcp_services is defined

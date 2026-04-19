@@ -16,18 +16,20 @@ bumper_network_internal: false
 # Network to join even when _network_enabled: false
 bumper_network_name: "bumper-internal"
 
-# Envoy
-bumper_envoy_enabled: true
-bumper_envoy_version: "1.37-latest"
-
 # Port mapping: host_port:container_port
+# Bind to primary interface so bumper ports are externally reachable (no traefik).
+bumper_bind_ip: "{{ ansible_default_ipv4.address }}"
 bumper_port_map_enabled: true
 bumper_port_map:
-  - "443:443"
-  - "1883:1883"
-  - "5223:5223"
-  - "8007:8007"
-  - "8443:8443"
+  - "{{ bumper_bind_ip }}:443:443"
+  - "{{ bumper_bind_ip }}:1883:1883"
+  - "{{ bumper_bind_ip }}:5223:5223"
+  - "{{ bumper_bind_ip }}:8007:8007"
+  - "{{ bumper_bind_ip }}:8443:8443"
+
+# Pasta TCP ports to forward into traefik's container namespace
+# Bumper exposes ports directly; no traefik routing needed by default
+bumper_pasta_tcp_ports: []
 
 # Build
 bumper_version: "latest"
@@ -39,10 +41,10 @@ bumper_autoupdate: true
 # Environment
 bumper_environment_vars:
   TZ: Europe/Berlin
-  WEB_SERVER_HTTPS_PORT: 8443 #"{{ '0.0.0.0:8443' if not bumper_envoy_enabled else '127.0.0.1:8443' }}"
-  WEB_SERVER_LISTEN_PORT: 8007 #"{{ '0.0.0.0:8007' if not bumper_envoy_enabled else '127.0.0.1:8007' }}"
-  MQTT_LISTEN_PORT_TLS: 443 #"{{ '0.0.0.0:443' if not bumper_envoy_enabled else '127.0.0.1:443' }}"
-  MQTT_LISTEN_PORT: 1883 #"{{ '0.0.0.0:1883' if not bumper_envoy_enabled else '127.0.0.1:1883' }}"
-  XMPP_LISTEN_PORT_TLS: 5223 #"{{ '0.0.0.0:5223' if not bumper_envoy_enabled else '127.0.0.1:5223' }}"
+  WEB_SERVER_HTTPS_PORT: 8443
+  WEB_SERVER_LISTEN_PORT: 8007
+  MQTT_LISTEN_PORT_TLS: 443
+  MQTT_LISTEN_PORT: 1883
+  XMPP_LISTEN_PORT_TLS: 5223
   DEBUG_BUMPER_VERBOSE: 2
   DEBUG_BUMPER_LEVEL: "INFO"
