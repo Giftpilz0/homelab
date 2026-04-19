@@ -28,7 +28,7 @@ forgejo_port_map:
 
 # Versions
 postgresql_version: "18-alpine"
-forgejo_version: "14"
+forgejo_version: "15"
 
 # Autoupdate
 forgejo_postgresql_autoupdate: true
