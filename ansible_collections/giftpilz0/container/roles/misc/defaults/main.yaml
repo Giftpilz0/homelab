@@ -16,14 +16,16 @@ misc_network_internal: false
 # Network to join even when _network_enabled: false
 misc_network_name: "misc-internal"
 
-# Envoy
-misc_envoy_enabled: true
-misc_envoy_version: "1.37-latest"
-
 # Port mapping: host_port:container_port
+# Bind to loopback so only traefik (via pasta splice) can reach the service.
+misc_bind_ip: "127.0.0.1"
 misc_port_map_enabled: true
 misc_port_map:
-  - "8080:8080"
+  - "{{ misc_bind_ip }}:8080:8080"
+
+# Pasta TCP ports to forward into traefik's container namespace
+misc_pasta_tcp_ports:
+  - 8080
 
 # Build
 misc_version: "latest"
@@ -36,4 +38,4 @@ misc_autoupdate: true
 misc_environment_vars:
   TZ: "Europe/Berlin"
   LOGLEVEL: "INFO"
-  PORT: 8080 #"{{ '0.0.0.0:8080' if not misc_envoy_enabled else '127.0.0.1:8080' }}"
+  PORT: 8080

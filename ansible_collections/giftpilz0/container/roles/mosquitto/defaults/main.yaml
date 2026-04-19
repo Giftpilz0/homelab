@@ -16,15 +16,18 @@ mosquitto_network_internal: false
 # Network to join even when _network_enabled: false
 mosquitto_network_name: "mosquitto-internal"
 
-# Envoy
-mosquitto_envoy_enabled: true
-mosquitto_envoy_version: "1.37-latest"
-
 # Port mapping: host_port:container_port
+# Bind to loopback so only traefik (via pasta splice) can reach the service.
+mosquitto_bind_ip: "127.0.0.1"
 mosquitto_port_map_enabled: true
 mosquitto_port_map:
-  - "1883:1883"
-  - "9001:9001"
+  - "{{ mosquitto_bind_ip }}:1883:1883"
+  - "{{ mosquitto_bind_ip }}:9001:9001"
+
+# Pasta TCP ports to forward into traefik's container namespace
+mosquitto_pasta_tcp_ports:
+  - 1883
+  - 9001
 
 # Versions
 mosquitto_version: "2"

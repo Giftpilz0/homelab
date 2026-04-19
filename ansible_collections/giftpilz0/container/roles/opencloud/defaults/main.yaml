@@ -16,14 +16,16 @@ opencloud_network_internal: false
 # Network to join even when _network_enabled: false
 opencloud_network_name: "opencloud-internal"
 
-# Envoy
-opencloud_envoy_enabled: true
-opencloud_envoy_version: "1.37-latest"
-
 # Port mapping: host_port:container_port
+# Bind to loopback so only traefik (via pasta splice) can reach the service.
+opencloud_bind_ip: "127.0.0.1"
 opencloud_port_map_enabled: true
 opencloud_port_map:
-  - "9200:9200"
+  - "{{ opencloud_bind_ip }}:9200:9200"
+
+# Pasta TCP ports to forward into traefik's container namespace
+opencloud_pasta_tcp_ports:
+  - 9200
 
 # Versions
 opencloud_version: "6"
@@ -41,7 +43,6 @@ opencloud_environment_vars:
   OPEN_CLOUD_LOG_LEVEL: "{{ opencloud_log_level }}"
   OC_URL: "{{ opencloud_domain }}"
   OC_CORS_ALLOW_ORIGINS: "{{ opencloud_domain }}"
-  PROXY_HTTP_ADDR: "{{ '0.0.0.0:9200' if not opencloud_envoy_enabled else '127.0.0.1:9200' }}"
   PROXY_TLS: false
   FRONTEND_ARCHIVER_MAX_SIZE: 68719476736
   THUMBNAILS_MAX_CONCURRENT_REQUESTS: 64

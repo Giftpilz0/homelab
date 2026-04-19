@@ -18,14 +18,10 @@ opencloud_network_internal: false
 # Network to join even when _network_enabled: false
 opencloud_network_name: "opencloud-internal"
 
-# Envoy
-opencloud_envoy_enabled: false
-opencloud_envoy_version: "1.37-latest"
-
 # Port mapping: host_port:container_port
 opencloud_port_map_enabled: true
-opencloud_port_map: {}
-#  - "9200:9200"
+opencloud_port_map:
+  - "127.0.0.1:9200:9200"
 
 # Versions
 opencloud_version: "6"
@@ -58,14 +54,6 @@ traefik_proxy_http: ""
 traefik_proxy_https: ""
 traefik_proxy_no_proxy: ""
 
-# Network
-traefik_network_enabled: false
-traefik_network_driver: "bridge"
-traefik_network_internal: false
-
-# Network to join even when _network_enabled: false
-traefik_network_name: "opencloud-internal"
-
 # Version
 traefik_version: "v3.6"
 
@@ -82,6 +70,9 @@ traefik_acme_eab_enabled: false
 # Logging
 traefik_log_level: "INFO"
 
+# Pasta TCP port forwarding into traefik container namespace
+traefik_pasta_tcp_ports: "{{ opencloud_pasta_tcp_ports }}"
+
 # Transport
 traefik_transport_timeouts_enabled: true
 traefik_transport_read_timeout: "12h"
@@ -94,7 +85,7 @@ traefik_http_services:
     domain: opencloud.nixpi.de
     rule: "Host(`opencloud.nixpi.de`)"
     servers:
-      - url: "http://opencloud-pod:9200"
+      - url: "http://127.0.0.1:9200"
     tls_enabled: true
     acme_enabled: true
     large_downloads: true

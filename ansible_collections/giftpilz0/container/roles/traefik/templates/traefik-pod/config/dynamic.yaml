@@ -21,9 +21,39 @@ http:
         customResponseHeaders:
           X-Robots-Tag: "noindex,nofollow,nosnippet"
 
+{% if traefik_middlewares_redirect %}
+{% for name, config in traefik_middlewares_redirect.items() %}
+    {{ name }}:
+      redirectRegex:
+{% if config.regex is defined %}
+        regex: "{{ config.regex }}"
+        replacement: "{{ config.replacement }}"
+{% else %}
+        regex: "{{ config.from }}"
+        replacement: "{{ config.to }}"
+{% endif %}
+        permanent: {{ config.permanent | default(false) | bool | lower }}
 
+{% endfor %}
+{% endif %}
+{% if traefik_http_services is defined %}
+{% for service in traefik_http_services %}
+{% if service.redirect is defined %}
+    {{ service.name }}-redirect:
+      redirectRegex:
+{% if service.redirect.regex is defined %}
+        regex: "{{ service.redirect.regex }}"
+        replacement: "{{ service.redirect.replacement }}"
+{% else %}
+        regex: "{{ service.redirect.from }}"
+        replacement: "{{ service.redirect.to }}"
+{% endif %}
+        permanent: {{ service.redirect.permanent | default(false) | bool | lower }}
 
-{% if traefik_custom_middlewares is defined %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if traefik_custom_middlewares %}
 {% for middleware_name, middleware_config in traefik_custom_middlewares.items() %}
     {{ middleware_name }}:
 {{ middleware_config | to_nice_yaml(indent=2) | indent(6, True) }}
@@ -43,9 +73,12 @@ http:
         - {{ entrypoint }}
 {% endfor %}
       service: {{ service.name }}-service
-{% if service.middlewares is defined %}
+{% set auto_middlewares = [] %}
+{% if service.redirect is defined %}{% set _ = auto_middlewares.append(service.name ~ '-redirect') %}{% endif %}
+{% set all_middlewares = auto_middlewares + (service.middlewares | default([])) %}
+{% if all_middlewares %}
       middlewares:
-{% for middleware in service.middlewares %}
+{% for middleware in all_middlewares %}
         - {{ middleware }}
 {% endfor %}
 {% endif %}

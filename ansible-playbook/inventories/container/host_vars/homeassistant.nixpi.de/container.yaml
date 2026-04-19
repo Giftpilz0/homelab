@@ -18,14 +18,10 @@ homeassistant_network_internal: false
 # Network to join even when _network_enabled: false
 homeassistant_network_name: "homeassistant-internal"
 
-# Envoy
-homeassistant_envoy_enabled: false
-homeassistant_envoy_version: "1.37-latest"
-
 # Port mapping: host_port:container_port
 homeassistant_port_map_enabled: true
-homeassistant_port_map: {}
-#  - "8123:8123"
+homeassistant_port_map:
+  - "127.0.0.1:8123:8123"
 
 # Versions
 homeassistant_version: "2026.4"
@@ -54,15 +50,11 @@ mosquitto_network_internal: false
 # Network to join even when _network_enabled: false
 mosquitto_network_name: "homeassistant-internal"
 
-# Envoy
-mosquitto_envoy_enabled: false
-mosquitto_envoy_version: "1.37-latest"
-
 # Port mapping: host_port:container_port
 mosquitto_port_map_enabled: true
-mosquitto_port_map: {}
-#  - "1883:1883"
-#  - "9001:9001"
+mosquitto_port_map:
+  - "127.0.0.1:1883:1883"
+  - "127.0.0.1:9001:9001"
 
 # Versions
 mosquitto_version: "2"
@@ -79,13 +71,8 @@ traefik_proxy_http: ""
 traefik_proxy_https: ""
 traefik_proxy_no_proxy: ""
 
-# Network
-traefik_network_enabled: false
-traefik_network_driver: "bridge"
-traefik_network_internal: false
-
-# Network to join even when _network_enabled: false
-traefik_network_name: "homeassistant-internal"
+# Pasta TCP port forwarding into traefik container namespace
+traefik_pasta_tcp_ports: "{{ homeassistant_pasta_tcp_ports + mosquitto_pasta_tcp_ports }}"
 
 # Version
 traefik_version: "v3.6"
@@ -109,6 +96,7 @@ traefik_tcp_entrypoints:
     port: 8883
   - name: mqtt
     port: 1883
+    internal_port: 11883
 
 # HTTP services
 traefik_http_services:
@@ -116,7 +104,7 @@ traefik_http_services:
     domain: homeassistant.nixpi.de
     rule: "Host(`homeassistant.nixpi.de`)"
     servers:
-      - url: "http://homeassistant-pod:8123"
+      - url: "http://127.0.0.1:8123"
     tls_enabled: true
     acme_enabled: true
 
@@ -124,7 +112,7 @@ traefik_http_services:
     domain: mqtt.nixpi.de
     rule: "Host(`mqtt.nixpi.de`)"
     servers:
-      - url: "http://mosquitto-pod:9001"
+      - url: "http://127.0.0.1:9001"
     tls_enabled: true
     acme_enabled: true
 
@@ -136,7 +124,7 @@ traefik_tcp_services:
     entrypoints:
       - mqtt
     servers:
-      - address: "mosquitto-pod:1883"
+      - address: "127.0.0.1:1883"
     tls_enabled: false
     acme_enabled: false
     tls_passthrough: false
@@ -147,7 +135,7 @@ traefik_tcp_services:
     entrypoints:
       - mqtt-tls
     servers:
-      - address: "mosquitto-pod:1883"
+      - address: "127.0.0.1:1883"
     tls_enabled: true
     acme_enabled: true
     tls_passthrough: false

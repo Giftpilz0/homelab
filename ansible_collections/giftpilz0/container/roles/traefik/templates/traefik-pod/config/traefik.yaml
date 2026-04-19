@@ -10,16 +10,18 @@ global:
 # =============================================================================
 entryPoints:
   web:
-    address: ":80"
+    address: ":{{ traefik_http_internal_port }}"
+{% if traefik_http_redirect_https | default(true) %}
     http:
       redirections:
         entryPoint:
           to: websecure
           scheme: https
           permanent: true
+{% endif %}
 
   websecure:
-    address: ":443"
+    address: ":{{ traefik_https_internal_port }}"
 {% if traefik_transport_timeouts_enabled | default(false) %}
     transport:
       respondingTimeouts:
@@ -34,7 +36,7 @@ entryPoints:
 {% if traefik_tcp_entrypoints is defined %}
 {% for entrypoint in traefik_tcp_entrypoints %}
   {{ entrypoint.name }}:
-    address: ":{{ entrypoint.port }}"
+    address: ":{{ entrypoint.internal_port | default(entrypoint.port) }}"
 {% endfor %}
 {% endif %}
 

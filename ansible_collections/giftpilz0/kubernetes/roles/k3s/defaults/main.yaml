@@ -1,7 +1,7 @@
 ---
 # defaults file for k3s
 
-k3s_version: v1.35.1+k3s1
+k3s_version: v1.35.3+k3s1
 
 k3s_vip_api_endpoint: "{{ hostvars[groups['k3s'][0]]['ansible_host'] | default(groups['k3s'][0]) }}"
 k3s_api_port: 6443
@@ -15,7 +15,7 @@ k3s_service_name: k3s.service
 k3s_service_state: started
 k3s_service_enabled: true
 
-k3s_kube_vip_tag: v1.0.4
+k3s_kube_vip_tag: v1.1.2
 k3s_kube_vip_iface: enp6s18
 
 k3s_service_cidr: 10.43.0.0/16
@@ -30,6 +30,6 @@ k3s_firewalld_state: enabled
 k3s_firewalld_zone: kubernetes
 
 k9s_tag: 0.50.18 # noqa: var-naming[no-role-prefix]
-fluxcli_tag: 2.8.1 # noqa: var-naming[no-role-prefix]
-helm_tag: 4.1.1 # noqa: var-naming[no-role-prefix]
-cilium_version: 1.19.1 # noqa: var-naming[no-role-prefix]
+fluxcli_tag: 2.8.5 # noqa: var-naming[no-role-prefix]
+helm_tag: 4.1.4 # noqa: var-naming[no-role-prefix]
+cilium_version: 1.19.3 # noqa: var-naming[no-role-prefix]

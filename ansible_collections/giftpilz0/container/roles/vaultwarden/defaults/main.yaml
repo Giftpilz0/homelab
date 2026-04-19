@@ -16,17 +16,19 @@ vaultwarden_network_internal: false
 # Network to join even when _network_enabled: false
 vaultwarden_network_name: "vaultwarden-internal"
 
-# Envoy
-vaultwarden_envoy_enabled: true
-vaultwarden_envoy_version: "1.37-latest"
-
 # Port mapping: host_port:container_port
+# Bind to loopback so only traefik (via pasta splice) can reach the service.
+vaultwarden_bind_ip: "127.0.0.1"
 vaultwarden_port_map_enabled: true
 vaultwarden_port_map:
-  - "80:80"
+  - "{{ vaultwarden_bind_ip }}:80:80"
+
+# Pasta TCP ports to forward into traefik's container namespace
+vaultwarden_pasta_tcp_ports:
+  - 80
 
 # Versions
-vaultwarden_version: "1.34.3-alpine"
+vaultwarden_version: "1.35.7-alpine"
 
 # Autoupdate
 vaultwarden_autoupdate: true
@@ -35,5 +37,4 @@ vaultwarden_autoupdate: true
 vaultwarden_environment_vars:
   DOMAIN: "{{ vaultwarden_domain }}"
   ADMIN_TOKEN: "{{ vaultwarden_admin_token }}"
-  ROCKET_ADDRESS: "{{ '0.0.0.0' if not vaultwarden_envoy_enabled else '127.0.0.1' }}"
   ROCKET_PORT: "80"

@@ -18,14 +18,10 @@ misc_network_internal: false
 # Network to join even when _network_enabled: false
 misc_network_name: "misc-internal"
 
-# Envoy
-misc_envoy_enabled: false
-misc_envoy_version: "1.37-latest"
-
 # Port mapping: host_port:container_port
 misc_port_map_enabled: true
 misc_port_map:
-  - "8080:8080"
+  - "127.0.0.1:8080:8080"
 
 # Versions
 misc_version: "latest"
