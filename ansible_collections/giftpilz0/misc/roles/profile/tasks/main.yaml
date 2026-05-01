@@ -5,7 +5,7 @@
   register: apt_check
   failed_when: false
   changed_when: false
-  when: ansible_os_family == "Debian"
+  when: ansible_facts['os_family'] == "Debian"
 
 - name: "Profile: Check if fastfetch is available in repos (RHEL-based)"
   ansible.builtin.command:
@@ -13,14 +13,14 @@
   register: rpm_check
   failed_when: false
   changed_when: false
-  when: ansible_os_family == "RedHat"
+  when: ansible_facts['os_family'] == "RedHat"
 
 - name: "Profile: Set fastfetch availability fact"
   ansible.builtin.set_fact:
     fastfetch_available: >-
       {{
-        (ansible_os_family == 'Debian'  and apt_check.rc | default(1) == 0) or
-        (ansible_os_family == 'RedHat'  and rpm_check.rc | default(1) == 0)
+        (ansible_facts['os_family'] == 'Debian'  and apt_check.rc | default(1) == 0) or
+        (ansible_facts['os_family'] == 'RedHat'  and rpm_check.rc | default(1) == 0)
       }}
 
 - name: "Profile: Install fastfetch"

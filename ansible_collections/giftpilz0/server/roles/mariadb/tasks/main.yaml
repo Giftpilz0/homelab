@@ -40,7 +40,7 @@
         zone: "{{ mariadb_firewalld_zone }}"
         state: "{{ mariadb_firewalld_state }}"
   when:
-    - "'firewalld' in ansible_facts.packages"
+    - "'firewalld' in ansible_facts['packages']"
     - mariadb_firewalld_state != 'skip'
     - mariadb_package_state != 'absent'
 

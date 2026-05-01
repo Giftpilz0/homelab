@@ -18,7 +18,7 @@ bumper_network_name: "bumper-internal"
 
 # Port mapping: host_port:container_port
 # Bind to primary interface so bumper ports are externally reachable (no traefik).
-bumper_bind_ip: "{{ ansible_default_ipv4.address }}"
+bumper_bind_ip: "{{ ansible_facts['default_ipv4']['address'] }}"
 bumper_port_map_enabled: true
 bumper_port_map:
   - "{{ bumper_bind_ip }}:443:443"

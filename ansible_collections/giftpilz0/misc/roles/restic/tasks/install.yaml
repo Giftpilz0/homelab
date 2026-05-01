@@ -7,7 +7,7 @@
 
 - name: "Restic: Detect architecture"
   ansible.builtin.set_fact:
-    restic_arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
+    restic_arch: "{{ 'amd64' if ansible_facts['architecture'] == 'x86_64' else ansible_facts['architecture'] }}"
 
 - name: "Restic: Download resticprofile"
   become: true

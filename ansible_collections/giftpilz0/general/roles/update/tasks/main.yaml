@@ -13,7 +13,7 @@
     update_cache: true
     security: "{{ update_package_security_only }}"
     bugfix: "{{ update_package_bugfix_only }}"
-  when: ansible_os_family == 'RedHat'
+  when: ansible_facts['os_family'] == 'RedHat'
 
 - name: Update packages on Debian-based systems
   become: true
@@ -22,11 +22,11 @@
     state: latest
     update_cache: true
     only_upgrade: true
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts['os_family'] == 'Debian'
 
 - name: Update packages on Archlinux systems
   become: true
   community.general.pacman:
     update_cache: true
     upgrade: true
-  when: ansible_os_family == 'Archlinux'
+  when: ansible_facts['os_family'] == 'Archlinux'
