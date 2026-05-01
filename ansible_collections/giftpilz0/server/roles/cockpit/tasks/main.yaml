@@ -23,7 +23,7 @@
     state: "{{ item.state }}"
   with_items: "{{ cockpit_additional_package }}"
   when:
-    - item.requirement in ansible_facts.packages
+    - item.requirement in ansible_facts['packages']
     - item.state != 'skip'
     - cockpit_package_state != 'absent'
   notify:
@@ -53,6 +53,6 @@
         zone: "{{ cockpit_firewalld_zone }}"
         state: "{{ cockpit_firewalld_state }}"
   when:
-    - "'firewalld' in ansible_facts.packages"
+    - "'firewalld' in ansible_facts['packages']"
     - cockpit_firewalld_state != 'skip'
     - cockpit_package_state != 'absent'

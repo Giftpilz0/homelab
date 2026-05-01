@@ -38,6 +38,6 @@
         zone: "{{ httpd_firewalld_zone }}"
         state: "{{ httpd_firewalld_state }}"
   when:
-    - "'firewalld' in ansible_facts.packages"
+    - "'firewalld' in ansible_facts['packages']"
     - httpd_firewalld_state != 'skip'
     - httpd_package_state != 'absent'

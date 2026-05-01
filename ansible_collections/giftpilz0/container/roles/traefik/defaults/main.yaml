@@ -16,7 +16,7 @@ traefik_autoupdate: true
 
 # Bind IP for traefik published ports. Defaults to the primary interface so that
 # traefik does not claim loopback (127.0.0.1), leaving it free for service pods.
-traefik_bind_ip: "{{ ansible_default_ipv4.address }}"
+traefik_bind_ip: "{{ ansible_facts['default_ipv4']['address'] }}"
 
 # Internal ports traefik listens on inside its container. These are remapped to the
 # standard ports (80/443) via PublishPort. Using non-standard internal ports ensures

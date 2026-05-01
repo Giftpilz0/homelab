@@ -41,7 +41,7 @@
         zone: "{{ nfs_firewalld_zone }}"
         state: "{{ nfs_firewalld_state }}"
   when:
-    - "'firewalld' in ansible_facts.packages"
+    - "'firewalld' in ansible_facts['packages']"
     - nfs_firewalld_state != 'skip'
     - nfs_package_state != 'absent'
 
@@ -53,7 +53,7 @@
     owner: "{{ item.user }}"
     group: "{{ item.group }}"
     mode: "{{ item.permissions }}"
-  loop: "{{ nfs_exports | default({}) }}"
+  loop: "{{ nfs_exports | default([]) }}"
   when:
     - nfs_exports_state != 'skip'
 

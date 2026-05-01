@@ -125,7 +125,7 @@
       - zone: trusted
         source: "{{ k3s_cluster_cidr }}"
   when:
-    - "'firewalld' in ansible_facts.packages"
+    - "'firewalld' in ansible_facts['packages']"
     - k3s_firewalld_state != 'skip'
 
 - name: "K3s: Install helm"
