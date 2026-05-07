@@ -22,6 +22,10 @@ entryPoints:
 
   websecure:
     address: ":{{ traefik_https_internal_port }}"
+{% if traefik_http3_enabled | default(false) %}
+    http3:
+      advertisedPort: {{ traefik_http3_advertised_port | default(443) }}
+{% endif %}
 {% if traefik_transport_timeouts_enabled | default(false) %}
     transport:
       respondingTimeouts:

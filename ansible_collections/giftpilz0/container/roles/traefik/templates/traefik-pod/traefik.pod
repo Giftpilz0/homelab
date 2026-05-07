@@ -8,6 +8,9 @@ Network=pasta{% if traefik_pasta_tcp_ports | default([]) | length > 0 %}:{% for 
 
 PublishPort={{ traefik_bind_ip }}:80:{{ traefik_http_internal_port }}
 PublishPort={{ traefik_bind_ip }}:443:{{ traefik_https_internal_port }}
+{% if traefik_http3_enabled | default(false) %}
+PublishPort={{ traefik_bind_ip }}:443:{{ traefik_https_internal_port }}/udp
+{% endif %}
 {% if traefik_tcp_entrypoints is defined %}
 {% for entrypoint in traefik_tcp_entrypoints %}
 PublishPort={{ traefik_bind_ip }}:{{ entrypoint.port }}:{{ entrypoint.internal_port | default(entrypoint.port) }}
