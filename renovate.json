@@ -4,170 +4,35 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Update OpenCloud Docker image in Ansible vars",
+      "description": "Update versions tracked via inline renovate annotations",
       "managerFilePatterns": [
         "/(^|/)defaults/main\\.ya?ml$/",
-        "/(^|/)group_vars/.+\\.ya?ml$/",
         "/(^|/)host_vars/.+\\.ya?ml$/",
-        "/(^|/)vars/.+\\.ya?ml$/"
+        "/(^|/)group_vars/.+\\.ya?ml$/"
       ],
-      "matchStrings": ["opencloud_version:\\s*\"(?<currentValue>[^\"]+)\""],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "opencloudeu/opencloud-rolling",
-      "versioningTemplate": "docker"
-    },
-    {
-      "customType": "regex",
-      "description": "Update Mosquitto Docker image in Ansible vars",
-      "managerFilePatterns": [
-        "/(^|/)defaults/main\\.ya?ml$/",
-        "/(^|/)group_vars/.+\\.ya?ml$/",
-        "/(^|/)host_vars/.+\\.ya?ml$/",
-        "/(^|/)vars/.+\\.ya?ml$/"
-      ],
-      "matchStrings": ["mosquitto_version:\\s*\"(?<currentValue>[^\"]+)\""],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "eclipse-mosquitto",
-      "versioningTemplate": "docker"
-    },
-    {
-      "customType": "regex",
-      "description": "Update Home Assistant Docker image in Ansible vars",
-      "managerFilePatterns": [
-        "/(^|/)defaults/main\\.ya?ml$/",
-        "/(^|/)group_vars/.+\\.ya?ml$/",
-        "/(^|/)host_vars/.+\\.ya?ml$/",
-        "/(^|/)vars/.+\\.ya?ml$/"
-      ],
-      "matchStrings": ["homeassistant_version:\\s*\"(?<currentValue>[^\"]+)\""],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "ghcr.io/home-assistant/home-assistant",
-      "versioningTemplate": "docker"
-    },
-    {
-      "customType": "regex",
-      "description": "Update Forgejo Docker image in Ansible vars",
-      "managerFilePatterns": [
-        "/(^|/)defaults/main\\.ya?ml$/",
-        "/(^|/)group_vars/.+\\.ya?ml$/",
-        "/(^|/)host_vars/.+\\.ya?ml$/",
-        "/(^|/)vars/.+\\.ya?ml$/"
-      ],
-      "matchStrings": ["forgejo_version:\\s*\"(?<currentValue>[^\"]+)\""],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "codeberg.org/forgejo/forgejo",
-      "versioningTemplate": "docker"
-    },
-    {
-      "customType": "regex",
-      "description": "Update Home Bumper Docker image in Ansible vars",
-      "managerFilePatterns": [
-        "/(^|/)defaults/main\\.ya?ml$/",
-        "/(^|/)group_vars/.+\\.ya?ml$/",
-        "/(^|/)host_vars/.+\\.ya?ml$/",
-        "/(^|/)vars/.+\\.ya?ml$/"
-      ],
-      "matchStrings": ["bumper_version:\\s*\"(?<currentValue>[^\"]+)\""],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "ghcr.io/mvladislav/bumper",
-      "versioningTemplate": "docker"
-    },
-    {
-      "customType": "regex",
-      "description": "Update Valkey Docker image in Ansible vars",
-      "managerFilePatterns": [
-        "/(^|/)defaults/main\\.ya?ml$/",
-        "/(^|/)group_vars/.+\\.ya?ml$/",
-        "/(^|/)host_vars/.+\\.ya?ml$/",
-        "/(^|/)vars/.+\\.ya?ml$/"
-      ],
-      "matchStrings": ["valkey_version:\\s*\"(?<currentValue>[^\"]+)\""],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "valkey/valkey",
-      "versioningTemplate": "docker"
-    },
-    {
-      "customType": "regex",
-      "description": "Update PostgreSQL Docker image in Ansible vars",
-      "managerFilePatterns": [
-        "/(^|/)defaults/main\\.ya?ml$/",
-        "/(^|/)group_vars/.+\\.ya?ml$/",
-        "/(^|/)host_vars/.+\\.ya?ml$/",
-        "/(^|/)vars/.+\\.ya?ml$/"
-      ],
-      "matchStrings": ["postgresql_version:\\s*\"(?<currentValue>[^\"]+)\""],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "postgres",
-      "versioningTemplate": "docker"
-    },
-    {
-      "customType": "regex",
-      "description": "Update Authentik Docker image in Ansible vars",
-      "managerFilePatterns": [
-        "/(^|/)defaults/main\\.ya?ml$/",
-        "/(^|/)group_vars/.+\\.ya?ml$/",
-        "/(^|/)host_vars/.+\\.ya?ml$/",
-        "/(^|/)vars/.+\\.ya?ml$/"
-      ],
-      "matchStrings": ["authentik_version:\\s*\"(?<currentValue>[^\"]+)\""],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "ghcr.io/goauthentik/server",
-      "versioningTemplate": "docker"
-    },
-    {
-      "customType": "regex",
-      "description": "Update Envoy Docker image in Ansible vars",
-      "managerFilePatterns": [
-        "/(^|/)defaults/main\\.ya?ml$/",
-        "/(^|/)group_vars/.+\\.ya?ml$/",
-        "/(^|/)host_vars/.+\\.ya?ml$/",
-        "/(^|/)vars/.+\\.ya?ml$/"
-      ],
-      "matchStrings": ["_envoy_version:\\s*\"(?<currentValue>[^\"]+)\""],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "docker.io/envoyproxy/envoy",
-      "versioningTemplate": "docker"
-    },
-    {
-      "customType": "regex",
-      "description": "Update SPIRE Server Docker image in Ansible vars",
-      "managerFilePatterns": [
-        "/(^|/)defaults/main\\.ya?ml$/",
-        "/(^|/)group_vars/.+\\.ya?ml$/",
-        "/(^|/)host_vars/.+\\.ya?ml$/",
-        "/(^|/)vars/.+\\.ya?ml$/"
-      ],
-      "matchStrings": ["spire_server_version:\\s*\"(?<currentValue>[^\"]+)\""],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "ghcr.io/spiffe/spire-server",
-      "versioningTemplate": "docker"
-    },
-    {
-      "customType": "regex",
-      "description": "Update SPIRE Agent Docker image in Ansible vars",
-      "managerFilePatterns": [
-        "/(^|/)defaults/main\\.ya?ml$/",
-        "/(^|/)group_vars/.+\\.ya?ml$/",
-        "/(^|/)host_vars/.+\\.ya?ml$/",
-        "/(^|/)vars/.+\\.ya?ml$/"
-      ],
-      "matchStrings": ["spire_agent_version:\\s*\"(?<currentValue>[^\"]+)\""],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "ghcr.io/spiffe/spire-agent",
-      "versioningTemplate": "docker"
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[^\\s]+)(?:\\s+registryUrl=(?<registryUrl>[^\\s]+))?(?:\\s+extractVersion=(?<extractVersion>[^\\s]+))?(?:\\s+versioning=(?<versioning>[^\\s]+))?\\n[\\w_]+:\\s*[\"']?(?<currentValue>[^\\s\"'\\n#]+)[\"']?"
+      ]
     }
   ],
   "packageRules": [
     {
       "description": "Group all Ansible Docker version updates",
       "matchManagers": ["custom.regex"],
+      "matchDatasources": ["docker"],
       "groupName": "Ansible Docker Versions",
       "commitMessageTopic": "Docker versions in Ansible vars"
     },
     {
-      "description": "Explicitly allow major updates for regex-managed Docker deps",
+      "description": "Group all GitHub release binary updates",
       "matchManagers": ["custom.regex"],
-      "matchDatasources": ["docker"],
+      "matchDatasources": ["github-releases"],
+      "groupName": "Binary tool versions",
+      "commitMessageTopic": "Binary tool versions in Ansible vars"
+    },
+    {
+      "description": "Allow major updates for all regex-managed deps",
+      "matchManagers": ["custom.regex"],
       "matchUpdateTypes": ["major"],
       "enabled": true
     }

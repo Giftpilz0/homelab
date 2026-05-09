@@ -9,7 +9,8 @@ traefik_proxy_no_proxy: ""
 traefik_proxy_env: "{{ (['https_proxy=' ~ traefik_proxy_https] + (['http_proxy=' ~ traefik_proxy_http] if traefik_proxy_http else []) + (['no_proxy=' ~ traefik_proxy_no_proxy] if traefik_proxy_no_proxy else [])) if traefik_proxy_enabled else [] }}"
 
 # Version
-traefik_version: "v3.6"
+# renovate: datasource=docker depName=traefik
+traefik_version: "v3.6.16"
 
 # Autoupdate
 traefik_autoupdate: true
