@@ -37,8 +37,9 @@ forgejo_autoupdate: true
 # Environment
 forgejo_domain: "forgejo.nixpi.de"
 forgejo_oauth_client_id: "forgejo"
-forgejo_oauth_domain: "opencloud.nixpi.de"
-forgejo_oauth_name: "opencloud"
+forgejo_oauth_domain: "login.nixpi.de/realms/nixpi"
+forgejo_oauth_name: "keycloak"
+forgejo_oauth_admin_group: "forgejo-admin"
 
 ######################################
 ### giftpilz0.container.traefik

@@ -1,0 +1,146 @@
+---
+podman_user: "container"
+
+######################################
+### giftpilz0.container.postgresql
+
+# Network
+postgresql_network_enabled: true
+postgresql_network_driver: "bridge"
+postgresql_network_internal: false
+
+# Network to join even when _network_enabled: false
+postgresql_network_name: "keycloak-internal"
+
+# Network
+postgresql_port_map_enabled: true
+
+# Versions
+# renovate: datasource=docker depName=postgres
+postgresql_version: "18.3-alpine"
+
+# Autoupdate
+postgresql_autoupdate: true
+postgresql_backup_autoupdate: true
+
+# Database credentials
+postgresql_db_name: "keycloak"
+postgresql_db_user: "keycloak"
+
+# Backup
+postgresql_backup_schedule_hours: 24
+postgresql_backup_retention_days: 7
+postgresql_backup_compression: 6
+
+######################################
+### giftpilz0.container.keycloak
+
+# Proxy
+keycloak_proxy_enabled: false
+keycloak_proxy_http: ""
+keycloak_proxy_https: ""
+keycloak_proxy_no_proxy: ""
+
+# Network
+keycloak_network_enabled: true
+keycloak_network_driver: "bridge"
+keycloak_network_internal: false
+
+# Network to join even when _network_enabled: false
+keycloak_network_name: "keycloak-internal"
+
+# Port mapping: host_port:container_port
+keycloak_port_map_enabled: true
+keycloak_port_map:
+  - "127.0.0.1:8080:8080"
+
+# Versions
+# renovate: datasource=docker depName=quay.io/keycloak/keycloak
+keycloak_version: "26.6.1"
+
+# Autoupdate
+keycloak_autoupdate: true
+
+# Environment
+keycloak_domain: "login.nixpi.de"
+
+keycloak_db_host: "postgresql-pod"
+keycloak_db_username: "{{ postgresql_db_user }}"
+keycloak_db_password: "{{ postgresql_db_password }}"
+
+keycloak_environment_vars:
+  # HTTP Configuration
+  KC_HTTPS_PORT: "8443"
+  KC_HTTP_PORT: "8080"
+  KC_HTTP_ENABLED: "true"
+  KC_HEALTH_ENABLED: "true"
+  KC_HTTP_MANAGEMENT_SCHEME: "http"
+  KC_METRICS_ENABLED: "true"
+
+  # Proxy Settings
+  KC_PROXY: "edge"
+  KC_PROXY_HEADERS: "xforwarded"
+  KC_PROXY_TRUSTED_ADDRESSES: "127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+  KC_HOSTNAME: "{{ keycloak_domain }}"
+
+  # Database Configuration
+  KC_DB: "postgres"
+  KC_DB_URL: "jdbc:postgresql://{{ keycloak_db_host }}:5432/{{ keycloak_db_name }}"
+  KC_DB_USERNAME: "{{ keycloak_db_username }}"
+  KC_DB_PASSWORD: "{{ keycloak_db_password }}"
+
+  # User Configuration
+  KC_BOOTSTRAP_ADMIN_USERNAME: admin
+  KC_BOOTSTRAP_ADMIN_PASSWORD: "{{ keycloak_admin_password }}"
+
+  # Cache Configuration
+  KC_CACHE: "ispn"
+  KC_CACHE_CONFIG_FILE: "cache-ispn.xml"
+  KC_CACHE_STACK: "jdbc-ping"
+
+  # Logging
+  KC_LOG: "console"
+  KC_LOG_LEVEL: "WARN"
+  KC_LOG_CONSOLE_COLOR: "true"
+
+  # Feature Flags
+  KC_FEATURES: "scripts"
+
+######################################
+### giftpilz0.container.traefik
+
+# Proxy
+traefik_proxy_enabled: false
+traefik_proxy_http: ""
+traefik_proxy_https: ""
+traefik_proxy_no_proxy: ""
+
+# Version
+# renovate: datasource=docker depName=traefik
+traefik_version: "v3.7.0"
+
+# Autoupdate
+traefik_autoupdate: true
+
+# ACME
+traefik_acme_enabled: true
+traefik_acme_ca_server: "https://acme-v02.api.letsencrypt.org/directory"
+traefik_acme_challenge_type: dns
+traefik_acme_dns_provider: "cloudflare"
+traefik_acme_eab_enabled: false
+
+# Logging
+traefik_log_level: "INFO"
+
+# Pasta TCP port forwarding into traefik container namespace
+traefik_pasta_tcp_ports: "{{ keycloak_pasta_tcp_ports }}"
+
+# HTTP services
+traefik_http_services:
+  - name: keycloak
+    domain: login.nixpi.de
+    rule: "Host(`login.nixpi.de`)"
+    servers:
+      - url: "http://127.0.0.1:8080"
+    tls_enabled: true
+    acme_enabled: true

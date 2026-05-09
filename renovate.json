@@ -6,9 +6,7 @@
       "customType": "regex",
       "description": "Update versions tracked via inline renovate annotations",
       "managerFilePatterns": [
-        "/(^|/)defaults/main\\.ya?ml$/",
-        "/(^|/)host_vars/.+\\.ya?ml$/",
-        "/(^|/)group_vars/.+\\.ya?ml$/"
+        "/.+\\.ya?ml$/"
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[^\\s]+)(?:\\s+registryUrl=(?<registryUrl>[^\\s]+))?(?:\\s+extractVersion=(?<extractVersion>[^\\s]+))?(?:\\s+versioning=(?<versioning>[^\\s]+))?\\n[\\w_]+:\\s*[\"']?(?<currentValue>[^\\s\"'\\n#]+)[\"']?"

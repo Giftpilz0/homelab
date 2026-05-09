@@ -1,0 +1,51 @@
+---
+podman_user: "{{ ansible_user }}"
+
+# Proxy
+postgresql_proxy_enabled: false
+postgresql_proxy_http: ""
+postgresql_proxy_https: ""
+postgresql_proxy_no_proxy: ""
+postgresql_proxy_env: "{{ (['https_proxy=' ~ postgresql_proxy_https] + (['http_proxy=' ~ postgresql_proxy_http] if postgresql_proxy_http else []) + (['no_proxy=' ~ postgresql_proxy_no_proxy] if postgresql_proxy_no_proxy else [])) if postgresql_proxy_enabled else [] }}"
+
+# Network
+postgresql_network_enabled: true
+postgresql_network_driver: "bridge"
+postgresql_network_internal: false
+
+# Network to join even when _network_enabled: false
+postgresql_network_name: "postgresql-internal"
+
+# Port mapping: host_port:container_port
+# Bind to loopback so only traefik (via pasta splice) can reach the service.
+postgresql_bind_ip: "127.0.0.1"
+postgresql_port_map_enabled: false
+postgresql_port_map:
+  - "{{ postgresql_bind_ip }}:5432:5432"
+
+# Pasta TCP ports to forward into traefik's container namespace
+postgresql_pasta_tcp_ports:
+  - 5432
+
+# Versions
+# renovate: datasource=docker depName=postgres
+postgresql_version: "18.3-alpine"
+
+# Autoupdate
+postgresql_autoupdate: true
+postgresql_backup_autoupdate: true
+
+# Environment
+postgresql_db_name: "postgres"
+postgresql_db_user: "postgres"
+postgresql_db_password: ""
+
+postgresql_environment_vars:
+  POSTGRES_DB: "{{ postgresql_db_name }}"
+  POSTGRES_USER: "{{ postgresql_db_user }}"
+  POSTGRES_PASSWORD: "{{ postgresql_db_password }}"
+
+# Backup
+postgresql_backup_schedule_hours: 24
+postgresql_backup_retention_days: 7
+postgresql_backup_compression: 6

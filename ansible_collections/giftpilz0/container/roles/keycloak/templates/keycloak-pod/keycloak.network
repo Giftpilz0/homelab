@@ -1,0 +1,9 @@
+{% if keycloak_network_enabled %}
+[Unit]
+Description=Keycloak Internal Network
+
+[Network]
+NetworkName={{ keycloak_network_name }}
+Driver={{ keycloak_network_driver }}
+Internal={{ keycloak_network_internal | bool | lower }}
+{% endif %}

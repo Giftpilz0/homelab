@@ -33,18 +33,30 @@ opencloud_autoupdate: true
 # Environment
 opencloud_domain: "https://opencloud.nixpi.de"
 opencloud_log_level: "WARN"
+opencloud_csp_oidc_origin: "https://login.nixpi.de"
 
-opencloud_custom_clients:
-  - id: forgejo
-    name: "forgejo"
-    trusted: false
-    secret: "{{ forgejo_oauth_client_secret }}"
-    redirect_uris:
-      - "https://forgejo.nixpi.de/user/oauth2/opencloud/callback"
-    post_logout_redirect_uris: []
-    origins:
-      - "https://forgejo.nixpi.de"
-    application_type: "web"
+opencloud_environment_vars:
+  IDM_ADMIN_PASSWORD: "{{ opencloud_admin_password }}"
+  OPEN_CLOUD_LOG_LEVEL: "{{ opencloud_log_level }}"
+  OC_URL: "{{ opencloud_domain }}"
+  OC_CORS_ALLOW_ORIGINS: "{{ opencloud_domain }}"
+  PROXY_TLS: false
+  PROXY_CSP_CONFIG_FILE_LOCATION: "/etc/opencloud/csp.yaml"
+  FRONTEND_ARCHIVER_MAX_SIZE: 68719476736
+  THUMBNAILS_MAX_CONCURRENT_REQUESTS: 64
+  # External OIDC (Keycloak)
+  OC_EXCLUDE_RUN_SERVICES: "idp"
+  OC_OIDC_CLIENT_ID: "OpenCloudWeb"
+  OC_OIDC_ISSUER: "https://login.nixpi.de/realms/nixpi"
+  PROXY_AUTOPROVISION_ACCOUNTS: "true"
+  PROXY_OIDC_REWRITE_WELLKNOWN: "true"
+  PROXY_USER_CS3_CLAIM: "username"
+  PROXY_USER_OIDC_CLAIM: "preferred_username"
+  PROXY_ROLE_ASSIGNMENT_DRIVER: "oidc"
+  GRAPH_ASSIGN_DEFAULT_USER_ROLE: "false"
+  GRAPH_USERNAME_MATCH: "none"
+  WEB_OPTION_ACCOUNT_EDIT_LINK_HREF: "https://login.nixpi.de/realms/nixpi/account"
+  SETTINGS_SETUP_DEFAULT_ASSIGNMENTS: "false"
 
 ######################################
 ### giftpilz0.container.traefik

@@ -4,3 +4,7 @@ creation_rules:
     key_groups:
       - pgp:
           - E610D1262E9505511041BE8A3E5CDE3393570604
+  - path_regex: \.tfstate$
+    key_groups:
+      - pgp:
+          - E610D1262E9505511041BE8A3E5CDE3393570604

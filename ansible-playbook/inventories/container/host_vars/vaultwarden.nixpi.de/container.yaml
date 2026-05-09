@@ -33,6 +33,16 @@ vaultwarden_autoupdate: true
 # Environment
 vaultwarden_domain: "https://vaultwarden.nixpi.de/"
 
+vaultwarden_environment_vars:
+  DOMAIN: "{{ vaultwarden_domain }}"
+  ADMIN_TOKEN: "{{ vaultwarden_admin_token }}"
+  ROCKET_PORT: "80"
+  # SSO via Keycloak
+  SSO_ENABLED: "true"
+  SSO_AUTHORITY: "https://login.nixpi.de/realms/nixpi"
+  SSO_CLIENT_ID: "vaultwarden"
+  SSO_CLIENT_SECRET: "{{ vaultwarden_client_secret }}"
+
 ######################################
 ### giftpilz0.container.traefik
 

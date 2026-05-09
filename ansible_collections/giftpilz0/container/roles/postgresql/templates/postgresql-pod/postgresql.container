@@ -1,0 +1,29 @@
+[Unit]
+Description=PostgreSQL Container
+
+[Container]
+ContainerName=postgresql
+Image=docker.io/library/postgres:{{ postgresql_version }}
+
+Pod=postgresql.pod
+
+{% if postgresql_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+{% if postgresql_environment_vars is defined %}
+{% for env_name, env_value in postgresql_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
+
+{% if postgresql_proxy_enabled %}
+{% for env_var in postgresql_proxy_env %}
+Environment={{ env_var }}
+{% endfor %}
+{% endif %}
+
+Volume=postgresql-data.volume:/var/lib/postgresql
+
+[Service]
+Restart=always

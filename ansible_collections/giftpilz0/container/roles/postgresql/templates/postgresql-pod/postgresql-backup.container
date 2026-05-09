@@ -1,0 +1,32 @@
+[Unit]
+Description=PostgreSQL Backup Daemon
+
+[Container]
+ContainerName=postgresql-backup
+Image=docker.io/library/postgres:{{ postgresql_version }}
+
+Pod=postgresql.pod
+
+{% if postgresql_backup_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+Environment=PGHOST=127.0.0.1
+Environment=PGPORT=5432
+Environment=PGDATABASE={{ postgresql_db_name }}
+Environment=PGUSER={{ postgresql_db_user }}
+Environment=PGPASSWORD={{ postgresql_db_password }}
+Environment=PGSSLMODE=disable
+Environment=BACKUP_SCHEDULE_HOURS={{ postgresql_backup_schedule_hours }}
+Environment=BACKUP_RETENTION_DAYS={{ postgresql_backup_retention_days }}
+Environment=BACKUP_COMPRESSION_LEVEL={{ postgresql_backup_compression }}
+Environment=BACKUP_DIR=/backups
+
+Volume=postgresql-backup.volume:/backups
+Volume=%h/.config/containers/systemd/postgresql-pod/config/backup-daemon.sh:/usr/local/bin/backup-daemon.sh:ro,Z
+Volume=%h/.config/containers/systemd/postgresql-pod/config/restore-backup.sh:/usr/local/bin/restore-backup.sh:ro,Z
+
+Exec=/usr/local/bin/backup-daemon.sh
+
+[Service]
+Restart=always

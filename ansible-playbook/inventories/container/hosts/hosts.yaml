@@ -25,6 +25,10 @@ server:
       hosts:
         bumper.nixpi.de:
           ansible_host: 192.168.60.15
+    keycloak:
+      hosts:
+        login.nixpi.de:
+          ansible_host: 192.168.60.16
   vars:
     ansible_port: 22
     ansible_user: root
