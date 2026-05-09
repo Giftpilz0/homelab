@@ -24,3 +24,6 @@ firewalld_rules_services:
   - service: https
     zone: clients
     state: enabled
+  - service: http3
+    zone: clients
+    state: enabled

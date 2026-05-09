@@ -67,7 +67,7 @@ traefik_transport_write_timeout: "12h"
 traefik_transport_idle_timeout: "3m"
 
 # HTTP/3 (QUIC) on the websecure entrypoint. Also publishes UDP 443.
-traefik_http3_enabled: false
+traefik_http3_enabled: true
 # The port advertised in the alt-svc header. Must match the external (host-side)
 # port clients connect to — important when traefik_https_internal_port differs
 # from the host-published port (e.g. internal 8843 published as 443).
