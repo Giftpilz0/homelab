@@ -25,8 +25,10 @@ forgejo_port_map:
   - "127.0.0.1:2222:2222"
 
 # Versions
-postgresql_version: "18-alpine"
-forgejo_version: "15"
+# renovate: datasource=docker depName=postgres
+postgresql_version: "18.3-alpine"
+# renovate: datasource=docker depName=codeberg.org/forgejo/forgejo
+forgejo_version: "15.0.1"
 
 # Autoupdate
 forgejo_postgresql_autoupdate: true
@@ -48,7 +50,8 @@ traefik_proxy_https: ""
 traefik_proxy_no_proxy: ""
 
 # Version
-traefik_version: "v3.6"
+# renovate: datasource=docker depName=traefik
+traefik_version: "v3.6.16"
 
 # Autoupdate
 traefik_autoupdate: true

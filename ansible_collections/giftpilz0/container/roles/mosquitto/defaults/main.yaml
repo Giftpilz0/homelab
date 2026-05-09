@@ -30,7 +30,8 @@ mosquitto_pasta_tcp_ports:
   - 9001
 
 # Versions
-mosquitto_version: "2"
+# renovate: datasource=docker depName=eclipse-mosquitto
+mosquitto_version: "2.0.22"
 
 # Autoupdate
 mosquitto_autoupdate: true

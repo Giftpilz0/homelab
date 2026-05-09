@@ -28,7 +28,8 @@ homeassistant_pasta_tcp_ports:
   - 8123
 
 # Versions
-homeassistant_version: "2026.4"
+# renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant
+homeassistant_version: "2026.4.4"
 
 # Autoupdate
 homeassistant_autoupdate: true

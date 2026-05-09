@@ -1,5 +1,7 @@
 ---
+# renovate: datasource=github-releases depName=creativeprojects/resticprofile extractVersion=^v(?<version>.*)$
 resticprofile_version: "0.33.1"
+# renovate: datasource=github-releases depName=restic/rest-server extractVersion=^v(?<version>.*)$
 rest_server_version: "0.14.0"
 
 # Mode: 'client', 'server', or 'both'

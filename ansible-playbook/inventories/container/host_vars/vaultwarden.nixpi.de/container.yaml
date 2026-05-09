@@ -24,7 +24,8 @@ vaultwarden_port_map:
   - "127.0.0.1:80:80"
 
 # Versions
-vaultwarden_version: "1.35.7-alpine"
+# renovate: datasource=docker depName=vaultwarden/server
+vaultwarden_version: "1.36.0-alpine"
 
 # Autoupdate
 vaultwarden_autoupdate: true
@@ -42,7 +43,8 @@ traefik_proxy_https: ""
 traefik_proxy_no_proxy: ""
 
 # Version
-traefik_version: "v3.6"
+# renovate: datasource=docker depName=traefik
+traefik_version: "v3.6.16"
 
 # Autoupdate
 traefik_autoupdate: true
