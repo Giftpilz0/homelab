@@ -45,6 +45,7 @@ forgejo_oauth_client_id: ""
 forgejo_oauth_client_secret: ""
 forgejo_oauth_domain: ""
 forgejo_oauth_name: ""
+forgejo_oauth_admin_group: "forgejo-admin"
 
 forgejo_environment_vars:
   USER_UID: "1000"
@@ -81,7 +82,7 @@ forgejo_environment_vars:
   FORGEJO__service__DISABLE_REGISTRATION: true
   FORGEJO__service__ALLOW_ONLY_EXTERNAL_REGISTRATION: true
   FORGEJO__service__SHOW_REGISTRATION_BUTTON: false
-  FORGEJO__service__ENABLE_INTERNAL_SIGNIN: false
+  FORGEJO__service__ENABLE_INTERNAL_SIGNIN: true
 
   # OAuth2 Client section
   FORGEJO__oauth2_client__ENABLE_AUTO_REGISTRATION: true
@@ -89,6 +90,7 @@ forgejo_environment_vars:
   FORGEJO__oauth2_client__UPDATE_AVATAR: true
   FORGEJO__oauth2_client__ACCOUNT_LINKING: "auto"
   FORGEJO__oauth2_client__OPENID_CONNECT_SCOPES: '"profile email"'
+  FORGEJO__oauth2_client__ADMIN_GROUP: "{{ forgejo_oauth_admin_group }}"
 
   # OpenID section
   FORGEJO__openid__ENABLE_OPENID_SIGNIN: false
@@ -99,7 +101,8 @@ forgejo_environment_vars:
   OAUTH_CLIENT_ID: "{{ forgejo_oauth_client_id }}"
   OAUTH_CLIENT_SECRET: "{{ forgejo_oauth_client_secret }}"
   OAUTH_DISCOVERY_URL: "https://{{ forgejo_oauth_domain }}/.well-known/openid-configuration"
-  OAUTH_SCOPES: "openid profile email"
+  OAUTH_SCOPES: "openid profile email groups"
+  OAUTH_ADMIN_GROUP: "{{ forgejo_oauth_admin_group }}"
 
 forgejo_postgresql_environment_vars:
   POSTGRES_DB: "{{ forgejo_db_name | default('forgejo') }}"

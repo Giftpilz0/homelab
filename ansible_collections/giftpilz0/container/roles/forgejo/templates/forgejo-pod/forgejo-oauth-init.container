@@ -47,7 +47,9 @@ if forgejo --config "$CONFIG" admin auth list | grep -q "$OAUTH_NAME"; then \
     --secret "$OAUTH_CLIENT_SECRET" \
     --auto-discover-url "$OAUTH_DISCOVERY_URL" \
     --scopes "$OAUTH_SCOPES" \
-    --skip-local-2fa false && echo "Updated"; \
+    --group-claim-name "groups" \
+    --admin-group "$OAUTH_ADMIN_GROUP" \
+    --skip-local-2fa && echo "Updated"; \
 else \
   echo "Creating new OAuth source..."; \
   forgejo --config "$CONFIG" admin auth add-oauth \
@@ -57,7 +59,9 @@ else \
     --secret "$OAUTH_CLIENT_SECRET" \
     --auto-discover-url "$OAUTH_DISCOVERY_URL" \
     --scopes "$OAUTH_SCOPES" \
-    --skip-local-2fa false && echo "Created"; \
+    --group-claim-name "groups" \
+    --admin-group "$OAUTH_ADMIN_GROUP" \
+    --skip-local-2fa && echo "Created"; \
 fi'
 
 [Service]

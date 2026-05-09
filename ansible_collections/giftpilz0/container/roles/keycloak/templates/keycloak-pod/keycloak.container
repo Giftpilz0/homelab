@@ -1,0 +1,32 @@
+[Unit]
+Description=Keycloak Container
+
+[Container]
+ContainerName=keycloak
+Image=quay.io/keycloak/keycloak:{{ keycloak_version }}
+
+Pod=keycloak.pod
+
+Exec=start
+
+{% if keycloak_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+{% if keycloak_environment_vars is defined %}
+{% for env_name, env_value in keycloak_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
+
+{% if keycloak_proxy_enabled %}
+{% for env_var in keycloak_proxy_env %}
+Environment={{ env_var }}
+{% endfor %}
+{% endif %}
+
+Volume=keycloak-data.volume:/opt/keycloak/data
+Volume=%h/.config/containers/systemd/keycloak-pod/config/keycloak-theme.jar:/opt/keycloak/providers/keycloak-theme.jar:Z
+
+[Service]
+Restart=always

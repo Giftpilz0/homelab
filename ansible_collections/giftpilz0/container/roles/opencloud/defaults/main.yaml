@@ -38,6 +38,7 @@ opencloud_autoupdate: true
 opencloud_domain: ""
 opencloud_admin_password: ""
 opencloud_log_level: "info"
+opencloud_csp_oidc_origin: ""
 
 opencloud_environment_vars:
   IDM_ADMIN_PASSWORD: "{{ opencloud_admin_password }}"
@@ -109,5 +110,7 @@ opencloud_standard_clients:
   #     - "https://{{ forgejo_domain }}"
   #   application_type: "web"
 
-# Merge OIDC clients
+opencloud_custom_clients: []
+
+# Merge OIDC clients (only used when external OIDC is disabled)
 opencloud_oidc_clients: "{{ opencloud_standard_clients + opencloud_custom_clients }}"

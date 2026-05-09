@@ -26,3 +26,6 @@ server:
         bumper.nixpi.de:
           ansible_host: 192.168.60.15
           ansible_user: serveradmin
+        login.nixpi.de:
+          ansible_host: 192.168.60.16
+          ansible_user: serveradmin

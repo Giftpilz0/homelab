@@ -71,7 +71,8 @@ firewalld_rules_ports:
 ######################################
 ### giftpilz0.kubernetes.k3s
 
-k3s_version: v1.34.1+k3s1
+# renovate: datasource=github-releases depName=k3s-io/k3s versioning=loose
+k3s_version: v1.36.0+k3s1
 k3s_vip_api_endpoint: 192.168.65.230
 k3s_extra_server_args:
   --tls-san {{ k3s_vip_api_endpoint }} --service-cidr {{ k3s_service_cidr }} --cluster-cidr {{ k3s_cluster_cidr }} --flannel-backend=none

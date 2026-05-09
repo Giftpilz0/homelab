@@ -1,0 +1,19 @@
+[Unit]
+Description=PostgreSQL Pod
+
+[Pod]
+PodName=postgresql-pod
+
+Network={{ postgresql_network_name }}
+
+{% if postgresql_port_map_enabled %}
+{% for port_mapping in postgresql_port_map %}
+PublishPort={{ port_mapping }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target
