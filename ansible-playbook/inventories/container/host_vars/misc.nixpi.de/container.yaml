@@ -21,7 +21,7 @@ misc_network_name: "misc-internal"
 # Port mapping: host_port:container_port
 misc_port_map_enabled: true
 misc_port_map:
-  - "127.0.0.1:8080:8080"
+  - "8080:8080"
 
 # Versions
 misc_version: "latest"
