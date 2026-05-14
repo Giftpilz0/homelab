@@ -41,3 +41,8 @@
   hosts: misc
   roles:
     - role: giftpilz0.container.misc
+
+- name: Configure hosts - keycloak
+  hosts: keycloak
+  roles:
+    - role: giftpilz0.container.keycloak
