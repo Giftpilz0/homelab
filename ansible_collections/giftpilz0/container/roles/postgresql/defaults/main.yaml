@@ -29,7 +29,7 @@ postgresql_pasta_tcp_ports:
 
 # Versions
 # renovate: datasource=docker depName=postgres
-postgresql_version: "18.3-alpine"
+postgresql_version: "18.4-alpine"
 
 # Autoupdate
 postgresql_autoupdate: true
