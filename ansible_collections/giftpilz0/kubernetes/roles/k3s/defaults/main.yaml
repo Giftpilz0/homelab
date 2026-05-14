@@ -34,8 +34,8 @@ k3s_firewalld_zone: kubernetes
 # renovate: datasource=github-releases depName=derailed/k9s extractVersion=^v(?<version>.*)$
 k9s_tag: 0.50.18 # noqa: var-naming[no-role-prefix]
 # renovate: datasource=github-releases depName=fluxcd/flux2 extractVersion=^v(?<version>.*)$
-fluxcli_tag: 2.8.6 # noqa: var-naming[no-role-prefix]
+fluxcli_tag: 2.8.7 # noqa: var-naming[no-role-prefix]
 # renovate: datasource=github-releases depName=helm/helm extractVersion=^v(?<version>.*)$
-helm_tag: 4.1.4 # noqa: var-naming[no-role-prefix]
+helm_tag: 4.2.0 # noqa: var-naming[no-role-prefix]
 # renovate: datasource=helm depName=cilium registryUrl=https://helm.cilium.io
 cilium_version: 1.19.3 # noqa: var-naming[no-role-prefix]
