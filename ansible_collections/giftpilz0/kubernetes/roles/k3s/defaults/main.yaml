@@ -31,6 +31,8 @@ k3s_cluster_cidr: 10.42.0.0/16
 k3s_firewalld_state: enabled
 k3s_firewalld_zone: kubernetes
 
+k3s_manage_cilium: true
+
 # renovate: datasource=github-releases depName=derailed/k9s extractVersion=^v(?<version>.*)$
 k9s_tag: 0.50.18 # noqa: var-naming[no-role-prefix]
 # renovate: datasource=github-releases depName=fluxcd/flux2 extractVersion=^v(?<version>.*)$
