@@ -80,6 +80,7 @@
   environment:
     INSTALL_K3S_SKIP_START: "true"
     INSTALL_K3S_VERSION: "{{ k3s_version }}"
+  notify: "K3s: Restart K3s service"
   changed_when: true
 
 - name: "K3s: Create manifests directory"
@@ -186,16 +187,19 @@
         seconds: 10
 
     - name: "K3s: Install cilium"
+      when: k3s_manage_cilium
       ansible.builtin.include_role:
         name: giftpilz0.kubernetes.cilium
 
     - name: "K3s: Restart K3s service"
       become: true
+      when: k3s_manage_cilium
       ansible.builtin.systemd:
         name: "{{ k3s_service_name }}"
         state: restarted
 
     - name: "K3s: Pause to allow server startup"
+      when: k3s_manage_cilium
       ansible.builtin.pause:
         seconds: 10
 

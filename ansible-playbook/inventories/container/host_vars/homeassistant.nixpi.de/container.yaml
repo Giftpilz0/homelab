@@ -78,7 +78,7 @@ traefik_pasta_tcp_ports: "{{ homeassistant_pasta_tcp_ports + mosquitto_pasta_tcp
 
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.0"
+traefik_version: "v3.7.1"
 
 # Autoupdate
 traefik_autoupdate: true

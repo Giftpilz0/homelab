@@ -1,2 +1,8 @@
 ---
 # handlers file for k3s
+
+- name: "K3s: Restart K3s service"
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ k3s_service_name }}"
+    state: restarted

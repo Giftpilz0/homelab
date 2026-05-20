@@ -54,7 +54,7 @@ traefik_proxy_no_proxy: ""
 
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.0"
+traefik_version: "v3.7.1"
 
 # Autoupdate
 traefik_autoupdate: true
