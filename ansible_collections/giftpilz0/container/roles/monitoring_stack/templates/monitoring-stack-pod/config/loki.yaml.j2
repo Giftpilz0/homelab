@@ -1,0 +1,68 @@
+# Grafana Loki – single-node / monolithic mode
+# Docs: https://grafana.com/docs/loki/latest/configure/
+# Logs are stored in GarageHQ (S3-compatible); index via TSDB shipper.
+
+auth_enabled: {{ monitoring_stack_loki_auth_enabled | bool | lower }}
+
+server:
+  http_listen_port: {{ monitoring_stack_loki_http_port }}
+  grpc_listen_port: {{ monitoring_stack_loki_grpc_port }}
+  log_level: {{ monitoring_stack_loki_log_level }}
+  # Reduce log noise
+  grpc_server_log_level: error
+
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /data
+  storage:
+    s3:
+      endpoint: "http://127.0.0.1:{{ monitoring_stack_garage_s3_api_port }}"
+      region: "{{ monitoring_stack_garage_region }}"
+      access_key_id: "{{ monitoring_stack_loki_access_key_id }}"
+      secret_access_key: "{{ monitoring_stack_loki_secret_access_key }}"
+      bucketnames: "{{ monitoring_stack_garage_loki_bucket }}"
+      s3forcepathstyle: true
+      insecure: true
+  ring:
+    kvstore:
+      store: inmemory
+  replication_factor: 1
+
+schema_config:
+  configs:
+    - from: "2024-01-01"
+      store: tsdb
+      object_store: s3
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+storage_config:
+  tsdb_shipper:
+    active_index_directory: /data/index
+    cache_location: /data/index_cache
+
+compactor:
+  working_directory: /data/compactor
+  # Delete chunks that are no longer referenced (reclaims S3 space)
+  retention_enabled: true
+  retention_delete_delay: 2h
+  delete_request_store: tsdb
+
+limits_config:
+  reject_old_samples: {{ monitoring_stack_loki_reject_old_samples | bool | lower }}
+  reject_old_samples_max_age: {{ monitoring_stack_loki_reject_old_samples_max_age }}
+  allow_structured_metadata: true
+  volume_enabled: true
+  # Reasonable single-node ingest limits
+  ingestion_rate_mb: 32
+  ingestion_burst_size_mb: 64
+  max_streams_per_user: 100000
+
+ruler:
+  alertmanager_url: "http://127.0.0.1:{{ monitoring_stack_mimir_http_port }}/alertmanager"
+  storage:
+    type: local
+    local:
+      directory: /data/rules

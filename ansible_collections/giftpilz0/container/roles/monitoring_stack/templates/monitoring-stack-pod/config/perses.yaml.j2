@@ -1,0 +1,28 @@
+# Perses – dashboarding server
+# Docs: https://perses.dev/perses/docs/configuration/
+
+database:
+  file:
+    folder: /var/perses/data
+    case_sensitive: false
+
+security:
+  readonly: {{ monitoring_stack_perses_readonly | bool | lower }}
+  enable_auth: false
+
+frontend:
+  activate_front_end: true
+
+schemas:
+  panels_path: /etc/perses/cue/schemas/panels
+  queries_path: /etc/perses/cue/schemas/queries
+  datasources_path: /etc/perses/cue/schemas/datasources
+  variables_path: /etc/perses/cue/schemas/variables
+  interval: 1m
+
+# Provisioning: resources in these folders are loaded on startup and refreshed periodically.
+# Docs: https://perses.dev/perses/docs/configuration/#provisioning
+provisioning:
+  interval: 1h
+  folders:
+    - /etc/perses/provisioning

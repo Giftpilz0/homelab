@@ -1,0 +1,4 @@
+[Unit]
+Description=GarageHQ Metadata Volume
+
+[Volume]

@@ -1,0 +1,9 @@
+{% if monitoring_stack_network_enabled %}
+[Unit]
+Description=Monitoring Stack Internal Network
+
+[Network]
+NetworkName={{ monitoring_stack_network_name }}
+Driver={{ monitoring_stack_network_driver }}
+Internal={{ monitoring_stack_network_internal | bool | lower }}
+{% endif %}

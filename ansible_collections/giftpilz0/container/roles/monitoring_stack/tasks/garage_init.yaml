@@ -1,0 +1,147 @@
+---
+# One-time GarageHQ initialization: layout assignment, bucket creation, and
+# access key generation.  Run with monitoring_stack_garage_init: true on
+# first deployment only.  Subsequent runs are safe (idempotent checks).
+
+- name: "Monitoring Stack GarageHQ Init: Wait for GarageHQ to be ready"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.command:
+    cmd: podman exec garage garage status
+  register: _garage_status
+  until: _garage_status.rc == 0
+  retries: 20
+  delay: 5
+  changed_when: false
+
+- name: "Monitoring Stack GarageHQ Init: Get node ID"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.command:
+    cmd: podman exec garage garage node id
+  register: _garage_node_id_raw
+  changed_when: false
+
+- name: "Monitoring Stack GarageHQ Init: Set node ID fact"
+  ansible.builtin.set_fact:
+    _monitoring_stack_garage_node_id: "{{ _garage_node_id_raw.stdout.split()[0] }}"
+
+- name: "Monitoring Stack GarageHQ Init: Check existing layout"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.command:
+    cmd: podman exec garage garage layout show
+  register: _garage_layout
+  changed_when: false
+
+- name: "Monitoring Stack GarageHQ Init: Assign single-node layout"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.command:
+    cmd: >
+      podman exec garage garage layout assign
+      -z dc1
+      -c {{ monitoring_stack_garage_storage_capacity }}
+      {{ _monitoring_stack_garage_node_id }}
+  changed_when: true
+  when: "'dc1' not in _garage_layout.stdout"
+
+- name: "Monitoring Stack GarageHQ Init: Apply layout"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.command:
+    cmd: podman exec garage garage layout apply --version 1
+  changed_when: true
+  when: "'dc1' not in _garage_layout.stdout"
+
+- name: "Monitoring Stack GarageHQ Init: List existing buckets"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.command:
+    cmd: podman exec garage garage bucket list
+  register: _garage_buckets
+  changed_when: false
+
+- name: "Monitoring Stack GarageHQ Init: Create Mimir bucket"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.command:
+    cmd: podman exec garage garage bucket create {{ monitoring_stack_garage_mimir_bucket }}
+  changed_when: true
+  when: monitoring_stack_garage_mimir_bucket not in _garage_buckets.stdout
+
+- name: "Monitoring Stack GarageHQ Init: Create Loki bucket"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.command:
+    cmd: podman exec garage garage bucket create {{ monitoring_stack_garage_loki_bucket }}
+  changed_when: true
+  when: monitoring_stack_garage_loki_bucket not in _garage_buckets.stdout
+
+- name: "Monitoring Stack GarageHQ Init: List existing keys"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.command:
+    cmd: podman exec garage garage key list
+  register: _garage_keys
+  changed_when: false
+
+- name: "Monitoring Stack GarageHQ Init: Create Mimir access key"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.command:
+    cmd: podman exec garage garage key create --name mimir-key
+  register: _mimir_key_create
+  changed_when: true
+  when: "'mimir-key' not in _garage_keys.stdout"
+
+- name: "Monitoring Stack GarageHQ Init: Allow Mimir key on Mimir bucket"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.command:
+    cmd: podman exec garage garage key allow --read --write mimir-key {{ monitoring_stack_garage_mimir_bucket }}
+  changed_when: true
+  when: "'mimir-key' not in _garage_keys.stdout"
+
+- name: "Monitoring Stack GarageHQ Init: Create Loki access key"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.command:
+    cmd: podman exec garage garage key create --name loki-key
+  register: _loki_key_create
+  changed_when: true
+  when: "'loki-key' not in _garage_keys.stdout"
+
+- name: "Monitoring Stack GarageHQ Init: Allow Loki key on Loki bucket"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.command:
+    cmd: podman exec garage garage key allow --read --write loki-key {{ monitoring_stack_garage_loki_bucket }}
+  changed_when: true
+  when: "'loki-key' not in _garage_keys.stdout"
+
+- name: "Monitoring Stack GarageHQ Init: Show Mimir key credentials"
+  ansible.builtin.debug:
+    msg: |
+      ============================================================
+      GarageHQ Mimir key created.  Set these in your vault/vars:
+
+      {{ _mimir_key_create.stdout | default('(key already existed – run: podman exec garage garage key info mimir-key)') }}
+
+      monitoring_stack_mimir_access_key_id: "<Key ID from above>"
+      monitoring_stack_mimir_secret_access_key: "<Secret key from above>"
+      ============================================================
+  when: _mimir_key_create is changed
+
+- name: "Monitoring Stack GarageHQ Init: Show Loki key credentials"
+  ansible.builtin.debug:
+    msg: |
+      ============================================================
+      GarageHQ Loki key created.  Set these in your vault/vars:
+
+      {{ _loki_key_create.stdout | default('(key already existed – run: podman exec garage garage key info loki-key)') }}
+
+      monitoring_stack_loki_access_key_id: "<Key ID from above>"
+      monitoring_stack_loki_secret_access_key: "<Secret key from above>"
+      ============================================================
+  when: _loki_key_create is changed

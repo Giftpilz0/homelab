@@ -8,3 +8,12 @@
     state: restarted
   when:
     - monitoring_agent_package_state != 'absent'
+
+- name: "Monitoring: Restart Beyla"
+  become: true
+  ansible.builtin.service:
+    name: "{{ monitoring_beyla_service_name }}"
+    state: restarted
+  when:
+    - monitoring_beyla_enabled | bool
+    - monitoring_beyla_package_state != 'absent'

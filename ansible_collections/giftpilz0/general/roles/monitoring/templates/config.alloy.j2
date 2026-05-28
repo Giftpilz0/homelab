@@ -1,17 +1,41 @@
+// Full configuration reference: https://grafana.com/docs/alloy
 
-// Full configuration reference, see https://grafana.com/docs/alloy
+// -------------------------------------------------------------------------
+// Node Exporter
+// -------------------------------------------------------------------------
+{% if monitoring_alloy_node_exporter_enabled %}
+prometheus.exporter.unix "node" {}
 
-// Logfiles
-local.file_match "log" {
-  path_targets = [{"__path__" = "/var/logs/**/*.log"}]
+prometheus.scrape "node" {
+  targets    = prometheus.exporter.unix.node.targets
+  forward_to = [prometheus.remote_write.mimir.receiver]
+
+  scrape_interval = "{{ monitoring_alloy_node_exporter_scrape_interval }}"
+}
+{% endif %}
+
+// -------------------------------------------------------------------------
+// Log collection – local files
+// -------------------------------------------------------------------------
+{% if monitoring_alloy_loki_files_enabled %}
+local.file_match "logs" {
+  path_targets = [
+{% for path in monitoring_alloy_loki_files_paths %}
+    {"__path__" = "{{ path }}"},
+{% endfor %}
+  ]
 }
 
-loki.source.file "log" {
-  targets    = local.file_match.log.targets
+loki.source.file "logs" {
+  targets    = local.file_match.logs.targets
   forward_to = [loki.write.endpoint.receiver]
 }
+{% endif %}
 
-// Journal
+// -------------------------------------------------------------------------
+// Log collection – systemd journal
+// -------------------------------------------------------------------------
+{% if monitoring_alloy_loki_journal_enabled %}
 loki.relabel "journal" {
   forward_to = []
 
@@ -19,6 +43,18 @@ loki.relabel "journal" {
     source_labels = ["__journal__systemd_unit"]
     target_label  = "unit"
   }
+
+  rule {
+    source_labels = ["__journal__hostname"]
+    target_label  = "host"
+  }
+{% for rule in monitoring_alloy_loki_journal_extra_rules %}
+
+  rule {
+    source_labels = {{ rule.source_labels | to_json }}
+    target_label  = "{{ rule.target_label }}"
+  }
+{% endfor %}
 }
 
 loki.source.journal "journal" {
@@ -26,24 +62,72 @@ loki.source.journal "journal" {
   labels        = {component = "loki.source.journal"}
   forward_to    = [loki.write.endpoint.receiver]
 }
+{% endif %}
 
-// node_exporter
-prometheus.exporter.unix "node" { }
+// -------------------------------------------------------------------------
+// Blackbox Exporter (HTTP / ICMP probing)
+// -------------------------------------------------------------------------
+{% if monitoring_alloy_blackbox_enabled and monitoring_alloy_blackbox_targets | length > 0 %}
+prometheus.exporter.blackbox "probes" {
+  config = `
+modules:
+{{ monitoring_alloy_blackbox_modules | to_nice_yaml(indent=2) | indent(2, first=true) }}`
 
-prometheus.scrape "node" {
-  targets         = prometheus.exporter.unix.node.targets
-  forward_to      = [prometheus.remote_write.endpoint.receiver]
+{% for target in monitoring_alloy_blackbox_targets %}
+  target {
+    name    = "{{ target.name }}"
+    address = "{{ target.address }}"
+    module  = "{{ target.module }}"
+  }
+{% endfor %}
 }
 
-// Endpoints
+prometheus.scrape "blackbox" {
+  targets         = prometheus.exporter.blackbox.probes.targets
+  forward_to      = [prometheus.remote_write.mimir.receiver]
+  scrape_interval = "{{ monitoring_alloy_blackbox_scrape_interval }}"
+}
+{% endif %}
+
+// -------------------------------------------------------------------------
+// Beyla metrics scrape (when Beyla is co-located on this host)
+// -------------------------------------------------------------------------
+{% if monitoring_alloy_beyla_scrape_enabled | bool %}
+prometheus.scrape "beyla" {
+  targets = [{
+    __address__ = "127.0.0.1:{{ monitoring_beyla_prometheus_port }}",
+    job         = "beyla",
+  }]
+  forward_to      = [prometheus.remote_write.mimir.receiver]
+  scrape_interval = "{{ monitoring_alloy_beyla_scrape_interval }}"
+}
+{% endif %}
+
+// -------------------------------------------------------------------------
+// Remote write endpoints
+// -------------------------------------------------------------------------
 loki.write "endpoint" {
   endpoint {
     url = "{{ monitoring_agent_config_remoteserver_loki }}"
   }
+{% if monitoring_agent_extra_labels %}
+  external_labels = {
+{% for k, v in monitoring_agent_extra_labels.items() %}
+    {{ k }} = "{{ v }}",
+{% endfor %}
+  }
+{% endif %}
 }
 
-prometheus.remote_write "endpoint" {
+prometheus.remote_write "mimir" {
   endpoint {
     url = "{{ monitoring_agent_config_remoteserver_prometheus }}"
   }
+{% if monitoring_agent_extra_labels %}
+  external_labels = {
+{% for k, v in monitoring_agent_extra_labels.items() %}
+    {{ k }} = "{{ v }}",
+{% endfor %}
+  }
+{% endif %}
 }

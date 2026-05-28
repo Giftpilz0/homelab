@@ -2,6 +2,9 @@
 # defaults file for monitoring
 
 monitoring_agent_arch: amd64
+
+# Alloy
+# Docs: https://grafana.com/docs/alloy/latest/
 # renovate: datasource=github-releases depName=grafana/alloy extractVersion=^v(?<version>.*)$
 monitoring_agent_tag: 1.16.1
 monitoring_agent_package_state: present
@@ -9,9 +12,99 @@ monitoring_agent_package:
   - https://github.com/grafana/alloy/releases/download/v{{ monitoring_agent_tag }}/alloy-{{ monitoring_agent_tag }}-1.{{ monitoring_agent_arch }}.rpm
 
 monitoring_agent_config_path: /etc/alloy/config.alloy
-monitoring_agent_config_remoteserver_loki: http://127.0.0.1:3100/loki/api/v1/push
-monitoring_agent_config_remoteserver_prometheus: http://127.0.0.1:9100/api/v1/push
-
 monitoring_agent_service_name: alloy.service
 monitoring_agent_service_state: started
 monitoring_agent_service_enabled: true
+
+# Remote write endpoints (must match the monitoring_stack role port defaults)
+monitoring_agent_config_remoteserver_loki: http://127.0.0.1:3100/loki/api/v1/push
+monitoring_agent_config_remoteserver_prometheus: http://127.0.0.1:9009/api/v1/push
+
+# Extra labels attached to all forwarded metrics and logs
+monitoring_agent_extra_labels: {}
+# monitoring_agent_extra_labels:
+#   env: production
+#   region: eu-west-1
+
+# Node Exporter (via prometheus.exporter.unix in Alloy)
+monitoring_alloy_node_exporter_enabled: true
+monitoring_alloy_node_exporter_scrape_interval: "60s"
+
+# Log collection – local files
+monitoring_alloy_loki_files_enabled: true
+monitoring_alloy_loki_files_paths:
+  - /var/log/**/*.log
+
+# Log collection – systemd journal
+monitoring_alloy_loki_journal_enabled: true
+# Extra relabel rules for journal logs (list of {source_labels, target_label} dicts)
+monitoring_alloy_loki_journal_extra_rules: []
+
+# Blackbox Exporter (via prometheus.exporter.blackbox in Alloy)
+# Docs: https://grafana.com/docs/alloy/latest/reference/components/prometheus/prometheus.exporter.blackbox/
+monitoring_alloy_blackbox_enabled: true
+monitoring_alloy_blackbox_scrape_interval: "60s"
+
+# Common probe targets – extend or override per host
+monitoring_alloy_blackbox_targets:
+  - name: ssh
+    address: "localhost:22"
+    module: tcp_connect
+  - name: mimir_ready
+    address: "http://localhost:9009/ready"
+    module: http_2xx
+  - name: loki_ready
+    address: "http://localhost:3100/ready"
+    module: http_2xx
+  - name: perses
+    address: "http://localhost:8080/api/v1/health"
+    module: http_2xx
+
+# Blackbox module definitions
+monitoring_alloy_blackbox_modules:
+  http_2xx:
+    prober: http
+    timeout: 10s
+    http:
+      valid_http_versions:
+        - "HTTP/1.1"
+        - "HTTP/2.0"
+      follow_redirects: true
+      preferred_ip_protocol: ip4
+  tcp_connect:
+    prober: tcp
+    timeout: 5s
+  icmp:
+    prober: icmp
+    timeout: 5s
+    icmp:
+      preferred_ip_protocol: ip4
+
+# Beyla – eBPF auto-instrumentation (optional, opt-in)
+# Docs: https://grafana.com/docs/beyla/latest/
+monitoring_beyla_enabled: false
+
+# renovate: datasource=github-releases depName=grafana/beyla extractVersion=^v(?<version>.*)$
+monitoring_beyla_version: "1.9.4"
+monitoring_beyla_package_state: present
+monitoring_beyla_package:
+  - https://github.com/grafana/beyla/releases/download/v{{ monitoring_beyla_version }}/beyla_{{ monitoring_beyla_version }}_linux_{{ monitoring_agent_arch }}.rpm
+
+monitoring_beyla_service_name: beyla.service
+monitoring_beyla_service_state: started
+monitoring_beyla_service_enabled: true
+monitoring_beyla_env_path: /etc/beyla/beyla.env
+
+# What to instrument – set one of the following (mutually exclusive)
+monitoring_beyla_open_port: ""       # e.g., "8080"
+monitoring_beyla_executable_name: "" # e.g., "python"
+
+# Prometheus metrics port Beyla exposes (scraped by Alloy)
+monitoring_beyla_prometheus_port: 9090
+
+# OTLP endpoint for trace export (empty = disabled)
+monitoring_beyla_otlp_endpoint: ""
+
+# Alloy scrapes Beyla when both are enabled
+monitoring_alloy_beyla_scrape_enabled: "{{ monitoring_beyla_enabled }}"
+monitoring_alloy_beyla_scrape_interval: "30s"
