@@ -30,7 +30,7 @@ forgejo_pasta_tcp_ports:
 
 # Versions
 # renovate: datasource=docker depName=postgres
-postgresql_version: "18.3-alpine"
+postgresql_version: "18.4-alpine"
 # renovate: datasource=docker depName=codeberg.org/forgejo/forgejo
 forgejo_version: "15.0.2"
 

@@ -31,11 +31,11 @@ authentik_pasta_tcp_ports:
 
 # Versions
 # renovate: datasource=docker depName=valkey/valkey
-valkey_version: "9.0.4-alpine"
+valkey_version: "9.1.0-alpine"
 # renovate: datasource=docker depName=postgres
-postgresql_version: "18.3-alpine"
+postgresql_version: "18.4-alpine"
 # renovate: datasource=docker depName=ghcr.io/goauthentik/server
-authentik_version: "2026.2.3"
+authentik_version: "2026.5.2"
 
 # Autoupdate
 authentik_cache_autoupdate: true
