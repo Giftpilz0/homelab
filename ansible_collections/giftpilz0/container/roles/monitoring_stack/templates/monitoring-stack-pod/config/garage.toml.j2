@@ -1,0 +1,23 @@
+# GarageHQ configuration
+# Docs: https://garagehq.deuxfleurs.fr/documentation/reference-manual/configuration/
+
+metadata_dir = "/var/lib/garage/meta"
+data_dir = "/var/lib/garage/data"
+db_engine = "lmdb"
+replication_factor = {{ monitoring_stack_garage_replication_factor }}
+
+rpc_bind_addr = "0.0.0.0:{{ monitoring_stack_garage_rpc_port }}"
+rpc_secret = "{{ monitoring_stack_garage_rpc_secret }}"
+
+[s3_api]
+api_bind_addr = "0.0.0.0:{{ monitoring_stack_garage_s3_api_port }}"
+s3_region = "{{ monitoring_stack_garage_region }}"
+root_domain = ".s3.garage.localhost"
+
+[s3_web]
+bind_addr = "0.0.0.0:{{ monitoring_stack_garage_web_port }}"
+root_domain = ".web.garage.localhost"
+index = "index.html"
+
+[admin]
+api_bind_addr = "0.0.0.0:{{ monitoring_stack_garage_admin_port }}"

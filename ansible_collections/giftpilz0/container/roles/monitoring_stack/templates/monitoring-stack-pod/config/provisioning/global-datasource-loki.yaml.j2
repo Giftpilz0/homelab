@@ -1,0 +1,11 @@
+# Perses provisioning – Loki global datasource
+# Docs: https://perses.dev/perses/docs/api/datasource/
+kind: GlobalDatasource
+metadata:
+  name: loki
+spec:
+  default: false
+  plugin:
+    kind: LokiDatasource
+    spec:
+      directUrl: "http://127.0.0.1:{{ monitoring_stack_loki_http_port }}"

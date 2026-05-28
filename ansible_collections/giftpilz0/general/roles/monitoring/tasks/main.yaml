@@ -2,7 +2,7 @@
 # tasks file for monitoring
 
 ######################################
-### monitoring
+### Grafana Alloy
 
 - name: "Monitoring: Gather package facts"
   ansible.builtin.package_facts:
@@ -46,3 +46,60 @@
     enabled: "{{ monitoring_agent_service_enabled }}"
   when:
     - monitoring_agent_package_state != 'skip'
+
+######################################
+### Beyla (optional)
+
+- name: "Monitoring: Install Beyla"
+  become: true
+  ansible.builtin.package:
+    name: "{{ monitoring_beyla_package }}"
+    state: "{{ monitoring_beyla_package_state }}"
+  when:
+    - monitoring_beyla_enabled | bool
+    - monitoring_beyla_package_state != 'skip'
+
+- name: "Monitoring: Create Beyla config directory"
+  become: true
+  ansible.builtin.file:
+    path: "{{ monitoring_beyla_env_path | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when:
+    - monitoring_beyla_enabled | bool
+
+- name: "Monitoring: Manage Beyla environment file"
+  become: true
+  ansible.builtin.template:
+    src: beyla.env.j2
+    dest: "{{ monitoring_beyla_env_path }}"
+    owner: root
+    group: root
+    mode: "0640"
+  when:
+    - monitoring_beyla_enabled | bool
+    - monitoring_beyla_package_state != 'skip'
+  notify:
+    - "Monitoring: Restart Beyla"
+
+- name: "Monitoring: Manage Beyla service"
+  become: true
+  ansible.builtin.service:
+    name: "{{ monitoring_beyla_service_name }}"
+    state: "{{ monitoring_beyla_service_state }}"
+    enabled: "{{ monitoring_beyla_service_enabled }}"
+  when:
+    - monitoring_beyla_enabled | bool
+    - monitoring_beyla_package_state != 'skip'
+
+- name: "Monitoring: Disable Beyla service"
+  become: true
+  ansible.builtin.service:
+    name: "{{ monitoring_beyla_service_name }}"
+    state: stopped
+    enabled: false
+  when:
+    - not (monitoring_beyla_enabled | bool)
+    - monitoring_beyla_service_name in ansible_facts.services | default({})

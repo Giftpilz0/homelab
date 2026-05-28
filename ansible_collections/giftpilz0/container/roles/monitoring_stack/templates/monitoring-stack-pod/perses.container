@@ -1,0 +1,34 @@
+[Unit]
+Description=Perses Dashboarding
+After=monitoring-stack-pod.service
+
+[Container]
+ContainerName=perses
+Image=ghcr.io/perses/perses:{{ monitoring_stack_perses_version }}
+
+Pod=monitoring-stack.pod
+
+Exec=--config=/etc/perses/config.yaml
+
+{% if monitoring_stack_perses_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+Volume=perses-data.volume:/var/perses/data
+Volume=%h/.config/containers/systemd/monitoring-stack-pod/config/perses.yaml:/etc/perses/config.yaml:Z,ro
+Volume=%h/.config/containers/systemd/monitoring-stack-pod/config/provisioning:/etc/perses/provisioning:Z,ro
+
+{% if monitoring_stack_perses_environment_vars is defined %}
+{% for env_name, env_value in monitoring_stack_perses_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
+
+{% if monitoring_stack_proxy_enabled %}
+{% for env_var in monitoring_stack_proxy_env %}
+Environment={{ env_var }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always

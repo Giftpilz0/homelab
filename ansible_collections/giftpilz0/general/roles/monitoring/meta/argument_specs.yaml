@@ -48,3 +48,99 @@ argument_specs:
         type: bool
         required: false
         description: monitoring_agent_service_enabled
+
+      monitoring_agent_config_remoteserver_loki:
+        type: str
+        required: false
+        description: monitoring_agent_config_remoteserver_loki
+
+      monitoring_agent_config_remoteserver_prometheus:
+        type: str
+        required: false
+        description: monitoring_agent_config_remoteserver_prometheus
+
+      monitoring_agent_extra_labels:
+        type: dict
+        required: false
+        description: monitoring_agent_extra_labels
+
+      monitoring_alloy_node_exporter_enabled:
+        type: bool
+        required: false
+        description: monitoring_alloy_node_exporter_enabled
+
+      monitoring_alloy_node_exporter_scrape_interval:
+        type: str
+        required: false
+        description: monitoring_alloy_node_exporter_scrape_interval
+
+      monitoring_alloy_loki_files_enabled:
+        type: bool
+        required: false
+        description: monitoring_alloy_loki_files_enabled
+
+      monitoring_alloy_loki_files_paths:
+        type: list
+        elements: str
+        required: false
+        description: monitoring_alloy_loki_files_paths
+
+      monitoring_alloy_loki_journal_enabled:
+        type: bool
+        required: false
+        description: monitoring_alloy_loki_journal_enabled
+
+      monitoring_alloy_blackbox_enabled:
+        type: bool
+        required: false
+        description: monitoring_alloy_blackbox_enabled
+
+      monitoring_alloy_blackbox_targets:
+        type: list
+        required: false
+        description: monitoring_alloy_blackbox_targets
+
+      monitoring_alloy_blackbox_modules:
+        type: dict
+        required: false
+        description: monitoring_alloy_blackbox_modules
+
+      monitoring_beyla_enabled:
+        type: bool
+        required: false
+        description: monitoring_beyla_enabled
+
+      monitoring_beyla_version:
+        type: str
+        required: false
+        description: monitoring_beyla_version
+
+      monitoring_beyla_package_state:
+        type: str
+        required: false
+        choices:
+          - present
+          - absent
+          - latest
+          - skip
+        description: monitoring_beyla_package_state
+
+      monitoring_beyla_open_port:
+        type: str
+        required: false
+        description: monitoring_beyla_open_port
+
+      monitoring_beyla_executable_name:
+        type: str
+        required: false
+        description: monitoring_beyla_executable_name
+
+      monitoring_beyla_prometheus_port:
+        type: int
+        required: false
+        description: monitoring_beyla_prometheus_port
+
+      monitoring_beyla_otlp_endpoint:
+        type: str
+        required: false
+        description: monitoring_beyla_otlp_endpoint

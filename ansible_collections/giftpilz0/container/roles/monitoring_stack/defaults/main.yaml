@@ -1,0 +1,118 @@
+---
+podman_user: "{{ ansible_user }}"
+
+# Proxy
+monitoring_stack_proxy_enabled: false
+monitoring_stack_proxy_http: ""
+monitoring_stack_proxy_https: ""
+monitoring_stack_proxy_no_proxy: ""
+monitoring_stack_proxy_env: "{{ (['https_proxy=' ~ monitoring_stack_proxy_https] + (['http_proxy=' ~ monitoring_stack_proxy_http] if monitoring_stack_proxy_http else []) + (['no_proxy=' ~ monitoring_stack_proxy_no_proxy] if monitoring_stack_proxy_no_proxy else [])) if monitoring_stack_proxy_enabled else [] }}"
+
+# Network
+monitoring_stack_network_enabled: true
+monitoring_stack_network_driver: "bridge"
+monitoring_stack_network_internal: false
+
+# Network to join even when _network_enabled: false
+monitoring_stack_network_name: "monitoring-stack-internal"
+
+# Port mapping: host_ip:host_port:container_port
+# Bind to loopback so only traefik (via pasta splice) can reach the service.
+monitoring_stack_bind_ip: "127.0.0.1"
+monitoring_stack_port_map_enabled: true
+monitoring_stack_port_map:
+  - "{{ monitoring_stack_bind_ip }}:3100:3100" # Loki HTTP
+  - "{{ monitoring_stack_bind_ip }}:9009:9009" # Mimir HTTP
+  - "{{ monitoring_stack_bind_ip }}:8080:8080" # Perses UI
+  - "{{ monitoring_stack_bind_ip }}:3903:3903" # GarageHQ admin API (initial setup only)
+
+# Pasta TCP ports to forward into traefik's container namespace
+monitoring_stack_pasta_tcp_ports:
+  - 3100
+  - 9009
+  - 8080
+
+# Versions
+# renovate: datasource=docker depName=dxflrs/garage
+monitoring_stack_garage_version: "v1.0.1"
+# renovate: datasource=docker depName=grafana/mimir
+monitoring_stack_mimir_version: "2.15.0"
+# renovate: datasource=docker depName=grafana/loki
+monitoring_stack_loki_version: "3.4.2"
+# renovate: datasource=docker depName=ghcr.io/perses/perses
+monitoring_stack_perses_version: "v0.51.0"
+
+# Autoupdate
+monitoring_stack_garage_autoupdate: true
+monitoring_stack_mimir_autoupdate: true
+monitoring_stack_loki_autoupdate: true
+monitoring_stack_perses_autoupdate: true
+
+# GarageHQ
+# Docs: https://garagehq.deuxfleurs.fr/documentation/reference-manual/configuration/
+monitoring_stack_garage_rpc_secret: "" # openssl rand -hex 32
+monitoring_stack_garage_region: "garage"
+monitoring_stack_garage_replication_factor: 1
+
+# Internal listener ports (all inside the shared pod namespace → 127.0.0.1)
+monitoring_stack_garage_rpc_port: 3901
+monitoring_stack_garage_s3_api_port: 3900
+monitoring_stack_garage_web_port: 3902
+monitoring_stack_garage_admin_port: 3903
+
+# Bucket names
+monitoring_stack_garage_mimir_bucket: "mimir"
+monitoring_stack_garage_loki_bucket: "loki"
+
+# Storage capacity hint used during layout assignment (see tasks/garage_init.yaml)
+monitoring_stack_garage_storage_capacity: "100G"
+
+# Run GarageHQ one-time initialization (layout + buckets + keys).
+# Set to true on first deployment, then false for idempotent subsequent runs.
+monitoring_stack_garage_init: false
+
+# Access key credentials for Mimir → GarageHQ
+# TODO: populate after running tasks/garage_init.yaml with monitoring_stack_garage_init: true
+monitoring_stack_mimir_access_key_id: ""
+monitoring_stack_mimir_secret_access_key: ""
+
+# Access key credentials for Loki → GarageHQ
+# TODO: populate after running tasks/garage_init.yaml with monitoring_stack_garage_init: true
+monitoring_stack_loki_access_key_id: ""
+monitoring_stack_loki_secret_access_key: ""
+
+# Mimir
+# Docs: https://grafana.com/docs/mimir/latest/configure/configuration-parameters/
+monitoring_stack_mimir_http_port: 9009
+monitoring_stack_mimir_grpc_port: 9095
+monitoring_stack_mimir_log_level: "warn"
+monitoring_stack_mimir_multitenancy_enabled: false
+monitoring_stack_mimir_ingestion_rate: 100000
+monitoring_stack_mimir_max_global_series_per_user: 10000000
+monitoring_stack_mimir_out_of_order_time_window: "1h"
+
+monitoring_stack_mimir_environment_vars:
+  GOMAXPROCS: "2"
+
+# Loki
+# Docs: https://grafana.com/docs/loki/latest/configure/
+monitoring_stack_loki_http_port: 3100
+monitoring_stack_loki_grpc_port: 9096
+monitoring_stack_loki_log_level: "warn"
+monitoring_stack_loki_auth_enabled: false
+monitoring_stack_loki_reject_old_samples: true
+monitoring_stack_loki_reject_old_samples_max_age: "168h"
+
+monitoring_stack_loki_environment_vars:
+  GOMAXPROCS: "2"
+
+# Perses
+# Docs: https://perses.dev/perses/docs/
+monitoring_stack_perses_http_port: 8080
+monitoring_stack_perses_readonly: false
+
+monitoring_stack_perses_environment_vars: {}
+
+# Traefik integration (optional – consumed by giftpilz0.container.traefik)
+# traefik_http_services and traefik_tcp_services can be set in the playbook
+# to expose Mimir, Loki, and Perses through Traefik.

@@ -1,0 +1,26 @@
+[Unit]
+Description=GarageHQ S3-compatible Object Storage
+After=monitoring-stack-pod.service
+
+[Container]
+ContainerName=garage
+Image=docker.io/dxflrs/garage:{{ monitoring_stack_garage_version }}
+
+Pod=monitoring-stack.pod
+
+{% if monitoring_stack_garage_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+Volume=garage-data.volume:/var/lib/garage/data
+Volume=garage-meta.volume:/var/lib/garage/meta
+Volume=%h/.config/containers/systemd/monitoring-stack-pod/config/garage.toml:/etc/garage.toml:Z,ro
+
+{% if monitoring_stack_proxy_enabled %}
+{% for env_var in monitoring_stack_proxy_env %}
+Environment={{ env_var }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always

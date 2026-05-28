@@ -1,0 +1,323 @@
+# Perses provisioning – Node Exporter infrastructure dashboard
+# Docs: https://perses.dev/perses/docs/api/dashboard/
+# Note: Prometheus label interpolation uses {{ '{{' }} label {{ '}}' }} to escape Jinja2.
+kind: Dashboard
+metadata:
+  name: infrastructure
+  project: default
+spec:
+  display:
+    name: Infrastructure
+  datasources:
+    mimir:
+      default: true
+      plugin:
+        kind: PrometheusDatasource
+        spec:
+          directUrl: "http://127.0.0.1:{{ monitoring_stack_mimir_http_port }}/prometheus"
+  duration: 1h
+  refreshInterval: 60s
+  variables:
+    - kind: ListVariable
+      spec:
+        name: job
+        display:
+          name: Job
+        plugin:
+          kind: PrometheusLabelValuesVariable
+          spec:
+            labelName: job
+            matchers:
+              - node_uname_info
+    - kind: ListVariable
+      spec:
+        name: instance
+        display:
+          name: Instance
+        plugin:
+          kind: PrometheusLabelValuesVariable
+          spec:
+            labelName: instance
+            matchers:
+              - node_uname_info{job="{{ '{{' }}job{{ '}}' }}"}
+  layouts:
+    - kind: Grid
+      spec:
+        display:
+          title: CPU
+        items:
+          - x: 0
+            "y": 0
+            width: 12
+            height: 8
+            content:
+              $ref: "#/spec/panels/cpu_usage"
+          - x: 12
+            "y": 0
+            width: 12
+            height: 8
+            content:
+              $ref: "#/spec/panels/load_average"
+    - kind: Grid
+      spec:
+        display:
+          title: Memory
+        items:
+          - x: 0
+            "y": 0
+            width: 12
+            height: 8
+            content:
+              $ref: "#/spec/panels/memory_usage"
+          - x: 12
+            "y": 0
+            width: 12
+            height: 8
+            content:
+              $ref: "#/spec/panels/memory_breakdown"
+    - kind: Grid
+      spec:
+        display:
+          title: Disk
+        items:
+          - x: 0
+            "y": 0
+            width: 12
+            height: 8
+            content:
+              $ref: "#/spec/panels/disk_io"
+          - x: 12
+            "y": 0
+            width: 12
+            height: 8
+            content:
+              $ref: "#/spec/panels/disk_space"
+    - kind: Grid
+      spec:
+        display:
+          title: Network
+        items:
+          - x: 0
+            "y": 0
+            width: 24
+            height: 8
+            content:
+              $ref: "#/spec/panels/network_io"
+  panels:
+    cpu_usage:
+      kind: Panel
+      spec:
+        display:
+          name: CPU Usage
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            legend:
+              position: bottom
+            yAxis:
+              format:
+                unit: percent
+                decimalPlaces: 1
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: >-
+                    100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle",instance="{{ '{{' }}instance{{ '}}' }}"}[5m])) * 100)
+                  legend: "{{ '{{' }}instance{{ '}}' }}"
+                  minStep: 60s
+    load_average:
+      kind: Panel
+      spec:
+        display:
+          name: Load Average
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            legend:
+              position: bottom
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: node_load1{instance="{{ '{{' }}instance{{ '}}' }}"}
+                  legend: 1m
+                  minStep: 60s
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: node_load5{instance="{{ '{{' }}instance{{ '}}' }}"}
+                  legend: 5m
+                  minStep: 60s
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: node_load15{instance="{{ '{{' }}instance{{ '}}' }}"}
+                  legend: 15m
+                  minStep: 60s
+    memory_usage:
+      kind: Panel
+      spec:
+        display:
+          name: Memory Usage
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            legend:
+              position: bottom
+            yAxis:
+              format:
+                unit: percent
+                decimalPlaces: 1
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: >-
+                    100 * (1 - ((node_memory_MemAvailable_bytes{instance="{{ '{{' }}instance{{ '}}' }}"}) / node_memory_MemTotal_bytes{instance="{{ '{{' }}instance{{ '}}' }}"}))
+                  legend: Used %
+                  minStep: 60s
+    memory_breakdown:
+      kind: Panel
+      spec:
+        display:
+          name: Memory Breakdown
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            legend:
+              position: bottom
+            yAxis:
+              format:
+                unit: bytes
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: node_memory_MemTotal_bytes{instance="{{ '{{' }}instance{{ '}}' }}"}
+                  legend: Total
+                  minStep: 60s
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: node_memory_MemAvailable_bytes{instance="{{ '{{' }}instance{{ '}}' }}"}
+                  legend: Available
+                  minStep: 60s
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: node_memory_Cached_bytes{instance="{{ '{{' }}instance{{ '}}' }}"}
+                  legend: Cached
+                  minStep: 60s
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: node_memory_Buffers_bytes{instance="{{ '{{' }}instance{{ '}}' }}"}
+                  legend: Buffers
+                  minStep: 60s
+    disk_io:
+      kind: Panel
+      spec:
+        display:
+          name: Disk I/O
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            legend:
+              position: bottom
+            yAxis:
+              format:
+                unit: bytes/sec
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: >-
+                    rate(node_disk_read_bytes_total{instance="{{ '{{' }}instance{{ '}}' }}",device!~"loop.*"}[5m])
+                  legend: "Read {{ '{{' }}device{{ '}}' }}"
+                  minStep: 60s
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: >-
+                    rate(node_disk_written_bytes_total{instance="{{ '{{' }}instance{{ '}}' }}",device!~"loop.*"}[5m])
+                  legend: "Write {{ '{{' }}device{{ '}}' }}"
+                  minStep: 60s
+    disk_space:
+      kind: Panel
+      spec:
+        display:
+          name: Disk Space
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            legend:
+              position: bottom
+            yAxis:
+              format:
+                unit: percent
+                decimalPlaces: 1
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: >-
+                    100 - (node_filesystem_avail_bytes{instance="{{ '{{' }}instance{{ '}}' }}",fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{instance="{{ '{{' }}instance{{ '}}' }}",fstype!~"tmpfs|overlay"} * 100)
+                  legend: "{{ '{{' }}mountpoint{{ '}}' }}"
+                  minStep: 60s
+    network_io:
+      kind: Panel
+      spec:
+        display:
+          name: Network I/O
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            legend:
+              position: bottom
+            yAxis:
+              format:
+                unit: bytes/sec
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: >-
+                    rate(node_network_receive_bytes_total{instance="{{ '{{' }}instance{{ '}}' }}",device!~"lo"}[5m])
+                  legend: "RX {{ '{{' }}device{{ '}}' }}"
+                  minStep: 60s
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: >-
+                    rate(node_network_transmit_bytes_total{instance="{{ '{{' }}instance{{ '}}' }}",device!~"lo"}[5m])
+                  legend: "TX {{ '{{' }}device{{ '}}' }}"
+                  minStep: 60s

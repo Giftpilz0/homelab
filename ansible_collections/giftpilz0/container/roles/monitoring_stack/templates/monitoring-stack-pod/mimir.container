@@ -1,0 +1,33 @@
+[Unit]
+Description=Grafana Mimir Metrics Backend
+After=monitoring-stack-pod.service
+
+[Container]
+ContainerName=mimir
+Image=grafana/mimir:{{ monitoring_stack_mimir_version }}
+
+Pod=monitoring-stack.pod
+
+Exec=-config.file=/etc/mimir/mimir.yaml
+
+{% if monitoring_stack_mimir_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+Volume=mimir-data.volume:/data
+Volume=%h/.config/containers/systemd/monitoring-stack-pod/config/mimir.yaml:/etc/mimir/mimir.yaml:Z,ro
+
+{% if monitoring_stack_mimir_environment_vars is defined %}
+{% for env_name, env_value in monitoring_stack_mimir_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
+
+{% if monitoring_stack_proxy_enabled %}
+{% for env_var in monitoring_stack_proxy_env %}
+Environment={{ env_var }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always

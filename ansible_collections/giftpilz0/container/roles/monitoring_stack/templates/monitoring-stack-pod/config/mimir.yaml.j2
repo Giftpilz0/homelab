@@ -1,0 +1,71 @@
+# Grafana Mimir – single-node / monolithic mode
+# Docs: https://grafana.com/docs/mimir/latest/configure/configuration-parameters/
+# All components run in one process; data is stored in GarageHQ (S3).
+
+target: all,alertmanager
+
+multitenancy_enabled: {{ monitoring_stack_mimir_multitenancy_enabled | bool | lower }}
+
+server:
+  http_listen_port: {{ monitoring_stack_mimir_http_port }}
+  grpc_listen_port: {{ monitoring_stack_mimir_grpc_port }}
+  log_level: {{ monitoring_stack_mimir_log_level }}
+  # Reduce log noise from gRPC keepalive probes
+  grpc_server_log_level: error
+
+# Common S3 backend pointing at the local GarageHQ instance.
+common:
+  storage:
+    backend: s3
+    s3:
+      endpoint: "http://127.0.0.1:{{ monitoring_stack_garage_s3_api_port }}"
+      region: "{{ monitoring_stack_garage_region }}"
+      access_key_id: "{{ monitoring_stack_mimir_access_key_id }}"
+      secret_access_key: "{{ monitoring_stack_mimir_secret_access_key }}"
+      insecure: true
+      bucket_name: "{{ monitoring_stack_garage_mimir_bucket }}"
+      http:
+        idle_conn_timeout: 90s
+        response_header_timeout: 120s
+
+blocks_storage:
+  s3:
+    bucket_name: "{{ monitoring_stack_garage_mimir_bucket }}"
+  tsdb:
+    dir: /data/tsdb
+    # Flush WAL to disk every 2 h to limit replayed data on crash recovery
+    wal_replay_concurrency: 1
+    retention_period: 13h
+
+ingester:
+  ring:
+    replication_factor: 1
+
+store_gateway:
+  sharding_ring:
+    replication_factor: 1
+
+compactor:
+  data_dir: /data/compactor
+  sharding_ring:
+    wait_stability_min_duration: 0
+
+activity_tracker:
+  filepath: /data/metrics-activity.log
+
+ruler_storage:
+  backend: filesystem
+  filesystem:
+    dir: /data/rules
+
+alertmanager_storage:
+  backend: filesystem
+  filesystem:
+    dir: /data/alertmanager
+
+limits:
+  ingestion_rate: {{ monitoring_stack_mimir_ingestion_rate }}
+  max_global_series_per_user: {{ monitoring_stack_mimir_max_global_series_per_user }}
+  out_of_order_time_window: {{ monitoring_stack_mimir_out_of_order_time_window }}
+  # Allow Prometheus-compatible remote_write from Alloy without tenant header
+  compactor_blocks_retention_period: 90d
