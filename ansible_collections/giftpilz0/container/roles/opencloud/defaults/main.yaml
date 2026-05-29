@@ -29,7 +29,7 @@ opencloud_pasta_tcp_ports:
 
 # Versions
 # renovate: datasource=docker depName=opencloudeu/opencloud-rolling
-opencloud_version: "6.2.0"
+opencloud_version: "7.0.0"
 
 # Autoupdate
 opencloud_autoupdate: true
