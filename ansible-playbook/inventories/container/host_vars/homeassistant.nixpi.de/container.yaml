@@ -25,7 +25,7 @@ homeassistant_port_map:
 
 # Versions
 # renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant
-homeassistant_version: "2026.5.1"
+homeassistant_version: "2026.6.3"
 
 # Autoupdate
 homeassistant_autoupdate: true
@@ -78,7 +78,7 @@ traefik_pasta_tcp_ports: "{{ homeassistant_pasta_tcp_ports + mosquitto_pasta_tcp
 
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.1"
+traefik_version: "v3.7.5"
 
 # Autoupdate
 traefik_autoupdate: true
