@@ -5,5 +5,5 @@ helm_bin_state: present
 helm_url: https://get.helm.sh/helm-v{{ helm_tag }}-linux-{{ helm_arch }}.tar.gz
 helm_arch: amd64
 # renovate: datasource=github-releases depName=helm/helm extractVersion=^v(?<version>.*)$
-helm_tag: 4.2.1
+helm_tag: 4.2.2
 helm_path: /usr/local/sbin
