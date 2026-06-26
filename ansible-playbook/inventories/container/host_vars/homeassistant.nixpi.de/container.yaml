@@ -25,7 +25,7 @@ homeassistant_port_map:
 
 # Versions
 # renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant
-homeassistant_version: "2026.6.3"
+homeassistant_version: "2026.6.4"
 
 # Autoupdate
 homeassistant_autoupdate: true
