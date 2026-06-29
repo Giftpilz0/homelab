@@ -33,7 +33,7 @@ bumper_pasta_tcp_ports: []
 
 # Build
 bumper_version: "latest"
-bumper_commit: "86bf91be27bf23bddc1e122013713d1c8f7ca53a"
+bumper_commit: "4438eb5e9ffa31b60385052102da68a3a18bf4b7"
 
 # Autoupdate
 bumper_autoupdate: true

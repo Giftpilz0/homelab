@@ -2,7 +2,7 @@
 # defaults file for cilium
 
 # renovate: datasource=helm depName=cilium registryUrl=https://helm.cilium.io
-cilium_version: 1.19.4
+cilium_version: 1.19.5
 cilium_repo_url: https://helm.cilium.io
 cilium_kubeconfig: /etc/rancher/k3s/k3s.yaml
 
