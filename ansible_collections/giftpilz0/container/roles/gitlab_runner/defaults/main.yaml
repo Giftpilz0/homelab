@@ -18,7 +18,7 @@ gitlab_runner_network_name: "gitlab-runner-internal"
 
 # Versions
 # renovate: datasource=docker depName=gitlab/gitlab-runner
-gitlab_runner_version: "v19.0.1"
+gitlab_runner_version: "v19.1.1"
 
 # Autoupdate
 gitlab_runner_autoupdate: true
