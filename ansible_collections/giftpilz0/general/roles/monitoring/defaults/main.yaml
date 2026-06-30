@@ -3,7 +3,7 @@
 
 monitoring_agent_arch: amd64
 # renovate: datasource=github-releases depName=grafana/alloy extractVersion=^v(?<version>.*)$
-monitoring_agent_tag: 1.17.0
+monitoring_agent_tag: 1.17.1
 monitoring_agent_package_state: present
 monitoring_agent_package:
   - https://github.com/grafana/alloy/releases/download/v{{ monitoring_agent_tag }}/alloy-{{ monitoring_agent_tag }}-1.{{ monitoring_agent_arch }}.rpm
