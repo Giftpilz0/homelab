@@ -4,7 +4,10 @@ Description=Traefik Pod
 [Pod]
 PodName=traefik-pod
 
-Network=pasta{% if traefik_pasta_tcp_ports | default([]) | length > 0 %}:{% for port in traefik_pasta_tcp_ports %}-T,{{ port }}{% if not loop.last %},{% endif %}{% endfor %}{% endif %}
+Network={{ traefik_network_name }}
+{% for net in traefik_networks | default([]) %}
+Network={{ net }}.network
+{% endfor %}
 
 PublishPort={{ traefik_bind_ip }}:80:{{ traefik_http_internal_port }}
 PublishPort={{ traefik_bind_ip }}:443:{{ traefik_https_internal_port }}

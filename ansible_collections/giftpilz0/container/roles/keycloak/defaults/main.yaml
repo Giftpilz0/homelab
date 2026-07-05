@@ -16,16 +16,16 @@ keycloak_network_internal: false
 # Network to join even when _network_enabled: false
 keycloak_network_name: "keycloak-internal"
 
-# Port mapping: host_port:container_port
-# Bind to loopback so only traefik (via pasta splice) can reach the service.
+# Optional: expose this service directly on the host, bypassing Traefik.
+# Not required for Traefik to reach it -- Traefik connects directly over the
+# shared Podman network using the container name and container port.
+# _bind_ip and _port_map are independent: override _bind_ip alone to change
+# where it's exposed, or _port_map alone ("host_port:container_port") to
+# change which ports -- no need to redefine both together.
 keycloak_bind_ip: "127.0.0.1"
 keycloak_port_map_enabled: true
 keycloak_port_map:
-  - "{{ keycloak_bind_ip }}:8080:8080"
-
-# Pasta TCP ports to forward into traefik's container namespace
-keycloak_pasta_tcp_ports:
-  - 8080
+  - "8080:8080"
 
 # Versions
 # renovate: datasource=docker depName=quay.io/keycloak/keycloak
@@ -38,8 +38,8 @@ keycloak_autoupdate: true
 keycloak_domain: "login.nixpi.de"
 
 keycloak_db_name: "keycloak"
-keycloak_db_host: "postgresql"
-keycloak_db_username: "keycloak"
+keycloak_db_host: "postgresql-pod"
+keycloak_db_user: "keycloak"
 keycloak_db_password: ""
 
 keycloak_environment_vars:
@@ -60,7 +60,7 @@ keycloak_environment_vars:
   # Database Configuration
   KC_DB: "postgres"
   KC_DB_URL: "jdbc:postgresql://{{ keycloak_db_host }}:5432/{{ keycloak_db_name }}"
-  KC_DB_USERNAME: "{{ keycloak_db_username }}"
+  KC_DB_USERNAME: "{{ keycloak_db_user }}"
   KC_DB_PASSWORD: "{{ keycloak_db_password }}"
 
   # User Configuration

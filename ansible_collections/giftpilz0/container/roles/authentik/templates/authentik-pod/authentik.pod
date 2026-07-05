@@ -8,7 +8,7 @@ Network={{ authentik_network_name }}
 
 {% if authentik_port_map_enabled %}
 {% for port_mapping in authentik_port_map %}
-PublishPort={{ port_mapping }}
+PublishPort={{ authentik_bind_ip }}:{{ port_mapping }}
 {% endfor %}
 {% endif %}
 

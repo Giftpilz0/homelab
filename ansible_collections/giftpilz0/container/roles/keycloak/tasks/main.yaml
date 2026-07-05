@@ -1,4 +1,13 @@
 ---
+- name: "Keycloak: Provision postgresql database"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.postgresql
+  vars:
+    postgresql_network_name: "{{ keycloak_network_name }}"
+    postgresql_db_name: "{{ keycloak_db_name }}"
+    postgresql_db_user: "{{ keycloak_db_user }}"
+    postgresql_db_password: "{{ keycloak_db_password }}"
+
 - name: "Keycloak: Create Podman config directory"
   become: true
   ansible.builtin.file:

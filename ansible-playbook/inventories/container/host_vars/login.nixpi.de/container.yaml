@@ -2,17 +2,10 @@
 podman_user: "container"
 
 ######################################
-### giftpilz0.container.postgresql
+### giftpilz0.container.postgresql (provisioned by giftpilz0.container.keycloak)
 
-# Network
-postgresql_network_enabled: true
-postgresql_network_driver: "bridge"
-postgresql_network_internal: false
-
-# Network to join even when _network_enabled: false
-postgresql_network_name: "keycloak-internal"
-
-# Network
+# Optional overrides -- network/db wiring is set by the keycloak role itself;
+# only host-controllable settings (version pin, exposure, backups) live here.
 postgresql_port_map_enabled: true
 
 # Versions
@@ -22,10 +15,6 @@ postgresql_version: "18.4-alpine"
 # Autoupdate
 postgresql_autoupdate: true
 postgresql_backup_autoupdate: true
-
-# Database credentials
-postgresql_db_name: "keycloak"
-postgresql_db_user: "keycloak"
 
 # Backup
 postgresql_backup_schedule_hours: 24
@@ -49,11 +38,6 @@ keycloak_network_internal: false
 # Network to join even when _network_enabled: false
 keycloak_network_name: "keycloak-internal"
 
-# Port mapping: host_port:container_port
-keycloak_port_map_enabled: true
-keycloak_port_map:
-  - "127.0.0.1:8080:8080"
-
 # Versions
 # renovate: datasource=docker depName=quay.io/keycloak/keycloak
 keycloak_version: "26.6.4"
@@ -65,8 +49,7 @@ keycloak_autoupdate: true
 keycloak_domain: "login.nixpi.de"
 
 keycloak_db_host: "postgresql-pod"
-keycloak_db_username: "{{ postgresql_db_user }}"
-keycloak_db_password: "{{ postgresql_db_password }}"
+keycloak_db_user: "keycloak"
 
 keycloak_environment_vars:
   # HTTP Configuration
@@ -86,7 +69,7 @@ keycloak_environment_vars:
   # Database Configuration
   KC_DB: "postgres"
   KC_DB_URL: "jdbc:postgresql://{{ keycloak_db_host }}:5432/{{ keycloak_db_name }}"
-  KC_DB_USERNAME: "{{ keycloak_db_username }}"
+  KC_DB_USERNAME: "{{ keycloak_db_user }}"
   KC_DB_PASSWORD: "{{ keycloak_db_password }}"
 
   # User Configuration
@@ -132,8 +115,9 @@ traefik_acme_eab_enabled: false
 # Logging
 traefik_log_level: "INFO"
 
-# Pasta TCP port forwarding into traefik container namespace
-traefik_pasta_tcp_ports: "{{ keycloak_pasta_tcp_ports }}"
+# Podman networks traefik should join to reach backends directly
+traefik_networks:
+  - keycloak
 
 # HTTP services
 traefik_http_services:
@@ -141,6 +125,6 @@ traefik_http_services:
     domain: login.nixpi.de
     rule: "Host(`login.nixpi.de`)"
     servers:
-      - url: "http://127.0.0.1:8080"
+      - url: "http://keycloak-pod:8080"
     tls_enabled: true
     acme_enabled: true

@@ -8,7 +8,7 @@ Network={{ opencloud_network_name }}
 
 {% if opencloud_port_map_enabled %}
 {% for port_mapping in opencloud_port_map %}
-PublishPort={{ port_mapping }}
+PublishPort={{ opencloud_bind_ip }}:{{ port_mapping }}
 {% endfor %}
 {% endif %}
 

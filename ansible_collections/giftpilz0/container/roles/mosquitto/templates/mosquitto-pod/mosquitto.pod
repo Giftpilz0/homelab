@@ -8,7 +8,7 @@ Network={{ mosquitto_network_name }}
 
 {% if mosquitto_port_map_enabled %}
 {% for port_mapping in mosquitto_port_map %}
-PublishPort={{ port_mapping }}
+PublishPort={{ mosquitto_bind_ip }}:{{ port_mapping }}
 {% endfor %}
 {% endif %}
 

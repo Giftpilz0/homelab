@@ -18,15 +18,6 @@ bumper_network_internal: false
 # Network to join even when _network_enabled: false
 bumper_network_name: "bumper-internal"
 
-# Port mapping: host_port:container_port
-bumper_port_map_enabled: true
-bumper_port_map:
-  - "{{ bumper_bind_ip }}:443:443"
-  - "{{ bumper_bind_ip }}:1883:1883"
-  - "{{ bumper_bind_ip }}:5223:5223"
-  - "{{ bumper_bind_ip }}:8007:8007"
-  - "{{ bumper_bind_ip }}:8443:8443"
-
 # Versions
 bumper_version: "latest"
 bumper_commit: "4438eb5e9ffa31b60385052102da68a3a18bf4b7"

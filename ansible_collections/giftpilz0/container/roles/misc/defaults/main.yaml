@@ -16,16 +16,14 @@ misc_network_internal: false
 # Network to join even when _network_enabled: false
 misc_network_name: "misc-internal"
 
-# Port mapping: host_port:container_port
-# Bind to loopback so only traefik (via pasta splice) can reach the service.
-misc_bind_ip: "127.0.0.1"
+# Bind to primary interface so misc ports are externally reachable (no traefik).
+# _bind_ip and _port_map are independent: override _bind_ip alone to change
+# where it's exposed, or _port_map alone ("host_port:container_port") to
+# change which ports -- no need to redefine both together.
+misc_bind_ip: "{{ ansible_facts['default_ipv4']['address'] }}"
 misc_port_map_enabled: true
 misc_port_map:
-  - "{{ misc_bind_ip }}:8080:8080"
-
-# Pasta TCP ports to forward into traefik's container namespace
-misc_pasta_tcp_ports:
-  - 8080
+  - "8080:8080"
 
 # Build
 misc_version: "latest"
