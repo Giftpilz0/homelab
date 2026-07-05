@@ -39,6 +39,26 @@
     recurse: true
     mode: "0755"
 
+- name: "Podman: Create user containers.conf.d directory"
+  become: true
+  ansible.builtin.file:
+    path: /home/{{ podman_user }}/.config/containers/containers.conf.d
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    recurse: true
+    mode: "0755"
+
+- name: "Podman: Configure rootless port forwarder"
+  become: true
+  ansible.builtin.template:
+    src: "containers.conf.d/networking.conf.j2"
+    dest: "/home/{{ podman_user }}/.config/containers/containers.conf.d/networking.conf"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0644"
+  when: podman_rootless_port_forwarder | length > 0
+
 ######################################
 ### services
 

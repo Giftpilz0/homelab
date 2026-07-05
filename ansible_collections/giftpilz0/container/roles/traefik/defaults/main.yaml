@@ -8,6 +8,13 @@ traefik_proxy_https: ""
 traefik_proxy_no_proxy: ""
 traefik_proxy_env: "{{ (['https_proxy=' ~ traefik_proxy_https] + (['http_proxy=' ~ traefik_proxy_http] if traefik_proxy_http else []) + (['no_proxy=' ~ traefik_proxy_no_proxy] if traefik_proxy_no_proxy else [])) if traefik_proxy_enabled else [] }}"
 
+# Network
+# Traefik's own network. Also joins traefik_networks below to reach backends.
+traefik_network_enabled: true
+traefik_network_driver: "bridge"
+traefik_network_internal: false
+traefik_network_name: "traefik-internal"
+
 # Version
 # renovate: datasource=docker depName=traefik
 traefik_version: "v3.7.5"
@@ -20,23 +27,32 @@ traefik_autoupdate: true
 traefik_bind_ip: "{{ ansible_facts['default_ipv4']['address'] }}"
 
 # Internal ports traefik listens on inside its container. These are remapped to the
-# standard ports (80/443) via PublishPort. Using non-standard internal ports ensures
-# pasta's -T forwarding (which binds ports on the container loopback) never clashes
-# with traefik's own listeners, even when services use container-port 80 or 443.
-traefik_http_internal_port: 8880
-traefik_https_internal_port: 8843
+# standard ports (80/443) via PublishPort.
+traefik_http_internal_port: 80
+traefik_https_internal_port: 443
 
-# Pasta TCP port forwarding: host ports to splice into the traefik container namespace.
-# Services that publish to 127.0.0.1:HOST_PORT must be listed here so pasta can forward
-# them via --network=pasta:-T,HOST_PORT (podman quadlet Network= syntax).
-# IMPORTANT: HOST_PORT must NOT equal any port traefik itself listens on inside its
-# container (80, 443, or any traefik_tcp_entrypoints port). Pasta binds HOST_PORT on the
-# container's loopback for forwarding — if that matches traefik's own listener, traefik
-# will fail to start with "address already in use".
-# Example: vaultwarden container:80 → host:8080 (not 80), pasta -T,8080 → traefik ok.
-# Combine the svc_pasta_tcp_ports from each service role you are using, e.g.:
-#   traefik_pasta_tcp_ports: "{{ forgejo_pasta_tcp_ports + opencloud_pasta_tcp_ports }}"
-traefik_pasta_tcp_ports: []
+# Podman networks traefik should join, in addition to its own default network.
+# Traefik no longer runs on pasta -- it is a plain bridge-networked container like
+# every other service, and reaches backends directly over these shared Podman
+# networks using aardvark-dns (container name resolution), instead of splicing
+# host loopback ports via pasta -T.
+#
+# Each entry must be the *role name* of a service whose <role>.network quadlet
+# unit should be joined (e.g. "homeassistant" joins the network defined by
+# homeassistant.network / homeassistant_network_name). Referencing the quadlet
+# unit name (rather than the raw network name) makes systemd start that
+# service's -network.service before traefik-pod.service, so startup order is
+# correct on boot as well as on first deploy.
+#
+# Example:
+#   traefik_networks:
+#     - forgejo
+#     - opencloud
+#
+# In traefik_http_services / traefik_tcp_services, point "servers" at the
+# backend's pod name and *pod* port (not 127.0.0.1 and not the
+# host-published port), e.g. "http://forgejo-pod:3000".
+traefik_networks: []
 
 # Environment
 traefik_environment_vars: {}
@@ -114,7 +130,7 @@ traefik_custom_middlewares: {}
 #     domain: app.example.com
 #     rule: "Host(`app.example.com`)"
 #     servers:
-#       - url: "http://127.0.0.1:8080"   # host loopback via pasta splice
+#       - url: "http://webapp-pod:8080"  # container name + container port, over a shared network
 #     tls_enabled: true
 #     acme_enabled: true
 #     middlewares:

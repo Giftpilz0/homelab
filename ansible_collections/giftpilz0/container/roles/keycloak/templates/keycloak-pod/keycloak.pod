@@ -8,7 +8,7 @@ Network={{ keycloak_network_name }}
 
 {% if keycloak_port_map_enabled %}
 {% for port_mapping in keycloak_port_map %}
-PublishPort={{ port_mapping }}
+PublishPort={{ keycloak_bind_ip }}:{{ port_mapping }}
 {% endfor %}
 {% endif %}
 

@@ -16,16 +16,16 @@ homeassistant_network_internal: false
 # Network to join even when _network_enabled: false
 homeassistant_network_name: "homeassistant-internal"
 
-# Port mapping: host_port:container_port
-# Bind to loopback so only traefik (via pasta splice) can reach the service.
+# Optional: expose this service directly on the host, bypassing Traefik.
+# Not required for Traefik to reach it -- Traefik connects directly over the
+# shared Podman network using the container name and container port.
+# _bind_ip and _port_map are independent: override _bind_ip alone to change
+# where it's exposed, or _port_map alone ("host_port:container_port") to
+# change which ports -- no need to redefine both together.
 homeassistant_bind_ip: "127.0.0.1"
 homeassistant_port_map_enabled: true
 homeassistant_port_map:
-  - "{{ homeassistant_bind_ip }}:8123:8123"
-
-# Pasta TCP ports to forward into traefik's container namespace
-homeassistant_pasta_tcp_ports:
-  - 8123
+  - "8123:8123"
 
 # Versions
 # renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant

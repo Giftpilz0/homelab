@@ -18,11 +18,6 @@ misc_network_internal: false
 # Network to join even when _network_enabled: false
 misc_network_name: "misc-internal"
 
-# Port mapping: host_port:container_port
-misc_port_map_enabled: true
-misc_port_map:
-  - "8080:8080"
-
 # Versions
 misc_version: "latest"
 misc_commit: "db16ab7ca40f6e1e98e6e7a3947fb9e2aa04f527"

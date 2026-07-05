@@ -81,6 +81,16 @@
     daemon_reload: true
     scope: user
 
+- name: "Traefik: Start network service"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: traefik-network.service
+    enabled: true
+    state: restarted
+    scope: user
+  when: traefik_network_enabled
+
 - name: "Traefik: Start pod service"
   become: true
   become_user: "{{ podman_user }}"

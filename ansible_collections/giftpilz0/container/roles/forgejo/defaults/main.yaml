@@ -16,29 +16,32 @@ forgejo_network_internal: false
 # Network to join even when _network_enabled: false
 forgejo_network_name: "forgejo-internal"
 
-# Port mapping: host_port:container_port
-# Bind to loopback so only traefik (via pasta splice) can reach the service.
+# Optional: expose this service directly on the host, bypassing Traefik.
+# Not required for Traefik to reach it -- Traefik connects directly over the
+# shared Podman network using the container name and container port.
+# _bind_ip and _port_map are independent: override _bind_ip alone to change
+# where it's exposed, or _port_map alone ("host_port:container_port") to
+# change which ports -- no need to redefine both together.
 forgejo_bind_ip: "127.0.0.1"
 forgejo_port_map_enabled: true
 forgejo_port_map:
-  - "{{ forgejo_bind_ip }}:3000:3000"
-  - "{{ forgejo_bind_ip }}:2222:2222"
-
-# Pasta TCP ports to forward into traefik's container namespace
-forgejo_pasta_tcp_ports:
-  - 3000
+  - "3000:3000"
+  - "2222:2222"
 
 # Versions
-# renovate: datasource=docker depName=postgres
-postgresql_version: "18.4-alpine"
 # renovate: datasource=docker depName=codeberg.org/forgejo/forgejo
 forgejo_version: "15.0.3"
 
 # Autoupdate
-forgejo_postgresql_autoupdate: true
 forgejo_autoupdate: true
 
 # Environment
+# Database: forgejo uses the shared giftpilz0.container.postgresql role as its
+# database backend (a separate pod on the same Podman network) rather than an
+# embedded postgres container. Point forgejo_db_host at that pod/container name.
+forgejo_db_host: "postgresql-pod"
+forgejo_db_name: "forgejo"
+forgejo_db_user: "forgejo"
 forgejo_db_password: ""
 forgejo_domain: ""
 forgejo_oauth_client_id: ""
@@ -69,9 +72,9 @@ forgejo_environment_vars:
 
   # Database section
   FORGEJO__database__DB_TYPE: "postgres"
-  FORGEJO__database__HOST: "127.0.0.1:5432"
-  FORGEJO__database__NAME: "{{ forgejo_db_name | default('forgejo') }}"
-  FORGEJO__database__USER: "{{ forgejo_db_user | default('forgejo') }}"
+  FORGEJO__database__HOST: "{{ forgejo_db_host }}:5432"
+  FORGEJO__database__NAME: "{{ forgejo_db_name }}"
+  FORGEJO__database__USER: "{{ forgejo_db_user }}"
   FORGEJO__database__PASSWD: "{{ forgejo_db_password }}"
 
   # Security section
@@ -103,8 +106,3 @@ forgejo_environment_vars:
   OAUTH_DISCOVERY_URL: "https://{{ forgejo_oauth_domain }}/.well-known/openid-configuration"
   OAUTH_SCOPES: "openid profile email groups"
   OAUTH_ADMIN_GROUP: "{{ forgejo_oauth_admin_group }}"
-
-forgejo_postgresql_environment_vars:
-  POSTGRES_DB: "{{ forgejo_db_name | default('forgejo') }}"
-  POSTGRES_USER: "{{ forgejo_db_user | default('forgejo') }}"
-  POSTGRES_PASSWORD: "{{ forgejo_db_password }}"

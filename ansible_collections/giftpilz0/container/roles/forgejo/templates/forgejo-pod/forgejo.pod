@@ -8,7 +8,7 @@ Network={{ forgejo_network_name }}
 
 {% if forgejo_port_map_enabled %}
 {% for port_mapping in forgejo_port_map %}
-PublishPort={{ port_mapping }}
+PublishPort={{ forgejo_bind_ip }}:{{ port_mapping }}
 {% endfor %}
 {% endif %}
 

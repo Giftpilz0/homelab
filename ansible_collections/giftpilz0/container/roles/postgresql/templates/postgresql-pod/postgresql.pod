@@ -8,7 +8,7 @@ Network={{ postgresql_network_name }}
 
 {% if postgresql_port_map_enabled %}
 {% for port_mapping in postgresql_port_map %}
-PublishPort={{ port_mapping }}
+PublishPort={{ postgresql_bind_ip }}:{{ port_mapping }}
 {% endfor %}
 {% endif %}
 

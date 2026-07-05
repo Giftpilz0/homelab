@@ -2,6 +2,26 @@
 podman_user: "container"
 
 ######################################
+### giftpilz0.container.postgresql (provisioned by giftpilz0.container.forgejo)
+
+# Optional overrides -- network/db wiring is set by the forgejo role itself;
+# only host-controllable settings (version pin, exposure, backups) live here.
+postgresql_port_map_enabled: true
+
+# Versions
+# renovate: datasource=docker depName=postgres
+postgresql_version: "18.4-alpine"
+
+# Autoupdate
+postgresql_autoupdate: true
+postgresql_backup_autoupdate: true
+
+# Backup
+postgresql_backup_schedule_hours: 24
+postgresql_backup_retention_days: 7
+postgresql_backup_compression: 6
+
+######################################
 ### giftpilz0.container.forgejo
 
 # Proxy
@@ -18,20 +38,11 @@ forgejo_network_internal: false
 # Network to join even when _network_enabled: false
 forgejo_network_name: "forgejo-internal"
 
-# Port mapping: host_port:container_port
-forgejo_port_map_enabled: true
-forgejo_port_map:
-  - "127.0.0.1:3000:3000"
-  - "127.0.0.1:2222:2222"
-
 # Versions
-# renovate: datasource=docker depName=postgres
-postgresql_version: "18.4-alpine"
 # renovate: datasource=docker depName=codeberg.org/forgejo/forgejo
 forgejo_version: "15.0.3"
 
 # Autoupdate
-forgejo_postgresql_autoupdate: true
 forgejo_autoupdate: true
 
 # Environment
@@ -67,8 +78,9 @@ traefik_acme_eab_enabled: false
 # Logging
 traefik_log_level: "INFO"
 
-# Pasta TCP port forwarding into traefik container namespace
-traefik_pasta_tcp_ports: "{{ forgejo_pasta_tcp_ports }}"
+# Podman networks traefik should join to reach backends directly
+traefik_networks:
+  - forgejo
 
 # HTTP services
 traefik_http_services:
@@ -76,6 +88,6 @@ traefik_http_services:
     domain: forgejo.nixpi.de
     rule: "Host(`forgejo.nixpi.de`)"
     servers:
-      - url: "http://127.0.0.1:3000"
+      - url: "http://forgejo-pod:3000"
     tls_enabled: true
     acme_enabled: true

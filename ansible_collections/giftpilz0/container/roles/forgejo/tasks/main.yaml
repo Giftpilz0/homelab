@@ -1,4 +1,13 @@
 ---
+- name: "Forgejo: Provision postgresql database"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.postgresql
+  vars:
+    postgresql_network_name: "{{ forgejo_network_name }}"
+    postgresql_db_name: "{{ forgejo_db_name }}"
+    postgresql_db_user: "{{ forgejo_db_user }}"
+    postgresql_db_password: "{{ forgejo_db_password }}"
+
 - name: "Forgejo: Create Podman config directory"
   become: true
   ansible.builtin.file:

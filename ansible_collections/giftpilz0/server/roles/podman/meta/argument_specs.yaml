@@ -48,3 +48,12 @@ argument_specs:
         elements: str
         required: false
         description: podman_package
+
+      podman_rootless_port_forwarder:
+        type: str
+        required: false
+        description: >
+          Rootless port forwarder backend written to the user's
+          containers.conf.d drop-in. "pasta" preserves client source IPs
+          (requires podman >= 6 with a recent passt/pasta); ignored by
+          older podman versions.

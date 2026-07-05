@@ -8,7 +8,7 @@ Network={{ homeassistant_network_name }}
 
 {% if homeassistant_port_map_enabled %}
 {% for port_mapping in homeassistant_port_map %}
-PublishPort={{ port_mapping }}
+PublishPort={{ homeassistant_bind_ip }}:{{ port_mapping }}
 {% endfor %}
 {% endif %}
 

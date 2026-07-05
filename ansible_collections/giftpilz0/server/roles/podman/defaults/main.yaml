@@ -10,3 +10,12 @@ podman_service_enabled: true
 podman_package_state: present
 podman_package:
   - podman
+
+# Rootless port forwarder. "pasta" preserves the real client source IP for
+# published ports on ordinary bridge networks -- this requires podman >= 6
+# with a recent passt/pasta (providing the pesto control socket). It is an
+# experimental containers.conf option; podman < 6 silently ignores unknown
+# keys, so this is safe to set unconditionally and simply has no effect
+# until the host is upgraded to podman >= 6. The legacy "rootlesskit"
+# forwarder (default before this is set) does not preserve client IPs.
+podman_rootless_port_forwarder: "pasta"

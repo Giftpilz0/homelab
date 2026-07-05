@@ -16,16 +16,16 @@ vaultwarden_network_internal: false
 # Network to join even when _network_enabled: false
 vaultwarden_network_name: "vaultwarden-internal"
 
-# Port mapping: host_port:container_port
-# Bind to loopback so only traefik (via pasta splice) can reach the service.
+# Optional: expose this service directly on the host, bypassing Traefik.
+# Not required for Traefik to reach it -- Traefik connects directly over the
+# shared Podman network using the container name and container port.
+# _bind_ip and _port_map are independent: override _bind_ip alone to change
+# where it's exposed, or _port_map alone ("host_port:container_port") to
+# change which ports -- no need to redefine both together.
 vaultwarden_bind_ip: "127.0.0.1"
 vaultwarden_port_map_enabled: true
 vaultwarden_port_map:
-  - "{{ vaultwarden_bind_ip }}:80:80"
-
-# Pasta TCP ports to forward into traefik's container namespace
-vaultwarden_pasta_tcp_ports:
-  - 80
+  - "80:80"
 
 # Versions
 # renovate: datasource=docker depName=vaultwarden/server
