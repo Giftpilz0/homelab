@@ -40,7 +40,7 @@ keycloak_network_name: "keycloak-internal"
 
 # Versions
 # renovate: datasource=docker depName=quay.io/keycloak/keycloak
-keycloak_version: "26.6.4"
+keycloak_version: "26.7.0"
 
 # Autoupdate
 keycloak_autoupdate: true
@@ -100,7 +100,7 @@ traefik_proxy_no_proxy: ""
 
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.5"
+traefik_version: "v3.7.7"
 
 # Autoupdate
 traefik_autoupdate: true
