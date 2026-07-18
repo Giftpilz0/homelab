@@ -30,7 +30,7 @@ forgejo_port_map:
 
 # Versions
 # renovate: datasource=docker depName=codeberg.org/forgejo/forgejo
-forgejo_version: "15.0.4"
+forgejo_version: "15.0.5"
 
 # Autoupdate
 forgejo_autoupdate: true

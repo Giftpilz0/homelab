@@ -40,7 +40,7 @@ forgejo_network_name: "forgejo-internal"
 
 # Versions
 # renovate: datasource=docker depName=codeberg.org/forgejo/forgejo
-forgejo_version: "15.0.4"
+forgejo_version: "15.0.5"
 
 # Autoupdate
 forgejo_autoupdate: true
@@ -63,7 +63,7 @@ traefik_proxy_no_proxy: ""
 
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.7"
+traefik_version: "v3.7.8"
 
 # Autoupdate
 traefik_autoupdate: true

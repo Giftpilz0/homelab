@@ -20,7 +20,7 @@ opencloud_network_name: "opencloud-internal"
 
 # Versions
 # renovate: datasource=docker depName=opencloudeu/opencloud-rolling
-opencloud_version: "7.2.0"
+opencloud_version: "7.3.0"
 
 # Autoupdate
 opencloud_autoupdate: true
@@ -64,7 +64,7 @@ traefik_proxy_no_proxy: ""
 
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.7"
+traefik_version: "v3.7.8"
 
 # Autoupdate
 traefik_autoupdate: true

@@ -34,7 +34,7 @@ valkey_version: "9.1.0-alpine"
 # renovate: datasource=docker depName=postgres
 postgresql_version: "18.4-alpine"
 # renovate: datasource=docker depName=ghcr.io/goauthentik/server
-authentik_version: "2026.5.4"
+authentik_version: "2026.5.5"
 
 # Autoupdate
 authentik_cache_autoupdate: true
