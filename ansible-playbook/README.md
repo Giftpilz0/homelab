@@ -5,6 +5,5 @@ This Ansible playbook automates the configuration of previously provisioned virt
 ## Getting Started
 
 ```bash
-cd inventories/{{ inventory_name }}/
 ./run.sh
 ```
