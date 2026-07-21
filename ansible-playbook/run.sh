@@ -17,6 +17,7 @@ fi
 
 if [[ -n "$1" ]]; then
     INVENTORY_DIR="$1"
+    shift
     if [[ ! -d "./inventories/$INVENTORY_DIR" ]]; then
         echo -e "[${RED}✘${NC}] Inventory '$INVENTORY_DIR' not found"
         exit 1

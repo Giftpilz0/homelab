@@ -29,7 +29,7 @@ opencloud_port_map:
 
 # Versions
 # renovate: datasource=docker depName=opencloudeu/opencloud-rolling
-opencloud_version: "7.2.0"
+opencloud_version: "7.3.0"
 
 # Autoupdate
 opencloud_autoupdate: true
