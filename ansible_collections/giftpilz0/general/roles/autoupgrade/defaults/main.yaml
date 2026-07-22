@@ -1,0 +1,9 @@
+---
+autoupgrade_auto_apply: true
+autoupgrade_upgrade_type: default
+autoupgrade_reboot: >-
+  {{ false if ansible_facts['os_family'] == 'Debian'
+     else 'never' }}
+autoupgrade_blacklist: []
+autoupgrade_mail_report: ""
+autoupgrade_mail: ""
