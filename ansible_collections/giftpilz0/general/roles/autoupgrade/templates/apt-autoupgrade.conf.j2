@@ -8,12 +8,22 @@ Unattended-Upgrade::Origins-Pattern {
     "origin=*";
 };
 
-Unattended-Upgrade::Package-Blacklist {};
+Unattended-Upgrade::Package-Blacklist {
+{% for package in autoupgrade_blacklist %}
+    "{{ package }}";
+{% endfor %}
+};
 Unattended-Upgrade::AutoFixInterruptedDpkg "true";
 Dpkg::Options {"--force-confold"};
 Unattended-Upgrade::MinimalSteps "true";
 Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
 Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
 Unattended-Upgrade::Remove-Unused-Dependencies "false";
+{% if autoupgrade_mail_report %}
+Unattended-Upgrade::MailReport "{{ autoupgrade_mail_report }}";
+{% endif %}
+{% if autoupgrade_mail %}
+Unattended-Upgrade::Mail "{{ autoupgrade_mail }}";
+{% endif %}
 Unattended-Upgrade::Automatic-Reboot "{{ autoupgrade_reboot | lower }}";
 Unattended-Upgrade::Automatic-Reboot-Time "02:00";

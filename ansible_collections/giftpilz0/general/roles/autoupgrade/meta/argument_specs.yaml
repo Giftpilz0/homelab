@@ -64,3 +64,19 @@ argument_specs:
           - when-changed
           - when-needed
         description: autoupgrade_config_reboot
+
+      autoupgrade_blacklist:
+        type: list
+        elements: str
+        required: false
+        description:  autoupgrade_blacklist
+
+      autoupgrade_mail_report:
+        type: str
+        required: false
+        description:  autoupgrade_mail_report (e.g. "on-change", "always", "only-on-error")
+
+      autoupgrade_maily:
+        type: str
+        required: false
+        description: autoupgrade_mail_report

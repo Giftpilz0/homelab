@@ -13,6 +13,3 @@ autoupgrade_package_list:
 
 # Configuration path
 autoupgrade_config_path: /etc/dnf/automatic.conf
-autoupgrade_auto_apply: true
-autoupgrade_upgrade_type: default
-autoupgrade_reboot: never
