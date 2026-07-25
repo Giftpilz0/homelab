@@ -85,7 +85,7 @@ monitoring_alloy_blackbox_modules:
 monitoring_beyla_enabled: false
 
 # renovate: datasource=github-releases depName=grafana/beyla extractVersion=^v(?<version>.*)$
-monitoring_beyla_version: "1.9.4"
+monitoring_beyla_version: "3.28.0"
 monitoring_beyla_package_state: present
 monitoring_beyla_package:
   - https://github.com/grafana/beyla/releases/download/v{{ monitoring_beyla_version }}/beyla_{{ monitoring_beyla_version }}_linux_{{ monitoring_agent_arch }}.rpm
