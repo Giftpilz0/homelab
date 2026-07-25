@@ -1,0 +1,10 @@
+---
+######################################
+### giftpilz0.general.monitoring
+
+monitoring_agent_config_remoteserver_loki: https://loki.nixpi.de/loki/api/v1/push
+monitoring_agent_config_remoteserver_prometheus: https://mimir.nixpi.de/api/v1/push
+
+monitoring_alloy_loki_journal_extra_rules:
+  - source_labels: ["__journal_CONTAINER_NAME"]
+    target_label: "container"

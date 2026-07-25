@@ -1,0 +1,14 @@
+# Perses – dashboarding server
+# Docs: https://perses.dev/perses/docs/configuration/configuration/
+
+database:
+  file:
+    folder: /var/perses/data
+
+security:
+  enable_auth: false
+
+provisioning:
+  interval: 5m
+  folders:
+    - /etc/perses/provisioning

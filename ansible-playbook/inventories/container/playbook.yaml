@@ -5,6 +5,7 @@
     - role: giftpilz0.general.user
     - role: giftpilz0.general.update
     - role: giftpilz0.general.autoupgrade
+    - role: giftpilz0.general.monitoring
     - role: giftpilz0.general.firewalld
     - role: giftpilz0.general.packages
     - role: giftpilz0.general.timezone
@@ -46,3 +47,8 @@
   hosts: keycloak
   roles:
     - role: giftpilz0.container.keycloak
+
+- name: Configure hosts - monitoring
+  hosts: monitoring
+  roles:
+    - role: giftpilz0.container.monitoring_stack

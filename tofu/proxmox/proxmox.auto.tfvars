@@ -77,7 +77,7 @@ vms = {
     scsi_hardware   = "virtio-scsi-single"
 
     clone = {
-      vm_id     = 101
+      vm_id     = 100
       node_name = "pve"
       full      = true
     }
@@ -161,7 +161,7 @@ vms = {
     scsi_hardware   = "virtio-scsi-single"
 
     clone = {
-      vm_id     = 101
+      vm_id     = 100
       node_name = "pve"
       full      = true
     }
@@ -245,7 +245,7 @@ vms = {
     scsi_hardware   = "virtio-scsi-single"
 
     clone = {
-      vm_id     = 101
+      vm_id     = 100
       node_name = "pve"
       full      = true
     }
@@ -329,7 +329,7 @@ vms = {
     scsi_hardware   = "virtio-scsi-single"
 
     clone = {
-      vm_id     = 101
+      vm_id     = 100
       node_name = "pve"
       full      = true
     }
@@ -413,7 +413,7 @@ vms = {
     scsi_hardware   = "virtio-scsi-single"
 
     clone = {
-      vm_id     = 101
+      vm_id     = 100
       node_name = "pve"
       full      = true
     }
@@ -497,7 +497,7 @@ vms = {
     scsi_hardware   = "virtio-scsi-single"
 
     clone = {
-      vm_id     = 101
+      vm_id     = 100
       node_name = "pve"
       full      = true
     }
@@ -581,7 +581,7 @@ vms = {
     scsi_hardware   = "virtio-scsi-single"
 
     clone = {
-      vm_id     = 101
+      vm_id     = 100
       node_name = "pve"
       full      = true
     }
@@ -665,7 +665,7 @@ vms = {
     scsi_hardware   = "virtio-scsi-single"
 
     clone = {
-      vm_id     = 101
+      vm_id     = 100
       node_name = "pve"
       full      = true
     }
@@ -721,6 +721,90 @@ vms = {
         {
           ipv4 = {
             address = "192.168.60.16/24"
+            gateway = "192.168.60.1"
+          }
+        }
+      ]
+
+      dns = {
+        servers = ["192.168.60.1"]
+      }
+    }
+
+    serial_devices = []
+  }
+
+  "monitoring" = {
+    node_name       = "pve"
+    vm_id           = 4007
+    name            = "monitoring"
+    description     = "Monitoring Server"
+    tags            = ["container", "docker", "production"]
+    started         = true
+    on_boot         = true
+    template        = false
+    stop_on_destroy = false
+    machine         = "q35"
+    bios            = "ovmf"
+    scsi_hardware   = "virtio-scsi-single"
+
+    clone = {
+      vm_id     = 100
+      node_name = "pve"
+      full      = true
+    }
+
+    agent = {
+      enabled = true
+      trim    = false
+      type    = "virtio"
+    }
+
+    cpu = {
+      cores   = 2
+      sockets = 1
+      type    = "host"
+    }
+
+    memory = {
+      dedicated = 4096
+    }
+
+    operating_system = {
+      type = "l26"
+    }
+
+    disks = [
+      {
+        datastore_id = "local-lvm"
+        file_format  = "raw"
+        interface    = "scsi0"
+        iothread     = true
+        discard      = "on"
+        size         = 50
+      }
+    ]
+
+    network_devices = [
+      {
+        bridge   = "misc"
+        model    = "virtio"
+        firewall = true
+      }
+    ]
+
+    cloud_init = {
+      datastore_id = "local-lvm"
+
+      user_account = {
+        username = "serveradmin"
+        keys     = []
+      }
+
+      ip_configs = [
+        {
+          ipv4 = {
+            address = "192.168.60.17/24"
             gateway = "192.168.60.1"
           }
         }

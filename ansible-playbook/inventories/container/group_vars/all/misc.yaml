@@ -18,6 +18,7 @@ packages_additional_package:
   - mkpasswd
   - nfs-utils
   - nmap
+  - htop
 
 ######################################
 ### giftpilz0.general.user

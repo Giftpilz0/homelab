@@ -2,7 +2,7 @@ packer {
   required_plugins {
     name = {
       source  = "github.com/hashicorp/proxmox"
-      version = "1.2.3"
+      version = "1.2.4"
     }
   }
 }
@@ -24,12 +24,12 @@ variable "proxmox_config_endpoint" {
 
 variable "almalinux_iso_url" {
   type    = string
-  default = "https://repo.almalinux.org/almalinux/10/isos/x86_64/AlmaLinux-10.1-x86_64-boot.iso"
+  default = "https://repo.almalinux.org/almalinux/10/isos/x86_64/AlmaLinux-10.2-x86_64-boot.iso"
 }
 
 variable "almalinux_sha256sum_url" {
   type    = string
-  default = "https://repo.almalinux.org/almalinux/10.1/isos/x86_64/CHECKSUM"
+  default = "https://repo.almalinux.org/almalinux/10.2/isos/x86_64/CHECKSUM"
 }
 
 source "proxmox-iso" "almalinux10" {
@@ -44,9 +44,10 @@ source "proxmox-iso" "almalinux10" {
   bios                     = "ovmf"
   cpu_type                 = "host"
   machine                  = "q35"
+  ssh_timeout              = "15m"
 
   boot_command   = ["<wait><wait>e<down><down><end><bs><bs><bs><bs><bs>inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux.ks<leftCtrlOn>x<leftCtrlOff>"]
-  boot_wait      = "30s"
+  boot_wait      = "15s"
   http_directory = "http"
   ssh_username   = "root"
   ssh_password   = "packer"
