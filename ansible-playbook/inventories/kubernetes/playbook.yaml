@@ -1,5 +1,5 @@
 ---
-- name: Configure hosts - authentik
+- name: Configure hosts - k3s
   hosts: k3s
   roles:
     - role: giftpilz0.general.user
@@ -8,5 +8,5 @@
     - role: giftpilz0.general.firewalld
     - role: giftpilz0.general.packages
     - role: giftpilz0.general.timezone
-    - role: giftpilz0.kubernetes.k3s
+    # - role: giftpilz0.kubernetes.k3s
     - role: giftpilz0.misc.profile

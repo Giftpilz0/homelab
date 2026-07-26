@@ -12,11 +12,14 @@ packages_python_package_state: skip
 packages_flatpak_repo_state: skip
 
 packages_additional_package:
+  - bash-completion
   - epel-release
+  - git-core
   - mkpasswd
   - nfs-utils
   - nmap
-  - bash-completion
+  - htop
+  - gum
 
 ######################################
 ### giftpilz0.general.user
@@ -74,8 +77,7 @@ firewalld_rules_ports:
 # renovate: datasource=github-releases depName=k3s-io/k3s versioning=loose
 k3s_version: v1.36.2+k3s1
 k3s_vip_api_endpoint: 192.168.65.230
-k3s_extra_server_args:
-  --tls-san {{ k3s_vip_api_endpoint }} --service-cidr {{ k3s_service_cidr }} --cluster-cidr {{ k3s_cluster_cidr }} --flannel-backend=none
+k3s_extra_server_args: --tls-san {{ k3s_vip_api_endpoint }} --service-cidr {{ k3s_service_cidr }} --cluster-cidr {{ k3s_cluster_cidr }} --flannel-backend=none
   --disable-network-policy --disable-helm-controller --disable metrics-server --disable servicelb --disable traefik --selinux
 
 k3s_kube_vip_iface: eth0
@@ -102,8 +104,7 @@ cilium_config_hubble_relay_enabled: true
 cilium_config_hubble_relay_rolloutpods: true
 cilium_config_hubble_ui_enabled: true
 cilium_config_hubble_ui_rolloutpods: true
-cilium_config_ipam_operator_clusterpoolipv4podcidrlist:
-  ["{{ k3s_cluster_cidr }}"]
+cilium_config_ipam_operator_clusterpoolipv4podcidrlist: ["{{ k3s_cluster_cidr }}"]
 cilium_config_ipv4_enabled: true
 cilium_config_ipv6_enabled: false
 cilium_config_egressgateway_enabled: false

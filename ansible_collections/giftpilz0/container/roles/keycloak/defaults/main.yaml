@@ -6,7 +6,8 @@ keycloak_proxy_enabled: false
 keycloak_proxy_http: ""
 keycloak_proxy_https: ""
 keycloak_proxy_no_proxy: ""
-keycloak_proxy_env: "{{ (['https_proxy=' ~ keycloak_proxy_https] + (['http_proxy=' ~ keycloak_proxy_http] if keycloak_proxy_http else []) + (['no_proxy=' ~ keycloak_proxy_no_proxy] if keycloak_proxy_no_proxy else [])) if keycloak_proxy_enabled else [] }}"
+keycloak_proxy_env: "{{ (['https_proxy=' ~ keycloak_proxy_https] + (['http_proxy=' ~ keycloak_proxy_http] if keycloak_proxy_http else []) + (['no_proxy=' ~ keycloak_proxy_no_proxy]
+  if keycloak_proxy_no_proxy else [])) if keycloak_proxy_enabled else [] }}"
 
 # Network
 keycloak_network_enabled: true

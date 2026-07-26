@@ -77,7 +77,7 @@ vms = {
     scsi_hardware   = "virtio-scsi-single"
 
     clone = {
-      vm_id     = 101
+      vm_id     = 100
       node_name = "pve"
       full      = true
     }
@@ -161,7 +161,7 @@ vms = {
     scsi_hardware   = "virtio-scsi-single"
 
     clone = {
-      vm_id     = 101
+      vm_id     = 100
       node_name = "pve"
       full      = true
     }
@@ -245,7 +245,7 @@ vms = {
     scsi_hardware   = "virtio-scsi-single"
 
     clone = {
-      vm_id     = 101
+      vm_id     = 100
       node_name = "pve"
       full      = true
     }
@@ -329,7 +329,7 @@ vms = {
     scsi_hardware   = "virtio-scsi-single"
 
     clone = {
-      vm_id     = 101
+      vm_id     = 100
       node_name = "pve"
       full      = true
     }
@@ -413,7 +413,7 @@ vms = {
     scsi_hardware   = "virtio-scsi-single"
 
     clone = {
-      vm_id     = 101
+      vm_id     = 100
       node_name = "pve"
       full      = true
     }
@@ -497,7 +497,7 @@ vms = {
     scsi_hardware   = "virtio-scsi-single"
 
     clone = {
-      vm_id     = 101
+      vm_id     = 100
       node_name = "pve"
       full      = true
     }
@@ -581,7 +581,7 @@ vms = {
     scsi_hardware   = "virtio-scsi-single"
 
     clone = {
-      vm_id     = 101
+      vm_id     = 100
       node_name = "pve"
       full      = true
     }
@@ -665,7 +665,7 @@ vms = {
     scsi_hardware   = "virtio-scsi-single"
 
     clone = {
-      vm_id     = 101
+      vm_id     = 100
       node_name = "pve"
       full      = true
     }
