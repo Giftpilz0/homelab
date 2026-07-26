@@ -6,7 +6,8 @@ mosquitto_proxy_enabled: false
 mosquitto_proxy_http: ""
 mosquitto_proxy_https: ""
 mosquitto_proxy_no_proxy: ""
-mosquitto_proxy_env: "{{ (['https_proxy=' ~ mosquitto_proxy_https] + (['http_proxy=' ~ mosquitto_proxy_http] if mosquitto_proxy_http else []) + (['no_proxy=' ~ mosquitto_proxy_no_proxy] if mosquitto_proxy_no_proxy else [])) if mosquitto_proxy_enabled else [] }}"
+mosquitto_proxy_env: "{{ (['https_proxy=' ~ mosquitto_proxy_https] + (['http_proxy=' ~ mosquitto_proxy_http] if mosquitto_proxy_http else []) + (['no_proxy=' ~ mosquitto_proxy_no_proxy]
+  if mosquitto_proxy_no_proxy else [])) if mosquitto_proxy_enabled else [] }}"
 
 # Network
 mosquitto_network_enabled: true

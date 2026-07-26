@@ -6,7 +6,8 @@ homeassistant_proxy_enabled: false
 homeassistant_proxy_http: ""
 homeassistant_proxy_https: ""
 homeassistant_proxy_no_proxy: ""
-homeassistant_proxy_env: "{{ (['https_proxy=' ~ homeassistant_proxy_https] + (['http_proxy=' ~ homeassistant_proxy_http] if homeassistant_proxy_http else []) + (['no_proxy=' ~ homeassistant_proxy_no_proxy] if homeassistant_proxy_no_proxy else [])) if homeassistant_proxy_enabled else [] }}"
+homeassistant_proxy_env: "{{ (['https_proxy=' ~ homeassistant_proxy_https] + (['http_proxy=' ~ homeassistant_proxy_http] if homeassistant_proxy_http else []) + (['no_proxy='
+  ~ homeassistant_proxy_no_proxy] if homeassistant_proxy_no_proxy else [])) if homeassistant_proxy_enabled else [] }}"
 
 # Network
 homeassistant_network_enabled: true

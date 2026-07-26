@@ -8,8 +8,7 @@ k3s_vip_api_endpoint: "{{ hostvars[groups['k3s'][0]]['ansible_host'] | default(g
 k3s_api_port: 6443
 
 k3s_token: W7hzb52sN7wpDHv2ayzQYfLz4tH2pQvpyg3vKe2iAK577bStCuruqeftKjwkd34
-k3s_extra_server_args:
-  --tls-san {{ k3s_vip_api_endpoint }} --flannel-backend=none --disable-network-policy --disable-helm-controller --disable metrics-server
+k3s_extra_server_args: --tls-san {{ k3s_vip_api_endpoint }} --flannel-backend=none --disable-network-policy --disable-helm-controller --disable metrics-server
   --disable servicelb --disable traefik --selinux
 
 k3s_service_name: k3s.service

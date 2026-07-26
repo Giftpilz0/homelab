@@ -6,7 +6,8 @@ authentik_proxy_enabled: false
 authentik_proxy_http: ""
 authentik_proxy_https: ""
 authentik_proxy_no_proxy: ""
-authentik_proxy_env: "{{ (['https_proxy=' ~ authentik_proxy_https] + (['http_proxy=' ~ authentik_proxy_http] if authentik_proxy_http else []) + (['no_proxy=' ~ authentik_proxy_no_proxy] if authentik_proxy_no_proxy else [])) if authentik_proxy_enabled else [] }}"
+authentik_proxy_env: "{{ (['https_proxy=' ~ authentik_proxy_https] + (['http_proxy=' ~ authentik_proxy_http] if authentik_proxy_http else []) + (['no_proxy=' ~ authentik_proxy_no_proxy]
+  if authentik_proxy_no_proxy else [])) if authentik_proxy_enabled else [] }}"
 
 # Network
 authentik_network_enabled: true

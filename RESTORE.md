@@ -3,7 +3,7 @@
 This guide covers restoring data from restic backups.
 All commands are run **on the affected client host** as `root` (or via `sudo`).
 
----
+______________________________________________________________________
 
 ## Architecture Overview
 
@@ -22,7 +22,7 @@ Each host has two profiles:
 | `podman-volumes` | `/home/container/.local/share/containers/storage/volumes` |
 | `podman-configs` | `/home/container/.config/containers/systemd`              |
 
----
+______________________________________________________________________
 
 ## Quick Start
 
@@ -41,7 +41,7 @@ cp -a /tmp/restore/home/container/.local/share/containers/storage/volumes/<volum
 systemctl --user -M container@ start <service>.service
 ```
 
----
+______________________________________________________________________
 
 ## Full Reference
 
@@ -140,7 +140,7 @@ ls /mnt/restic-mount/snapshots/latest/
 
 > Mounted repositories are read-only. Use `restore` for actual recovery.
 
----
+______________________________________________________________________
 
 ## Common Recovery Scenarios
 
@@ -217,7 +217,7 @@ resticprofile --config /etc/resticprofile/profiles.yaml --name podman-volumes \
   restore --target /tmp/restore a1b2c3d4
 ```
 
----
+______________________________________________________________________
 
 ## Backup Schedule Reference
 
@@ -228,7 +228,7 @@ resticprofile --config /etc/resticprofile/profiles.yaml --name podman-volumes \
 
 Integrity checks run every **Sunday at 03:00** (10% data subset read).
 
----
+______________________________________________________________________
 
 ## Troubleshooting
 

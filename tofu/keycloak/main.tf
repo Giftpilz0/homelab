@@ -67,9 +67,9 @@ variable "realm_display_name" {
 # REALM CONFIGURATION
 # ======================================================================================================================
 resource "keycloak_realm" "nixpi" {
-  realm        = var.realm_name
-  enabled      = true
-  display_name = var.realm_display_name
+  realm             = var.realm_name
+  enabled           = true
+  display_name      = var.realm_display_name
   display_name_html = "<b>${var.realm_display_name}</b>"
   #login_theme       = "nixpi"
   #account_theme     = "nixpi"
@@ -83,7 +83,7 @@ resource "keycloak_realm" "nixpi" {
   reset_password_allowed   = true
 
   # Security settings
-  ssl_required = "external"
+  ssl_required         = "external"
   access_code_lifespan = "1h"
 
   # Internationalization
@@ -283,11 +283,11 @@ resource "keycloak_openid_client_scope" "opencloud_realm_roles" {
 }
 
 resource "keycloak_openid_user_realm_role_protocol_mapper" "opencloud_realm_roles_mapper" {
-  realm_id        = keycloak_realm.nixpi.id
-  client_scope_id = keycloak_openid_client_scope.opencloud_realm_roles.id
-  name            = "realm-roles"
-  claim_name      = "roles"
-  multivalued     = true
+  realm_id            = keycloak_realm.nixpi.id
+  client_scope_id     = keycloak_openid_client_scope.opencloud_realm_roles.id
+  name                = "realm-roles"
+  claim_name          = "roles"
+  multivalued         = true
   add_to_id_token     = true
   add_to_access_token = true
   add_to_userinfo     = true
@@ -352,11 +352,11 @@ resource "keycloak_openid_client_scope" "forgejo_groups" {
 }
 
 resource "keycloak_openid_group_membership_protocol_mapper" "forgejo_groups_mapper" {
-  realm_id        = keycloak_realm.nixpi.id
-  client_scope_id = keycloak_openid_client_scope.forgejo_groups.id
-  name            = "groups"
-  claim_name      = "groups"
-  full_path       = false
+  realm_id            = keycloak_realm.nixpi.id
+  client_scope_id     = keycloak_openid_client_scope.forgejo_groups.id
+  name                = "groups"
+  claim_name          = "groups"
+  full_path           = false
   add_to_id_token     = true
   add_to_access_token = true
   add_to_userinfo     = true
@@ -529,7 +529,7 @@ resource "keycloak_openid_client" "forgejo" {
   direct_access_grants_enabled = false
 
   # Session settings
-  use_refresh_tokens           = true
+  use_refresh_tokens = true
 
   valid_redirect_uris = [
     "https://forgejo.nixpi.de/user/oauth2/keycloak/callback"
@@ -583,7 +583,7 @@ resource "keycloak_openid_client" "vaultwarden" {
   direct_access_grants_enabled = false
 
   # Session settings
-  use_refresh_tokens           = true
+  use_refresh_tokens = true
 
   valid_redirect_uris = [
     "https://vaultwarden.nixpi.de/identity/connect/oidc-signin"
