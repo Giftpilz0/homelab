@@ -16,7 +16,7 @@ k3s_service_state: started
 k3s_service_enabled: true
 
 # renovate: datasource=github-releases depName=kube-vip/kube-vip
-k3s_kube_vip_tag: v1.2.1
+k3s_kube_vip_tag: v1.2.2
 k3s_kube_vip_iface: enp6s18
 
 k3s_service_cidr: 10.43.0.0/16
