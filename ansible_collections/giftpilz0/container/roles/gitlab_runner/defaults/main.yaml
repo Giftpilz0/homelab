@@ -28,6 +28,7 @@ gitlab_runner_autoupdate: true
 gitlab_runner_environment_vars: {}
 
 # Config
+gitlab_runner_concurrent: 1
 gitlab_runner_name: ""
 gitlab_runner_url: ""
 gitlab_runner_token: ""
