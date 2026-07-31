@@ -1,4 +1,4 @@
-concurrent = 1
+concurrent = {{ gitlab_runner_concurrent }}
 check_interval = 0
 shutdown_timeout = 0
 
