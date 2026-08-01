@@ -1,0 +1,23 @@
+[Unit]
+Description=CloudBeaver Pod
+
+[Pod]
+PodName=cloudbeaver-pod
+
+{% if cloudbeaver_db_network_name %}
+Network={{ cloudbeaver_db_network_name }}
+{% elif cloudbeaver_network_enabled %}
+Network={{ cloudbeaver_network_name }}
+{% endif %}
+
+{% if cloudbeaver_port_map_enabled %}
+{% for port_mapping in cloudbeaver_port_map %}
+PublishPort={{ cloudbeaver_bind_ip }}:{{ port_mapping }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

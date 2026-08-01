@@ -1,5 +1,5 @@
 ---
-- name: "PostgreSQL: Create Podman config directory"
+- name: "MariaDB: Create Podman config directory"
   become: true
   ansible.builtin.file:
     path: /etc/containers/containers.conf.d
@@ -8,29 +8,29 @@
     group: root
     mode: "0755"
 
-- name: "PostgreSQL: Deploy podman proxy configuration"
+- name: "MariaDB: Deploy podman proxy configuration"
   become: true
   ansible.builtin.template:
-    src: "postgresql-pod/proxy.conf.j2"
+    src: "mariadb-pod/proxy.conf.j2"
     dest: "/etc/containers/containers.conf.d/proxy.conf"
     owner: root
     group: root
     mode: "0644"
-  when: postgresql_proxy_enabled
+  when: mariadb_proxy_enabled
 
-- name: "PostgreSQL: Delete quadlet directory"
+- name: "MariaDB: Delete quadlet directory"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.file:
-    path: "/home/{{ podman_user }}/.config/containers/systemd/postgresql-pod"
+    path: "/home/{{ podman_user }}/.config/containers/systemd/mariadb-pod"
     state: absent
 
-- name: "PostgreSQL: Enable lingering"
+- name: "MariaDB: Enable lingering"
   become: true
   ansible.builtin.command: loginctl enable-linger {{ podman_user }}
   changed_when: true
 
-- name: "PostgreSQL: Configure unprivileged port range for rootless containers"
+- name: "MariaDB: Configure unprivileged port range for rootless containers"
   become: true
   ansible.posix.sysctl:
     name: net.ipv4.ip_unprivileged_port_start
@@ -39,7 +39,7 @@
     sysctl_file: /etc/sysctl.d/99-rootless-ports.conf
     reload: true
 
-- name: "PostgreSQL: Create quadlet directory"
+- name: "MariaDB: Create quadlet directory"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.file:
@@ -49,7 +49,7 @@
     group: "{{ podman_user }}"
     mode: "0755"
 
-- name: "PostgreSQL: Create directory structure"
+- name: "MariaDB: Create directory structure"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.file:
@@ -61,7 +61,7 @@
   with_community.general.filetree: "templates/"
   when: item.state == 'directory'
 
-- name: "PostgreSQL: Create config directories"
+- name: "MariaDB: Create config directories"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.file:
@@ -73,7 +73,7 @@
   with_community.general.filetree: "files/"
   when: item.state == 'directory'
 
-- name: "PostgreSQL: Copy config shell scripts"
+- name: "MariaDB: Copy config shell scripts"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.copy:
@@ -85,7 +85,7 @@
   with_community.general.filetree: "files/"
   when: item.state == 'file'
 
-- name: "PostgreSQL: Template quadlet files"
+- name: "MariaDB: Template quadlet files"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.template:
@@ -97,33 +97,33 @@
   with_community.general.filetree: "templates/"
   when: item.state == 'file'
 
-- name: "PostgreSQL: systemd daemon reload"
+- name: "MariaDB: systemd daemon reload"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.systemd:
     daemon_reload: true
     scope: user
 
-- name: "PostgreSQL: Start network service"
+- name: "MariaDB: Start network service"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.systemd:
-    name: postgresql-network.service
+    name: mariadb-network.service
     enabled: true
     state: restarted
     scope: user
-  when: postgresql_network_enabled
+  when: mariadb_network_enabled
 
-- name: "PostgreSQL: Start pod service"
+- name: "MariaDB: Start pod service"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.systemd:
-    name: postgresql-pod.service
+    name: mariadb-pod.service
     enabled: true
     state: restarted
     scope: user
 
-- name: "PostgreSQL: Enable podman-auto-update timer"
+- name: "MariaDB: Enable podman-auto-update timer"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.systemd:
@@ -132,26 +132,26 @@
     state: started
     scope: user
 
-- name: "PostgreSQL: Deploy CloudBeaver"
+- name: "MariaDB: Deploy CloudBeaver"
   ansible.builtin.include_role:
     name: giftpilz0.container.cloudbeaver
   vars:
-    cloudbeaver_db_network_name: "{{ postgresql_network_name }}"
-    cloudbeaver_db_type: "postgresql"
-    cloudbeaver_db_host: "postgresql-pod"
-    cloudbeaver_db_port: "5432"
-    cloudbeaver_db_name: "{{ postgresql_db_name }}"
-    cloudbeaver_db_user: "{{ postgresql_db_user }}"
-    cloudbeaver_db_password: "{{ postgresql_db_password }}"
-    cloudbeaver_admin_user: "{{ postgresql_cloudbeaver_admin_user }}"
-    cloudbeaver_admin_password: "{{ postgresql_cloudbeaver_admin_password }}"
-    cloudbeaver_proxy_enabled: "{{ postgresql_proxy_enabled }}"
-    cloudbeaver_proxy_http: "{{ postgresql_proxy_http }}"
-    cloudbeaver_proxy_https: "{{ postgresql_proxy_https }}"
-    cloudbeaver_proxy_no_proxy: "{{ postgresql_proxy_no_proxy }}"
-  when: postgresql_cloudbeaver_enabled
+    cloudbeaver_db_network_name: "{{ mariadb_network_name }}"
+    cloudbeaver_db_type: "mariadb"
+    cloudbeaver_db_host: "mariadb-pod"
+    cloudbeaver_db_port: "3306"
+    cloudbeaver_db_name: "{{ mariadb_db_name }}"
+    cloudbeaver_db_user: "{{ mariadb_db_user }}"
+    cloudbeaver_db_password: "{{ mariadb_db_password }}"
+    cloudbeaver_admin_user: "{{ mariadb_cloudbeaver_admin_user }}"
+    cloudbeaver_admin_password: "{{ mariadb_cloudbeaver_admin_password }}"
+    cloudbeaver_proxy_enabled: "{{ mariadb_proxy_enabled }}"
+    cloudbeaver_proxy_http: "{{ mariadb_proxy_http }}"
+    cloudbeaver_proxy_https: "{{ mariadb_proxy_https }}"
+    cloudbeaver_proxy_no_proxy: "{{ mariadb_proxy_no_proxy }}"
+  when: mariadb_cloudbeaver_enabled
 
-- name: "PostgreSQL: Configure traefik"
+- name: "MariaDB: Configure traefik"
   ansible.builtin.include_role:
     name: giftpilz0.container.traefik
   when: traefik_http_services is defined or traefik_tcp_services is defined

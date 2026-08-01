@@ -1,0 +1,9 @@
+{% if mariadb_network_enabled %}
+[Unit]
+Description=MariaDB Internal Network
+
+[Network]
+NetworkName={{ mariadb_network_name }}
+Driver={{ mariadb_network_driver }}
+Internal={{ mariadb_network_internal | bool | lower }}
+{% endif %}

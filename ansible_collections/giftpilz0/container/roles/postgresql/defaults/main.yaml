@@ -47,6 +47,11 @@ postgresql_environment_vars:
   POSTGRES_PASSWORD: "{{ postgresql_db_password }}"
 
 # Backup
-postgresql_backup_schedule_hours: 24
+postgresql_backup_schedule_times: "03:00"
 postgresql_backup_retention_days: 7
 postgresql_backup_compression: 6
+
+# CloudBeaver management UI
+postgresql_cloudbeaver_enabled: false
+postgresql_cloudbeaver_admin_user: "cbadmin"
+postgresql_cloudbeaver_admin_password: ""

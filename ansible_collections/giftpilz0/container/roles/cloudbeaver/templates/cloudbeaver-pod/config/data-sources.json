@@ -1,0 +1,37 @@
+{
+  "folders": {},
+  "connections": {
+{% if cloudbeaver_db_type in ('postgresql', 'postgres') %}
+    "postgresql-auto": {
+      "provider": "postgresql",
+      "driver": "postgres-jdbc",
+{% else %}
+    "mariadb-auto": {
+      "provider": "mysql",
+      "driver": "mariaDB",
+{% endif %}
+      "name": {{ (cloudbeaver_db_type | capitalize ~ " (auto)") | to_json }},
+      "configuration": {
+        "host": {{ cloudbeaver_db_host | to_json }},
+        "port": {{ cloudbeaver_db_port | string | to_json }},
+        "database": {{ cloudbeaver_db_name | to_json }},
+{% if cloudbeaver_db_type in ('postgresql', 'postgres') %}
+        "url": {{ ("jdbc:postgresql://" ~ cloudbeaver_db_host ~ ":" ~ cloudbeaver_db_port ~ "/" ~ cloudbeaver_db_name) | to_json }},
+{% else %}
+        "url": {{ ("jdbc:mariadb://" ~ cloudbeaver_db_host ~ ":" ~ cloudbeaver_db_port ~ "/" ~ cloudbeaver_db_name) | to_json }},
+{% endif %}
+        "configurationType": "MANUAL",
+        "type": "dev",
+        "closeIdleConnection": true,
+        "auth-model": "native",
+        "auth-properties": {
+          "user": {{ cloudbeaver_db_user | to_json }},
+          "password": {{ cloudbeaver_db_password | to_json }}
+        },
+        "bootstrap": {
+          "autocommit": true
+        }
+      }
+    }
+  }
+}
