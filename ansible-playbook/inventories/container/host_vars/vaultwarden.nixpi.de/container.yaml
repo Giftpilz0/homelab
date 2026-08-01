@@ -20,7 +20,7 @@ vaultwarden_network_name: "vaultwarden-internal"
 
 # Versions
 # renovate: datasource=docker depName=vaultwarden/server
-vaultwarden_version: "1.37.0-alpine"
+vaultwarden_version: "1.37.1-alpine"
 
 # Autoupdate
 vaultwarden_autoupdate: true
@@ -49,7 +49,7 @@ traefik_proxy_no_proxy: ""
 
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.9"
+traefik_version: "v3.7.10"
 
 # Autoupdate
 traefik_autoupdate: true
