@@ -1,0 +1,29 @@
+[Unit]
+Description=MariaDB Container
+
+[Container]
+ContainerName=mariadb
+Image=docker.io/library/mariadb:{{ mariadb_version }}
+
+Pod=mariadb.pod
+
+{% if mariadb_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+{% if mariadb_environment_vars is defined %}
+{% for env_name, env_value in mariadb_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
+
+{% if mariadb_proxy_enabled %}
+{% for env_var in mariadb_proxy_env %}
+Environment={{ env_var }}
+{% endfor %}
+{% endif %}
+
+Volume=mariadb-data.volume:/var/lib/mysql
+
+[Service]
+Restart=always

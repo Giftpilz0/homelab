@@ -1,0 +1,32 @@
+[Unit]
+Description=MariaDB Backup Daemon
+
+[Container]
+ContainerName=mariadb-backup
+Image=docker.io/library/mariadb:{{ mariadb_version }}
+
+Pod=mariadb.pod
+
+{% if mariadb_backup_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+Environment=DB_HOST=127.0.0.1
+Environment=DB_PORT=3306
+Environment=DB_NAME={{ mariadb_db_name }}
+Environment=DB_USER={{ mariadb_db_user }}
+Environment=DB_PASSWORD={{ mariadb_db_password }}
+Environment=BACKUP_SCHEDULE_TIMES={{ mariadb_backup_schedule_times }}
+Environment=BACKUP_RETENTION_DAYS={{ mariadb_backup_retention_days }}
+Environment=BACKUP_COMPRESSION_LEVEL={{ mariadb_backup_compression }}
+Environment=BACKUP_DIR=/backups
+
+Volume=mariadb-backup.volume:/backups
+Volume=%h/.config/containers/systemd/mariadb-pod/config/backup.sh:/usr/local/bin/backup.sh:ro,Z
+Volume=%h/.config/containers/systemd/mariadb-pod/config/restore.sh:/usr/local/bin/restore.sh:ro,Z
+Volume=%h/.config/containers/systemd/mariadb-pod/config/backup-daemon.sh:/usr/local/bin/backup-daemon.sh:ro,Z
+
+Exec=/usr/local/bin/backup-daemon.sh
+
+[Service]
+Restart=always

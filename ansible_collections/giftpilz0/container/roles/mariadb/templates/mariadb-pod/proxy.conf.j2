@@ -1,0 +1,9 @@
+[containers]
+http_proxy = false
+
+[engine]
+{% if mariadb_proxy_enabled and mariadb_proxy_env %}
+env = ["{{ mariadb_proxy_env | join('","') }}"]
+{% else %}
+env = []
+{% endif %}

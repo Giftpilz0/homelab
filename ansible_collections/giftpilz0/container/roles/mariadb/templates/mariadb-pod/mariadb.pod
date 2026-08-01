@@ -1,0 +1,19 @@
+[Unit]
+Description=MariaDB Pod
+
+[Pod]
+PodName=mariadb-pod
+
+Network={{ mariadb_network_name }}
+
+{% if mariadb_port_map_enabled %}
+{% for port_mapping in mariadb_port_map %}
+PublishPort={{ mariadb_bind_ip }}:{{ port_mapping }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target
