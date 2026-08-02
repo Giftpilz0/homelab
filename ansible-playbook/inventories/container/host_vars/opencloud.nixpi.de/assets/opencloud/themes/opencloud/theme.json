@@ -1,0 +1,223 @@
+{
+  "common": {
+    "name": "nixpi",
+    "slogan": "Private cloud storage",
+    "logo": "themes/opencloud/assets/logo.svg",
+    "urls": {
+      "accessDeniedHelp": "",
+      "imprint": "",
+      "privacy": "",
+      "accessibility": ""
+    },
+    "shareRoles": {
+      "b1e2218d-eef8-4d4c-b82d-0f1a1b48f3b5": {
+        "name": "UnifiedRoleViewer",
+        "iconName": "eye"
+      },
+      "a8d5fe5e-96e3-418d-825b-534dbdf22b99": {
+        "label": "UnifiedRoleSpaceViewer",
+        "iconName": "eye"
+      },
+      "2d00ce52-1fc2-4dbc-8b95-a73b73395f5a": {
+        "label": "UnifiedRoleFileEditor",
+        "iconName": "pencil"
+      },
+      "fb6c3e19-e378-47e5-b277-9732f9de6e21": {
+        "label": "UnifiedRoleEditor",
+        "iconName": "pencil"
+      },
+      "58c63c02-1d89-4572-916a-870abc5a1b7d": {
+        "label": "UnifiedRoleSpaceEditor",
+        "iconName": "pencil"
+      },
+      "312c0871-5ef7-4b3a-85b6-0e4074c64049": {
+        "label": "UnifiedRoleManager",
+        "iconName": "user-star"
+      },
+      "1c996275-f1c9-4e71-abdf-a42f6495e960": {
+        "label": "UnifiedRoleUploader",
+        "iconName": "upload"
+      },
+      "aa97fe03-7980-45ac-9e50-b325749fd7e6": {
+        "label": "UnifiedRoleSecureView",
+        "iconName": "shield"
+      }
+    }
+  },
+  "clients": {
+    "android": {},
+    "desktop": {},
+    "ios": {},
+    "web": {
+      "defaults": {
+        "logo": "themes/opencloud/assets/logo.svg",
+        "logoMobile": "themes/opencloud/assets/logo-mobile.svg",
+        "favicon": "themes/opencloud/assets/favicon.svg"
+      },
+      "themes": [
+        {
+          "isDark": false,
+          "label": "Light Theme",
+          "designTokens": {
+            "roles": {
+              "primary": "#36618E",
+              "onPrimary": "#FFFFFF",
+              "primaryContainer": "#D1E4FF",
+              "onPrimaryContainer": "#001D36",
+              "secondary": "#535F70",
+              "onSecondary": "#FFFFFF",
+              "secondaryContainer": "#D7E3F8",
+              "onSecondaryContainer": "#101C2B",
+              "tertiary": "#6B5778",
+              "onTertiary": "#FFFFFF",
+              "tertiaryContainer": "#F3DAFF",
+              "onTertiaryContainer": "#251431",
+              "error": "#BA1A1A",
+              "onError": "#FFFFFF",
+              "errorContainer": "#FFDAD6",
+              "onErrorContainer": "#410002",
+              "background": "#F8F9FF",
+              "onBackground": "#191C20",
+              "surface": "#F8F9FF",
+              "onSurface": "#191C20",
+              "surfaceVariant": "#DFE2EB",
+              "onSurfaceVariant": "#43474E",
+              "outline": "#73777F",
+              "outlineVariant": "#C3C6CF",
+              "shadow": "#000000",
+              "scrim": "#000000",
+              "inverseSurface": "#2E3135",
+              "inverseOnSurface": "#EFF0F7",
+              "inversePrimary": "#A0CAFD",
+              "primaryFixed": "#D1E4FF",
+              "onPrimaryFixed": "#001D36",
+              "secondaryFixed": "#D7E3F8",
+              "onSecondaryFixed": "#101C2B",
+              "tertiaryFixed": "#F3DAFF",
+              "onTertiaryFixed": "#251431",
+              "surfaceDim": "#D8DAE0",
+              "surfaceBright": "#F8F9FF",
+              "surfaceContainerLowest": "#FFFFFF",
+              "surfaceContainerLow": "#F2F3FA",
+              "surfaceContainer": "#ECEEF4",
+              "surfaceContainerHigh": "#E6E8EE",
+              "surfaceContainerHighest": "#E1E2E8",
+              "primaryFixedDim": "#A0CAFD",
+              "onPrimaryFixedVariant": "#1A4975",
+              "secondaryFixedDim": "#BBC7DB",
+              "onSecondaryFixedVariant": "#3B4858",
+              "tertiaryFixedDim": "#D7BEE4",
+              "onTertiaryFixedVariant": "#523F5F",
+              "surfaceTint": "#36618E",
+              "sourceColor": "#00528C",
+              "base00": "#006AA2",
+              "base01": "#005B8B",
+              "base02": "#004C74",
+              "base03": "#003D5C",
+              "base04": "#002D45",
+              "base05": "#001E2E",
+              "base06": "#000F17",
+              "base07": "#000000",
+              "base08": "#000000",
+              "base09": "#000000",
+              "base0a": "#000000",
+              "base0b": "#000000",
+              "base0c": "#000000",
+              "base0d": "#000000",
+              "base0e": "#000000",
+              "base0f": "#000000"
+            },
+            "colorPalette": {
+              "icon-archive": "#fbbe54",
+              "icon-audio": "#700460",
+              "icon-document": "#3b44a6",
+              "icon-folder": "#4d7eaf",
+              "icon-image": "#ee6b3b",
+              "icon-medical": "#0984db",
+              "icon-pdf": "#ec0d47",
+              "icon-presentation": "#ee6b3b",
+              "icon-spreadsheet": "#15c286",
+              "icon-video": "#045459"
+            }
+          }
+        },
+        {
+          "isDark": true,
+          "label": "Dark Theme",
+          "logo": "themes/opencloud/assets/logo-dark-mode.svg",
+          "logoMobile": "themes/opencloud/assets/logo-dark-mode-mobile.svg",
+          "designTokens": {
+            "roles": {
+              "primary": "#A0CAFD",
+              "onPrimary": "#003258",
+              "primaryContainer": "#1A4975",
+              "onPrimaryContainer": "#D1E4FF",
+              "secondary": "#BBC7DB",
+              "onSecondary": "#253140",
+              "secondaryContainer": "#3B4858",
+              "onSecondaryContainer": "#D7E3F8",
+              "tertiary": "#D7BEE4",
+              "onTertiary": "#3B2948",
+              "tertiaryContainer": "#523F5F",
+              "onTertiaryContainer": "#F3DAFF",
+              "error": "#FFB4AB",
+              "onError": "#690005",
+              "errorContainer": "#93000A",
+              "onErrorContainer": "#FFDAD6",
+              "background": "#111418",
+              "onBackground": "#E1E2E8",
+              "surface": "#111418",
+              "onSurface": "#E1E2E8",
+              "surfaceVariant": "#43474E",
+              "onSurfaceVariant": "#C3C6CF",
+              "outline": "#8D9199",
+              "outlineVariant": "#43474E",
+              "shadow": "#000000",
+              "scrim": "#000000",
+              "inverseSurface": "#E1E2E8",
+              "inverseOnSurface": "#2E3135",
+              "inversePrimary": "#36618E",
+              "primaryFixed": "#D1E4FF",
+              "onPrimaryFixed": "#001D36",
+              "secondaryFixed": "#D7E3F8",
+              "onSecondaryFixed": "#101C2B",
+              "tertiaryFixed": "#F3DAFF",
+              "onTertiaryFixed": "#251431",
+              "surfaceDim": "#111418",
+              "surfaceBright": "#36393E",
+              "surfaceContainerLowest": "#0B0E13",
+              "surfaceContainerLow": "#191C20",
+              "surfaceContainer": "#1D2024",
+              "surfaceContainerHigh": "#272A2F",
+              "surfaceContainerHighest": "#32353A",
+              "primaryFixedDim": "#A0CAFD",
+              "onPrimaryFixedVariant": "#1A4975",
+              "secondaryFixedDim": "#BBC7DB",
+              "onSecondaryFixedVariant": "#3B4858",
+              "tertiaryFixedDim": "#D7BEE4",
+              "onTertiaryFixedVariant": "#523F5F",
+              "surfaceTint": "#A0CAFD",
+              "sourceColor": "#00528C",
+              "base00": "#000000",
+              "base01": "#000F17",
+              "base02": "#001E2E",
+              "base03": "#002D45",
+              "base04": "#003D5C",
+              "base05": "#004C74",
+              "base06": "#005B8B",
+              "base07": "#006AA2",
+              "base08": "#000000",
+              "base09": "#000000",
+              "base0a": "#000000",
+              "base0b": "#000000",
+              "base0c": "#000000",
+              "base0d": "#000000",
+              "base0e": "#000000",
+              "base0f": "#000000"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

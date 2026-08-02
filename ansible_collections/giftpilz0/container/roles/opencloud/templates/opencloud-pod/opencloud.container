@@ -17,6 +17,30 @@ Environment={{ env_name }}={{ env_value }}
 {% endfor %}
 {% endif %}
 
+{% if opencloud_collabora_enabled %}
+Environment=OC_ADD_RUN_SERVICES={{ opencloud_environment_vars.get('OC_ADD_RUN_SERVICES', '') }}{{ ',' if opencloud_environment_vars.get('OC_ADD_RUN_SERVICES', '') else '' }}collaboration
+Environment=COLLABORA_DOMAIN={{ opencloud_collabora_url | regex_replace('^https?://', '') }}
+Environment=FRONTEND_APP_HANDLER_SECURE_VIEW_APP_ADDR=eu.opencloud.api.collaboration
+Environment=GRAPH_AVAILABLE_ROLES=b1e2218d-eef8-4d4c-b82d-0f1a1b48f3b5,a8d5fe5e-96e3-418d-825b-534dbdf22b99,fb6c3e19-e378-47e5-b277-9732f9de6e21,58c63c02-1d89-4572-916a-870abc5a1b7d,2d00ce52-1fc2-4dbc-8b95-a73b73395f5a,1c996275-f1c9-4e71-abdf-a42f6495e960,312c0871-5ef7-4b3a-85b6-0e4074c64049
+Environment=COLLABORATION_WOPI_SRC={{ opencloud_domain }}
+Environment=COLLABORATION_APP_NAME=CollaboraOnline
+Environment=COLLABORATION_APP_PRODUCT=Collabora
+Environment=COLLABORATION_APP_ADDR={{ opencloud_collabora_url }}
+Environment=COLLABORATION_APP_ICON={{ opencloud_collabora_url }}/favicon.ico
+Environment=COLLABORATION_APP_INSECURE={{ (not opencloud_collabora_ssl_verification) | bool | lower }}
+Environment=COLLABORATION_CS3API_DATAGATEWAY_INSECURE={{ (not opencloud_collabora_ssl_verification) | bool | lower }}
+{% endif %}
+
+{% if opencloud_theming_enabled %}
+Environment=WEB_ASSET_THEMES_PATH=/var/lib/opencloud/web/assets/custom-themes
+Environment=WEB_UI_THEME_PATH=/themes/opencloud/theme.json
+Environment=WEB_UI_CONFIG_FILE=/etc/opencloud/web-config.json
+{% endif %}
+
+{% if opencloud_plugins_enabled %}
+Environment=WEB_ASSET_APPS_PATH=/var/lib/opencloud/web/assets/custom-apps
+{% endif %}
+
 {% if opencloud_proxy_enabled %}
 {% for env_var in opencloud_proxy_env %}
 Environment={{ env_var }}
@@ -27,6 +51,16 @@ Volume=opencloud-config.volume:/etc/opencloud/
 Volume=opencloud-data.volume:/var/lib/opencloud/
 Volume=%h/.config/containers/systemd/opencloud-pod/config/idp.yaml:/etc/opencloud/idp.yaml:Z
 Volume=%h/.config/containers/systemd/opencloud-pod/config/csp.yaml:/etc/opencloud/csp.yaml:Z
+{% if opencloud_radicale_enabled %}
+Volume=%h/.config/containers/systemd/opencloud-pod/config/proxy.yaml:/etc/opencloud/proxy.yaml:Z
+{% endif %}
+{% if opencloud_theming_enabled %}
+Volume=%h/.config/containers/systemd/opencloud-pod/assets/themes:/var/lib/opencloud/web/assets/custom-themes:Z
+Volume=%h/.config/containers/systemd/opencloud-pod/config/web-config.json:/etc/opencloud/web-config.json:Z
+{% endif %}
+{% if opencloud_plugins_enabled %}
+Volume=%h/.config/containers/systemd/opencloud-pod/assets/apps:/var/lib/opencloud/web/assets/custom-apps:Z
+{% endif %}
 
 [Service]
 Restart=always

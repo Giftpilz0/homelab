@@ -18,7 +18,7 @@ traefik_network_name: "traefik-internal"
 
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.9"
+traefik_version: "v3.7.10"
 
 # Autoupdate
 traefik_autoupdate: true

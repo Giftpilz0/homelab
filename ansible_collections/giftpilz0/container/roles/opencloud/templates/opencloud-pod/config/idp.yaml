@@ -1,5 +1,3 @@
-# IDP Service Configuration
-
 clients:
 {% for client in opencloud_oidc_clients %}
 - id: {{ client.id }}

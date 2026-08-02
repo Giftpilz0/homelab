@@ -4,8 +4,6 @@ podman_user: "container"
 ######################################
 ### giftpilz0.container.postgresql (provisioned by giftpilz0.container.forgejo)
 
-# Optional overrides -- network/db wiring is set by the forgejo role itself;
-# only host-controllable settings (version pin, exposure, backups) live here.
 postgresql_port_map_enabled: true
 
 # Versions
@@ -45,7 +43,7 @@ forgejo_network_name: "forgejo-internal"
 
 # Versions
 # renovate: datasource=docker depName=codeberg.org/forgejo/forgejo
-forgejo_version: "16.0.1"
+forgejo_version: "16.0.2"
 
 # Autoupdate
 forgejo_autoupdate: true
@@ -68,7 +66,7 @@ traefik_proxy_no_proxy: ""
 
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.9"
+traefik_version: "v3.7.10"
 
 # Autoupdate
 traefik_autoupdate: true

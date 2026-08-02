@@ -49,6 +49,50 @@ opencloud_environment_vars:
   PROXY_TLS: false
   FRONTEND_ARCHIVER_MAX_SIZE: 68719476736
   THUMBNAILS_MAX_CONCURRENT_REQUESTS: 64
+  FRONTEND_CHECK_FOR_UPDATES: false
+
+# Collabora Online
+opencloud_collabora_enabled: false
+
+# Versions
+# renovate: datasource=docker depName=collabora/code
+opencloud_collabora_version: "26.04.2.4.1"
+
+opencloud_collabora_url: ""
+opencloud_collabora_admin_username: "admin"
+opencloud_collabora_admin_password: ""
+
+opencloud_collabora_ssl_enable: true
+opencloud_collabora_ssl_verification: true
+opencloud_collabora_ssl_termination: true
+opencloud_collabora_home_mode: false
+# opencloud_collabora_url is the browser-facing editor URL. The role does not
+# publish a host port or configure a reverse proxy; route this URL as desired.
+# Route opencloud_collabora_url through Traefik to http://collabora:9980 on
+# the shared OpenCloud network, for example:
+# traefik_http_services:
+#   - name: collabora
+#     domain: office.example.com
+#     rule: "Host(`office.example.com`)"
+#     servers:
+#       - url: "http://collabora:9980"
+#     tls_enabled: true
+#     acme_enabled: true
+
+# Radicale CalDAV/CardDAV
+opencloud_radicale_enabled: false
+
+# Versions
+# renovate: datasource=docker depName=opencloudeu/radicale
+opencloud_radicale_version: "v3.7.7"
+
+# Custom web assets
+opencloud_theming_enabled: false
+opencloud_theme_source: ""
+
+# Plugins
+opencloud_plugins_enabled: false
+opencloud_plugins_source: ""
 
 # OIDC Clients Configuration
 opencloud_standard_clients:
@@ -98,7 +142,8 @@ opencloud_standard_clients:
     origins: []
     application_type: "native"
 
-  # Custom OIDC Clients
+# Custom OIDC Clients
+opencloud_custom_clients: []
   # opencloud_custom_clients:
   # - id: forgejo
   #   name: "forgejo"
@@ -110,8 +155,6 @@ opencloud_standard_clients:
   #   origins:
   #     - "https://{{ forgejo_domain }}"
   #   application_type: "web"
-
-opencloud_custom_clients: []
 
 # Merge OIDC clients (only used when external OIDC is disabled)
 opencloud_oidc_clients: "{{ opencloud_standard_clients + opencloud_custom_clients }}"

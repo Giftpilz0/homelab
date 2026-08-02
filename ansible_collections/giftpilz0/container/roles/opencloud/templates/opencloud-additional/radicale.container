@@ -1,0 +1,20 @@
+[Unit]
+Description=Radicale CalDAV/CardDAV for OpenCloud
+
+[Container]
+ContainerName=radicale
+Image=docker.io/opencloudeu/radicale:{{ opencloud_radicale_version }}
+
+Pod=radicale.pod
+User=1000
+Group=1000
+
+{% if opencloud_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+Volume=radicale-data.volume:/var/lib/radicale
+Volume=%h/.config/containers/systemd/opencloud-additional/config/radicale.conf:/etc/radicale/config:ro,Z
+
+[Service]
+Restart=always

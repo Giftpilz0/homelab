@@ -92,15 +92,41 @@
     group: "{{ podman_user }}"
     mode: "0755"
 
+- name: "Keycloak: Validate theme JAR source"
+  ansible.builtin.assert:
+    that:
+      - keycloak_theme_jar_source | length > 0
+    fail_msg: >-
+      keycloak_theme_jar_source must point to a controller-local Keycloak
+      theme provider JAR when keycloak_theme_jar_enabled is true.
+  when: keycloak_theme_jar_enabled
+
+- name: "Keycloak: Check theme JAR source"
+  ansible.builtin.stat:
+    path: "{{ keycloak_theme_jar_source }}"
+  delegate_to: localhost
+  become: false
+  register: keycloak_theme_jar
+  when: keycloak_theme_jar_enabled
+
+- name: "Keycloak: Validate theme JAR source file"
+  ansible.builtin.assert:
+    that:
+      - keycloak_theme_jar.stat.exists
+      - keycloak_theme_jar.stat.isreg
+    fail_msg: "Keycloak theme JAR source does not exist: {{ keycloak_theme_jar_source }}"
+  when: keycloak_theme_jar_enabled
+
 - name: "Keycloak: Copy theme jar"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.copy:
-    src: "files/config/keycloak-theme-for-kc-all-other-versions.jar"
+    src: "{{ keycloak_theme_jar_source }}"
     dest: "/home/{{ podman_user }}/.config/containers/systemd/keycloak-pod/config/keycloak-theme.jar"
     owner: "{{ podman_user }}"
     group: "{{ podman_user }}"
     mode: "0644"
+  when: keycloak_theme_jar_enabled
 
 - name: "Keycloak: systemd daemon reload"
   become: true

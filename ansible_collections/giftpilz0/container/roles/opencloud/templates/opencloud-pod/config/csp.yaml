@@ -16,6 +16,9 @@ directives:
   frame-src:
     - "'self'"
     - 'blob:'
+{% if opencloud_collabora_enabled %}
+    - '{{ opencloud_collabora_url }}/'
+{% endif %}
   img-src:
     - "'self'"
     - 'data:'

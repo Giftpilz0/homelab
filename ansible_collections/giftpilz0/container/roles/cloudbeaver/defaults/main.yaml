@@ -6,7 +6,8 @@ cloudbeaver_proxy_enabled: false
 cloudbeaver_proxy_http: ""
 cloudbeaver_proxy_https: ""
 cloudbeaver_proxy_no_proxy: ""
-cloudbeaver_proxy_env: "{{ (['https_proxy=' ~ cloudbeaver_proxy_https] + (['http_proxy=' ~ cloudbeaver_proxy_http] if cloudbeaver_proxy_http else []) + (['no_proxy=' ~ cloudbeaver_proxy_no_proxy] if cloudbeaver_proxy_no_proxy else [])) if cloudbeaver_proxy_enabled else [] }}"
+cloudbeaver_proxy_env: "{{ (['https_proxy=' ~ cloudbeaver_proxy_https] + (['http_proxy=' ~ cloudbeaver_proxy_http] if cloudbeaver_proxy_http else []) + (['no_proxy='
+  ~ cloudbeaver_proxy_no_proxy] if cloudbeaver_proxy_no_proxy else [])) if cloudbeaver_proxy_enabled else [] }}"
 
 # Network
 cloudbeaver_network_enabled: true

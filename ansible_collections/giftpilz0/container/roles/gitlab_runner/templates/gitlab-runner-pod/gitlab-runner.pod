@@ -10,4 +10,4 @@ Network={{ gitlab_runner_network_name }}
 Restart=always
 
 [Install]
-WantedBy=multi-user.target default.target
+WantedBy=default.target
