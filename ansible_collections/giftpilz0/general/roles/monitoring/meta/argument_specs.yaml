@@ -3,48 +3,31 @@ argument_specs:
   main:
     short_description: The main entry point for the monitoring role.
     options:
-      monitoring_agent_package_state:
+      monitoring_agent_config_remoteserver_loki:
         type: str
-        required: false
-        choices:
-          - present
-          - absent
-          - latest
-          - skip
-        description: monitoring_agent_package_state
 
-      monitoring_agent_arch:
+      monitoring_agent_config_remoteserver_prometheus:
         type: str
-        required: false
-        description: monitoring_agent_arch
 
-      monitoring_agent_tag:
+      monitoring_alloy_loki_basic_auth_username:
         type: str
-        required: false
-        description: monitoring_agent_tag
 
-      monitoring_agent_package:
-        type: list
-        elements: str
-        required: false
-        description: monitoring_agent_package
-
-      monitoring_agent_service_name:
+      monitoring_alloy_loki_basic_auth_password:
         type: str
-        required: false
-        description: monitoring_agent_service_name
+        no_log: true
 
-      monitoring_agent_service_state:
+      monitoring_alloy_mimir_basic_auth_username:
         type: str
-        required: false
-        choices:
-          - reloaded
-          - restarted
-          - started
-          - stopped
-        description: monitoring_agent_service_state
 
-      monitoring_agent_service_enabled:
+      monitoring_alloy_mimir_basic_auth_password:
+        type: str
+        no_log: true
+
+      monitoring_agent_external_labels:
+        type: dict
+
+      monitoring_alloy_traefik_scrape_enabled:
         type: bool
-        required: false
-        description: monitoring_agent_service_enabled
+
+      monitoring_alloy_extra_config:
+        type: str

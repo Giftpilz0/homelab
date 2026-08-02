@@ -1,0 +1,99 @@
+kind: Dashboard
+metadata:
+  name: traefik-overview
+  project: default
+spec:
+  display:
+    name: "Traefik Overview"
+    description: "Ingress request volume, failures, and latency"
+  duration: 6h
+  refreshInterval: 30s
+  variables:
+    - kind: ListVariable
+      spec:
+        name: host
+        display:
+          name: "Host"
+        allowMultiple: false
+        plugin:
+          kind: PrometheusLabelValuesVariable
+          spec:
+            datasource: { kind: PrometheusDatasource, name: mimir }
+            labelName: host
+            matchers:
+              - "traefik_entrypoint_requests_total"
+  panels:
+    requestRate:
+      kind: Panel
+      spec:
+        display:
+          name: "Request Rate"
+        plugin:
+          kind: TimeSeriesChart
+          spec: {}
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  datasource: { kind: PrometheusDatasource, name: mimir }
+                  query: 'sum by (entrypoint) (rate(traefik_entrypoint_requests_total{host="${host}"}[5m]))'
+    errorRate:
+      kind: Panel
+      spec:
+        display:
+          name: "5xx Responses"
+        plugin:
+          kind: TimeSeriesChart
+          spec: {}
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  datasource: { kind: PrometheusDatasource, name: mimir }
+                  query: 'sum(rate(traefik_entrypoint_requests_total{host="${host}", code=~"5.."}[5m]))'
+    latency:
+      kind: Panel
+      spec:
+        display:
+          name: "Request Latency (p95)"
+        plugin:
+          kind: TimeSeriesChart
+          spec: {}
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  datasource: { kind: PrometheusDatasource, name: mimir }
+                  query: 'histogram_quantile(0.95, sum by (le, entrypoint) (rate(traefik_entrypoint_request_duration_seconds_bucket{host="${host}"}[5m])))'
+  layouts:
+    - kind: Grid
+      spec:
+        display: { title: "Traffic", collapse: { open: true } }
+        items:
+          - {
+              x: 0,
+              y: 0,
+              width: 12,
+              height: 8,
+              content: { $ref: "#/spec/panels/requestRate" },
+            }
+          - {
+              x: 12,
+              y: 0,
+              width: 12,
+              height: 8,
+              content: { $ref: "#/spec/panels/errorRate" },
+            }
+          - {
+              x: 0,
+              y: 8,
+              width: 24,
+              height: 8,
+              content: { $ref: "#/spec/panels/latency" },
+            }

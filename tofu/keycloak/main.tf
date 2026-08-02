@@ -71,7 +71,7 @@ resource "keycloak_realm" "nixpi" {
   enabled           = true
   display_name      = var.realm_display_name
   display_name_html = "<b>${var.realm_display_name}</b>"
-  #login_theme       = "nixpi"
+  login_theme       = "nixpi"
   #account_theme     = "nixpi"
 
   # Authentication settings
@@ -562,6 +562,59 @@ resource "keycloak_openid_client_default_scopes" "forgejo_default_scopes" {
     "profile",
     "email",
     keycloak_openid_client_scope.forgejo_groups.name,
+  ]
+}
+
+# ======================================================================================================================
+# CLIENT: perses
+# ======================================================================================================================
+resource "keycloak_openid_client" "perses" {
+  realm_id    = keycloak_realm.nixpi.id
+  client_id   = "perses"
+  name        = "Perses"
+  description = "Perses monitoring dashboards"
+
+  access_type   = "CONFIDENTIAL"
+  client_secret = local.secrets.data.perses_client_secret
+
+  # Authentication flow
+  standard_flow_enabled        = true
+  implicit_flow_enabled        = false
+  direct_access_grants_enabled = false
+
+  # Session settings
+  use_refresh_tokens = true
+
+  valid_redirect_uris = [
+    "https://monitoring.nixpi.de/api/auth/providers/oidc/keycloak/callback"
+  ]
+
+  # Valid redirect URIs
+  valid_post_logout_redirect_uris = [
+    "https://monitoring.nixpi.de"
+  ]
+
+  # Web origins for CORS
+  web_origins = [
+    "https://monitoring.nixpi.de"
+  ]
+
+  # Service accounts
+  service_accounts_enabled = false
+
+  # Authentication flow
+  authentication_flow_binding_overrides {
+    browser_id = keycloak_authentication_flow.browser_flow_2.id
+  }
+}
+
+resource "keycloak_openid_client_default_scopes" "perses_default_scopes" {
+  realm_id  = keycloak_realm.nixpi.id
+  client_id = keycloak_openid_client.perses.id
+
+  default_scopes = [
+    "profile",
+    "email",
   ]
 }
 

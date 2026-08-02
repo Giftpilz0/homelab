@@ -1,0 +1,130 @@
+---
+podman_user: "container"
+
+######################################
+### giftpilz0.container.monitoring_stack
+
+# Proxy
+monitoring_stack_proxy_enabled: false
+monitoring_stack_proxy_http: ""
+monitoring_stack_proxy_https: ""
+monitoring_stack_proxy_no_proxy: ""
+
+# Network
+monitoring_stack_network_enabled: true
+monitoring_stack_network_driver: "bridge"
+monitoring_stack_network_internal: true
+
+# Network to join even when _network_enabled: false
+monitoring_stack_network_name: "monitoring-stack-internal"
+
+# Versions
+# renovate: datasource=docker depName=dxflrs/garage
+monitoring_stack_garage_version: "v2.3.0"
+# renovate: datasource=docker depName=grafana/mimir
+monitoring_stack_mimir_version: "3.1.4"
+# renovate: datasource=docker depName=grafana/loki
+monitoring_stack_loki_version: "3.6.13"
+# renovate: datasource=docker depName=persesdev/perses
+monitoring_stack_perses_version: "v0.54.0-rc.1"
+
+# Autoupdate
+monitoring_stack_garage_autoupdate: true
+monitoring_stack_mimir_autoupdate: true
+monitoring_stack_loki_autoupdate: true
+monitoring_stack_perses_autoupdate: true
+
+# GarageHQ
+monitoring_stack_garage_region: "garage"
+
+monitoring_stack_garage_mimir_bucket: "mimir"
+monitoring_stack_garage_loki_bucket: "loki"
+
+monitoring_stack_garage_storage_capacity: "100G"
+
+# Run Garage init on first deployment, then set to false
+monitoring_stack_garage_init: false
+
+# Mimir
+monitoring_stack_mimir_http_port: 9009
+monitoring_stack_mimir_log_level: "warn"
+
+monitoring_stack_mimir_environment_vars: {}
+
+# Loki
+monitoring_stack_loki_http_port: 3100
+monitoring_stack_loki_log_level: "warn"
+
+monitoring_stack_loki_environment_vars: {}
+
+# Perses
+monitoring_stack_perses_http_port: 8080
+monitoring_stack_perses_environment_vars: {}
+
+######################################
+### giftpilz0.container.traefik
+
+# Proxy
+traefik_proxy_enabled: false
+traefik_proxy_http: ""
+traefik_proxy_https: ""
+traefik_proxy_no_proxy: ""
+
+# Version
+# renovate: datasource=docker depName=traefik
+traefik_version: "v3.7.9"
+
+# Autoupdate
+traefik_autoupdate: true
+
+# ACME
+traefik_acme_enabled: true
+traefik_acme_ca_server: "https://acme-v02.api.letsencrypt.org/directory"
+traefik_acme_challenge_type: dns
+traefik_acme_dns_provider: "cloudflare"
+traefik_acme_eab_enabled: false
+
+# Logging
+traefik_log_level: "INFO"
+
+# Podman networks traefik should join to reach backends directly
+traefik_networks:
+  - monitoring-stack
+
+# HTTP services
+traefik_http_services:
+  - name: perses
+    domain: monitoring.nixpi.de
+    rule: "Host(`monitoring.nixpi.de`)"
+    servers:
+      - url: "http://monitoring-stack-pod:8080"
+    tls_enabled: true
+    acme_enabled: true
+  - name: mimir-write
+    domain: mimir.nixpi.de
+    rule: "Host(`mimir.nixpi.de`) && Path(`/api/v1/push`)"
+    servers:
+      - url: "http://monitoring-stack-pod:9009"
+    tls_enabled: true
+    acme_enabled: true
+    middlewares:
+      - monitoring-mimir-write-auth
+  - name: loki-write
+    domain: loki.nixpi.de
+    rule: "Host(`loki.nixpi.de`) && Path(`/loki/api/v1/push`)"
+    servers:
+      - url: "http://monitoring-stack-pod:3100"
+    tls_enabled: true
+    acme_enabled: true
+    middlewares:
+      - monitoring-loki-write-auth
+
+traefik_custom_middlewares:
+  monitoring-mimir-write-auth:
+    basicAuth:
+      users:
+        - "{{ monitoring_stack_mimir_basic_auth_user }}:{{ monitoring_stack_mimir_basic_auth_hash }}"
+  monitoring-loki-write-auth:
+    basicAuth:
+      users:
+        - "{{ monitoring_stack_loki_basic_auth_user }}:{{ monitoring_stack_loki_basic_auth_hash }}"

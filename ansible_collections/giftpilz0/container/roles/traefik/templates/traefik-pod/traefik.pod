@@ -14,6 +14,9 @@ PublishPort={{ traefik_bind_ip }}:443:{{ traefik_https_internal_port }}
 {% if traefik_http3_enabled | default(false) %}
 PublishPort={{ traefik_bind_ip }}:443:{{ traefik_https_internal_port }}/udp
 {% endif %}
+{% if traefik_metrics_enabled %}
+PublishPort={{ traefik_metrics_bind_ip }}:{{ traefik_metrics_internal_port }}:{{ traefik_metrics_internal_port }}
+{% endif %}
 {% if traefik_tcp_entrypoints is defined %}
 {% for entrypoint in traefik_tcp_entrypoints %}
 PublishPort={{ traefik_bind_ip }}:{{ entrypoint.port }}:{{ entrypoint.internal_port | default(entrypoint.port) }}
