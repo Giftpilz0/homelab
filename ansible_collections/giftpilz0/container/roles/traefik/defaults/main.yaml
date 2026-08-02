@@ -6,7 +6,8 @@ traefik_proxy_enabled: false
 traefik_proxy_http: ""
 traefik_proxy_https: ""
 traefik_proxy_no_proxy: ""
-traefik_proxy_env: "{{ (['https_proxy=' ~ traefik_proxy_https] + (['http_proxy=' ~ traefik_proxy_http] if traefik_proxy_http else []) + (['no_proxy=' ~ traefik_proxy_no_proxy]
+traefik_proxy_env:
+  "{{ (['https_proxy=' ~ traefik_proxy_https] + (['http_proxy=' ~ traefik_proxy_http] if traefik_proxy_http else []) + (['no_proxy=' ~ traefik_proxy_no_proxy]
   if traefik_proxy_no_proxy else [])) if traefik_proxy_enabled else [] }}"
 
 # Network
@@ -77,6 +78,11 @@ traefik_log_format: "json"
 
 traefik_access_log_format: "json"
 traefik_access_log_buffer_size: 10
+
+# Prometheus metrics are available only to the local Alloy agent.
+traefik_metrics_enabled: true
+traefik_metrics_internal_port: 8082
+traefik_metrics_bind_ip: "127.0.0.1"
 
 # Transport
 traefik_transport_timeouts_enabled: false

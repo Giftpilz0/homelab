@@ -37,6 +37,11 @@ entryPoints:
       middlewares:
         - security-headers@file
 
+{% if traefik_metrics_enabled %}
+  metrics:
+    address: ":{{ traefik_metrics_internal_port }}"
+{% endif %}
+
 {% if traefik_tcp_entrypoints is defined %}
 {% for entrypoint in traefik_tcp_entrypoints %}
   {{ entrypoint.name }}:
@@ -90,3 +95,9 @@ log:
 accessLog:
   format: {{ traefik_access_log_format }}
   bufferingSize: {{ traefik_access_log_buffer_size }}
+
+{% if traefik_metrics_enabled %}
+metrics:
+  prometheus:
+    entryPoint: metrics
+{% endif %}

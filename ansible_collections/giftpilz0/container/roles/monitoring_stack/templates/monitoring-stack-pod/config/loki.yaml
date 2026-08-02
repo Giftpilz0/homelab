@@ -1,0 +1,89 @@
+# Grafana Loki – single-node / monolithic mode
+# Docs: https://grafana.com/docs/loki/latest/configure/
+
+auth_enabled: false
+
+server:
+  http_listen_port: {{ monitoring_stack_loki_http_port }}
+  grpc_listen_port: {{ monitoring_stack_loki_grpc_port }}
+  log_level: "{{ monitoring_stack_loki_log_level }}"
+  grpc_server_max_recv_msg_size: 67108864
+  grpc_server_max_send_msg_size: 67108864
+
+analytics:
+  reporting_enabled: false
+
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /data
+  storage:
+    s3:
+      endpoint: "127.0.0.1:{{ monitoring_stack_garage_s3_api_port }}"
+      region: "{{ monitoring_stack_garage_region }}"
+      access_key_id: "{{ monitoring_stack_loki_access_key_id | default('') }}"
+      secret_access_key: "{{ monitoring_stack_loki_secret_access_key | default('') }}"
+      bucketnames: "{{ monitoring_stack_garage_loki_bucket }}"
+      s3forcepathstyle: true
+      insecure: true
+  ring:
+    kvstore:
+      store: inmemory
+  replication_factor: 1
+
+schema_config:
+  configs:
+    - from: "2024-01-01"
+      store: tsdb
+      object_store: s3
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+storage_config:
+  tsdb_shipper:
+    active_index_directory: /data/index
+    cache_location: /data/index_cache
+
+ingester:
+  wal:
+    enabled: true
+    dir: /data/wal
+    flush_on_shutdown: true
+  chunk_idle_period: 30m
+  chunk_target_size: 1536000
+  max_chunk_age: 2h
+
+compactor:
+  working_directory: /data/compactor
+  compaction_interval: 10m
+  retention_enabled: true
+  retention_delete_delay: 2h
+  delete_request_store: s3
+  delete_request_cancel_period: 24h
+
+query_range:
+  cache_results: true
+  results_cache:
+    cache:
+      embedded_cache:
+        enabled: true
+        max_size_mb: 256
+
+limits_config:
+  ingestion_rate_strategy: global
+  ingestion_rate_mb: 10
+  ingestion_burst_size_mb: 20
+  per_stream_rate_limit: 3MB
+  per_stream_rate_limit_burst: 15MB
+  max_global_streams_per_user: 10000
+  max_streams_per_user: 0
+  max_line_size: 256KB
+  max_line_size_truncate: false
+  max_label_name_length: 1024
+  max_label_value_length: 2048
+  max_label_names_per_series: 15
+  reject_old_samples: true
+  reject_old_samples_max_age: 168h # 7 days
+  creation_grace_period: 10m
+  unordered_writes: true

@@ -1,0 +1,5 @@
+---
+######################################
+### giftpilz0.general.monitoring
+
+monitoring_alloy_traefik_scrape_enabled: true

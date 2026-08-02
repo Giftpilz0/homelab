@@ -1,0 +1,38 @@
+# Perses – dashboarding server
+# Docs: https://perses.dev/perses/docs/configuration/configuration/
+
+database:
+  file:
+    folder: /var/perses/data
+
+security:
+  enable_auth: {{ monitoring_stack_perses_oidc_enabled | bool | lower }}
+  # The monitoring instance is provisioned from Git; authenticated users can
+  # view every provisioned resource but cannot modify it through the UI or API.
+  readonly: true
+  cookie:
+    secure: true
+  authorization:
+    guest_permissions:
+      - actions: ["read"]
+        scopes: ["*"]
+{% if monitoring_stack_perses_oidc_enabled %}
+  authentication:
+    providers:
+      enable_native: false
+      oidc:
+        - slug_id: keycloak
+          name: Keycloak
+          client_id: "{{ monitoring_stack_perses_oidc_client_id }}"
+          client_secret: "{{ monitoring_stack_perses_oidc_client_secret }}"
+          issuer: "{{ monitoring_stack_perses_oidc_issuer }}"
+          redirect_uri: "{{ monitoring_stack_perses_external_url }}/api/auth/providers/oidc/keycloak/callback"
+          scopes: ["openid", "profile", "email"]
+          logout:
+            enabled: true
+{% endif %}
+
+provisioning:
+  interval: 5m
+  folders:
+    - /etc/perses/provisioning

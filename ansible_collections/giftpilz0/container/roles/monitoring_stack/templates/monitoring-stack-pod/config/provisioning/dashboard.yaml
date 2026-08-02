@@ -1,0 +1,559 @@
+# Docs: https://perses.dev/perses/docs/api/dashboard/
+# Docs: https://perses.dev/plugins/docs/loki/model/
+
+kind: Dashboard
+metadata:
+  name: host-overview
+  project: default
+spec:
+  display:
+    name: "Host Overview"
+    description: "System health, SSH/service reachability, and log analytics"
+  duration: 6h
+  refreshInterval: 30s
+
+  variables:
+    - kind: ListVariable
+      spec:
+        name: host
+        display:
+          name: "Host"
+        allowMultiple: false
+        plugin:
+          kind: PrometheusLabelValuesVariable
+          spec:
+            datasource: { kind: PrometheusDatasource, name: mimir }
+            labelName: host
+            matchers:
+              - "node_boot_time_seconds"
+    - kind: TextVariable
+      spec:
+        name: unit
+        display:
+          name: "Systemd Unit (regex, blank = all)"
+        value: ".*"
+    - kind: TextVariable
+      spec:
+        name: container
+        display:
+          name: "Podman Container (regex, blank = all)"
+        value: ".*"
+    - kind: TextVariable
+      spec:
+        name: application
+        display:
+          name: "Application / syslog identifier (regex, blank = all)"
+        value: ".*"
+    - kind: TextVariable
+      spec:
+        name: search
+        display:
+          name: "Log Search Text"
+        value: ""
+
+  panels:
+    # ---------- Overview ----------
+    uptime:
+      kind: Panel
+      spec:
+        display:
+          name: "Uptime"
+        plugin:
+          kind: StatChart
+          spec:
+            calculation: last-number
+            format:
+              unit: seconds
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  datasource: { kind: PrometheusDatasource, name: mimir }
+                  query: 'time() - node_boot_time_seconds{host="${host}"}'
+
+    cpuUsage:
+      kind: Panel
+      spec:
+        display:
+          name: "CPU Usage"
+        plugin:
+          kind: StatChart
+          spec:
+            calculation: last-number
+            format: { unit: percent }
+            thresholds:
+              steps:
+                - { value: 75, color: "#f5b400" }
+                - { value: 90, color: "#e02020" }
+            sparkline: {}
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  datasource: { kind: PrometheusDatasource, name: mimir }
+                  query: '100 - (avg by (host) (rate(node_cpu_seconds_total{host="${host}", mode="idle"}[5m])) * 100)'
+
+    memoryUsage:
+      kind: Panel
+      spec:
+        display:
+          name: "Memory Usage"
+        plugin:
+          kind: StatChart
+          spec:
+            calculation: last-number
+            format: { unit: percent }
+            thresholds:
+              steps:
+                - { value: 80, color: "#f5b400" }
+                - { value: 92, color: "#e02020" }
+            sparkline: {}
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  datasource: { kind: PrometheusDatasource, name: mimir }
+                  query: '100 * (1 - (node_memory_MemAvailable_bytes{host="${host}"} / node_memory_MemTotal_bytes{host="${host}"}))'
+
+    diskUsageRoot:
+      kind: Panel
+      spec:
+        display:
+          name: "Disk Usage (/)"
+        plugin:
+          kind: StatChart
+          spec:
+            calculation: last-number
+            format: { unit: percent }
+            thresholds:
+              steps:
+                - { value: 80, color: "#f5b400" }
+                - { value: 92, color: "#e02020" }
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  datasource: { kind: PrometheusDatasource, name: mimir }
+                  query: '100 * (1 - (node_filesystem_avail_bytes{host="${host}", mountpoint="/"} / node_filesystem_size_bytes{host="${host}", mountpoint="/"}))'
+
+    diskUsageData:
+      kind: Panel
+      spec:
+        display:
+          name: "Disk Usage (/data)"
+        plugin:
+          kind: StatChart
+          spec:
+            calculation: last-number
+            format: { unit: percent }
+            thresholds:
+              steps:
+                - { value: 80, color: "#f5b400" }
+                - { value: 92, color: "#e02020" }
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  datasource: { kind: PrometheusDatasource, name: mimir }
+                  query: '100 * (1 - (node_filesystem_avail_bytes{host="${host}", mountpoint="/data"} / node_filesystem_size_bytes{host="${host}", mountpoint="/data"}))'
+
+    sshProbe:
+      kind: Panel
+      spec:
+        display:
+          name: "SSH Reachability"
+        plugin:
+          kind: StatChart
+          spec:
+            calculation: last-number
+            format: { unit: decimal }
+            thresholds:
+              steps:
+                - { value: 0, color: "#e02020" }
+                - { value: 1, color: "#2ea043" }
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  datasource: { kind: PrometheusDatasource, name: mimir }
+                  query: 'probe_success{job="integrations/blackbox/ssh"}'
+
+    beylaUp:
+      kind: Panel
+      spec:
+        display:
+          name: "Beyla Status"
+        plugin:
+          kind: StatChart
+          spec:
+            calculation: last-number
+            format: { unit: decimal }
+            thresholds:
+              steps:
+                - { value: 0, color: "#e02020" }
+                - { value: 1, color: "#2ea043" }
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  datasource: { kind: PrometheusDatasource, name: mimir }
+                  query: 'up{job="beyla"}'
+
+    # ---------- Resource Trends ----------
+    loadAverage:
+      kind: Panel
+      spec:
+        display:
+          name: "Load Average"
+        plugin:
+          kind: TimeSeriesChart
+          spec: {}
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  datasource: { kind: PrometheusDatasource, name: mimir }
+                  query: 'node_load1{host="${host}"}'
+                  seriesNameFormat: "1m"
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  datasource: { kind: PrometheusDatasource, name: mimir }
+                  query: 'node_load5{host="${host}"}'
+                  seriesNameFormat: "5m"
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  datasource: { kind: PrometheusDatasource, name: mimir }
+                  query: 'node_load15{host="${host}"}'
+                  seriesNameFormat: "15m"
+
+    networkTraffic:
+      kind: Panel
+      spec:
+        display:
+          name: "Network Traffic"
+        plugin:
+          kind: TimeSeriesChart
+          spec: {}
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  datasource: { kind: PrometheusDatasource, name: mimir }
+                  query: 'rate(node_network_receive_bytes_total{host="${host}", device!="lo"}[5m])'
+                  seriesNameFormat: "rx {{ '{{device}}' }}"
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  datasource: { kind: PrometheusDatasource, name: mimir }
+                  query: 'rate(node_network_transmit_bytes_total{host="${host}", device!="lo"}[5m])'
+                  seriesNameFormat: "tx {{ '{{device}}' }}"
+
+    # ---------- Log Analytics ----------
+    logVolumeByUnit:
+      kind: Panel
+      spec:
+        display:
+          name: "Log Volume by Unit"
+        plugin:
+          kind: TimeSeriesChart
+          spec: {}
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: LokiTimeSeriesQuery
+                spec:
+                  datasource: { kind: LokiDatasource, name: loki }
+                  query: 'sum by (unit) (count_over_time({host="${host}"}[5m]))'
+
+    errorRate:
+      kind: Panel
+      spec:
+        display:
+          name: "Error / Warning Rate (all sources)"
+        plugin:
+          kind: TimeSeriesChart
+          spec: {}
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: LokiTimeSeriesQuery
+                spec:
+                  datasource: { kind: LokiDatasource, name: loki }
+                  query: 'sum(count_over_time({host="${host}"} |~ "(?i)error|exception|fatal|panic" [5m]))'
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: LokiTimeSeriesQuery
+                spec:
+                  datasource: { kind: LokiDatasource, name: loki }
+                  query: 'sum(count_over_time({host="${host}"} |~ "(?i)warn" [5m]))'
+
+    # ---------- General Log Search ----------
+    applicationLogs:
+      kind: Panel
+      spec:
+        display:
+          name: "Application Logs"
+        plugin:
+          kind: LogsTable
+          spec: {}
+        queries:
+          - kind: LogQuery
+            spec:
+              plugin:
+                kind: LokiLogQuery
+                spec:
+                  datasource: { kind: LokiDatasource, name: loki }
+                  query: '{host="${host}", application=~"${application}"} |= "${search}"'
+
+    generalLogSearch:
+      kind: Panel
+      spec:
+        display:
+          name: "All Logs (search)"
+        plugin:
+          kind: LogsTable
+          spec: {}
+        queries:
+          - kind: LogQuery
+            spec:
+              plugin:
+                kind: LokiLogQuery
+                spec:
+                  datasource: { kind: LokiDatasource, name: loki }
+                  query: '{host="${host}"} |= "${search}"'
+
+    # ---------- Application / systemd unit logs ----------
+    unitLogs:
+      kind: Panel
+      spec:
+        display:
+          name: "Systemd Unit Logs"
+        plugin:
+          kind: LogsTable
+          spec: {}
+        queries:
+          - kind: LogQuery
+            spec:
+              plugin:
+                kind: LokiLogQuery
+                spec:
+                  datasource: { kind: LokiDatasource, name: loki }
+                  query: '{host="${host}", unit=~"${unit}"} |= "${search}"'
+
+    # ---------- Podman container logs ----------
+    podmanLogs:
+      kind: Panel
+      spec:
+        display:
+          name: "Podman Container Logs"
+        plugin:
+          kind: LogsTable
+          spec: {}
+        queries:
+          - kind: LogQuery
+            spec:
+              plugin:
+                kind: LokiLogQuery
+                spec:
+                  datasource: { kind: LokiDatasource, name: loki }
+                  query: '{host="${host}", container=~"${container}"} |= "${search}"'
+
+    # ---------- Errors-only view ----------
+    errorLogs:
+      kind: Panel
+      spec:
+        display:
+          name: "Errors & Warnings (all sources)"
+        plugin:
+          kind: LogsTable
+          spec: {}
+        queries:
+          - kind: LogQuery
+            spec:
+              plugin:
+                kind: LokiLogQuery
+                spec:
+                  datasource: { kind: LokiDatasource, name: loki }
+                  query: '{host="${host}"} |~ "(?i)error|exception|fatal|panic|warn"'
+
+  layouts:
+    - kind: Grid
+      spec:
+        display: { title: "Application Log Search", collapse: { open: false } }
+        items:
+          - {
+              x: 0,
+              y: 0,
+              width: 24,
+              height: 10,
+              content: { $ref: "#/spec/panels/applicationLogs" },
+            }
+
+    - kind: Grid
+      spec:
+        display: { title: "Overview", collapse: { open: true } }
+        items:
+          - {
+              x: 0,
+              y: 0,
+              width: 4,
+              height: 5,
+              content: { $ref: "#/spec/panels/uptime" },
+            }
+          - {
+              x: 4,
+              y: 0,
+              width: 4,
+              height: 5,
+              content: { $ref: "#/spec/panels/cpuUsage" },
+            }
+          - {
+              x: 8,
+              y: 0,
+              width: 4,
+              height: 5,
+              content: { $ref: "#/spec/panels/memoryUsage" },
+            }
+          - {
+              x: 12,
+              y: 0,
+              width: 4,
+              height: 5,
+              content: { $ref: "#/spec/panels/diskUsageRoot" },
+            }
+          - {
+              x: 16,
+              y: 0,
+              width: 4,
+              height: 5,
+              content: { $ref: "#/spec/panels/diskUsageData" },
+            }
+          - {
+              x: 20,
+              y: 0,
+              width: 2,
+              height: 5,
+              content: { $ref: "#/spec/panels/sshProbe" },
+            }
+          - {
+              x: 22,
+              y: 0,
+              width: 2,
+              height: 5,
+              content: { $ref: "#/spec/panels/beylaUp" },
+            }
+
+    - kind: Grid
+      spec:
+        display: { title: "Resource Trends", collapse: { open: true } }
+        items:
+          - {
+              x: 0,
+              y: 0,
+              width: 12,
+              height: 8,
+              content: { $ref: "#/spec/panels/loadAverage" },
+            }
+          - {
+              x: 12,
+              y: 0,
+              width: 12,
+              height: 8,
+              content: { $ref: "#/spec/panels/networkTraffic" },
+            }
+
+    - kind: Grid
+      spec:
+        display: { title: "Log Analytics", collapse: { open: true } }
+        items:
+          - {
+              x: 0,
+              y: 0,
+              width: 12,
+              height: 8,
+              content: { $ref: "#/spec/panels/logVolumeByUnit" },
+            }
+          - {
+              x: 12,
+              y: 0,
+              width: 12,
+              height: 8,
+              content: { $ref: "#/spec/panels/errorRate" },
+            }
+
+    - kind: Grid
+      spec:
+        display: { title: "General Log Search", collapse: { open: false } }
+        items:
+          - {
+              x: 0,
+              y: 0,
+              width: 24,
+              height: 10,
+              content: { $ref: "#/spec/panels/generalLogSearch" },
+            }
+
+    - kind: Grid
+      spec:
+        display: { title: "Systemd Unit Logs", collapse: { open: false } }
+        items:
+          - {
+              x: 0,
+              y: 0,
+              width: 24,
+              height: 10,
+              content: { $ref: "#/spec/panels/unitLogs" },
+            }
+
+    - kind: Grid
+      spec:
+        display: { title: "Podman Container Logs", collapse: { open: false } }
+        items:
+          - {
+              x: 0,
+              y: 0,
+              width: 24,
+              height: 10,
+              content: { $ref: "#/spec/panels/podmanLogs" },
+            }
+
+    - kind: Grid
+      spec:
+        display: { title: "Errors & Warnings", collapse: { open: false } }
+        items:
+          - {
+              x: 0,
+              y: 0,
+              width: 24,
+              height: 10,
+              content: { $ref: "#/spec/panels/errorLogs" },
+            }

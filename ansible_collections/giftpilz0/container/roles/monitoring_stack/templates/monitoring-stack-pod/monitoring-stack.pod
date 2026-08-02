@@ -1,0 +1,19 @@
+[Unit]
+Description=Monitoring Stack Pod
+
+[Pod]
+PodName=monitoring-stack-pod
+
+Network={{ monitoring_stack_network_name }}
+
+{% if monitoring_stack_port_map_enabled %}
+{% for port_mapping in monitoring_stack_port_map %}
+PublishPort={{ port_mapping }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

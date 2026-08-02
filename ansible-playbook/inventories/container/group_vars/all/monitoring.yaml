@@ -1,0 +1,6 @@
+---
+######################################
+### giftpilz0.general.monitoring
+
+monitoring_agent_config_remoteserver_loki: https://loki.nixpi.de/loki/api/v1/push
+monitoring_agent_config_remoteserver_prometheus: https://mimir.nixpi.de/api/v1/push

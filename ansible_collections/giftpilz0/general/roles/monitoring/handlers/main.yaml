@@ -8,3 +8,8 @@
     state: restarted
   when:
     - monitoring_agent_package_state != 'absent'
+
+- name: "Monitoring: Reload systemd"
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true

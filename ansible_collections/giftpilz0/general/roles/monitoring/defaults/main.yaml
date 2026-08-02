@@ -1,17 +1,40 @@
 ---
-# defaults file for monitoring
-
 monitoring_agent_arch: amd64
 # renovate: datasource=github-releases depName=grafana/alloy extractVersion=^v(?<version>.*)$
 monitoring_agent_tag: 1.18.0
 monitoring_agent_package_state: present
 monitoring_agent_package:
-  - https://github.com/grafana/alloy/releases/download/v{{ monitoring_agent_tag }}/alloy-{{ monitoring_agent_tag }}-1.{{ monitoring_agent_arch }}.rpm
-
+  - >-
+    https://github.com/grafana/alloy/releases/download/v{{
+    monitoring_agent_tag }}/alloy-{{ monitoring_agent_tag }}-1.{{
+    monitoring_agent_arch }}.rpm
 monitoring_agent_config_path: /etc/alloy/config.alloy
-monitoring_agent_config_remoteserver_loki: http://127.0.0.1:3100/loki/api/v1/push
-monitoring_agent_config_remoteserver_prometheus: http://127.0.0.1:9100/api/v1/push
-
 monitoring_agent_service_name: alloy.service
 monitoring_agent_service_state: started
 monitoring_agent_service_enabled: true
+
+# Central endpoints and credentials are defined once in encrypted group vars.
+monitoring_agent_config_remoteserver_loki: ""
+monitoring_agent_config_remoteserver_prometheus: ""
+monitoring_alloy_loki_basic_auth_username: alloy
+monitoring_alloy_loki_basic_auth_password: ""
+monitoring_alloy_mimir_basic_auth_username: alloy
+monitoring_alloy_mimir_basic_auth_password: ""
+monitoring_agent_external_labels:
+  host: "{{ inventory_hostname }}"
+
+# Alloy must read the system journal
+monitoring_alloy_permissions_setup: true
+monitoring_alloy_extra_groups:
+  - adm
+  - systemd-journal
+monitoring_alloy_node_exporter_scrape_interval: 60s
+monitoring_alloy_loki_journal_max_age: 24h
+
+# Traefik publishes this endpoint only on the host loopback interface.
+monitoring_alloy_traefik_scrape_enabled: false
+monitoring_alloy_traefik_metrics_address: 127.0.0.1:8082
+monitoring_alloy_traefik_scrape_interval: 30s
+
+# Use this only for host-specific integrations that are outside the baseline.
+monitoring_alloy_extra_config: ""

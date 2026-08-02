@@ -1,26 +1,44 @@
 ---
 # tasks file for monitoring
 
-######################################
-### monitoring
-
 - name: "Monitoring: Gather package facts"
   ansible.builtin.package_facts:
     manager: auto
 
-- name: "Monitoring: Manage alloy repository keys"
-  become: true
-  ansible.builtin.rpm_key:
-    key: https://rpm.grafana.com/gpg.key
-    state: "{{ monitoring_agent_package_state }}"
-    fingerprint: B53A E77B ADB6 30A6 8304 6005 963F A277 1045 8545
+- name: "Monitoring: Validate remote write configuration"
+  ansible.builtin.assert:
+    that:
+      - monitoring_agent_config_remoteserver_loki | length > 0
+      - monitoring_agent_config_remoteserver_prometheus | length > 0
+      - monitoring_alloy_loki_basic_auth_password | length > 0
+      - monitoring_alloy_mimir_basic_auth_password | length > 0
+    fail_msg: >-
+      Define the remote write URLs and BasicAuth passwords in encrypted
+      monitoring group variables before deploying Alloy.
+
+- name: "Monitoring: Setup permissions"
   when:
+    - monitoring_alloy_permissions_setup | bool
     - monitoring_agent_package_state != 'skip'
+  block:
+    - name: "Monitoring: Add alloy user to extra groups"
+      ansible.builtin.user:
+        name: alloy
+        groups: "{{ monitoring_alloy_extra_groups | join(',') }}"
+        append: true
 
 - name: "Monitoring: Download alloy"
   become: true
   ansible.builtin.package:
     name: "{{ monitoring_agent_package }}"
+    state: "{{ monitoring_agent_package_state }}"
+  when:
+    - monitoring_agent_package_state != 'skip'
+
+- name: "Monitoring: Install acl"
+  become: true
+  ansible.builtin.package:
+    name: "acl"
     state: "{{ monitoring_agent_package_state }}"
   when:
     - monitoring_agent_package_state != 'skip'

@@ -29,3 +29,6 @@ server:
         login.nixpi.de:
           ansible_host: 192.168.60.16
           ansible_user: serveradmin
+        monitoring.nixpi.de:
+          ansible_host: 192.168.60.17
+          ansible_user: serveradmin
