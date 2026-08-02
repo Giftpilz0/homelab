@@ -1,0 +1,11 @@
+{
+  "config": {
+    "url": "https://embed.diagrams.net",
+    "theme": "minimal"
+  },
+  "name": "draw-io",
+  "version": "2.1.0",
+  "description": "OpenCloud web draw.io integration",
+  "license": "AGPL-3.0",
+  "entrypoint": "js/remoteEntry-DcvZc95b.mjs"
+}

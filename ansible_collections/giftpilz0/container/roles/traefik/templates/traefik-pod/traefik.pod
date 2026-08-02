@@ -24,4 +24,4 @@ PublishPort={{ traefik_bind_ip }}:{{ entrypoint.port }}:{{ entrypoint.internal_p
 Restart=always
 
 [Install]
-WantedBy=multi-user.target default.target
+WantedBy=default.target

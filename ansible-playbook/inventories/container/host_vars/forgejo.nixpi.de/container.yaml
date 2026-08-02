@@ -4,8 +4,6 @@ podman_user: "container"
 ######################################
 ### giftpilz0.container.postgresql (provisioned by giftpilz0.container.forgejo)
 
-# Optional overrides -- network/db wiring is set by the forgejo role itself;
-# only host-controllable settings (version pin, exposure, backups) live here.
 postgresql_port_map_enabled: true
 
 # Versions

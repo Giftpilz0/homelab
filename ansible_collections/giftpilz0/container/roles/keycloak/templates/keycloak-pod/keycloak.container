@@ -26,7 +26,9 @@ Environment={{ env_var }}
 {% endif %}
 
 Volume=keycloak-data.volume:/opt/keycloak/data
+{% if keycloak_theme_jar_enabled %}
 Volume=%h/.config/containers/systemd/keycloak-pod/config/keycloak-theme.jar:/opt/keycloak/providers/keycloak-theme.jar:Z
+{% endif %}
 
 [Service]
 Restart=always

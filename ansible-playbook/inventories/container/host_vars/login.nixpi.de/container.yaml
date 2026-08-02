@@ -4,8 +4,6 @@ podman_user: "container"
 ######################################
 ### giftpilz0.container.postgresql (provisioned by giftpilz0.container.keycloak)
 
-# Optional overrides -- network/db wiring is set by the keycloak role itself;
-# only host-controllable settings (version pin, exposure, backups) live here.
 postgresql_port_map_enabled: true
 
 # Versions
@@ -22,7 +20,7 @@ postgresql_backup_retention_days: 7
 postgresql_backup_compression: 6
 
 # CloudBeaver management UI
-postgresql_cloudbeaver_enabled: false
+postgresql_cloudbeaver_enabled: true
 postgresql_cloudbeaver_admin_user: "cbadmin"
 postgresql_cloudbeaver_admin_password: "cbadmin123"
 
@@ -49,6 +47,9 @@ keycloak_version: "26.7.0"
 
 # Autoupdate
 keycloak_autoupdate: true
+
+# theme JAR
+keycloak_theme_jar_source: "{{ inventory_dir | dirname }}/host_vars/{{ inventory_hostname }}/assets/keycloak/keycloak-theme.jar"
 
 # Environment
 keycloak_domain: "login.nixpi.de"

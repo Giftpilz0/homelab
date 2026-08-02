@@ -6,7 +6,8 @@ mariadb_proxy_enabled: false
 mariadb_proxy_http: ""
 mariadb_proxy_https: ""
 mariadb_proxy_no_proxy: ""
-mariadb_proxy_env: "{{ (['https_proxy=' ~ mariadb_proxy_https] + (['http_proxy=' ~ mariadb_proxy_http] if mariadb_proxy_http else []) + (['no_proxy=' ~ mariadb_proxy_no_proxy] if mariadb_proxy_no_proxy else [])) if mariadb_proxy_enabled else [] }}"
+mariadb_proxy_env: "{{ (['https_proxy=' ~ mariadb_proxy_https] + (['http_proxy=' ~ mariadb_proxy_http] if mariadb_proxy_http else []) + (['no_proxy=' ~ mariadb_proxy_no_proxy]
+  if mariadb_proxy_no_proxy else [])) if mariadb_proxy_enabled else [] }}"
 
 # Network
 mariadb_network_enabled: true

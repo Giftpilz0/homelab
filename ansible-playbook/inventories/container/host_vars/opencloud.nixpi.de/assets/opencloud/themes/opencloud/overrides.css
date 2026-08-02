@@ -1,0 +1,5 @@
+/* OpenCloud Web overrides */
+
+.oc-sidebar-nav-sponsor-link {
+    display: none;
+}

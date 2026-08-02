@@ -27,8 +27,25 @@ opencloud_autoupdate: true
 
 # Environment
 opencloud_domain: "https://opencloud.nixpi.de"
-opencloud_log_level: "WARN"
 opencloud_csp_oidc_origin: "https://login.nixpi.de"
+opencloud_log_level: "info"
+
+# Optional companion services and custom web assets
+opencloud_radicale_enabled: true
+
+opencloud_collabora_enabled: true
+opencloud_collabora_url: "https://collabora.nixpi.de"
+opencloud_collabora_admin_password: "{{ opencloud_admin_password }}"
+opencloud_collabora_ssl_enable: true
+opencloud_collabora_ssl_verification: true
+opencloud_collabora_ssl_termination: true
+opencloud_collabora_home_mode: false
+
+opencloud_theming_enabled: true
+opencloud_theme_source: "{{ inventory_dir | dirname }}/host_vars/{{ inventory_hostname }}/assets/opencloud/themes"
+
+opencloud_plugins_enabled: true
+opencloud_plugins_source: "{{ inventory_dir | dirname }}/host_vars/{{ inventory_hostname }}/assets/opencloud/plugins"
 
 opencloud_environment_vars:
   IDM_ADMIN_PASSWORD: "{{ opencloud_admin_password }}"
@@ -39,6 +56,7 @@ opencloud_environment_vars:
   PROXY_CSP_CONFIG_FILE_LOCATION: "/etc/opencloud/csp.yaml"
   FRONTEND_ARCHIVER_MAX_SIZE: 68719476736
   THUMBNAILS_MAX_CONCURRENT_REQUESTS: 64
+  FRONTEND_CHECK_FOR_UPDATES: false
   # External OIDC (Keycloak)
   OC_EXCLUDE_RUN_SERVICES: "idp"
   OC_OIDC_CLIENT_ID: "OpenCloudWeb"
@@ -99,3 +117,11 @@ traefik_http_services:
     tls_enabled: true
     acme_enabled: true
     large_downloads: true
+  - name: collabora
+    domain: collabora.nixpi.de
+    rule: "Host(`collabora.nixpi.de`)"
+    servers:
+      - url: "https://collabora-pod:9980"
+    tls_enabled: true
+    acme_enabled: true
+    insecure_skip_verify: true

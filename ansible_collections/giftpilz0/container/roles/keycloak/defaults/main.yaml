@@ -35,6 +35,10 @@ keycloak_version: "26.7.0"
 # Autoupdate
 keycloak_autoupdate: true
 
+# Theme provider JARs are supplied by each inventory, not bundled with the role.
+keycloak_theme_jar_enabled: true
+keycloak_theme_jar_source: ""
+
 # Environment
 keycloak_domain: "login.nixpi.de"
 

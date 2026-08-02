@@ -108,7 +108,7 @@ http:
 {% for service in traefik_http_services %}
     {{ service.name }}-service:
       loadBalancer:
-{% if service.large_downloads | default(false) %}
+{% if service.large_downloads | default(false) or service.insecure_skip_verify | default(false) %}
         serversTransport: {{ service.name }}-transport
 {% endif %}
         servers:
@@ -134,23 +134,28 @@ http:
   # SERVERS TRANSPORTS
   # =============================================================================
 {% if traefik_http_services is defined %}
-{% set has_large_download_service = namespace(found=false) %}
+{% set has_servers_transport_service = namespace(found=false) %}
 {% for service in traefik_http_services %}
-{% if service.large_downloads | default(false) %}
-{% set has_large_download_service.found = true %}
+{% if service.large_downloads | default(false) or service.insecure_skip_verify | default(false) %}
+{% set has_servers_transport_service.found = true %}
 {% endif %}
 {% endfor %}
-{% if has_large_download_service.found %}
+{% if has_servers_transport_service.found %}
   serversTransports:
 {% for service in traefik_http_services %}
-{% if service.large_downloads | default(false) %}
+{% if service.large_downloads | default(false) or service.insecure_skip_verify | default(false) %}
     {{ service.name }}-transport:
+{% if service.insecure_skip_verify | default(false) %}
+      insecureSkipVerify: true
+{% endif %}
+{% if service.large_downloads | default(false) %}
       forwardingTimeouts:
         dialTimeout: "30s"
         responseHeaderTimeout: "0s"
         idleConnTimeout: "90s"
         readIdleTimeout: "12h"
         pingTimeout: "15s"
+{% endif %}
 {% endif %}
 {% endfor %}
 {% endif %}
