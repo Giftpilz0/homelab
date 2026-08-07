@@ -43,7 +43,7 @@ keycloak_network_name: "keycloak-internal"
 
 # Versions
 # renovate: datasource=docker depName=quay.io/keycloak/keycloak
-keycloak_version: "26.7.0"
+keycloak_version: "26.7.1"
 
 # Autoupdate
 keycloak_autoupdate: true

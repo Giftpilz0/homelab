@@ -31,7 +31,7 @@ cloudbeaver_port_map:
   - "8978:8978"
 
 # renovate: datasource=docker depName=dbeaver/cloudbeaver
-cloudbeaver_version: "26.1.3"
+cloudbeaver_version: "26.1.4"
 
 cloudbeaver_autoupdate: true
 
