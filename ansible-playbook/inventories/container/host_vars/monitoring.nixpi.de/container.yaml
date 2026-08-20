@@ -22,7 +22,7 @@ monitoring_stack_network_name: "monitoring-stack-internal"
 # renovate: datasource=docker depName=dxflrs/garage
 monitoring_stack_garage_version: "v2.3.0"
 # renovate: datasource=docker depName=grafana/mimir
-monitoring_stack_mimir_version: "3.1.4"
+monitoring_stack_mimir_version: "3.2.0"
 # renovate: datasource=docker depName=grafana/loki
 monitoring_stack_loki_version: "3.7.6"
 # renovate: datasource=docker depName=persesdev/perses
@@ -72,7 +72,7 @@ traefik_proxy_no_proxy: ""
 
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.10"
+traefik_version: "v3.7.11"
 
 # Autoupdate
 traefik_autoupdate: true

@@ -24,7 +24,7 @@ monitoring_stack_port_map: []
 # renovate: datasource=docker depName=dxflrs/garage
 monitoring_stack_garage_version: "v2.3.0"
 # renovate: datasource=docker depName=grafana/mimir
-monitoring_stack_mimir_version: "3.1.4"
+monitoring_stack_mimir_version: "3.2.0"
 # renovate: datasource=docker depName=grafana/loki
 monitoring_stack_loki_version: "3.7.6"
 # renovate: datasource=docker depName=persesdev/perses

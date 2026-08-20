@@ -30,7 +30,7 @@ postgresql_port_map:
 
 # Versions
 # renovate: datasource=docker depName=postgres
-postgresql_version: "18.4-alpine"
+postgresql_version: "18.6-alpine"
 
 # Autoupdate
 postgresql_autoupdate: true
