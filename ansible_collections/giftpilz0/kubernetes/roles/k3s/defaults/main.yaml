@@ -16,7 +16,7 @@ k3s_service_state: started
 k3s_service_enabled: true
 
 # renovate: datasource=github-releases depName=kube-vip/kube-vip
-k3s_kube_vip_tag: v1.2.2
+k3s_kube_vip_tag: v1.2.3
 k3s_kube_vip_iface: enp6s18
 
 k3s_service_cidr: 10.43.0.0/16
@@ -37,6 +37,6 @@ k9s_tag: 0.51.0 # noqa: var-naming[no-role-prefix]
 # renovate: datasource=github-releases depName=fluxcd/flux2 extractVersion=^v(?<version>.*)$
 fluxcli_tag: 2.9.4 # noqa: var-naming[no-role-prefix]
 # renovate: datasource=github-releases depName=helm/helm extractVersion=^v(?<version>.*)$
-helm_tag: 4.2.3 # noqa: var-naming[no-role-prefix]
+helm_tag: 4.2.4 # noqa: var-naming[no-role-prefix]
 # renovate: datasource=helm depName=cilium registryUrl=https://helm.cilium.io
 cilium_version: 1.20.1 # noqa: var-naming[no-role-prefix]
