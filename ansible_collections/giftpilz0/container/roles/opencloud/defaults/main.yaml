@@ -56,7 +56,7 @@ opencloud_collabora_enabled: false
 
 # Versions
 # renovate: datasource=docker depName=collabora/code
-opencloud_collabora_version: "26.04.2.4.1"
+opencloud_collabora_version: "26.04.3.1.1"
 
 opencloud_collabora_url: ""
 opencloud_collabora_admin_username: "admin"
@@ -84,7 +84,7 @@ opencloud_radicale_enabled: false
 
 # Versions
 # renovate: datasource=docker depName=opencloudeu/radicale
-opencloud_radicale_version: "v3.7.7"
+opencloud_radicale_version: "v3.7.8"
 
 # Custom web assets
 opencloud_theming_enabled: false
