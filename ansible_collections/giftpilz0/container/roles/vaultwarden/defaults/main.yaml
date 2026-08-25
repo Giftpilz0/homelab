@@ -30,7 +30,7 @@ vaultwarden_port_map:
 
 # Versions
 # renovate: datasource=docker depName=vaultwarden/server
-vaultwarden_version: "1.37.1-alpine"
+vaultwarden_version: "1.37.2-alpine"
 
 # Autoupdate
 vaultwarden_autoupdate: true
