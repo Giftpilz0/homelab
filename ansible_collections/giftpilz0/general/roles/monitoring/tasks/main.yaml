@@ -32,6 +32,7 @@
   ansible.builtin.package:
     name: "{{ monitoring_agent_package }}"
     state: "{{ monitoring_agent_package_state }}"
+    disable_gpg_check: true
   when:
     - monitoring_agent_package_state != 'skip'
 
