@@ -1,21 +1,16 @@
 ---
+## Primary
+# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
-
-# Proxy
-traefik_proxy_enabled: false
-traefik_proxy_http: ""
-traefik_proxy_https: ""
-traefik_proxy_no_proxy: ""
-traefik_proxy_env:
-  "{{ (['https_proxy=' ~ traefik_proxy_https] + (['http_proxy=' ~ traefik_proxy_http] if traefik_proxy_http else []) + (['no_proxy=' ~ traefik_proxy_no_proxy]
-  if traefik_proxy_no_proxy else [])) if traefik_proxy_enabled else [] }}"
 
 # Network
 # Traefik's own network. Also joins traefik_networks below to reach backends.
 traefik_network_enabled: true
-traefik_network_driver: "bridge"
-traefik_network_internal: false
 traefik_network_name: "traefik-internal"
+
+# Bind IP for traefik published ports. Defaults to the primary interface so that
+# traefik does not claim loopback (127.0.0.1), leaving it free for service pods.
+traefik_bind_ip: "{{ ansible_facts['default_ipv4']['address'] }}"
 
 # Version
 # renovate: datasource=docker depName=traefik
@@ -23,15 +18,6 @@ traefik_version: "v3.7.11"
 
 # Autoupdate
 traefik_autoupdate: true
-
-# Bind IP for traefik published ports. Defaults to the primary interface so that
-# traefik does not claim loopback (127.0.0.1), leaving it free for service pods.
-traefik_bind_ip: "{{ ansible_facts['default_ipv4']['address'] }}"
-
-# Internal ports traefik listens on inside its container. These are remapped to the
-# standard ports (80/443) via PublishPort.
-traefik_http_internal_port: 80
-traefik_https_internal_port: 443
 
 # Podman networks traefik should join, in addition to its own default network.
 # Traefik no longer runs on pasta -- it is a plain bridge-networked container like
@@ -56,12 +42,6 @@ traefik_https_internal_port: 443
 # host-published port), e.g. "http://forgejo-pod:3000".
 traefik_networks: []
 
-# Environment
-traefik_environment_vars: {}
-
-# traefik_environment_vars:
-#   CLOUDFLARE_DNS_API_TOKEN: "example"
-
 # ACME
 traefik_acme_enabled: true
 traefik_acme_email: ""
@@ -71,31 +51,6 @@ traefik_acme_dns_provider: "cloudflare"
 traefik_acme_eab_enabled: false
 traefik_acme_eab_kid: ""
 traefik_acme_eab_hmac: ""
-
-# Logging
-traefik_log_level: "WARN"
-traefik_log_format: "json"
-
-traefik_access_log_format: "json"
-traefik_access_log_buffer_size: 10
-
-# Prometheus metrics are available only to the local Alloy agent.
-traefik_metrics_enabled: true
-traefik_metrics_internal_port: 8082
-traefik_metrics_bind_ip: "127.0.0.1"
-
-# Transport
-traefik_transport_timeouts_enabled: false
-traefik_transport_read_timeout: "12h"
-traefik_transport_write_timeout: "12h"
-traefik_transport_idle_timeout: "3m"
-
-# HTTP/3 (QUIC) on the websecure entrypoint. Also publishes UDP 443.
-traefik_http3_enabled: true
-# The port advertised in the alt-svc header. Must match the external (host-side)
-# port clients connect to — important when traefik_https_internal_port differs
-# from the host-published port (e.g. internal 8843 published as 443).
-traefik_http3_advertised_port: 443
 
 # HTTP to HTTPS redirect (entrypoint-level global redirect)
 traefik_http_redirect_https: true
@@ -169,3 +124,67 @@ traefik_custom_middlewares: {}
 #     sans:
 #       - "app1.example.com"
 #       - "app2.example.com"
+
+# Copy arbitrary extra files/directories from the inventory into this role's
+# quadlet directory (relative to the <role>-pod dir).
+# Each entry: { src: <controller path>, dest: <relative target path>,
+#               mount: <optional container bind-mount path> }
+# Entries with a mount are staged (copied) and bind-mounted into the container.
+# Example:
+#   traefik_extra_files:
+#     - src: "assets/keycloak/theme.jar"
+#       dest: "config/theme.jar"
+#       mount: "/containers/<container>/extra.jar"
+#   traefik_extra_dirs:
+#     - src: "assets/plugins/"
+#       dest: "assets/apps/plugins/"
+traefik_extra_files: []
+traefik_extra_dirs: []
+
+## Advanced
+# Proxy
+traefik_proxy_enabled: false
+traefik_proxy_http: ""
+traefik_proxy_https: ""
+traefik_proxy_no_proxy: ""
+traefik_proxy_env: "{{ (['https_proxy=' ~ traefik_proxy_https] + (['http_proxy=' ~ traefik_proxy_http] if traefik_proxy_http else []) + (['no_proxy=' ~ traefik_proxy_no_proxy]
+  if traefik_proxy_no_proxy else [])) if traefik_proxy_enabled else [] }}"
+
+# Network driver
+traefik_network_driver: "bridge"
+
+# Internal ports traefik listens on inside its container. These are remapped to the
+# standard ports (80/443) via PublishPort.
+traefik_http_internal_port: 80
+traefik_https_internal_port: 443
+
+# Environment
+traefik_environment_vars: {}
+
+# traefik_environment_vars:
+#   CLOUDFLARE_DNS_API_TOKEN: "example"
+
+# Logging
+traefik_log_level: "WARN"
+traefik_log_format: "json"
+
+traefik_access_log_format: "json"
+traefik_access_log_buffer_size: 10
+
+# Prometheus metrics are available only to the local Alloy agent.
+traefik_metrics_enabled: true
+traefik_metrics_internal_port: 8082
+traefik_metrics_bind_ip: "127.0.0.1"
+
+# Transport
+traefik_transport_timeouts_enabled: false
+traefik_transport_read_timeout: "12h"
+traefik_transport_write_timeout: "12h"
+traefik_transport_idle_timeout: "3m"
+
+# HTTP/3 (QUIC) on the websecure entrypoint. Also publishes UDP 443.
+traefik_http3_enabled: true
+# The port advertised in the alt-svc header. Must match the external (host-side)
+# port clients connect to — important when traefik_https_internal_port differs
+# from the host-published port (e.g. internal 8843 published as 443).
+traefik_http3_advertised_port: 443

@@ -34,5 +34,8 @@ Volume=%h/.config/containers/systemd/homeassistant-pod/config/8n0t5d.py:/usr/loc
 {% endif %}
 Volume=homeassistant-data.volume:/config
 
+{% for item in (homeassistant_extra_files | default([]) + homeassistant_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume=%h/.config/containers/systemd/homeassistant-pod/{{ item.dest }}:{{ item.mount }}:Z
+{% endfor %}
 [Service]
 Restart=always

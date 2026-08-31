@@ -4,16 +4,8 @@ podman_user: "container"
 ######################################
 ### giftpilz0.container.vaultwarden
 
-# Proxy
-vaultwarden_proxy_enabled: false
-vaultwarden_proxy_http: ""
-vaultwarden_proxy_https: ""
-vaultwarden_proxy_no_proxy: ""
-
 # Network
 vaultwarden_network_enabled: true
-vaultwarden_network_driver: "bridge"
-vaultwarden_network_internal: false
 
 # Network to join even when _network_enabled: false
 vaultwarden_network_name: "vaultwarden-internal"
@@ -40,12 +32,6 @@ vaultwarden_environment_vars:
 
 ######################################
 ### giftpilz0.container.traefik
-
-# Proxy
-traefik_proxy_enabled: false
-traefik_proxy_http: ""
-traefik_proxy_https: ""
-traefik_proxy_no_proxy: ""
 
 # Version
 # renovate: datasource=docker depName=traefik

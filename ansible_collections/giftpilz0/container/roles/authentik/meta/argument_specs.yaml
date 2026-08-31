@@ -1,0 +1,173 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy the Authentik identity provider (server, worker, PostgreSQL, and Redis) as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        default: "{{ ansible_user }}"
+        description: system user for rootless podman operations.
+
+      authentik_proxy_enabled:
+        type: bool
+        required: false
+        default: false
+        description: enable HTTP proxy for image pulls.
+
+      authentik_proxy_http:
+        type: str
+        required: false
+        default: ""
+        description: HTTP proxy URL.
+
+      authentik_proxy_https:
+        type: str
+        required: false
+        default: ""
+        description: HTTPS proxy URL.
+
+      authentik_proxy_no_proxy:
+        type: str
+        required: false
+        default: ""
+        description: comma-separated list of proxy exclusions.
+
+      authentik_network_enabled:
+        type: bool
+        required: false
+        default: true
+        description: create and manage the podman network.
+
+      authentik_network_driver:
+        type: str
+        required: false
+        default: bridge
+        description: podman network driver.
+
+      authentik_network_name:
+        type: str
+        required: false
+        default: authentik-internal
+        description: podman network name.
+
+      authentik_bind_ip:
+        type: str
+        required: false
+        default: "127.0.0.1"
+        description: host IP to bind exposed ports to.
+
+      authentik_port_map_enabled:
+        type: bool
+        required: false
+        default: true
+        description: expose container ports on the host.
+
+      authentik_port_map:
+        type: list
+        elements: str
+        required: false
+        default:
+          - "9000:9000"
+          - "9443:9443"
+        description: host:container port mappings.
+
+      valkey_version:
+        type: str
+        required: false
+        default: "9.1.1-alpine"
+        description: Valkey (Redis) container image version.
+
+      postgresql_version:
+        type: str
+        required: false
+        default: "18.6-alpine"
+        description: PostgreSQL container image version.
+
+      authentik_version:
+        type: str
+        required: false
+        default: "2026.8.0"
+        description: Authentik container image version.
+
+      authentik_cache_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable auto-update for the Valkey container.
+
+      authentik_postgresql_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable auto-update for the PostgreSQL container.
+
+      authentik_server_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable auto-update for the Authentik server container.
+
+      authentik_worker_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable auto-update for the Authentik worker container.
+
+      authentik_secret_key:
+        type: str
+        required: false
+        default: ""
+        description: application secret key (openssl rand -base64 60).
+
+      authentik_db_password:
+        type: str
+        required: false
+        default: ""
+        description: PostgreSQL password for the Authentik database.
+
+      authentik_domain:
+        type: str
+        required: false
+        default: ""
+        description: external domain for the Authentik instance.
+
+      authentik_server_environment_vars:
+        type: dict
+        required: false
+        default: {}
+        description: extra environment variables for the server container.
+
+      authentik_worker_environment_vars:
+        type: dict
+        required: false
+        default: {}
+        description: extra environment variables for the worker container.
+
+      authentik_postgresql_environment_vars:
+        type: dict
+        required: false
+        default: {}
+        description: extra environment variables for the PostgreSQL container.
+
+      authentik_cache_environment_vars:
+        type: dict
+        required: false
+        default: {}
+        description: extra environment variables for the Valkey container.
+
+      authentik_extra_files:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: list of arbitrary files to copy into the role quadlet directory. Each entry has src (controller path), dest (relative path inside the pod
+          quadlet dir) and optional mount (container bind-mount path).
+
+      authentik_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: list of arbitrary directories to copy into the role quadlet directory. Each entry has src (controller directory), dest (relative target
+          directory inside the pod quadlet dir) and optional mount (container bind-mount path).

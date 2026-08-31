@@ -1,30 +1,30 @@
 ---
 argument_specs:
   main:
-    short_description: The main entry point for the update role.
+    short_description: Apply system package updates with an optional automatic reboot.
     options:
       update_package_names:
         type: list
         elements: str
         required: false
-        description: update_package_names
+        description: list of packages to update (empty for all).
 
       update_package_security_only:
         type: bool
         required: false
-        description: update_package_security_only
+        description: only apply security updates.
 
       update_package_bugfix_only:
         type: bool
         required: false
-        description: update_package_bugfix_only
+        description: only apply bugfix updates.
 
       update_reboot_enabled:
         type: bool
         required: false
-        description: update_reboot_enabled
+        description: whether to reboot after updates if required.
 
       update_reboot_timeout:
         type: int
         required: false
-        description: update_reboot_timeout
+        description: timeout in seconds to wait for reboot completion.

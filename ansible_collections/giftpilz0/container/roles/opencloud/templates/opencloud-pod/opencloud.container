@@ -7,6 +7,10 @@ Image=docker.io/opencloudeu/opencloud-rolling:{{ opencloud_version }}
 
 Pod=opencloud.pod
 
+{% set _extra_assets = opencloud_extra_files | default([]) + opencloud_extra_dirs | default([]) %}
+{% set _theming = _extra_assets | selectattr('mount', 'defined') | selectattr('mount', 'search', '/var/lib/opencloud/web/assets/custom-themes') | list | length > 0 %}
+{% set _plugins = _extra_assets | selectattr('mount', 'defined') | selectattr('mount', 'search', '/var/lib/opencloud/web/assets/custom-apps') | list | length > 0 %}
+
 {% if opencloud_autoupdate %}
 AutoUpdate=registry
 {% endif %}
@@ -31,13 +35,13 @@ Environment=COLLABORATION_APP_INSECURE={{ (not opencloud_collabora_ssl_verificat
 Environment=COLLABORATION_CS3API_DATAGATEWAY_INSECURE={{ (not opencloud_collabora_ssl_verification) | bool | lower }}
 {% endif %}
 
-{% if opencloud_theming_enabled %}
+{% if _theming %}
 Environment=WEB_ASSET_THEMES_PATH=/var/lib/opencloud/web/assets/custom-themes
 Environment=WEB_UI_THEME_PATH=/themes/opencloud/theme.json
 Environment=WEB_UI_CONFIG_FILE=/etc/opencloud/web-config.json
 {% endif %}
 
-{% if opencloud_plugins_enabled %}
+{% if _plugins %}
 Environment=WEB_ASSET_APPS_PATH=/var/lib/opencloud/web/assets/custom-apps
 {% endif %}
 
@@ -54,12 +58,11 @@ Volume=%h/.config/containers/systemd/opencloud-pod/config/csp.yaml:/etc/openclou
 {% if opencloud_radicale_enabled %}
 Volume=%h/.config/containers/systemd/opencloud-pod/config/proxy.yaml:/etc/opencloud/proxy.yaml:Z
 {% endif %}
-{% if opencloud_theming_enabled %}
-Volume=%h/.config/containers/systemd/opencloud-pod/assets/themes:/var/lib/opencloud/web/assets/custom-themes:Z
+{% for item in _extra_assets if item.mount is defined and item.mount %}
+Volume=%h/.config/containers/systemd/opencloud-pod/{{ item.dest }}:{{ item.mount }}:Z
+{% endfor %}
+{% if _theming %}
 Volume=%h/.config/containers/systemd/opencloud-pod/config/web-config.json:/etc/opencloud/web-config.json:Z
-{% endif %}
-{% if opencloud_plugins_enabled %}
-Volume=%h/.config/containers/systemd/opencloud-pod/assets/apps:/var/lib/opencloud/web/assets/custom-apps:Z
 {% endif %}
 
 [Service]

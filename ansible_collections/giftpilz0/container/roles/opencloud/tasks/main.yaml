@@ -24,53 +24,9 @@
       - not opencloud_collabora_enabled or opencloud_domain | length > 0
       - not opencloud_collabora_enabled or opencloud_collabora_url | length > 0
       - not opencloud_collabora_enabled or opencloud_collabora_admin_password | length > 0
-      - not opencloud_theming_enabled or opencloud_theme_source | length > 0
-      - not opencloud_plugins_enabled or opencloud_plugins_source | length > 0
     fail_msg: >-
       Enabled OpenCloud optional features require their URL, password, source
       directory, and theme path settings to be set.
-
-- name: "OpenCloud: Check custom asset source directories"
-  ansible.builtin.stat:
-    path: "{{ item.source }}"
-  delegate_to: localhost
-  become: false
-  register: opencloud_asset_sources
-  loop:
-    - name: themes
-      enabled: "{{ opencloud_theming_enabled }}"
-      source: "{{ opencloud_theme_source }}"
-    - name: plugins
-      enabled: "{{ opencloud_plugins_enabled }}"
-      source: "{{ opencloud_plugins_source }}"
-  when: item.enabled
-
-- name: "OpenCloud: Validate custom asset source directories"
-  ansible.builtin.assert:
-    that:
-      - item.stat.exists
-      - item.stat.isdir
-    fail_msg: "OpenCloud {{ item.item.name }} source directory does not exist: {{ item.item.source }}"
-  loop: "{{ opencloud_asset_sources.results | default([]) }}"
-  when: item is not skipped
-
-- name: "OpenCloud: Discover plugin manifests"
-  ansible.builtin.find:
-    paths: "{{ opencloud_plugins_source }}"
-    patterns: manifest.json
-    file_type: file
-    recurse: true
-  delegate_to: localhost
-  become: false
-  register: opencloud_plugin_manifests
-  when: opencloud_plugins_enabled
-
-- name: "OpenCloud: Validate discovered plugins"
-  ansible.builtin.assert:
-    that:
-      - opencloud_plugin_manifests.matched | int > 0
-    fail_msg: "OpenCloud plugin source contains no manifest.json files: {{ opencloud_plugins_source }}"
-  when: opencloud_plugins_enabled
 
 - name: "OpenCloud: Delete quadlet directory"
   become: true
@@ -147,28 +103,29 @@
   when:
     - item.state == 'file'
 
-- name: "OpenCloud: Stage custom themes"
+- name: "Opencloud: Copy extra files"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.copy:
-    src: "{{ opencloud_theme_source }}/"
-    dest: "/home/{{ podman_user }}/.config/containers/systemd/opencloud-pod/assets/themes/"
+    src: "{{ item.src }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/opencloud-pod/{{ item.dest }}"
     owner: "{{ podman_user }}"
     group: "{{ podman_user }}"
     mode: preserve
-  when: opencloud_theming_enabled
+  loop: "{{ opencloud_extra_files | default([]) }}"
+  when: "opencloud_extra_files | default([]) | length > 0"
 
-- name: "OpenCloud: Stage discovered plugins"
+- name: "Opencloud: Copy extra directories"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.copy:
-    src: "{{ item.path | dirname }}/"
-    dest: "/home/{{ podman_user }}/.config/containers/systemd/opencloud-pod/assets/apps/{{ item.path | dirname | basename }}/"
+    src: "{{ item.src }}/"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/opencloud-pod/{{ item.dest }}"
     owner: "{{ podman_user }}"
     group: "{{ podman_user }}"
     mode: preserve
-  loop: "{{ opencloud_plugin_manifests.files | default([]) }}"
-  when: opencloud_plugins_enabled
+  loop: "{{ opencloud_extra_dirs | default([]) }}"
+  when: "opencloud_extra_dirs | default([]) | length > 0"
 
 - name: "OpenCloud: systemd daemon reload"
   become: true

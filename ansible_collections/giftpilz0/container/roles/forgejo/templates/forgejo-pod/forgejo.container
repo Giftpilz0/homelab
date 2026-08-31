@@ -25,5 +25,8 @@ Environment={{ env_var }}
 
 Volume=forgejo-data.volume:/data
 
+{% for item in (forgejo_extra_files | default([]) + forgejo_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume=%h/.config/containers/systemd/forgejo-pod/{{ item.dest }}:{{ item.mount }}:Z
+{% endfor %}
 [Service]
 Restart=always

@@ -4,16 +4,8 @@ podman_user: "container"
 ######################################
 ### giftpilz0.container.homeassistant
 
-# Proxy
-homeassistant_proxy_enabled: false
-homeassistant_proxy_http: ""
-homeassistant_proxy_https: ""
-homeassistant_proxy_no_proxy: ""
-
 # Network
 homeassistant_network_enabled: true
-homeassistant_network_driver: "bridge"
-homeassistant_network_internal: false
 
 # Network to join even when _network_enabled: false
 homeassistant_network_name: "homeassistant-internal"
@@ -32,16 +24,8 @@ homeassistant_deebot_module: "true"
 ######################################
 ### giftpilz0.container.mosquitto
 
-# Proxy
-mosquitto_proxy_enabled: false
-mosquitto_proxy_http: ""
-mosquitto_proxy_https: ""
-mosquitto_proxy_no_proxy: ""
-
 # Network
 mosquitto_network_enabled: true
-mosquitto_network_driver: "bridge"
-mosquitto_network_internal: false
 
 # Network to join even when _network_enabled: false
 mosquitto_network_name: "mosquitto-internal"
@@ -55,12 +39,6 @@ mosquitto_autoupdate: true
 
 ######################################
 ### giftpilz0.container.traefik
-
-# Proxy
-traefik_proxy_enabled: false
-traefik_proxy_http: ""
-traefik_proxy_https: ""
-traefik_proxy_no_proxy: ""
 
 # Podman networks traefik should join to reach backends directly
 traefik_networks:

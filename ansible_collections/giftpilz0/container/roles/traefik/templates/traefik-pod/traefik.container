@@ -27,5 +27,8 @@ Volume=traefik-acme.volume:/acme/
 Volume=%h/.config/containers/systemd/traefik-pod/config/dynamic.yaml:/etc/traefik/dynamic/dynamic.yaml:Z
 Volume=%h/.config/containers/systemd/traefik-pod/config/traefik.yaml:/etc/traefik/traefik.yaml:Z
 
+{% for item in (traefik_extra_files | default([]) + traefik_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume=%h/.config/containers/systemd/traefik-pod/{{ item.dest }}:{{ item.mount }}:Z
+{% endfor %}
 [Service]
 Restart=always

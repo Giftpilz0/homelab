@@ -73,6 +73,30 @@
   with_community.general.filetree: "templates/"
   when: item.state == 'file'
 
+- name: "Authentik: Copy extra files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/authentik-pod/{{ item.dest }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: preserve
+  loop: "{{ authentik_extra_files | default([]) }}"
+  when: "authentik_extra_files | default([]) | length > 0"
+
+- name: "Authentik: Copy extra directories"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    src: "{{ item.src }}/"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/authentik-pod/{{ item.dest }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: preserve
+  loop: "{{ authentik_extra_dirs | default([]) }}"
+  when: "authentik_extra_dirs | default([]) | length > 0"
+
 - name: "Authentik: systemd daemon reload"
   become: true
   become_user: "{{ podman_user }}"

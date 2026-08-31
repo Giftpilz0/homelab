@@ -30,5 +30,8 @@ Volume=%h/.config/containers/systemd/bumper-pod/config/ca.crt:/bumper/certs/ca.c
 Volume=%h/.config/containers/systemd/bumper-pod/config/ca.pem:/bumper/certs/ca.pem:Z
 Volume=bumper-data.volume:/bumper/data
 
+{% for item in (bumper_extra_files | default([]) + bumper_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume=%h/.config/containers/systemd/bumper-pod/{{ item.dest }}:{{ item.mount }}:Z
+{% endfor %}
 [Service]
 Restart=always

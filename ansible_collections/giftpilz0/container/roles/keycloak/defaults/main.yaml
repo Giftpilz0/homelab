@@ -1,20 +1,11 @@
 ---
+## Primary
+# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
-# Proxy
-keycloak_proxy_enabled: false
-keycloak_proxy_http: ""
-keycloak_proxy_https: ""
-keycloak_proxy_no_proxy: ""
-keycloak_proxy_env: "{{ (['https_proxy=' ~ keycloak_proxy_https] + (['http_proxy=' ~ keycloak_proxy_http] if keycloak_proxy_http else []) + (['no_proxy=' ~ keycloak_proxy_no_proxy]
-  if keycloak_proxy_no_proxy else [])) if keycloak_proxy_enabled else [] }}"
-
 # Network
-keycloak_network_enabled: true
-keycloak_network_driver: "bridge"
-keycloak_network_internal: false
-
 # Network to join even when _network_enabled: false
+keycloak_network_enabled: true
 keycloak_network_name: "keycloak-internal"
 
 # Optional: expose this service directly on the host, bypassing Traefik.
@@ -35,10 +26,6 @@ keycloak_version: "26.7.2"
 # Autoupdate
 keycloak_autoupdate: true
 
-# Theme provider JARs are supplied by each inventory, not bundled with the role.
-keycloak_theme_jar_enabled: true
-keycloak_theme_jar_source: ""
-
 # Environment
 keycloak_domain: "login.nixpi.de"
 
@@ -47,6 +34,36 @@ keycloak_db_host: "postgresql-pod"
 keycloak_db_user: "keycloak"
 keycloak_db_password: ""
 
+# Copy arbitrary extra files/directories from the inventory into this role's
+# quadlet directory (relative to the <role>-pod dir).
+# Each entry: { src: <controller path>, dest: <relative target path>,
+#               mount: <optional container bind-mount path> }
+# Entries with a mount are staged (copied) and bind-mounted into the container.
+# Example (theme provider JAR mounted into the Keycloak providers dir):
+#   keycloak_extra_files:
+#     - src: "assets/keycloak/keycloak-theme.jar"
+#       dest: "config/keycloak-theme.jar"
+#       mount: "/opt/keycloak/providers/keycloak-theme.jar"
+#   keycloak_extra_dirs:
+#     - src: "assets/plugins/"
+#       dest: "assets/apps/plugins/"
+#       mount: "/opt/keycloak/providers/plugins"
+keycloak_extra_files: []
+keycloak_extra_dirs: []
+
+## Advanced
+# Proxy
+keycloak_proxy_enabled: false
+keycloak_proxy_http: ""
+keycloak_proxy_https: ""
+keycloak_proxy_no_proxy: ""
+keycloak_proxy_env: "{{ (['https_proxy=' ~ keycloak_proxy_https] + (['http_proxy=' ~ keycloak_proxy_http] if keycloak_proxy_http else []) + (['no_proxy=' ~ keycloak_proxy_no_proxy]
+  if keycloak_proxy_no_proxy else [])) if keycloak_proxy_enabled else [] }}"
+
+# Network driver
+keycloak_network_driver: "bridge"
+
+# Environment
 keycloak_environment_vars:
   # HTTP Configuration
   KC_HTTPS_PORT: "8443"

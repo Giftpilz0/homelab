@@ -1,135 +1,134 @@
 ---
 argument_specs:
-  # main.yaml entry point
   main:
-    short_description: The main entry point for the cilium role.
+    short_description: Install and configure the Cilium CNI on a Kubernetes cluster.
     options:
       cilium_version:
         type: str
         required: false
-        description: cilium_version
+        description: cilium Helm chart version.
 
       cilium_repo_url:
         type: str
         required: false
-        description: cilium_repo_url
+        description: cilium Helm repository URL.
 
       cilium_kubeconfig:
         type: str
         required: false
-        description: cilium_kubeconfig
+        description: path to kubeconfig for cluster access.
 
       cilium_config_kubeproxyreplacement:
         type: bool
         required: false
-        description: cilium_config_kubeproxyreplacement
+        description: enable kube-proxy replacement.
 
       cilium_config_k8sclientratelimit_qps:
         type: int
         required: false
-        description: cilium_config_k8sclientratelimit_qps
+        description: Kubernetes client QPS rate limit.
 
       cilium_config_k8sclientratelimit_burst:
         type: int
         required: false
-        description: cilium_config_k8sclientratelimit_burst
+        description: Kubernetes client burst rate limit.
 
       cilium_config_rolloutciliumpods:
         type: bool
         required: false
-        description: cilium_config_rolloutciliumpods
+        description: trigger pod rollout after config changes.
 
       cilium_config_l2announcements_enabled:
         type: bool
         required: false
-        description: cilium_config_l2announcements_enabled
+        description: enable L2 announcements.
 
       cilium_config_bgp_enabled:
         type: bool
         required: false
-        description: cilium_config_bgp_enabled
+        description: enable BGP peering.
 
       cilium_config_bgpcontrolplane_enabled:
         type: bool
         required: false
-        description: cilium_config_bgpcontrolplane_enabled
+        description: enable BGP control plane.
 
       cilium_config_ingresscontroller_enabled:
         type: bool
         required: false
-        description: cilium_config_ingresscontroller_enabled
+        description: enable cilium ingress controller.
 
       cilium_config_ingresscontroller_default:
         type: bool
         required: false
-        description: cilium_config_ingresscontroller_default
+        description: set cilium as default ingress controller.
 
       cilium_config_gatewayapi_enabled:
         type: bool
         required: false
-        description: cilium_config_gatewayapi_enabled
+        description: enable Gateway API support.
 
       cilium_config_hostfirewall_enabled:
         type: bool
         required: false
-        description: cilium_config_hostfirewall_enabled
+        description: enable host firewall.
 
       cilium_config_hubble_enabled:
         type: bool
         required: false
-        description: cilium_config_hubble_enabled
+        description: enable Hubble observability.
 
       cilium_config_hubble_relay_enabled:
         type: bool
         required: false
-        description: cilium_config_hubble_relay_enabled
+        description: enable Hubble Relay.
 
       cilium_config_hubble_relay_rolloutpods:
         type: bool
         required: false
-        description: cilium_config_hubble_relay_rolloutpods
+        description: trigger pod rollout for Hubble Relay.
 
       cilium_config_hubble_ui_enabled:
         type: bool
         required: false
-        description: cilium_config_hubble_ui_enabled
+        description: enable Hubble UI.
 
       cilium_config_hubble_ui_rolloutpods:
         type: bool
         required: false
-        description: cilium_config_hubble_ui_rolloutpods
+        description: trigger pod rollout for Hubble UI.
 
       cilium_config_ipam_mode:
         type: str
         required: false
-        description: cilium_config_ipam_mode
+        description: IPAM mode (e.g. cluster-pool).
 
       cilium_config_ipam_operator_clusterpoolipv4podcidrlist:
         type: list
         required: false
-        description: cilium_config_ipam_operator_clusterpoolipv4podcidrlist
+        description: list of IPv4 pod CIDRs for cluster-pool.
 
       cilium_config_ipv4_enabled:
         type: bool
         required: false
-        description: cilium_config_ipv4_enabled
+        description: enable IPv4 networking.
 
       cilium_config_ipv6_enabled:
         type: bool
         required: false
-        description: cilium_config_ipv6_enabled
+        description: enable IPv6 networking.
 
       cilium_config_egressgateway_enabled:
         type: bool
         required: false
-        description: cilium_config_egressgateway_enabled
+        description: enable egress gateway.
 
       cilium_config_operator_enabled:
         type: bool
         required: false
-        description: cilium_config_operator_enabled
+        description: deploy the cilium operator.
 
       cilium_config_operator_rolloutpods:
         type: bool
         required: false
-        description: cilium_config_operator_rolloutpods
+        description: trigger pod rollout for the operator.

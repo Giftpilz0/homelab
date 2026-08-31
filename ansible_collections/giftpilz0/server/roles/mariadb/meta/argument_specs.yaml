@@ -1,13 +1,12 @@
 ---
 argument_specs:
-  # main.yaml entry point
   main:
-    short_description: The main entry point for the mariadb role.
+    short_description: Install and manage the MariaDB server, databases, and users.
     options:
       mariadb_service_name:
         type: str
         required: false
-        description: mariadb_service_name
+        description: systemd service unit name.
 
       mariadb_service_state:
         type: str
@@ -17,12 +16,12 @@ argument_specs:
           - restarted
           - started
           - stopped
-        description: mariadb_service_state
+        description: desired state of the mariadb service.
 
       mariadb_service_enabled:
         type: bool
         required: false
-        description: mariadb_service_enabled
+        description: whether the mariadb service is enabled at boot.
 
       mariadb_package_state:
         type: str
@@ -31,28 +30,28 @@ argument_specs:
           - present
           - absent
           - latest
-        description: mariadb_package_state
+        description: desired state of mariadb packages.
 
       mariadb_package:
         type: list
         elements: str
         required: false
-        description: mariadb_package
+        description: list of packages to install.
 
       mariadb_database:
         type: str
         required: false
-        description: mariadb_database
+        description: database name to manage.
 
       mariadb_database_encoding:
         type: str
         required: false
-        description: mariadb_database_encoding
+        description: database character encoding (e.g. utf8mb4).
 
       mariadb_database_collation:
         type: str
         required: false
-        description: mariadb_database_collation
+        description: database collation (e.g. utf8mb4_unicode_ci).
 
       mariadb_database_state:
         type: str
@@ -61,27 +60,27 @@ argument_specs:
           - present
           - absent
           - skip
-        description: mariadb_database_state
+        description: desired state of the database.
 
       mariadb_user:
         type: str
         required: false
-        description: mariadb_user
+        description: database username.
 
       mariadb_user_password:
         type: str
         required: false
-        description: mariadb_user_password
+        description: database user password.
 
       mariadb_user_database:
         type: str
         required: false
-        description: mariadb_user_database
+        description: database to grant user access to.
 
       mariadb_user_privileges:
         type: str
         required: false
-        description: mariadb_user_privileges
+        description: SQL privileges string (e.g. ALL ON db.*).
 
       mariadb_user_state:
         type: str
@@ -90,17 +89,17 @@ argument_specs:
           - present
           - absent
           - skip
-        description: mariadb_user_state
+        description: desired state of the database user.
 
       mariadb_firewalld_zone:
         type: str
         required: false
-        description: mariadb_firewalld_zone
+        description: firewall zone for mariadb rules.
 
       mariadb_firewalld_service:
         type: str
         required: false
-        description: mariadb_firewalld_service
+        description: firewall service name.
 
       mariadb_firewalld_state:
         type: str
@@ -111,4 +110,4 @@ argument_specs:
           - enabled
           - disabled
           - skip
-        description: mariadb_firewalld_state
+        description: desired state of firewall rules.

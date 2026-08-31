@@ -1,0 +1,49 @@
+---
+argument_specs:
+  main:
+    short_description: Run a dynamic DNS updater that publishes the public IP to Cloudflare.
+    options:
+      cfdyndns_api_token:
+        type: str
+        required: false
+        description: Cloudflare API token for DNS updates.
+
+      cfdyndns_update_url:
+        type: str
+        required: false
+        description: DDNS update endpoint URL.
+
+      cfdyndns_cloudflare_trace_url:
+        type: str
+        required: false
+        description: Cloudflare trace URL for IP detection.
+
+      cfdyndns_script_path:
+        type: str
+        required: false
+        description: path to the IP updater script.
+
+      cfdyndns_state_dir:
+        type: str
+        required: false
+        description: directory for storing state files.
+
+      cfdyndns_last_ip_file:
+        type: str
+        required: false
+        description: path to the file storing the last known IP.
+
+      cfdyndns_check_interval:
+        type: str
+        required: false
+        description: interval between IP change checks.
+
+      cfdyndns_on_boot_delay:
+        type: str
+        required: false
+        description: delay before first check after boot.
+
+      cfdyndns_python_requests_package:
+        type: str
+        required: false
+        description: name of the Python requests package to install.

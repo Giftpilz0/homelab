@@ -460,7 +460,6 @@ resource "keycloak_authentication_execution" "browser_webauthn_form" {
   priority          = 60
 }
 
-
 resource "keycloak_authentication_subflow" "otp_default" {
   realm_id          = keycloak_realm.nixpi.id
   parent_flow_alias = keycloak_authentication_subflow._2fa_subflow.alias

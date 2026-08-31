@@ -1,20 +1,11 @@
 ---
+## Primary
+# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
-# Proxy
-mosquitto_proxy_enabled: false
-mosquitto_proxy_http: ""
-mosquitto_proxy_https: ""
-mosquitto_proxy_no_proxy: ""
-mosquitto_proxy_env: "{{ (['https_proxy=' ~ mosquitto_proxy_https] + (['http_proxy=' ~ mosquitto_proxy_http] if mosquitto_proxy_http else []) + (['no_proxy=' ~ mosquitto_proxy_no_proxy]
-  if mosquitto_proxy_no_proxy else [])) if mosquitto_proxy_enabled else [] }}"
-
 # Network
-mosquitto_network_enabled: true
-mosquitto_network_driver: "bridge"
-mosquitto_network_internal: false
-
 # Network to join even when _network_enabled: false
+mosquitto_network_enabled: true
 mosquitto_network_name: "mosquitto-internal"
 
 # Optional: expose this service directly on the host, bypassing Traefik.
@@ -36,8 +27,36 @@ mosquitto_version: "2.1-alpine"
 # Autoupdate
 mosquitto_autoupdate: true
 
-# Environment
-mosquitto_environment_vars: {}
-
 # Config
 mosquitto_pwfile_users: {}
+
+# Copy arbitrary extra files/directories from the inventory into this role's
+# quadlet directory (relative to the <role>-pod dir).
+# Each entry: { src: <controller path>, dest: <relative target path>,
+#               mount: <optional container bind-mount path> }
+# Entries with a mount are staged (copied) and bind-mounted into the container.
+# Example:
+#   mosquitto_extra_files:
+#     - src: "assets/keycloak/theme.jar"
+#       dest: "config/theme.jar"
+#       mount: "/containers/<container>/extra.jar"
+#   mosquitto_extra_dirs:
+#     - src: "assets/plugins/"
+#       dest: "assets/apps/plugins/"
+mosquitto_extra_files: []
+mosquitto_extra_dirs: []
+
+## Advanced
+# Proxy
+mosquitto_proxy_enabled: false
+mosquitto_proxy_http: ""
+mosquitto_proxy_https: ""
+mosquitto_proxy_no_proxy: ""
+mosquitto_proxy_env: "{{ (['https_proxy=' ~ mosquitto_proxy_https] + (['http_proxy=' ~ mosquitto_proxy_http] if mosquitto_proxy_http else []) + (['no_proxy=' ~ mosquitto_proxy_no_proxy]
+  if mosquitto_proxy_no_proxy else [])) if mosquitto_proxy_enabled else [] }}"
+
+# Network driver
+mosquitto_network_driver: "bridge"
+
+# Environment
+mosquitto_environment_vars: {}

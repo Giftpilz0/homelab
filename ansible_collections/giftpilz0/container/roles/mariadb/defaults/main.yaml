@@ -1,20 +1,11 @@
 ---
+## Primary
+# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
-# Proxy
-mariadb_proxy_enabled: false
-mariadb_proxy_http: ""
-mariadb_proxy_https: ""
-mariadb_proxy_no_proxy: ""
-mariadb_proxy_env: "{{ (['https_proxy=' ~ mariadb_proxy_https] + (['http_proxy=' ~ mariadb_proxy_http] if mariadb_proxy_http else []) + (['no_proxy=' ~ mariadb_proxy_no_proxy]
-  if mariadb_proxy_no_proxy else [])) if mariadb_proxy_enabled else [] }}"
-
 # Network
-mariadb_network_enabled: true
-mariadb_network_driver: "bridge"
-mariadb_network_internal: false
-
 # Network to join even when _network_enabled: false
+mariadb_network_enabled: true
 mariadb_network_name: "mariadb-internal"
 
 # Optional: expose this service directly on the host, bypassing Traefik.
@@ -41,12 +32,6 @@ mariadb_db_name: "mariadb"
 mariadb_db_user: "mariadb"
 mariadb_db_password: ""
 
-mariadb_environment_vars:
-  MARIADB_DATABASE: "{{ mariadb_db_name }}"
-  MARIADB_USER: "{{ mariadb_db_user }}"
-  MARIADB_PASSWORD: "{{ mariadb_db_password }}"
-  MARIADB_RANDOM_ROOT_PASSWORD: 1
-
 # Backup
 mariadb_backup_schedule_times: "03:00"
 mariadb_backup_retention_days: 7
@@ -56,3 +41,38 @@ mariadb_backup_compression: 6
 mariadb_cloudbeaver_enabled: false
 mariadb_cloudbeaver_admin_user: "cbadmin"
 mariadb_cloudbeaver_admin_password: ""
+
+# Copy arbitrary extra files/directories from the inventory into this role's
+# quadlet directory (relative to the <role>-pod dir).
+# Each entry: { src: <controller path>, dest: <relative target path>,
+#               mount: <optional container bind-mount path> }
+# Entries with a mount are staged (copied) and bind-mounted into the container.
+# Example:
+#   mariadb_extra_files:
+#     - src: "assets/keycloak/theme.jar"
+#       dest: "config/theme.jar"
+#       mount: "/containers/<container>/extra.jar"
+#   mariadb_extra_dirs:
+#     - src: "assets/plugins/"
+#       dest: "assets/apps/plugins/"
+mariadb_extra_files: []
+mariadb_extra_dirs: []
+
+## Advanced
+# Proxy
+mariadb_proxy_enabled: false
+mariadb_proxy_http: ""
+mariadb_proxy_https: ""
+mariadb_proxy_no_proxy: ""
+mariadb_proxy_env: "{{ (['https_proxy=' ~ mariadb_proxy_https] + (['http_proxy=' ~ mariadb_proxy_http] if mariadb_proxy_http else []) + (['no_proxy=' ~ mariadb_proxy_no_proxy]
+  if mariadb_proxy_no_proxy else [])) if mariadb_proxy_enabled else [] }}"
+
+# Network driver
+mariadb_network_driver: "bridge"
+
+# Environment
+mariadb_environment_vars:
+  MARIADB_DATABASE: "{{ mariadb_db_name }}"
+  MARIADB_USER: "{{ mariadb_db_user }}"
+  MARIADB_PASSWORD: "{{ mariadb_db_password }}"
+  MARIADB_RANDOM_ROOT_PASSWORD: 1

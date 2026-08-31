@@ -27,16 +27,8 @@ postgresql_cloudbeaver_admin_password: "cbadmin123"
 ######################################
 ### giftpilz0.container.keycloak
 
-# Proxy
-keycloak_proxy_enabled: false
-keycloak_proxy_http: ""
-keycloak_proxy_https: ""
-keycloak_proxy_no_proxy: ""
-
 # Network
 keycloak_network_enabled: true
-keycloak_network_driver: "bridge"
-keycloak_network_internal: false
 
 # Network to join even when _network_enabled: false
 keycloak_network_name: "keycloak-internal"
@@ -48,8 +40,12 @@ keycloak_version: "26.7.2"
 # Autoupdate
 keycloak_autoupdate: true
 
-# theme JAR
-keycloak_theme_jar_source: "{{ inventory_dir | dirname }}/host_vars/{{ inventory_hostname }}/assets/keycloak/keycloak-theme.jar"
+# Copy the keycloakify theme.
+# The container mounts it into the Keycloak providers dir via the mount field.
+keycloak_extra_files:
+  - src: "{{ inventory_dir | dirname }}/host_vars/{{ inventory_hostname }}/assets/keycloak/keycloak-theme.jar"
+    dest: "config/keycloak-theme.jar"
+    mount: "/opt/keycloak/providers/keycloak-theme.jar"
 
 # Environment
 keycloak_domain: "login.nixpi.de"
@@ -97,12 +93,6 @@ keycloak_environment_vars:
 
 ######################################
 ### giftpilz0.container.traefik
-
-# Proxy
-traefik_proxy_enabled: false
-traefik_proxy_http: ""
-traefik_proxy_https: ""
-traefik_proxy_no_proxy: ""
 
 # Version
 # renovate: datasource=docker depName=traefik

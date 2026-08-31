@@ -29,5 +29,8 @@ Volume=authentik-media.volume:/media
 Volume=authentik-templates.volume:/templates
 Volume=authentik-certs.volume:/certs
 
+{% for item in (authentik_extra_files | default([]) + authentik_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume=%h/.config/containers/systemd/authentik-pod/{{ item.dest }}:{{ item.mount }}:Z
+{% endfor %}
 [Service]
 Restart=always

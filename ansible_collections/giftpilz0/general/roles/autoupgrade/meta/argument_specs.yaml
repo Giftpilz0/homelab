@@ -1,12 +1,12 @@
 ---
 argument_specs:
   main:
-    short_description: The main entry point for the autoupgrade role.
+    short_description: Configure automatic package upgrades with dnf-automatic.
     options:
       autoupgrade_service_name:
         type: str
         required: false
-        description: autoupgrade_service_name
+        description: systemd service or timer unit name.
 
       autoupgrade_service_state:
         type: str
@@ -16,12 +16,12 @@ argument_specs:
           - restarted
           - started
           - stopped
-        description: autoupgrade_service_state
+        description: desired state of the autoupgrade service.
 
       autoupgrade_service_enabled:
         type: bool
         required: false
-        description: autoupgrade_service_enabled
+        description: whether the autoupgrade service is enabled at boot.
 
       autoupgrade_package_state:
         type: str
@@ -30,53 +30,53 @@ argument_specs:
           - present
           - absent
           - latest
-        description: autoupgrade_package_state
+        description: desired state of autoupgrade packages.
 
-      autoupgrade_package:
+      autoupgrade_package_list:
         type: list
         elements: str
         required: false
-        description: autoupgrade_package
+        description: list of packages to install for automatic upgrades.
 
       autoupgrade_config_path:
         type: str
         required: false
-        description: autoupgrade_config_path
+        description: path to the autoupgrade configuration file.
 
-      autoupgrade_config_auto_apply:
+      autoupgrade_auto_apply:
         type: bool
         required: false
-        description: autoupgrade_config_auto_apply
+        description: whether to automatically apply package upgrades.
 
-      autoupgrade_config_upgrade_type:
+      autoupgrade_upgrade_type:
         type: str
         required: false
         choices:
           - default
           - security
-        description: autoupgrade_config_upgrade_type
+        description: type of upgrades to apply.
 
-      autoupgrade_config_reboot:
+      autoupgrade_reboot:
         type: str
         required: false
         choices:
           - never
           - when-changed
           - when-needed
-        description: autoupgrade_config_reboot
+        description: reboot behavior after upgrades.
 
       autoupgrade_blacklist:
         type: list
         elements: str
         required: false
-        description: autoupgrade_blacklist
+        description: list of packages excluded from automatic upgrades.
 
       autoupgrade_mail_report:
         type: str
         required: false
-        description: autoupgrade_mail_report (e.g. "on-change", "always", "only-on-error")
+        description: email reporting frequency (e.g. on-change, always, only-on-error).
 
-      autoupgrade_maily:
+      autoupgrade_mail:
         type: str
         required: false
-        description: autoupgrade_mail_report
+        description: recipient email address for upgrade reports.

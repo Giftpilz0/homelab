@@ -73,6 +73,30 @@
   with_community.general.filetree: "templates/"
   when: item.state == 'file'
 
+- name: "Vaultwarden: Copy extra files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/vaultwarden-pod/{{ item.dest }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: preserve
+  loop: "{{ vaultwarden_extra_files | default([]) }}"
+  when: "vaultwarden_extra_files | default([]) | length > 0"
+
+- name: "Vaultwarden: Copy extra directories"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    src: "{{ item.src }}/"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/vaultwarden-pod/{{ item.dest }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: preserve
+  loop: "{{ vaultwarden_extra_dirs | default([]) }}"
+  when: "vaultwarden_extra_dirs | default([]) | length > 0"
+
 - name: "Vaultwarden: systemd daemon reload"
   become: true
   become_user: "{{ podman_user }}"

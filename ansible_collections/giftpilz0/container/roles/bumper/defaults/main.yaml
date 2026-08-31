@@ -1,20 +1,11 @@
 ---
+## Primary
+# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
-# Proxy
-bumper_proxy_enabled: false
-bumper_proxy_http: ""
-bumper_proxy_https: ""
-bumper_proxy_no_proxy: ""
-bumper_proxy_env: "{{ (['https_proxy=' ~ bumper_proxy_https] + (['http_proxy=' ~ bumper_proxy_http] if bumper_proxy_http else []) + (['no_proxy=' ~ bumper_proxy_no_proxy]
-  if bumper_proxy_no_proxy else [])) if bumper_proxy_enabled else [] }}"
-
 # Network
-bumper_network_enabled: true
-bumper_network_driver: "bridge"
-bumper_network_internal: false
-
 # Network to join even when _network_enabled: false
+bumper_network_enabled: true
 bumper_network_name: "bumper-internal"
 
 # Bind to primary interface so bumper ports are externally reachable (no traefik).
@@ -47,3 +38,31 @@ bumper_environment_vars:
   XMPP_LISTEN_PORT_TLS: 5223
   DEBUG_BUMPER_VERBOSE: 2
   DEBUG_BUMPER_LEVEL: "INFO"
+
+# Copy arbitrary extra files/directories from the inventory into this role's
+# quadlet directory (relative to the <role>-pod dir).
+# Each entry: { src: <controller path>, dest: <relative target path>,
+#               mount: <optional container bind-mount path> }
+# Entries with a mount are staged (copied) and bind-mounted into the container.
+# Example:
+#   bumper_extra_files:
+#     - src: "assets/keycloak/theme.jar"
+#       dest: "config/theme.jar"
+#       mount: "/containers/<container>/extra.jar"
+#   bumper_extra_dirs:
+#     - src: "assets/plugins/"
+#       dest: "assets/apps/plugins/"
+bumper_extra_files: []
+bumper_extra_dirs: []
+
+## Advanced
+# Proxy
+bumper_proxy_enabled: false
+bumper_proxy_http: ""
+bumper_proxy_https: ""
+bumper_proxy_no_proxy: ""
+bumper_proxy_env: "{{ (['https_proxy=' ~ bumper_proxy_https] + (['http_proxy=' ~ bumper_proxy_http] if bumper_proxy_http else []) + (['no_proxy=' ~ bumper_proxy_no_proxy]
+  if bumper_proxy_no_proxy else [])) if bumper_proxy_enabled else [] }}"
+
+# Network driver
+bumper_network_driver: "bridge"

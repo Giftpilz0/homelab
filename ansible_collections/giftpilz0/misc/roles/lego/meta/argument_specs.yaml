@@ -1,0 +1,108 @@
+---
+argument_specs:
+  main:
+    short_description: Issue and renew ACME (Let's Encrypt) certificates with lego.
+    options:
+      lego_keytype:
+        type: str
+        required: false
+        description: certificate key type (e.g. rsa4096).
+
+      lego_cert_path:
+        type: str
+        required: false
+        description: directory to store certificates.
+
+      lego_acme_email:
+        type: str
+        required: false
+        description: ACME account email address.
+
+      lego_dns_resolver:
+        type: str
+        required: false
+        description: DNS resolver for domain validation.
+
+      lego_acme_provider:
+        type: str
+        required: false
+        description: ACME DNS challenge provider (e.g. cloudflare).
+
+      lego_cloudflare_api_key:
+        type: str
+        required: false
+        description: Cloudflare API key for DNS challenge.
+
+      lego_manager_script_path:
+        type: str
+        required: false
+        description: path to the certificate management script.
+
+      lego_acme_domains:
+        type: str
+        required: false
+        description: comma-separated list of domains for the certificate.
+
+      lego_service_state:
+        type: str
+        required: false
+        choices:
+          - reloaded
+          - restarted
+          - started
+          - stopped
+        description: desired state of the lego services.
+
+      lego_service_enabled:
+        type: bool
+        required: false
+        description: whether lego services are enabled at boot.
+
+      lego_service_name:
+        type: list
+        elements: str
+        required: false
+        description: systemd service and timer unit names.
+
+      lego_bin_state:
+        type: str
+        required: false
+        choices:
+          - present
+          - skip
+        description: desired state of the lego binary.
+
+      lego_url:
+        type: str
+        required: false
+        description: download URL for the lego binary.
+
+      lego_arch:
+        type: str
+        required: false
+        description: target architecture (e.g. amd64, arm64).
+
+      lego_tag:
+        type: str
+        required: false
+        description: release version tag.
+
+      lego_path:
+        type: str
+        required: false
+        description: installation directory for the binary.
+
+      lego_package:
+        type: list
+        elements: str
+        required: false
+        description: list of dependencies to install.
+
+      lego_package_state:
+        type: str
+        required: false
+        choices:
+          - present
+          - absent
+          - latest
+        description: desired state of dependency packages.

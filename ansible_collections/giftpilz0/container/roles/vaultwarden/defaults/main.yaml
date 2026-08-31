@@ -1,20 +1,11 @@
 ---
+## Primary
+# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
-# Proxy
-vaultwarden_proxy_enabled: false
-vaultwarden_proxy_http: ""
-vaultwarden_proxy_https: ""
-vaultwarden_proxy_no_proxy: ""
-vaultwarden_proxy_env: "{{ (['https_proxy=' ~ vaultwarden_proxy_https] + (['http_proxy=' ~ vaultwarden_proxy_http] if vaultwarden_proxy_http else []) + (['no_proxy='
-  ~ vaultwarden_proxy_no_proxy] if vaultwarden_proxy_no_proxy else [])) if vaultwarden_proxy_enabled else [] }}"
-
 # Network
-vaultwarden_network_enabled: true
-vaultwarden_network_driver: "bridge"
-vaultwarden_network_internal: false
-
 # Network to join even when _network_enabled: false
+vaultwarden_network_enabled: true
 vaultwarden_network_name: "vaultwarden-internal"
 
 # Optional: expose this service directly on the host, bypassing Traefik.
@@ -40,3 +31,31 @@ vaultwarden_environment_vars:
   DOMAIN: "{{ vaultwarden_domain }}"
   ADMIN_TOKEN: "{{ vaultwarden_admin_token }}"
   ROCKET_PORT: "80"
+
+# Copy arbitrary extra files/directories from the inventory into this role's
+# quadlet directory (relative to the <role>-pod dir).
+# Each entry: { src: <controller path>, dest: <relative target path>,
+#               mount: <optional container bind-mount path> }
+# Entries with a mount are staged (copied) and bind-mounted into the container.
+# Example:
+#   vaultwarden_extra_files:
+#     - src: "assets/keycloak/theme.jar"
+#       dest: "config/theme.jar"
+#       mount: "/containers/<container>/extra.jar"
+#   vaultwarden_extra_dirs:
+#     - src: "assets/plugins/"
+#       dest: "assets/apps/plugins/"
+vaultwarden_extra_files: []
+vaultwarden_extra_dirs: []
+
+## Advanced
+# Proxy
+vaultwarden_proxy_enabled: false
+vaultwarden_proxy_http: ""
+vaultwarden_proxy_https: ""
+vaultwarden_proxy_no_proxy: ""
+vaultwarden_proxy_env: "{{ (['https_proxy=' ~ vaultwarden_proxy_https] + (['http_proxy=' ~ vaultwarden_proxy_http] if vaultwarden_proxy_http else []) + (['no_proxy='
+  ~ vaultwarden_proxy_no_proxy] if vaultwarden_proxy_no_proxy else [])) if vaultwarden_proxy_enabled else [] }}"
+
+# Network driver
+vaultwarden_network_driver: "bridge"

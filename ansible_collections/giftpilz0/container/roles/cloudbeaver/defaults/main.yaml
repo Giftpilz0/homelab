@@ -1,21 +1,12 @@
 ---
+## Primary
+# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
-# Proxy
-cloudbeaver_proxy_enabled: false
-cloudbeaver_proxy_http: ""
-cloudbeaver_proxy_https: ""
-cloudbeaver_proxy_no_proxy: ""
-cloudbeaver_proxy_env: "{{ (['https_proxy=' ~ cloudbeaver_proxy_https] + (['http_proxy=' ~ cloudbeaver_proxy_http] if cloudbeaver_proxy_http else []) + (['no_proxy='
-  ~ cloudbeaver_proxy_no_proxy] if cloudbeaver_proxy_no_proxy else [])) if cloudbeaver_proxy_enabled else [] }}"
-
 # Network
-cloudbeaver_network_enabled: true
-cloudbeaver_network_driver: "bridge"
-cloudbeaver_network_internal: false
-
 # When deployed standalone, CloudBeaver uses its own network. When a database
 # network is supplied, CloudBeaver uses that network instead.
+cloudbeaver_network_enabled: true
 cloudbeaver_network_name: "cloudbeaver-internal"
 cloudbeaver_db_network_name: ""
 
@@ -30,6 +21,7 @@ cloudbeaver_port_map_enabled: true
 cloudbeaver_port_map:
   - "8978:8978"
 
+# Version
 # renovate: datasource=docker depName=dbeaver/cloudbeaver
 cloudbeaver_version: "26.1.5"
 
@@ -40,6 +32,42 @@ cloudbeaver_server_name: "CloudBeaver"
 cloudbeaver_admin_user: "cbadmin"
 cloudbeaver_admin_password: ""
 
+# Database connection (passed by parent role)
+cloudbeaver_db_type: "postgresql"
+cloudbeaver_db_host: "localhost"
+cloudbeaver_db_port: "5432"
+cloudbeaver_db_name: ""
+cloudbeaver_db_user: ""
+cloudbeaver_db_password: ""
+
+# Copy arbitrary extra files/directories from the inventory into this role's
+# quadlet directory (relative to the <role>-pod dir).
+# Each entry: { src: <controller path>, dest: <relative target path>,
+#               mount: <optional container bind-mount path> }
+# Entries with a mount are staged (copied) and bind-mounted into the container.
+# Example:
+#   cloudbeaver_extra_files:
+#     - src: "assets/keycloak/theme.jar"
+#       dest: "config/theme.jar"
+#       mount: "/containers/<container>/extra.jar"
+#   cloudbeaver_extra_dirs:
+#     - src: "assets/plugins/"
+#       dest: "assets/apps/plugins/"
+cloudbeaver_extra_files: []
+cloudbeaver_extra_dirs: []
+
+## Advanced
+# Proxy
+cloudbeaver_proxy_enabled: false
+cloudbeaver_proxy_http: ""
+cloudbeaver_proxy_https: ""
+cloudbeaver_proxy_no_proxy: ""
+cloudbeaver_proxy_env: "{{ (['https_proxy=' ~ cloudbeaver_proxy_https] + (['http_proxy=' ~ cloudbeaver_proxy_http] if cloudbeaver_proxy_http else []) + (['no_proxy='
+  ~ cloudbeaver_proxy_no_proxy] if cloudbeaver_proxy_no_proxy else [])) if cloudbeaver_proxy_enabled else [] }}"
+
+# Network driver
+cloudbeaver_network_driver: "bridge"
+
 # Environment
 cloudbeaver_environment_vars:
   CB_SERVER_NAME: "{{ cloudbeaver_server_name }}"
@@ -48,11 +76,3 @@ cloudbeaver_environment_vars:
   CLOUDBEAVER_APP_ANONYMOUS_ACCESS_ENABLED: "false"
   CLOUDBEAVER_APP_SUPPORTS_CUSTOM_CONNECTIONS: "true"
   CLOUDBEAVER_APP_PUBLIC_CREDENTIALS_SAVE_ENABLED: "true"
-
-# Database connection (passed by parent role)
-cloudbeaver_db_type: "postgresql"
-cloudbeaver_db_host: "localhost"
-cloudbeaver_db_port: "5432"
-cloudbeaver_db_name: ""
-cloudbeaver_db_user: ""
-cloudbeaver_db_password: ""

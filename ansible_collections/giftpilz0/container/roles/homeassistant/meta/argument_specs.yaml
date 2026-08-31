@@ -1,0 +1,107 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy Home Assistant as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        default: "{{ ansible_user }}"
+        description: system user for rootless podman operations.
+
+      homeassistant_proxy_enabled:
+        type: bool
+        required: false
+        default: false
+        description: enable HTTP proxy for image pulls.
+
+      homeassistant_proxy_http:
+        type: str
+        required: false
+        default: ""
+        description: HTTP proxy URL.
+
+      homeassistant_proxy_https:
+        type: str
+        required: false
+        default: ""
+        description: HTTPS proxy URL.
+
+      homeassistant_proxy_no_proxy:
+        type: str
+        required: false
+        default: ""
+        description: comma-separated list of proxy exclusions.
+
+      homeassistant_network_enabled:
+        type: bool
+        required: false
+        default: true
+        description: create and manage the podman network.
+
+      homeassistant_network_driver:
+        type: str
+        required: false
+        default: bridge
+        description: podman network driver.
+
+      homeassistant_network_name:
+        type: str
+        required: false
+        default: homeassistant-internal
+        description: podman network name.
+
+      homeassistant_bind_ip:
+        type: str
+        required: false
+        default: "127.0.0.1"
+        description: host IP to bind exposed ports to.
+
+      homeassistant_port_map_enabled:
+        type: bool
+        required: false
+        default: true
+        description: expose container ports on the host.
+
+      homeassistant_port_map:
+        type: list
+        elements: str
+        required: false
+        default:
+          - "8123:8123"
+        description: host:container port mappings.
+
+      homeassistant_version:
+        type: str
+        required: false
+        default: "2026.8.3"
+        description: container image version.
+
+      homeassistant_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable podman auto-update for this container.
+
+      homeassistant_environment_vars:
+        type: dict
+        required: false
+        default:
+          TZ: Europe/Berlin
+        description: extra environment variables injected into the container.
+
+      homeassistant_extra_files:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: list of arbitrary files to copy into the role quadlet directory. Each entry has src (controller path), dest (relative path inside the pod
+          quadlet dir) and optional mount (container bind-mount path).
+
+      homeassistant_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: list of arbitrary directories to copy into the role quadlet directory. Each entry has src (controller directory), dest (relative target
+          directory inside the pod quadlet dir) and optional mount (container bind-mount path).

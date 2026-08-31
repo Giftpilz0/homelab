@@ -27,5 +27,8 @@ Volume=%h/.config/containers/systemd/mosquitto-pod/config/passwd:/mosquitto/conf
 Volume=%h/.config/containers/systemd/mosquitto-pod/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:Z
 Volume=mosquitto-data.volume:/mosquitto/data
 
+{% for item in (mosquitto_extra_files | default([]) + mosquitto_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume=%h/.config/containers/systemd/mosquitto-pod/{{ item.dest }}:{{ item.mount }}:Z
+{% endfor %}
 [Service]
 Restart=always

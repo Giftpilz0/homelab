@@ -1,20 +1,11 @@
 ---
+## Primary
+# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
-# Proxy
-gitlab_runner_proxy_enabled: false
-gitlab_runner_proxy_http: ""
-gitlab_runner_proxy_https: ""
-gitlab_runner_proxy_no_proxy: ""
-gitlab_runner_proxy_env: "{{ (['https_proxy=' ~ gitlab_runner_proxy_https] + (['http_proxy=' ~ gitlab_runner_proxy_http] if gitlab_runner_proxy_http else []) + (['no_proxy='
-  ~ gitlab_runner_proxy_no_proxy] if gitlab_runner_proxy_no_proxy else [])) if gitlab_runner_proxy_enabled else [] }}"
-
 # Network
-gitlab_runner_network_enabled: true
-gitlab_runner_network_driver: "bridge"
-gitlab_runner_network_internal: false
-
 # Network to join even when _network_enabled: false
+gitlab_runner_network_enabled: true
 gitlab_runner_network_name: "gitlab-runner-internal"
 
 # Versions
@@ -24,11 +15,39 @@ gitlab_runner_version: "v19.3.1"
 # Autoupdate
 gitlab_runner_autoupdate: true
 
-# Environment
-gitlab_runner_environment_vars: {}
-
 # Config
 gitlab_runner_concurrent: 1
 gitlab_runner_name: ""
 gitlab_runner_url: ""
 gitlab_runner_token: ""
+
+# Copy arbitrary extra files/directories from the inventory into this role's
+# quadlet directory (relative to the <role>-pod dir).
+# Each entry: { src: <controller path>, dest: <relative target path>,
+#               mount: <optional container bind-mount path> }
+# Entries with a mount are staged (copied) and bind-mounted into the container.
+# Example:
+#   gitlab_runner_extra_files:
+#     - src: "assets/keycloak/theme.jar"
+#       dest: "config/theme.jar"
+#       mount: "/containers/<container>/extra.jar"
+#   gitlab_runner_extra_dirs:
+#     - src: "assets/plugins/"
+#       dest: "assets/apps/plugins/"
+gitlab_runner_extra_files: []
+gitlab_runner_extra_dirs: []
+
+## Advanced
+# Proxy
+gitlab_runner_proxy_enabled: false
+gitlab_runner_proxy_http: ""
+gitlab_runner_proxy_https: ""
+gitlab_runner_proxy_no_proxy: ""
+gitlab_runner_proxy_env: "{{ (['https_proxy=' ~ gitlab_runner_proxy_https] + (['http_proxy=' ~ gitlab_runner_proxy_http] if gitlab_runner_proxy_http else []) + (['no_proxy='
+  ~ gitlab_runner_proxy_no_proxy] if gitlab_runner_proxy_no_proxy else [])) if gitlab_runner_proxy_enabled else [] }}"
+
+# Network driver
+gitlab_runner_network_driver: "bridge"
+
+# Environment
+gitlab_runner_environment_vars: {}

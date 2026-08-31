@@ -1,13 +1,12 @@
 ---
 argument_specs:
-  # main.yaml entry point
   main:
-    short_description: The main entry point for the httpd role.
+    short_description: Install and configure the Apache HTTP server.
     options:
       httpd_service_name:
         type: str
         required: false
-        description: httpd_service_name
+        description: systemd service unit name.
 
       httpd_service_state:
         type: str
@@ -17,12 +16,12 @@ argument_specs:
           - restarted
           - started
           - stopped
-        description: httpd_service_state
+        description: desired state of the httpd service.
 
       httpd_service_enabled:
         type: bool
         required: false
-        description: httpd_service_enabled
+        description: whether the httpd service is enabled at boot.
 
       httpd_package_state:
         type: str
@@ -31,23 +30,23 @@ argument_specs:
           - present
           - absent
           - latest
-        description: httpd_package_state
+        description: desired state of httpd packages.
 
       httpd_package:
         type: list
         elements: str
         required: false
-        description: httpd_package
+        description: list of packages to install.
 
       httpd_firewalld_zone:
         type: str
         required: false
-        description: httpd_firewalld_zone
+        description: firewall zone for httpd rules.
 
       httpd_firewalld_service:
         type: str
         required: false
-        description: httpd_firewalld_service
+        description: firewall service name.
 
       httpd_firewalld_state:
         type: str
@@ -58,4 +57,4 @@ argument_specs:
           - enabled
           - disabled
           - skip
-        description: httpd_firewalld_state
+        description: desired state of firewall rules.

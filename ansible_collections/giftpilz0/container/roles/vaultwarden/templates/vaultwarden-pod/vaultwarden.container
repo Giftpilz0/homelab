@@ -25,5 +25,8 @@ Environment={{ env_var }}
 
 Volume=vaultwarden-data.volume:/data
 
+{% for item in (vaultwarden_extra_files | default([]) + vaultwarden_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume=%h/.config/containers/systemd/vaultwarden-pod/{{ item.dest }}:{{ item.mount }}:Z
+{% endfor %}
 [Service]
 Restart=always

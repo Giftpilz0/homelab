@@ -1,0 +1,90 @@
+---
+argument_specs:
+  main:
+    short_description: Install and configure Snapper filesystem snapshots.
+    options:
+      snapper_configs:
+        type: list
+        elements: dict
+        required: false
+        options:
+          name:
+            type: str
+            required: false
+            description: configuration name.
+          path:
+            type: str
+            required: false
+            description: subvolume path to manage.
+          allow_users:
+            type: str
+            required: false
+            description: comma-separated list of users allowed to create snapshots.
+          sync_acl:
+            type: str
+            required: false
+            choices:
+              - "yes"
+              - "no"
+            description: synchronize ACLs from subvolume to .snapshots.
+          timeline_create:
+            type: str
+            required: false
+            choices:
+              - "yes"
+              - "no"
+            description: enable timeline snapshots.
+          timeline_cleanup:
+            type: str
+            required: false
+            choices:
+              - "yes"
+              - "no"
+            description: enable automatic timeline cleanup.
+          timeline_min_age:
+            type: int
+            required: false
+            description: minimum age in seconds between snapshots.
+          timeline_limit_hourly:
+            type: int
+            required: false
+            description: number of hourly snapshots to keep.
+          timeline_limit_daily:
+            type: int
+            required: false
+            description: number of daily snapshots to keep.
+          timeline_limit_weekly:
+            type: int
+            required: false
+            description: number of weekly snapshots to keep.
+          timeline_limit_monthly:
+            type: int
+            required: false
+            description: number of monthly snapshots to keep.
+          timeline_limit_yearly:
+            type: int
+            required: false
+            description: number of yearly snapshots to keep.
+          number_cleanup:
+            type: str
+            required: false
+            choices:
+              - "yes"
+              - "no"
+            description: enable number-based cleanup.
+        description: list of snapper configurations to create.
+
+      snapper_enable_timeline_timer:
+        type: bool
+        required: false
+        description: enable the snapper timeline timer.
+
+      snapper_enable_cleanup_timer:
+        type: bool
+        required: false
+        description: enable the snapper cleanup timer.
+
+      snapper_add_to_fstab:
+        type: bool
+        required: false
+        description: mount .snapshots subvolumes via fstab.
