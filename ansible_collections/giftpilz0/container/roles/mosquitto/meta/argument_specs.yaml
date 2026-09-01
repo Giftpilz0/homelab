@@ -76,7 +76,29 @@ argument_specs:
         type: str
         required: false
         default: "2.1-alpine"
-        description: container image version.
+        description: Mosquitto version identifier used in the custom image tag.
+
+      mosquitto_go_auth_version:
+        type: str
+        required: false
+        default: "3.5.0"
+        description: mosquitto-go-auth release used to build the image.
+
+      mosquitto_image:
+        type: str
+        required: false
+        description: custom image name and tag.
+
+      mosquitto_image_name:
+        type: str
+        required: false
+        default: "localhost/mosquitto-custom"
+        description: custom image name.
+
+      mosquitto_image_tag:
+        type: str
+        required: false
+        description: custom image tag.
 
       mosquitto_autoupdate:
         type: bool
@@ -95,6 +117,39 @@ argument_specs:
         required: false
         default: {}
         description: map of username to password_hash for the password file.
+
+      mosquitto_users:
+        type: dict
+        required: false
+        default: {}
+        description: map of username to clear-text password; hashes are generated during deployment.
+
+      mosquitto_acl_users:
+        type: dict
+        required: false
+        default: {}
+        description: map of usernames to ACL rule objects or raw topic rules.
+
+      mosquitto_acl_patterns:
+        type: list
+        elements: dict
+        required: false
+        default:
+          - access: readwrite
+            topic: "%u/#"
+        description: ACL pattern rules using %u and %c substitutions.
+
+      mosquitto_acl_rules:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: raw Mosquitto ACL lines for advanced rules.
+
+      mosquitto_go_auth_options:
+        type: dict
+        required: false
+        description: map passed through as auth_opt_* go-auth settings.
 
       mosquitto_extra_files:
         type: list

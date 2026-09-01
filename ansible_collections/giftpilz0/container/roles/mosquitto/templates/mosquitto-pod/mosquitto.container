@@ -3,7 +3,7 @@ Description=Mosquitto Container
 
 [Container]
 ContainerName=mosquitto
-Image=docker.io/library/eclipse-mosquitto:{{ mosquitto_version }}
+Image={{ mosquitto_image }}
 
 Pod=mosquitto.pod
 
@@ -24,6 +24,7 @@ Environment={{ env_var }}
 {% endif %}
 
 Volume=%h/.config/containers/systemd/mosquitto-pod/config/passwd:/mosquitto/config/passwd:Z
+Volume=%h/.config/containers/systemd/mosquitto-pod/config/acl:/mosquitto/config/acl:Z
 Volume=%h/.config/containers/systemd/mosquitto-pod/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:Z
 Volume=mosquitto-data.volume:/mosquitto/data
 
