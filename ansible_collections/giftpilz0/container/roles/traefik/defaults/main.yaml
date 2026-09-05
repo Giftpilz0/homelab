@@ -15,7 +15,7 @@ traefik_unprivileged_port_start: 80
 
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.11"
+traefik_version: "v3.7.13"
 
 # Autoupdate
 traefik_autoupdate: true

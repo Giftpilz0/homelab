@@ -16,7 +16,7 @@ monitoring_stack_garage_version: "v2.3.0"
 # renovate: datasource=docker depName=grafana/mimir
 monitoring_stack_mimir_version: "3.2.0"
 # renovate: datasource=docker depName=grafana/loki
-monitoring_stack_loki_version: "3.7.6"
+monitoring_stack_loki_version: "3.7.7"
 # renovate: datasource=docker depName=persesdev/perses
 monitoring_stack_perses_version: "v0.54.0-rc.1"
 
@@ -58,7 +58,7 @@ monitoring_stack_perses_environment_vars: {}
 
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.11"
+traefik_version: "v3.7.13"
 
 # Rootless ports
 traefik_unprivileged_port_start: 80

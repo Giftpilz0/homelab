@@ -37,7 +37,7 @@ opencloud_collabora_enabled: false
 
 # Versions
 # renovate: datasource=docker depName=collabora/code
-opencloud_collabora_version: "26.04.3.1.1"
+opencloud_collabora_version: "26.04.3.2.1"
 
 opencloud_collabora_url: ""
 opencloud_collabora_admin_username: "admin"

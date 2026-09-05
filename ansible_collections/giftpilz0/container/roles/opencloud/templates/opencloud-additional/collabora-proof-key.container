@@ -3,7 +3,7 @@ Description=Generate Collabora WOPI Proof Key
 
 [Container]
 ContainerName=collabora-proof-key
-Image=docker.io/alpine/openssl:3.5.7
+Image=docker.io/alpine/openssl:3.5.8
 {% if opencloud_collabora_proof_key_entrypoint %}
 Entrypoint={{ opencloud_collabora_proof_key_entrypoint }}
 {% else %}
