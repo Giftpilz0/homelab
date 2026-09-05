@@ -1,7 +1,7 @@
 ---
 argument_specs:
   main:
-    short_description: Configure automatic package upgrades with dnf-automatic.
+    short_description: Configure automatic package upgrades on Debian or Red Hat systems.
     options:
       autoupgrade_service_name:
         type: str
@@ -57,9 +57,15 @@ argument_specs:
         description: type of upgrades to apply.
 
       autoupgrade_reboot:
-        type: bool
+        type: str
         required: false
-        description: reboot behavior after upgrades.
+        choices:
+          - "false"
+          - "true"
+          - never
+          - when-changed
+          - when-needed
+        description: reboot policy; use false or true on Debian and never, when-changed, or when-needed on Red Hat.
 
       autoupgrade_blacklist:
         type: list
