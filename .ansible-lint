@@ -1,6 +1,7 @@
 ---
 exclude_paths:
   - secrets.yaml
+  - monitoring-secrets.yaml
 
 skip_list:
   - ignore-errors

@@ -58,6 +58,21 @@ networks = {
       "misc" = {}
     }
   }
+
+  "dmz" = {
+    node_name   = "pve"
+    bridge_name = "dmz"
+    vlan_aware  = true
+    comment     = "Bridge for dmz networks"
+    ports       = []
+
+    network = "192.168.55.10/24"
+    gateway = "192.168.55.1"
+
+    sdn_vlan_zone = {
+      "dmz" = {}
+    }
+  }
 }
 
 # VMs Configuration
@@ -812,6 +827,90 @@ vms = {
 
       dns = {
         servers = ["192.168.60.1"]
+      }
+    }
+
+    serial_devices = []
+  }
+
+  "acme" = {
+    node_name       = "pve"
+    vm_id           = 4008
+    name            = "acme"
+    description     = "acme Server"
+    tags            = ["container", "docker", "production"]
+    started         = true
+    on_boot         = true
+    template        = false
+    stop_on_destroy = false
+    machine         = "q35"
+    bios            = "ovmf"
+    scsi_hardware   = "virtio-scsi-single"
+
+    clone = {
+      vm_id     = 100
+      node_name = "pve"
+      full      = true
+    }
+
+    agent = {
+      enabled = true
+      trim    = false
+      type    = "virtio"
+    }
+
+    cpu = {
+      cores   = 1
+      sockets = 1
+      type    = "host"
+    }
+
+    memory = {
+      dedicated = 1024
+    }
+
+    operating_system = {
+      type = "l26"
+    }
+
+    disks = [
+      {
+        datastore_id = "local-lvm"
+        file_format  = "raw"
+        interface    = "scsi0"
+        iothread     = true
+        discard      = "on"
+        size         = 20
+      }
+    ]
+
+    network_devices = [
+      {
+        bridge   = "dmz"
+        model    = "virtio"
+        firewall = true
+      }
+    ]
+
+    cloud_init = {
+      datastore_id = "local-lvm"
+
+      user_account = {
+        username = "serveradmin"
+        keys     = []
+      }
+
+      ip_configs = [
+        {
+          ipv4 = {
+            address = "192.168.55.10/24"
+            gateway = "192.168.55.1"
+          }
+        }
+      ]
+
+      dns = {
+        servers = ["192.168.55.1"]
       }
     }
 
