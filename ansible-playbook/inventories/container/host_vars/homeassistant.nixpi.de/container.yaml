@@ -4,23 +4,15 @@ podman_user: "container"
 ######################################
 ### giftpilz0.container.homeassistant
 
-# Proxy
-homeassistant_proxy_enabled: false
-homeassistant_proxy_http: ""
-homeassistant_proxy_https: ""
-homeassistant_proxy_no_proxy: ""
-
 # Network
 homeassistant_network_enabled: true
-homeassistant_network_driver: "bridge"
-homeassistant_network_internal: false
 
 # Network to join even when _network_enabled: false
 homeassistant_network_name: "homeassistant-internal"
 
 # Versions
 # renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant
-homeassistant_version: "2026.7.4"
+homeassistant_version: "2026.8.3"
 
 # Autoupdate
 homeassistant_autoupdate: true
@@ -32,35 +24,36 @@ homeassistant_deebot_module: "true"
 ######################################
 ### giftpilz0.container.mosquitto
 
-# Proxy
-mosquitto_proxy_enabled: false
-mosquitto_proxy_http: ""
-mosquitto_proxy_https: ""
-mosquitto_proxy_no_proxy: ""
-
 # Network
 mosquitto_network_enabled: true
-mosquitto_network_driver: "bridge"
-mosquitto_network_internal: false
 
 # Network to join even when _network_enabled: false
 mosquitto_network_name: "mosquitto-internal"
 
 # Versions
 # renovate: datasource=docker depName=eclipse-mosquitto
-mosquitto_version: "2.0.22"
+mosquitto_version: "2.1-alpine"
 
 # Autoupdate
 mosquitto_autoupdate: true
 
+# Authentication and authorization
+mosquitto_go_auth_options:
+  backends: "files"
+  files_password_path: "/mosquitto/config/passwd"
+  files_acl_path: "/mosquitto/config/acl"
+
+mosquitto_acl_patterns:
+  - access: readwrite
+    topic: "%u/#"
+
+# mosquitto_acl_users:
+#   homeassistant:
+#     - access: readwrite
+#       topic: "homeassistant/#"
+
 ######################################
 ### giftpilz0.container.traefik
-
-# Proxy
-traefik_proxy_enabled: false
-traefik_proxy_http: ""
-traefik_proxy_https: ""
-traefik_proxy_no_proxy: ""
 
 # Podman networks traefik should join to reach backends directly
 traefik_networks:
@@ -69,7 +62,10 @@ traefik_networks:
 
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.10"
+traefik_version: "v3.7.11"
+
+# Rootless ports
+traefik_unprivileged_port_start: 80
 
 # Autoupdate
 traefik_autoupdate: true

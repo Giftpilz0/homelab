@@ -4,16 +4,8 @@ podman_user: "container"
 ######################################
 ### giftpilz0.container.monitoring_stack
 
-# Proxy
-monitoring_stack_proxy_enabled: false
-monitoring_stack_proxy_http: ""
-monitoring_stack_proxy_https: ""
-monitoring_stack_proxy_no_proxy: ""
-
 # Network
 monitoring_stack_network_enabled: true
-monitoring_stack_network_driver: "bridge"
-monitoring_stack_network_internal: true
 
 # Network to join even when _network_enabled: false
 monitoring_stack_network_name: "monitoring-stack-internal"
@@ -22,9 +14,9 @@ monitoring_stack_network_name: "monitoring-stack-internal"
 # renovate: datasource=docker depName=dxflrs/garage
 monitoring_stack_garage_version: "v2.3.0"
 # renovate: datasource=docker depName=grafana/mimir
-monitoring_stack_mimir_version: "3.1.4"
+monitoring_stack_mimir_version: "3.2.0"
 # renovate: datasource=docker depName=grafana/loki
-monitoring_stack_loki_version: "3.6.13"
+monitoring_stack_loki_version: "3.7.6"
 # renovate: datasource=docker depName=persesdev/perses
 monitoring_stack_perses_version: "v0.54.0-rc.1"
 
@@ -64,15 +56,12 @@ monitoring_stack_perses_environment_vars: {}
 ######################################
 ### giftpilz0.container.traefik
 
-# Proxy
-traefik_proxy_enabled: false
-traefik_proxy_http: ""
-traefik_proxy_https: ""
-traefik_proxy_no_proxy: ""
-
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.9"
+traefik_version: "v3.7.11"
+
+# Rootless ports
+traefik_unprivileged_port_start: 80
 
 # Autoupdate
 traefik_autoupdate: true

@@ -42,6 +42,7 @@
   hosts: misc
   roles:
     - role: giftpilz0.container.misc
+    - role: giftpilz0.misc.cfdyndns
 
 - name: Configure hosts - keycloak
   hosts: keycloak
@@ -52,3 +53,8 @@
   hosts: monitoring
   roles:
     - role: giftpilz0.container.monitoring_stack
+
+- name: Configure hosts - acme
+  hosts: acme
+  roles:
+    - role: giftpilz0.container.acme_dns
