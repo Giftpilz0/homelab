@@ -15,13 +15,16 @@ RUN set -eux; \
     git clone --depth 1 --branch "${GO_AUTH_VERSION}" \
       https://github.com/lhns/mosquitto-go-auth.git /tmp/mosquitto-go-auth; \
     cd /tmp/mosquitto-go-auth; \
+    export GOMODCACHE=/tmp/go-mod-cache; \
+    export GOCACHE=/tmp/go-build-cache; \
     CGO_CFLAGS="-I/usr/include -I/usr/include/mosquitto -fPIC" \
     CGO_LDFLAGS="-shared -Wl,-unresolved-symbols=ignore-all" \
-      go build -buildvcs=false -buildmode=c-archive go-auth.go; \
+      go build -p=1 -buildvcs=false -buildmode=c-archive go-auth.go; \
     CGO_CFLAGS="-I/usr/include -I/usr/include/mosquitto -fPIC" \
     CGO_LDFLAGS="-shared -Wl,-unresolved-symbols=ignore-all" \
-      go build -buildvcs=false -buildmode=c-shared -o /tmp/go-auth.so .; \
-    go build -buildvcs=false -o /tmp/mosquitto-go-auth-pw ./pw-gen/pw.go
+      go build -p=1 -buildvcs=false -buildmode=c-shared -o /tmp/go-auth.so .; \
+    go build -p=1 -buildvcs=false -o /tmp/mosquitto-go-auth-pw ./pw-gen/pw.go; \
+    rm -rf "${GOMODCACHE}" "${GOCACHE}" /tmp/mosquitto-go-auth go-auth.a go-auth.h
 
 FROM debian:bookworm-slim
 

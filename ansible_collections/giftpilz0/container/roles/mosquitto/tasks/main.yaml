@@ -73,7 +73,7 @@
     build:
       file: "/tmp/mosquitto-build/Dockerfile"
       format: oci
-      cache: false
+      cache: true
       force_rm: true
       extra_args: "--build-arg GO_AUTH_VERSION={{ mosquitto_go_auth_version }}"
     force: true
