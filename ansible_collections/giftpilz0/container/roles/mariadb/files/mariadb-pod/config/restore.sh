@@ -6,6 +6,7 @@ BACKUP_DIR="${BACKUP_DIR:-/backups}"
 DB_HOST="${DB_HOST:-localhost}"
 DB_PORT="${DB_PORT:-3306}"
 DB_NAME="${DB_NAME:-mariadb}"
+DB_NAMES="${DB_NAMES:-$DB_NAME}"
 DB_USER="${DB_USER:-root}"
 DB_PASSWORD="${DB_PASSWORD:-}"
 
@@ -18,7 +19,7 @@ list_backups() {
         echo "[ERROR] Backup directory not found: $BACKUP_DIR"
         exit 1
     fi
-    find "$BACKUP_DIR" -name "${DB_NAME}_backup_*.sql.gz" -type f | sort -r | while IFS= read -r f; do
+    find "$BACKUP_DIR" -name "*_backup_*.sql.gz" -type f | sort -r | while IFS= read -r f; do
         size=$(du -h "$f" 2>/dev/null | cut -f1)
         date=$(stat -c '%y' "$f" 2>/dev/null | cut -d. -f1)
         printf "  %-50s %10s  %s\n" "$(basename "$f")" "$size" "$date"
@@ -43,9 +44,16 @@ restore_backup() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] Creating pre-restore backup..."
     backup.sh
 
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Recreating database..."
+    database_name=$(basename "$backup_file")
+    database_name=${database_name%%_backup_*}
+    if [ -z "$database_name" ]; then
+        echo "[ERROR] Could not determine database name from backup file"
+        exit 1
+    fi
+
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Recreating database: $database_name"
     mariadb --host="$DB_HOST" --port="$DB_PORT" --user="$DB_USER" \
-        -e "DROP DATABASE IF EXISTS \`$DB_NAME\`; CREATE DATABASE \`$DB_NAME\`;"
+        -e "DROP DATABASE IF EXISTS \`$database_name\`; CREATE DATABASE \`$database_name\`;"
 
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] Restoring data..."
     gzip -cd "$backup_file" | mariadb --host="$DB_HOST" --port="$DB_PORT" --user="$DB_USER"

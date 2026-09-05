@@ -97,6 +97,50 @@
   with_community.general.filetree: "templates/"
   when: item.state == 'file'
 
+- name: "PostgreSQL: Copy extra files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/postgresql-pod/{{ item.dest }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: preserve
+  loop: "{{ postgresql_extra_files | default([]) }}"
+  when:
+    - "postgresql_extra_files | default([]) | length > 0"
+    - item.src is defined
+    - not (item.template | default(false))
+
+- name: "PostgreSQL: Template extra files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/postgresql-pod/{{ item.dest }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode | default('0640') }}"
+  loop: "{{ postgresql_extra_files | default([]) }}"
+  when:
+    - "postgresql_extra_files | default([]) | length > 0"
+    - item.src is defined
+    - item.template | default(false)
+
+- name: "PostgreSQL: Copy extra directories"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    src: "{{ item.src }}/"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/postgresql-pod/{{ item.dest }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: preserve
+  loop: "{{ postgresql_extra_dirs | default([]) }}"
+  when:
+    - "postgresql_extra_dirs | default([]) | length > 0"
+    - item.src is defined
+
 - name: "PostgreSQL: systemd daemon reload"
   become: true
   become_user: "{{ podman_user }}"
@@ -131,25 +175,6 @@
     enabled: true
     state: started
     scope: user
-
-- name: "PostgreSQL: Deploy CloudBeaver"
-  ansible.builtin.include_role:
-    name: giftpilz0.container.cloudbeaver
-  vars:
-    cloudbeaver_db_network_name: "{{ postgresql_network_name }}"
-    cloudbeaver_db_type: "postgresql"
-    cloudbeaver_db_host: "postgresql-pod"
-    cloudbeaver_db_port: "5432"
-    cloudbeaver_db_name: "{{ postgresql_db_name }}"
-    cloudbeaver_db_user: "{{ postgresql_db_user }}"
-    cloudbeaver_db_password: "{{ postgresql_db_password }}"
-    cloudbeaver_admin_user: "{{ postgresql_cloudbeaver_admin_user }}"
-    cloudbeaver_admin_password: "{{ postgresql_cloudbeaver_admin_password }}"
-    cloudbeaver_proxy_enabled: "{{ postgresql_proxy_enabled }}"
-    cloudbeaver_proxy_http: "{{ postgresql_proxy_http }}"
-    cloudbeaver_proxy_https: "{{ postgresql_proxy_https }}"
-    cloudbeaver_proxy_no_proxy: "{{ postgresql_proxy_no_proxy }}"
-  when: postgresql_cloudbeaver_enabled
 
 - name: "PostgreSQL: Configure traefik"
   ansible.builtin.include_role:

@@ -1,0 +1,13 @@
+{% for username, rules in mosquitto_acl_users.items() %}
+user {{ username }}
+{% for rule in rules %}
+topic {{ rule.access | default('readwrite') }} {{ rule.topic | default(rule) }}
+{% endfor %}
+
+{% endfor %}
+{% for pattern in mosquitto_acl_patterns %}
+pattern {{ pattern.access | default('readwrite') }} {{ pattern.topic | default(pattern) }}
+{% endfor %}
+{% for rule in mosquitto_acl_rules %}
+{{ rule }}
+{% endfor %}

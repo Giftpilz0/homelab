@@ -10,6 +10,9 @@ Pod=vaultwarden.pod
 {% if vaultwarden_autoupdate %}
 AutoUpdate=registry
 {% endif %}
+{% if vaultwarden_entrypoint %}
+Entrypoint={{ vaultwarden_entrypoint }}
+{% endif %}
 
 {% if vaultwarden_environment_vars is defined %}
 {% for env_name, env_value in vaultwarden_environment_vars.items() %}
@@ -25,5 +28,8 @@ Environment={{ env_var }}
 
 Volume=vaultwarden-data.volume:/data
 
+{% for item in (vaultwarden_extra_files | default([]) + vaultwarden_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume={{ item.source | default('%h/.config/containers/systemd/vaultwarden-pod/' ~ item.dest) }}:{{ item.mount }}:Z
+{% endfor %}
 [Service]
 Restart=always

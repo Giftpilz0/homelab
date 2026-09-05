@@ -3,12 +3,15 @@ Description=Mosquitto Container
 
 [Container]
 ContainerName=mosquitto
-Image=docker.io/library/eclipse-mosquitto:{{ mosquitto_version }}
+Image={{ mosquitto_image }}
 
 Pod=mosquitto.pod
 
 {% if mosquitto_autoupdate %}
 AutoUpdate=registry
+{% endif %}
+{% if mosquitto_entrypoint %}
+Entrypoint={{ mosquitto_entrypoint }}
 {% endif %}
 
 {% if mosquitto_environment_vars is defined %}
@@ -24,8 +27,12 @@ Environment={{ env_var }}
 {% endif %}
 
 Volume=%h/.config/containers/systemd/mosquitto-pod/config/passwd:/mosquitto/config/passwd:Z
+Volume=%h/.config/containers/systemd/mosquitto-pod/config/acl:/mosquitto/config/acl:Z
 Volume=%h/.config/containers/systemd/mosquitto-pod/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:Z
 Volume=mosquitto-data.volume:/mosquitto/data
 
+{% for item in (mosquitto_extra_files | default([]) + mosquitto_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume={{ item.source | default('%h/.config/containers/systemd/mosquitto-pod/' ~ item.dest) }}:{{ item.mount }}:Z
+{% endfor %}
 [Service]
 Restart=always

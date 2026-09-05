@@ -1,20 +1,11 @@
 ---
+## Primary
+# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
-# Proxy
-opencloud_proxy_enabled: false
-opencloud_proxy_http: ""
-opencloud_proxy_https: ""
-opencloud_proxy_no_proxy: ""
-opencloud_proxy_env: "{{ (['https_proxy=' ~ opencloud_proxy_https] + (['http_proxy=' ~ opencloud_proxy_http] if opencloud_proxy_http else []) + (['no_proxy=' ~ opencloud_proxy_no_proxy]
-  if opencloud_proxy_no_proxy else [])) if opencloud_proxy_enabled else [] }}"
-
 # Network
-opencloud_network_enabled: true
-opencloud_network_driver: "bridge"
-opencloud_network_internal: false
-
 # Network to join even when _network_enabled: false
+opencloud_network_enabled: true
 opencloud_network_name: "opencloud-internal"
 
 # Optional: expose this service directly on the host, bypassing Traefik.
@@ -30,7 +21,7 @@ opencloud_port_map:
 
 # Versions
 # renovate: datasource=docker depName=opencloudeu/opencloud-rolling
-opencloud_version: "7.3.0"
+opencloud_version: "7.5.0"
 
 # Autoupdate
 opencloud_autoupdate: true
@@ -41,6 +32,76 @@ opencloud_admin_password: ""
 opencloud_log_level: "info"
 opencloud_csp_oidc_origin: ""
 
+# Collabora Online
+opencloud_collabora_enabled: false
+
+# Versions
+# renovate: datasource=docker depName=collabora/code
+opencloud_collabora_version: "26.04.3.1.1"
+
+opencloud_collabora_url: ""
+opencloud_collabora_admin_username: "admin"
+opencloud_collabora_admin_password: ""
+
+# Radicale CalDAV/CardDAV
+opencloud_radicale_enabled: false
+
+# Versions
+# renovate: datasource=docker depName=opencloudeu/radicale
+opencloud_radicale_version: "v3.7.8"
+
+# Custom web assets and plugins are supplied by each inventory via
+# opencloud_extra_dirs (staged into opencloud-pod/assets/...), not bundled
+# with the role.
+
+# Copy arbitrary extra files/directories from the inventory into this role's
+# quadlet directory (relative to the <role>-pod dir).
+# Each entry supports src (controller path) or source (target path), dest,
+# optional mount, mode, and template (files only).
+# Theming/plugins env vars and the web-config.json mount are enabled
+# automatically when an entry mounts to the matching OpenCloud asset path.
+# Example:
+#   opencloud_extra_files:
+#     - src: "assets/example/config.yaml"
+#       dest: "config/example.yaml"
+#       mode: "0640"
+#       template: true
+#       mount: "/etc/example/config.yaml"
+#     - source: "/srv/example/license.key"
+#       dest: "host-license.key"
+#       mount: "/run/secrets/license.key"
+#   opencloud_extra_dirs:
+#     - src: "assets/example/plugins/"
+#       dest: "plugins"
+#       mount: "/usr/local/share/example/plugins"
+#     - source: "/srv/example/plugins"
+#       dest: "host-plugins"
+#       mount: "/usr/local/share/example/host-plugins"
+opencloud_extra_files: []
+opencloud_extra_dirs: []
+
+# Optional container entrypoint overrides.
+opencloud_entrypoint: ""
+opencloud_collabora_entrypoint: ""
+opencloud_collabora_proof_key_entrypoint: ""
+opencloud_radicale_entrypoint: ""
+
+# Merge OIDC clients (only used when external OIDC is disabled)
+opencloud_oidc_clients: "{{ opencloud_standard_clients + opencloud_custom_clients }}"
+
+## Advanced
+# Proxy
+opencloud_proxy_enabled: false
+opencloud_proxy_http: ""
+opencloud_proxy_https: ""
+opencloud_proxy_no_proxy: ""
+opencloud_proxy_env: "{{ (['https_proxy=' ~ opencloud_proxy_https] + (['http_proxy=' ~ opencloud_proxy_http] if opencloud_proxy_http else []) + (['no_proxy=' ~ opencloud_proxy_no_proxy]
+  if opencloud_proxy_no_proxy else [])) if opencloud_proxy_enabled else [] }}"
+
+# Network driver
+opencloud_network_driver: "bridge"
+
+# Environment
 opencloud_environment_vars:
   IDM_ADMIN_PASSWORD: "{{ opencloud_admin_password }}"
   OPEN_CLOUD_LOG_LEVEL: "{{ opencloud_log_level }}"
@@ -51,17 +112,7 @@ opencloud_environment_vars:
   THUMBNAILS_MAX_CONCURRENT_REQUESTS: 64
   FRONTEND_CHECK_FOR_UPDATES: false
 
-# Collabora Online
-opencloud_collabora_enabled: false
-
-# Versions
-# renovate: datasource=docker depName=collabora/code
-opencloud_collabora_version: "26.04.2.4.1"
-
-opencloud_collabora_url: ""
-opencloud_collabora_admin_username: "admin"
-opencloud_collabora_admin_password: ""
-
+# Collabora advanced
 opencloud_collabora_ssl_enable: true
 opencloud_collabora_ssl_verification: true
 opencloud_collabora_ssl_termination: true
@@ -78,21 +129,6 @@ opencloud_collabora_home_mode: false
 #       - url: "http://collabora:9980"
 #     tls_enabled: true
 #     acme_enabled: true
-
-# Radicale CalDAV/CardDAV
-opencloud_radicale_enabled: false
-
-# Versions
-# renovate: datasource=docker depName=opencloudeu/radicale
-opencloud_radicale_version: "v3.7.7"
-
-# Custom web assets
-opencloud_theming_enabled: false
-opencloud_theme_source: ""
-
-# Plugins
-opencloud_plugins_enabled: false
-opencloud_plugins_source: ""
 
 # OIDC Clients Configuration
 opencloud_standard_clients:
@@ -155,6 +191,3 @@ opencloud_custom_clients: []
   #   origins:
   #     - "https://{{ forgejo_domain }}"
   #   application_type: "web"
-
-# Merge OIDC clients (only used when external OIDC is disabled)
-opencloud_oidc_clients: "{{ opencloud_standard_clients + opencloud_custom_clients }}"

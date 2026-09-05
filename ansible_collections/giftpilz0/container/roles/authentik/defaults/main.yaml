@@ -1,20 +1,11 @@
 ---
+## Primary
+# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
-# Proxy
-authentik_proxy_enabled: false
-authentik_proxy_http: ""
-authentik_proxy_https: ""
-authentik_proxy_no_proxy: ""
-authentik_proxy_env: "{{ (['https_proxy=' ~ authentik_proxy_https] + (['http_proxy=' ~ authentik_proxy_http] if authentik_proxy_http else []) + (['no_proxy=' ~ authentik_proxy_no_proxy]
-  if authentik_proxy_no_proxy else [])) if authentik_proxy_enabled else [] }}"
-
 # Network
-authentik_network_enabled: true
-authentik_network_driver: "bridge"
-authentik_network_internal: false
-
 # Network to join even when _network_enabled: false
+authentik_network_enabled: true
 authentik_network_name: "authentik-internal"
 
 # Optional: expose this service directly on the host, bypassing Traefik.
@@ -33,9 +24,9 @@ authentik_port_map:
 # renovate: datasource=docker depName=valkey/valkey
 valkey_version: "9.1.1-alpine"
 # renovate: datasource=docker depName=postgres
-postgresql_version: "18.4-alpine"
+postgresql_version: "18.6-alpine"
 # renovate: datasource=docker depName=ghcr.io/goauthentik/server
-authentik_version: "2026.5.6"
+authentik_version: "2026.8.0"
 
 # Autoupdate
 authentik_cache_autoupdate: true
@@ -43,13 +34,54 @@ authentik_postgresql_autoupdate: true
 authentik_server_autoupdate: true
 authentik_worker_autoupdate: true
 
-# Environment
-
 # Required Variables
 authentik_secret_key: "" # openssl rand -base64 60 | tr -d '\n'
 authentik_db_password: ""
 authentik_domain: ""
 
+# Copy arbitrary extra files/directories from the inventory into this role's
+# quadlet directory (relative to the <role>-pod dir).
+# Each entry supports src (controller path) or source (target path), dest,
+# optional mount, mode, and template (files only).
+# Example:
+#   authentik_extra_files:
+#     - src: "assets/example/config.yaml"
+#       dest: "config/example.yaml"
+#       mode: "0640"
+#       template: true
+#       mount: "/etc/example/config.yaml"
+#     - source: "/srv/example/license.key"
+#       dest: "host-license.key"
+#       mount: "/run/secrets/license.key"
+#   authentik_extra_dirs:
+#     - src: "assets/example/plugins/"
+#       dest: "plugins"
+#       mount: "/usr/local/share/example/plugins"
+#     - source: "/srv/example/plugins"
+#       dest: "host-plugins"
+#       mount: "/usr/local/share/example/host-plugins"
+authentik_extra_files: []
+authentik_extra_dirs: []
+
+# Optional container entrypoint overrides.
+authentik_entrypoint: ""
+authentik_worker_entrypoint: ""
+authentik_cache_entrypoint: ""
+authentik_postgresql_entrypoint: ""
+
+## Advanced
+# Proxy
+authentik_proxy_enabled: false
+authentik_proxy_http: ""
+authentik_proxy_https: ""
+authentik_proxy_no_proxy: ""
+authentik_proxy_env: "{{ (['https_proxy=' ~ authentik_proxy_https] + (['http_proxy=' ~ authentik_proxy_http] if authentik_proxy_http else []) + (['no_proxy=' ~ authentik_proxy_no_proxy]
+  if authentik_proxy_no_proxy else [])) if authentik_proxy_enabled else [] }}"
+
+# Network driver
+authentik_network_driver: "bridge"
+
+# Environment
 authentik_base_environment_vars: &authentik_base_env
   AUTHENTIK_SECRET_KEY: "{{ authentik_secret_key }}"
   AUTHENTIK_POSTGRESQL__HOST: 127.0.0.1

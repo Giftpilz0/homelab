@@ -6,6 +6,9 @@ After=authentik-postgresql.service authentik-cache.service
 ContainerName=authentik-server
 Image=ghcr.io/goauthentik/server:{{ authentik_version }}
 Exec=server
+{% if authentik_entrypoint %}
+Entrypoint={{ authentik_entrypoint }}
+{% endif %}
 
 Pod=authentik.pod
 
@@ -29,5 +32,8 @@ Volume=authentik-media.volume:/media
 Volume=authentik-templates.volume:/templates
 Volume=authentik-certs.volume:/certs
 
+{% for item in (authentik_extra_files | default([]) + authentik_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume={{ item.source | default('%h/.config/containers/systemd/authentik-pod/' ~ item.dest) }}:{{ item.mount }}:Z
+{% endfor %}
 [Service]
 Restart=always

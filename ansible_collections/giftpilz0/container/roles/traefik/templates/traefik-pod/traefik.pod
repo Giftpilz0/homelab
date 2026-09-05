@@ -9,10 +9,12 @@ Network={{ traefik_network_name }}
 Network={{ net }}.network
 {% endfor %}
 
+{% if traefik_http_services | default([]) | length > 0 %}
 PublishPort={{ traefik_bind_ip }}:80:{{ traefik_http_internal_port }}
 PublishPort={{ traefik_bind_ip }}:443:{{ traefik_https_internal_port }}
 {% if traefik_http3_enabled | default(false) %}
 PublishPort={{ traefik_bind_ip }}:443:{{ traefik_https_internal_port }}/udp
+{% endif %}
 {% endif %}
 {% if traefik_metrics_enabled %}
 PublishPort={{ traefik_metrics_bind_ip }}:{{ traefik_metrics_internal_port }}:{{ traefik_metrics_internal_port }}

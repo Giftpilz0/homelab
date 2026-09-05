@@ -9,6 +9,10 @@ Image=codeberg.org/forgejo/forgejo:{{ forgejo_version }}
 Pod=forgejo.pod
 User=1000:1000
 
+{% if forgejo_oauth_init_entrypoint %}
+Entrypoint={{ forgejo_oauth_init_entrypoint }}
+{% endif %}
+
 {% if forgejo_autoupdate %}
 AutoUpdate=registry
 {% endif %}

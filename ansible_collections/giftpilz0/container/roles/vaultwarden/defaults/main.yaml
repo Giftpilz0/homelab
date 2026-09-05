@@ -1,20 +1,11 @@
 ---
+## Primary
+# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
-# Proxy
-vaultwarden_proxy_enabled: false
-vaultwarden_proxy_http: ""
-vaultwarden_proxy_https: ""
-vaultwarden_proxy_no_proxy: ""
-vaultwarden_proxy_env: "{{ (['https_proxy=' ~ vaultwarden_proxy_https] + (['http_proxy=' ~ vaultwarden_proxy_http] if vaultwarden_proxy_http else []) + (['no_proxy='
-  ~ vaultwarden_proxy_no_proxy] if vaultwarden_proxy_no_proxy else [])) if vaultwarden_proxy_enabled else [] }}"
-
 # Network
-vaultwarden_network_enabled: true
-vaultwarden_network_driver: "bridge"
-vaultwarden_network_internal: false
-
 # Network to join even when _network_enabled: false
+vaultwarden_network_enabled: true
 vaultwarden_network_name: "vaultwarden-internal"
 
 # Optional: expose this service directly on the host, bypassing Traefik.
@@ -30,13 +21,54 @@ vaultwarden_port_map:
 
 # Versions
 # renovate: datasource=docker depName=vaultwarden/server
-vaultwarden_version: "1.37.1-alpine"
+vaultwarden_version: "1.37.2-alpine"
 
 # Autoupdate
 vaultwarden_autoupdate: true
 
 # Environment
+vaultwarden_domain: ""
+vaultwarden_admin_token: ""
+
 vaultwarden_environment_vars:
   DOMAIN: "{{ vaultwarden_domain }}"
   ADMIN_TOKEN: "{{ vaultwarden_admin_token }}"
   ROCKET_PORT: "80"
+
+# Copy arbitrary extra files/directories from the inventory into this role's
+# quadlet directory (relative to the <role>-pod dir).
+# Each entry supports src (controller path) or source (target path), dest,
+# optional mount, mode, and template (files only).
+# Example:
+#   vaultwarden_extra_files:
+#     - src: "assets/example/config.yaml"
+#       dest: "config/example.yaml"
+#       mode: "0640"
+#       template: true
+#       mount: "/etc/example/config.yaml"
+#     - source: "/srv/example/license.key"
+#       dest: "host-license.key"
+#       mount: "/run/secrets/license.key"
+#   vaultwarden_extra_dirs:
+#     - src: "assets/example/plugins/"
+#       dest: "plugins"
+#       mount: "/usr/local/share/example/plugins"
+#     - source: "/srv/example/plugins"
+#       dest: "host-plugins"
+#       mount: "/usr/local/share/example/host-plugins"
+vaultwarden_extra_files: []
+vaultwarden_extra_dirs: []
+
+vaultwarden_entrypoint: ""
+
+## Advanced
+# Proxy
+vaultwarden_proxy_enabled: false
+vaultwarden_proxy_http: ""
+vaultwarden_proxy_https: ""
+vaultwarden_proxy_no_proxy: ""
+vaultwarden_proxy_env: "{{ (['https_proxy=' ~ vaultwarden_proxy_https] + (['http_proxy=' ~ vaultwarden_proxy_http] if vaultwarden_proxy_http else []) + (['no_proxy='
+  ~ vaultwarden_proxy_no_proxy] if vaultwarden_proxy_no_proxy else [])) if vaultwarden_proxy_enabled else [] }}"
+
+# Network driver
+vaultwarden_network_driver: "bridge"

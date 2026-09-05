@@ -1,20 +1,11 @@
 ---
+## Primary
+# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
-# Proxy
-postgresql_proxy_enabled: false
-postgresql_proxy_http: ""
-postgresql_proxy_https: ""
-postgresql_proxy_no_proxy: ""
-postgresql_proxy_env: "{{ (['https_proxy=' ~ postgresql_proxy_https] + (['http_proxy=' ~ postgresql_proxy_http] if postgresql_proxy_http else []) + (['no_proxy='
-  ~ postgresql_proxy_no_proxy] if postgresql_proxy_no_proxy else [])) if postgresql_proxy_enabled else [] }}"
-
 # Network
-postgresql_network_enabled: true
-postgresql_network_driver: "bridge"
-postgresql_network_internal: false
-
 # Network to join even when _network_enabled: false
+postgresql_network_enabled: true
 postgresql_network_name: "postgresql-internal"
 
 # Optional: expose this service directly on the host, bypassing Traefik.
@@ -30,28 +21,73 @@ postgresql_port_map:
 
 # Versions
 # renovate: datasource=docker depName=postgres
-postgresql_version: "18.4-alpine"
+postgresql_version: "18.6-alpine"
 
 # Autoupdate
 postgresql_autoupdate: true
 postgresql_backup_autoupdate: true
 
-# Environment
-postgresql_db_name: "postgres"
-postgresql_db_user: "postgres"
-postgresql_db_password: ""
-
-postgresql_environment_vars:
-  POSTGRES_DB: "{{ postgresql_db_name }}"
-  POSTGRES_USER: "{{ postgresql_db_user }}"
-  POSTGRES_PASSWORD: "{{ postgresql_db_password }}"
+# Database administrator
+# The PostgreSQL image creates this user and database during first startup.
+# The administrator is also used by the backup/provisioning container.
+postgresql_admin_database: "postgres"
+postgresql_admin_user: "postgres"
+postgresql_admin_password: ""
+# Secondary databases/users are created by the role after the administrator
+# database is available.
+postgresql_databases: []
 
 # Backup
 postgresql_backup_schedule_times: "03:00"
 postgresql_backup_retention_days: 7
 postgresql_backup_compression: 6
 
-# CloudBeaver management UI
-postgresql_cloudbeaver_enabled: false
-postgresql_cloudbeaver_admin_user: "cbadmin"
-postgresql_cloudbeaver_admin_password: ""
+# Copy arbitrary extra files/directories from the inventory into this role's
+# quadlet directory (relative to the <role>-pod dir).
+# Each entry supports src (controller path) or source (target path), dest,
+# optional mount, mode, and template (files only).
+# Example:
+#   postgresql_extra_files:
+#     - src: "assets/example/config.yaml"
+#       dest: "config/example.yaml"
+#       mode: "0640"
+#       template: true
+#       mount: "/etc/example/config.yaml"
+#     - source: "/srv/example/license.key"
+#       dest: "host-license.key"
+#       mount: "/run/secrets/license.key"
+#   postgresql_extra_dirs:
+#     - src: "assets/example/plugins/"
+#       dest: "plugins"
+#       mount: "/usr/local/share/example/plugins"
+#     - source: "/srv/example/plugins"
+#       dest: "host-plugins"
+#       mount: "/usr/local/share/example/host-plugins"
+# PostgreSQL extensions can also be mapped this way only when their files are
+# already built for the exact image version and architecture. External
+# mappings do not install packages or runtime dependencies; use a custom image
+# for extensions that require compilation or OS packages.
+postgresql_extra_files: []
+postgresql_extra_dirs: []
+
+## Advanced
+# Proxy
+postgresql_proxy_enabled: false
+postgresql_proxy_http: ""
+postgresql_proxy_https: ""
+postgresql_proxy_no_proxy: ""
+postgresql_proxy_env: "{{ (['https_proxy=' ~ postgresql_proxy_https] + (['http_proxy=' ~ postgresql_proxy_http] if postgresql_proxy_http else []) + (['no_proxy='
+  ~ postgresql_proxy_no_proxy] if postgresql_proxy_no_proxy else [])) if postgresql_proxy_enabled else [] }}"
+
+# Network driver
+postgresql_network_driver: "bridge"
+
+# Environment
+postgresql_environment_vars:
+  POSTGRES_DB: "{{ postgresql_admin_database }}"
+  POSTGRES_USER: "{{ postgresql_admin_user }}"
+  POSTGRES_PASSWORD: "{{ postgresql_admin_password }}"
+
+# Optional container entrypoint overrides.
+postgresql_entrypoint: ""
+postgresql_backup_entrypoint: ""

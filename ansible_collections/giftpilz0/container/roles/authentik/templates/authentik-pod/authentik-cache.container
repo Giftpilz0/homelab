@@ -8,6 +8,10 @@ Exec=valkey-server --supervised systemd
 
 Pod=authentik.pod
 
+{% if authentik_cache_entrypoint %}
+Entrypoint={{ authentik_cache_entrypoint }}
+{% endif %}
+
 {% if authentik_cache_autoupdate %}
 AutoUpdate=registry
 {% endif %}

@@ -134,10 +134,10 @@
   ansible.builtin.set_fact:
     _mimir_key_id: "{{ _mimir_key_create.stdout | regex_findall('Key ID:\\s+(\\S+)') | first | default('') }}"
     _mimir_secret: "{{ _mimir_key_create.stdout | regex_findall('Secret key:\\s+(\\S+)') | first | default('') }}"
-  when: _mimir_key_create is changed
+  when: _mimir_key_create is defined
 
 - name: "Monitoring Stack GarageHQ Init: Parse Loki key credentials"
   ansible.builtin.set_fact:
     _loki_key_id: "{{ _loki_key_create.stdout | regex_findall('Key ID:\\s+(\\S+)') | first | default('') }}"
     _loki_secret: "{{ _loki_key_create.stdout | regex_findall('Secret key:\\s+(\\S+)') | first | default('') }}"
-  when: _loki_key_create is changed
+  when: _loki_key_create is defined

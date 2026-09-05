@@ -5,5 +5,4 @@ Description=Vaultwarden Internal Network
 [Network]
 NetworkName={{ vaultwarden_network_name }}
 Driver={{ vaultwarden_network_driver }}
-Internal={{ vaultwarden_network_internal | bool | lower }}
 {% endif %}

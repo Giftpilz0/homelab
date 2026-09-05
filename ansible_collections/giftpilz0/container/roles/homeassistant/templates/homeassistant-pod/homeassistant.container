@@ -10,6 +10,9 @@ Pod=homeassistant.pod
 {% if homeassistant_autoupdate %}
 AutoUpdate=registry
 {% endif %}
+{% if homeassistant_entrypoint %}
+Entrypoint={{ homeassistant_entrypoint }}
+{% endif %}
 
 {% if homeassistant_environment_vars is defined %}
 {% for env_name, env_value in homeassistant_environment_vars.items() %}
@@ -34,5 +37,8 @@ Volume=%h/.config/containers/systemd/homeassistant-pod/config/8n0t5d.py:/usr/loc
 {% endif %}
 Volume=homeassistant-data.volume:/config
 
+{% for item in (homeassistant_extra_files | default([]) + homeassistant_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume={{ item.source | default('%h/.config/containers/systemd/homeassistant-pod/' ~ item.dest) }}:{{ item.mount }}:Z
+{% endfor %}
 [Service]
 Restart=always

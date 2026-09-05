@@ -9,6 +9,10 @@ Pod=radicale.pod
 User=1000
 Group=1000
 
+{% if opencloud_radicale_entrypoint %}
+Entrypoint={{ opencloud_radicale_entrypoint }}
+{% endif %}
+
 {% if opencloud_autoupdate %}
 AutoUpdate=registry
 {% endif %}

@@ -9,6 +9,10 @@ Image=docker.io/collabora/code:{{ opencloud_collabora_version }}
 
 Pod=collabora.pod
 
+{% if opencloud_collabora_entrypoint %}
+Entrypoint={{ opencloud_collabora_entrypoint }}
+{% endif %}
+
 AddCapability=SYS_ADMIN
 PodmanArgs=--security-opt=seccomp=unconfined
 PodmanArgs=--mount=type=volume,source=systemd-collabora-proof-key,target=/etc/coolwsd/proof_key,readonly,subpath=proof_key

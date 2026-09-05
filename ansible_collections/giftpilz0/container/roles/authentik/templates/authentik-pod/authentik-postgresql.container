@@ -7,6 +7,10 @@ Image=docker.io/library/postgres:{{ postgresql_version }}
 
 Pod=authentik.pod
 
+{% if authentik_postgresql_entrypoint %}
+Entrypoint={{ authentik_postgresql_entrypoint }}
+{% endif %}
+
 {% if authentik_postgresql_autoupdate %}
 AutoUpdate=registry
 {% endif %}
