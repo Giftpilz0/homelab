@@ -1,9 +1,16 @@
 ---
+# Cloudflare account email used by the Worker basic-auth protocol
+cfdyndns_api_email: ""
+
 # API token for basic auth
 cfdyndns_api_token: ""
 
 # Update URL (made for https://github.com/willswire/unifi-ddns)
 cfdyndns_update_url: ""
+
+# Cloudflare hostnames to update in one worker request. The worker accepts a
+# comma-separated hostname parameter and updates each existing A/AAAA record.
+cfdyndns_update_hostnames: []
 
 # Cloudflare trace endpoint
 cfdyndns_cloudflare_trace_url: "https://cloudflare.com/cdn-cgi/trace"

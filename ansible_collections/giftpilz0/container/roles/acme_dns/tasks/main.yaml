@@ -1,0 +1,159 @@
+---
+- name: "ACME DNS: Create Podman config directory"
+  become: true
+  ansible.builtin.file:
+    path: /etc/containers/containers.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "ACME DNS: Deploy podman proxy configuration"
+  become: true
+  ansible.builtin.template:
+    src: "acme_dns-pod/proxy.conf.j2"
+    dest: "/etc/containers/containers.conf.d/proxy.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  when: acme_dns_proxy_enabled
+
+- name: "ACME DNS: Delete quadlet directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd/acme_dns-pod"
+    state: absent
+
+- name: "ACME DNS: Enable lingering"
+  become: true
+  ansible.builtin.command: loginctl enable-linger {{ podman_user }}
+  register: podman_lingering
+  changed_when: podman_lingering.rc != 0
+
+- name: "ACME DNS: Configure unprivileged port range for rootless containers"
+  become: true
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_unprivileged_port_start
+    value: "53"
+    sysctl_set: true
+    sysctl_file: /etc/sysctl.d/99-rootless-ports.conf
+    reload: true
+
+- name: "ACME DNS: Create quadlet directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0755"
+
+- name: "ACME DNS: Create directory structure"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/systemd/{{ item.path }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode }}"
+  with_community.general.filetree: "templates/"
+  when: item.state == 'directory'
+
+- name: "ACME DNS: Template quadlet files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/{{ item.path }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode }}"
+  with_community.general.filetree: "templates/"
+  when: item.state == 'file'
+
+- name: "ACME DNS: Copy extra files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/acme_dns-pod/{{ item.dest }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode | default('0640') }}"
+  loop: "{{ acme_dns_extra_files | default([]) }}"
+  when:
+    - "acme_dns_extra_files | default([]) | length > 0"
+    - item.src is defined
+    - not (item.template | default(false))
+
+- name: "ACME DNS: Template extra files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/acme_dns-pod/{{ item.dest }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode | default('0640') }}"
+  loop: "{{ acme_dns_extra_files | default([]) }}"
+  when:
+    - "acme_dns_extra_files | default([]) | length > 0"
+    - item.src is defined
+    - item.template | default(false)
+
+- name: "ACME DNS: Copy extra directories"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    src: "{{ item.src }}/"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/acme_dns-pod/{{ item.dest }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode | default('0755') }}"
+  loop: "{{ acme_dns_extra_dirs | default([]) }}"
+  when:
+    - "acme_dns_extra_dirs | default([]) | length > 0"
+    - item.src is defined
+
+- name: "ACME DNS: systemd daemon reload"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    daemon_reload: true
+    scope: user
+
+- name: "ACME DNS: Start network service"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: acme_dns-network.service
+    enabled: true
+    state: restarted
+    scope: user
+  when: acme_dns_network_enabled
+
+- name: "ACME DNS: Start pod service"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: acme_dns-pod.service
+    enabled: true
+    state: restarted
+    scope: user
+
+- name: "ACME DNS: Enable podman-auto-update timer"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: podman-auto-update.timer
+    enabled: true
+    state: started
+    scope: user
+
+- name: "ACME DNS: Configure traefik"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.traefik
+  when: traefik_http_services is defined or traefik_tcp_services is defined

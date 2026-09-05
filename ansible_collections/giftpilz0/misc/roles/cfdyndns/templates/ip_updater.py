@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 import os
 from pathlib import Path
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import requests
 
 # Configuration
-API_TOKEN = "{{ cfdyndns_api_token }}"
-UPDATE_URL = "{{ cfdyndns_update_url }}"
-LAST_IP_FILE = Path("{{ cfdyndns_last_ip_file }}")
-CLOUDFLARE_TRACE_URL = "{{ cfdyndns_cloudflare_trace_url }}"
+API_EMAIL = {{ cfdyndns_api_email | to_json }}
+API_TOKEN = {{ cfdyndns_api_token | to_json }}
+UPDATE_URL = {{ cfdyndns_update_url | to_json }}
+LAST_IP_FILE = Path({{ cfdyndns_last_ip_file | to_json }})
+CLOUDFLARE_TRACE_URL = {{ cfdyndns_cloudflare_trace_url | to_json }}
+UPDATE_HOSTNAMES = {{ cfdyndns_update_hostnames | default([]) | to_json }}
 
 def get_public_ip():
     """Fetch public IP from Cloudflare trace endpoint"""
@@ -39,15 +42,27 @@ def save_ip(ip):
     except Exception as e:
         print(f"Error saving IP: {e}")
 
-def update_ip():
+def update_ip(ip):
     """Send update request with basic auth"""
+    update_url = UPDATE_URL.replace("%i", ip)
+    if UPDATE_HOSTNAMES:
+        update_url = update_url.replace("%h", ",".join(UPDATE_HOSTNAMES))
+        parsed_url = urlsplit(update_url)
+        query = dict(parse_qsl(parsed_url.query, keep_blank_values=True))
+        query["ip"] = ip
+        query["hostname"] = ",".join(UPDATE_HOSTNAMES)
+        update_url = urlunsplit(parsed_url._replace(query=urlencode(query)))
+
     try:
         response = requests.get(
-            UPDATE_URL,
-            auth=("", API_TOKEN),
+            update_url,
+            auth=(API_EMAIL, API_TOKEN),
             timeout=10
         )
-        response.raise_for_status()
+        if not response.ok:
+            detail = response.text.strip()
+            print(f"Error updating IP: HTTP {response.status_code}: {detail}")
+            return False
         print(f"Update successful: {response.status_code}")
         return True
     except Exception as e:
@@ -64,7 +79,7 @@ def main():
 
     if current_ip != last_ip:
         print(f"IP changed: {last_ip} -> {current_ip}")
-        if update_ip():
+        if update_ip(current_ip):
             save_ip(current_ip)
     else:
         print(f"IP unchanged: {current_ip}")
