@@ -22,11 +22,11 @@ authentik_port_map:
 
 # Versions
 # renovate: datasource=docker depName=valkey/valkey
-valkey_version: "9.1.1-alpine"
+valkey_version: "9.1.2-alpine"
 # renovate: datasource=docker depName=postgres
 postgresql_version: "18.6-alpine"
 # renovate: datasource=docker depName=ghcr.io/goauthentik/server
-authentik_version: "2026.8.0"
+authentik_version: "2026.8.1"
 
 # Autoupdate
 authentik_cache_autoupdate: true
