@@ -32,3 +32,6 @@ server:
         monitoring.nixpi.de:
           ansible_host: 192.168.60.17
           ansible_user: serveradmin
+        acme.nixpi.de:
+          ansible_host: 192.168.55.10
+          ansible_user: serveradmin
