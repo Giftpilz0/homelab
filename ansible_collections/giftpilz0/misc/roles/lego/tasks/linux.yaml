@@ -1,0 +1,122 @@
+---
+- name: "Lego: Install service group"
+  become: true
+  ansible.builtin.group:
+    name: "{{ lego_service_group }}"
+    system: true
+    state: present
+
+- name: "Lego: Install service account"
+  become: true
+  ansible.builtin.user:
+    name: "{{ lego_service_user }}"
+    group: "{{ lego_service_group }}"
+    system: true
+    home: "{{ lego_state_path }}"
+    create_home: false
+    shell: /usr/sbin/nologin
+
+- name: "Lego: Install dependencies"
+  become: true
+  ansible.builtin.package:
+    name:
+      - openssl
+      - tar
+    state: present
+
+- name: "Lego: Create state directory"
+  become: true
+  ansible.builtin.file:
+    path: "{{ lego_state_path }}"
+    state: directory
+    owner: "{{ lego_service_user }}"
+    group: "{{ lego_service_group }}"
+    mode: "0700"
+
+- name: "Lego: Install binary directory"
+  become: true
+  ansible.builtin.file:
+    path: "{{ lego_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when: lego_bin_state != 'skip'
+
+- name: "Lego: Install binary"
+  become: true
+  ansible.builtin.unarchive:
+    src: "{{ lego_url }}"
+    dest: "{{ lego_path }}"
+    remote_src: true
+    include:
+      - lego
+    owner: root
+    group: root
+    mode: "0755"
+  when: lego_bin_state != 'skip'
+
+- name: "Lego: Create deployment directories"
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.deploy.pem.directory }}"
+    state: directory
+    owner: "{{ item.deploy.pem.owner | default('root') }}"
+    group: "{{ item.deploy.pem.group | default('root') }}"
+    mode: "{{ item.deploy.pem.directory_mode | default(lego_default_deploy_directory_mode) }}"
+  loop: "{{ lego_certificates }}"
+  when: item.deploy is defined and item.deploy.pem is defined
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: "Lego: Create certificate environment files"
+  become: true
+  ansible.builtin.template:
+    src: certificate.env.j2
+    dest: "{{ lego_state_path }}/{{ item.name }}.env"
+    owner: "{{ lego_service_user }}"
+    group: "{{ lego_service_group }}"
+    mode: "0600"
+  loop: "{{ lego_certificates }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: "Lego: Install renewal script"
+  become: true
+  ansible.builtin.template:
+    src: renew-linux.sh.j2
+    dest: /usr/local/sbin/lego-renew
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "Lego: Install systemd units"
+  become: true
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "/etc/systemd/system/{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - { src: lego-renew.service.j2, dest: lego-renew.service }
+    - { src: lego-renew.timer.j2, dest: lego-renew.timer }
+
+- name: "Lego: Reload systemd"
+  become: true
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+
+- name: "Lego: Enable renewal timer"
+  become: true
+  ansible.builtin.systemd:
+    name: lego-renew.timer
+    enabled: true
+    state: started
+
+- name: "Lego: Issue certificates on deployment"
+  become: true
+  ansible.builtin.systemd:
+    name: lego-renew.service
+    state: started
+  when: lego_issue_on_deploy

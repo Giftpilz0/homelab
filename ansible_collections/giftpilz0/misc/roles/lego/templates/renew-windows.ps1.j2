@@ -1,0 +1,92 @@
+$ErrorActionPreference = 'Stop'
+$Lego = '{{ lego_path }}\lego.exe'
+$State = '{{ lego_state_path }}'
+$Server = '{{ lego_acme_server }}'
+$ServerHost = ([Uri]$Server).Host -replace ':', '_'
+
+{% for item in lego_certificates %}
+Write-Host 'Processing {{ item.name }}'
+$Environment = Join-Path $State '{{ item.name }}.ps1'
+if (Test-Path -LiteralPath $Environment) {
+  . $Environment
+}
+
+$Certificate = Join-Path $State 'certificates\{{ item.domains[0] | replace('*', '_') }}.crt'
+$Arguments = @(
+  'run'
+  '--accept-tos'
+  '--email', '{{ lego_acme_email }}',
+  '--server', $Server,
+  '--path', $State,
+  '--key-type', '{{ item.key_type | default('EC256') }}'
+{% if item.challenge.type == 'dns-01' %}
+  '--dns', '{{ item.challenge.provider }}'
+{% elif item.challenge.type == 'http-01' %}
+  '--http'
+{% else %}
+  '--tls-alpn'
+{% endif %}
+{% for domain in item.domains %}
+  '--domains', '{{ domain }}'
+{% endfor %}
+{% for resolver in lego_acme_dns_resolvers %}
+  '--dns.resolvers', '{{ resolver }}'
+{% endfor %}
+{% for argument in lego_extra_args %}
+  '{{ argument }}'
+{% endfor %}
+{% for argument in item.extra_args | default([]) %}
+  '{{ argument }}'
+{% endfor %}
+  '--pem'
+{% if item.deploy is defined and item.deploy.pfx is defined %}
+  '--pfx'
+{% endif %}
+)
+if (Test-Path -LiteralPath $Certificate) {
+  $Arguments += @('--renew-days', '{{ item.renewal.threshold | default(lego_renewal_threshold) }}')
+}
+
+Write-Host "Running: $Lego $($Arguments -join ' ')"
+$AccountId = '{{ item.account_id | default(lego_acme_email) }}'
+$AccountDir = Join-Path $State "accounts\$ServerHost\$AccountId"
+$Output = (& $Lego @Arguments 2>&1 | Out-String)
+$ExitCode = $LASTEXITCODE
+$Output | Write-Host
+
+if (($ExitCode -ne 0) -and ($Output -match 'accountDoesNotExist')) {
+  if (-not (Test-Path -LiteralPath $AccountDir -PathType Container)) {
+    throw "Lego failed for {{ item.name }}: stale account directory was not found"
+  }
+
+  $StaleAccountDir = "$AccountDir.stale.$(Get-Date -Format yyyyMMdd_HHmmss)"
+  Write-Host "Archiving stale Lego account: $AccountDir"
+  Move-Item -LiteralPath $AccountDir -Destination $StaleAccountDir
+  $Output = (& $Lego @Arguments 2>&1 | Out-String)
+  $ExitCode = $LASTEXITCODE
+  $Output | Write-Host
+}
+
+if ($ExitCode -ne 0) {
+  throw "Lego failed for {{ item.name }} with exit code $ExitCode"
+}
+
+$Marker = Join-Path $State '.{{ item.name }}.deployed'
+$Changed = -not (Test-Path -LiteralPath $Marker) -or
+  ((Get-Item -LiteralPath $Certificate).LastWriteTime -gt (Get-Item -LiteralPath $Marker).LastWriteTime)
+if ($Changed) {
+{% if item.deploy is defined and item.deploy.pfx is defined %}
+  Copy-Item -LiteralPath (Join-Path $State 'certificates\{{ item.domains[0] | replace('*', '_') }}.pfx') -Destination '{{ item.deploy.pfx.path }}' -Force
+{% if item.deploy.windows_store is defined %}
+  $PfxPassword = ConvertTo-SecureString $env:LEGO_PFX_PASSWORD -AsPlainText -Force
+  Import-PfxCertificate -FilePath '{{ item.deploy.pfx.path }}' -CertStoreLocation 'Cert:\{{ item.deploy.windows_store.store_location | default('LocalMachine') }}\{{ item.deploy.windows_store.store_name | default('My') }}' -Password $PfxPassword | Out-Null
+{% endif %}
+{% endif %}
+{% for hook in item.hooks.changed | default([]) %}
+{% if hook.type | default('powershell') == 'powershell' %}
+  {{ hook.script }}
+{% endif %}
+{% endfor %}
+  New-Item -ItemType File -Path $Marker -Force | Out-Null
+}
+{% endfor %}
