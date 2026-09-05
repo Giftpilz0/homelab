@@ -1,0 +1,300 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy the Traefik reverse proxy as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        default: "{{ ansible_user }}"
+        description: system user for rootless podman operations.
+
+      traefik_network_enabled:
+        type: bool
+        required: false
+        default: true
+        description: create and manage the podman network.
+
+      traefik_network_name:
+        type: str
+        required: false
+        default: traefik-internal
+        description: podman network name.
+
+      traefik_bind_ip:
+        type: str
+        required: false
+        default: "{{ ansible_facts['default_ipv4']['address'] }}"
+        description: host IP to bind exposed ports to.
+
+      traefik_unprivileged_port_start:
+        type: int
+        required: false
+        default: 80
+        description: lowest host port rootless containers may bind.
+
+      traefik_version:
+        type: str
+        required: false
+        default: "v3.7.11"
+        description: container image version.
+
+      traefik_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable podman auto-update for this container.
+
+      traefik_networks:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: additional podman networks to join (by role name).
+
+      traefik_acme_enabled:
+        type: bool
+        required: false
+        default: true
+        description: enable ACME/Let's Encrypt certificates.
+
+      traefik_acme_email:
+        type: str
+        required: false
+        default: ""
+        description: ACME account email.
+
+      traefik_acme_ca_server:
+        type: str
+        required: false
+        default: "https://acme-v02.api.letsencrypt.org/directory"
+        description: ACME CA server URL.
+
+      traefik_acme_challenge_type:
+        type: str
+        required: false
+        default: http
+        description: ACME challenge type (dns, http, or tls).
+
+      traefik_acme_dns_provider:
+        type: str
+        required: false
+        default: cloudflare
+        description: DNS provider for DNS challenge.
+
+      traefik_acme_dns_resolvers:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: custom DNS resolvers for DNS challenge.
+
+      traefik_acme_eab_enabled:
+        type: bool
+        required: false
+        default: false
+        description: enable external account binding for ACME.
+
+      traefik_acme_eab_kid:
+        type: str
+        required: false
+        default: ""
+        description: ACME EAB key ID.
+
+      traefik_acme_eab_hmac:
+        type: str
+        required: false
+        default: ""
+        description: ACME EAB HMAC key.
+
+      traefik_http_redirect_https:
+        type: bool
+        required: false
+        default: true
+        description: redirect HTTP to HTTPS.
+
+      traefik_middlewares_redirect:
+        type: dict
+        required: false
+        default: {}
+        description: redirect middleware definitions (path/regex-based).
+
+      traefik_custom_middlewares:
+        type: dict
+        required: false
+        default: {}
+        description: custom traefik middleware definitions.
+
+      traefik_tcp_entrypoints:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: TCP entrypoint definitions.
+
+      traefik_http_services:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: HTTP service/router definitions.
+
+      traefik_tcp_services:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: TCP service/router definitions.
+
+      traefik_extra_files:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      traefik_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.
+
+      traefik_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional container entrypoint override.
+
+      traefik_proxy_enabled:
+        type: bool
+        required: false
+        default: false
+        description: enable HTTP proxy for image pulls.
+
+      traefik_proxy_http:
+        type: str
+        required: false
+        default: ""
+        description: HTTP proxy URL.
+
+      traefik_proxy_https:
+        type: str
+        required: false
+        default: ""
+        description: HTTPS proxy URL.
+
+      traefik_proxy_no_proxy:
+        type: str
+        required: false
+        default: ""
+        description: comma-separated list of proxy exclusions.
+
+      traefik_proxy_env:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: generated proxy environment entries.
+
+      traefik_network_driver:
+        type: str
+        required: false
+        default: bridge
+        description: podman network driver.
+
+      traefik_http_internal_port:
+        type: int
+        required: false
+        default: 80
+        description: internal HTTP entrypoint port.
+
+      traefik_https_internal_port:
+        type: int
+        required: false
+        default: 443
+        description: internal HTTPS entrypoint port.
+
+      traefik_environment_vars:
+        type: dict
+        required: false
+        default: {}
+        description: extra environment variables for the container.
+
+      traefik_log_level:
+        type: str
+        required: false
+        default: WARN
+        description: traefik log level.
+
+      traefik_log_format:
+        type: str
+        required: false
+        default: json
+        description: traefik log format.
+
+      traefik_access_log_format:
+        type: str
+        required: false
+        default: json
+        description: access log format.
+
+      traefik_access_log_buffer_size:
+        type: int
+        required: false
+        default: 10
+        description: access log channel buffer size.
+
+      traefik_metrics_enabled:
+        type: bool
+        required: false
+        default: true
+        description: enable Prometheus metrics endpoint.
+
+      traefik_metrics_internal_port:
+        type: int
+        required: false
+        default: 8082
+        description: Prometheus metrics port inside the container.
+
+      traefik_metrics_bind_ip:
+        type: str
+        required: false
+        default: "127.0.0.1"
+        description: bind IP for metrics endpoint.
+
+      traefik_transport_timeouts_enabled:
+        type: bool
+        required: false
+        default: false
+        description: enable custom transport timeouts.
+
+      traefik_transport_read_timeout:
+        type: str
+        required: false
+        default: "12h"
+        description: transport read timeout (e.g. 12h).
+
+      traefik_transport_write_timeout:
+        type: str
+        required: false
+        default: "12h"
+        description: transport write timeout (e.g. 12h).
+
+      traefik_transport_idle_timeout:
+        type: str
+        required: false
+        default: "3m"
+        description: transport idle timeout (e.g. 3m).
+
+      traefik_http3_enabled:
+        type: bool
+        required: false
+        default: true
+        description: enable HTTP/3 (QUIC).
+
+      traefik_http3_advertised_port:
+        type: int
+        required: false
+        default: 443
+        description: HTTP/3 advertised port.

@@ -1,33 +1,132 @@
 ---
 argument_specs:
   main:
-    short_description: The main entry point for the monitoring role.
+    short_description: Install and configure the Grafana Alloy monitoring agent.
     options:
+      monitoring_agent_arch:
+        type: str
+        required: false
+        description: alloy agent architecture (e.g. amd64, arm64).
+
+      monitoring_agent_tag:
+        type: str
+        required: false
+        description: alloy release version tag.
+
+      monitoring_agent_package_state:
+        type: str
+        required: false
+        choices:
+          - present
+          - absent
+          - latest
+        description: desired state of the alloy package.
+
+      monitoring_agent_package:
+        type: list
+        elements: str
+        required: false
+        description: list of packages to install.
+
+      monitoring_agent_config_path:
+        type: str
+        required: false
+        description: path to the alloy configuration file.
+
+      monitoring_agent_service_name:
+        type: str
+        required: false
+        description: systemd service unit name.
+
+      monitoring_agent_service_state:
+        type: str
+        required: false
+        choices:
+          - reloaded
+          - restarted
+          - started
+          - stopped
+        description: desired state of the alloy service.
+
+      monitoring_agent_service_enabled:
+        type: bool
+        required: false
+        description: whether the alloy service is enabled at boot.
+
       monitoring_agent_config_remoteserver_loki:
         type: str
+        required: false
+        description: Loki remote write endpoint URL.
 
       monitoring_agent_config_remoteserver_prometheus:
         type: str
+        required: false
+        description: Prometheus remote write endpoint URL.
 
       monitoring_alloy_loki_basic_auth_username:
         type: str
+        required: false
+        description: basic auth username for Loki.
 
       monitoring_alloy_loki_basic_auth_password:
         type: str
+        required: false
         no_log: true
+        description: basic auth password for Loki.
 
       monitoring_alloy_mimir_basic_auth_username:
         type: str
+        required: false
+        description: basic auth username for Mimir/Prometheus.
 
       monitoring_alloy_mimir_basic_auth_password:
         type: str
+        required: false
         no_log: true
+        description: basic auth password for Mimir/Prometheus.
 
       monitoring_agent_external_labels:
         type: dict
+        required: false
+        description: external labels added to all metrics and logs.
+
+      monitoring_alloy_permissions_setup:
+        type: bool
+        required: false
+        description: whether to add alloy user to extra groups for journal access.
+
+      monitoring_alloy_extra_groups:
+        type: list
+        elements: str
+        required: false
+        description: additional system groups for the alloy user.
+
+      monitoring_alloy_node_exporter_scrape_interval:
+        type: str
+        required: false
+        description: scrape interval for node exporter metrics.
+
+      monitoring_alloy_loki_journal_max_age:
+        type: str
+        required: false
+        description: maximum age of journal entries sent to Loki.
 
       monitoring_alloy_traefik_scrape_enabled:
         type: bool
+        required: false
+        description: whether to scrape Traefik metrics.
+
+      monitoring_alloy_traefik_metrics_address:
+        type: str
+        required: false
+        description: Traefik metrics endpoint address.
+
+      monitoring_alloy_traefik_scrape_interval:
+        type: str
+        required: false
+        description: scrape interval for Traefik metrics.
 
       monitoring_alloy_extra_config:
         type: str
+        required: false
+        description: extra Alloy configuration appended to the main config.

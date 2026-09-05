@@ -1,7 +1,7 @@
 ---
 argument_specs:
   main:
-    short_description: The main entry point for the fluxcli role.
+    short_description: Install the Flux CLI (flux) binary.
     options:
       fluxcli_bin_state:
         type: str
@@ -9,24 +9,24 @@ argument_specs:
         choices:
           - present
           - skip
-        description: fluxcli_bin_state
+        description: desired state of the flux binary.
 
       fluxcli_url:
         type: str
         required: false
-        description: fluxcli_url
+        description: download URL for the flux binary.
 
       fluxcli_arch:
         type: str
         required: false
-        description: fluxcli_arch
+        description: target architecture (e.g. amd64, arm64).
 
       fluxcli_tag:
         type: str
         required: false
-        description: fluxcli_tag
+        description: release version tag.
 
       fluxcli_path:
         type: str
         required: false
-        description: fluxcli_path
+        description: installation directory for the binary.

@@ -1,7 +1,7 @@
 ---
 argument_specs:
   main:
-    short_description: The main entry point for the helm role.
+    short_description: Install the Helm package manager binary.
     options:
       helm_bin_state:
         type: str
@@ -9,24 +9,24 @@ argument_specs:
         choices:
           - present
           - skip
-        description: helm_bin_state
+        description: desired state of the helm binary.
 
       helm_url:
         type: str
         required: false
-        description: helm_url
+        description: download URL for the helm binary.
 
       helm_arch:
         type: str
         required: false
-        description: helm_arch
+        description: target architecture (e.g. amd64, arm64).
 
       helm_tag:
         type: str
         required: false
-        description: helm_tag
+        description: release version tag.
 
       helm_path:
         type: str
         required: false
-        description: helm_path
+        description: installation directory for the binary.

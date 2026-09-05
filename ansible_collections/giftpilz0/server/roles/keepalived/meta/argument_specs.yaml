@@ -1,13 +1,12 @@
 ---
 argument_specs:
-  # main.yaml entry point
   main:
-    short_description: The main entry point for the keepalived role.
+    short_description: Install and configure keepalived for a virtual IP (VRRP).
     options:
       keepalived_service_name:
         type: str
         required: false
-        description: keepalived_service_name
+        description: systemd service unit name.
 
       keepalived_service_state:
         type: str
@@ -17,12 +16,12 @@ argument_specs:
           - restarted
           - started
           - stopped
-        description: keepalived_service_state
+        description: desired state of the keepalived service.
 
       keepalived_service_enabled:
         type: bool
         required: false
-        description: keepalived_service_enabled
+        description: whether the keepalived service is enabled at boot.
 
       keepalived_package_state:
         type: str
@@ -31,45 +30,45 @@ argument_specs:
           - present
           - absent
           - latest
-        description: keepalived_package_state
+        description: desired state of keepalived packages.
 
       keepalived_package:
         type: list
         elements: str
         required: false
-        description: keepalived_package
+        description: list of packages to install.
 
       keepalived_config_path:
         type: str
         required: false
-        description: keepalived_config_path
+        description: path to the keepalived configuration file.
 
       keepalived_config_virtual_ip:
         type: str
         required: false
-        description: keepalived_config_virtual_ip
+        description: virtual IP address to manage.
 
       keepalived_config_interface:
         type: str
         required: false
-        description: keepalived_config_interface
+        description: network interface for VRRP advertisements.
 
       keepalived_config_priority:
         type: int
         required: false
-        description: keepalived_config_priority
+        description: VRRP priority (higher wins election).
 
       keepalived_config_virtual_router_id:
         type: int
         required: false
-        description: keepalived_config_virtual_router_id
+        description: VRRP virtual router ID.
 
       keepalived_config_vrrp_instance:
         type: str
         required: false
-        description: keepalived_config_vrrp_instance
+        description: VRRP instance name.
 
       keepalived_config_state:
         type: str
         required: false
-        description: keepalived_config_state
+        description: initial VRRP state (MASTER or BACKUP).

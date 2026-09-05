@@ -1,0 +1,134 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy the Bumper web application (built from a git commit) as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        default: "{{ ansible_user }}"
+        description: system user for rootless podman operations.
+
+      bumper_proxy_enabled:
+        type: bool
+        required: false
+        default: false
+        description: enable HTTP proxy for image pulls.
+
+      bumper_proxy_http:
+        type: str
+        required: false
+        default: ""
+        description: HTTP proxy URL.
+
+      bumper_proxy_https:
+        type: str
+        required: false
+        default: ""
+        description: HTTPS proxy URL.
+
+      bumper_proxy_no_proxy:
+        type: str
+        required: false
+        default: ""
+        description: comma-separated list of proxy exclusions.
+
+      bumper_proxy_env:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: generated proxy environment entries.
+
+      bumper_network_enabled:
+        type: bool
+        required: false
+        default: true
+        description: create and manage the podman network.
+
+      bumper_network_driver:
+        type: str
+        required: false
+        default: bridge
+        description: podman network driver.
+
+      bumper_network_name:
+        type: str
+        required: false
+        default: bumper-internal
+        description: podman network name.
+
+      bumper_bind_ip:
+        type: str
+        required: false
+        default: "{{ ansible_facts['default_ipv4']['address'] }}"
+        description: host IP to bind exposed ports to.
+
+      bumper_port_map_enabled:
+        type: bool
+        required: false
+        default: true
+        description: expose container ports on the host.
+
+      bumper_port_map:
+        type: list
+        elements: str
+        required: false
+        default:
+          - "443:443"
+          - "1883:1883"
+          - "5223:5223"
+          - "8007:8007"
+          - "8443:8443"
+        description: host:container port mappings.
+
+      bumper_version:
+        type: str
+        required: false
+        default: latest
+        description: container image version.
+
+      bumper_commit:
+        type: str
+        required: false
+        default: "4438eb5e9ffa31b60385052102da68a3a18bf4b7"
+        description: git commit to build from.
+
+      bumper_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable podman auto-update for this container.
+
+      bumper_environment_vars:
+        type: dict
+        required: false
+        default:
+          WEB_SERVER_HTTPS_PORT: 8443
+          WEB_SERVER_LISTEN_PORT: 8007
+          MQTT_LISTEN_PORT_TLS: 443
+          MQTT_LISTEN_PORT: 1883
+          XMPP_LISTEN_PORT_TLS: 5223
+          DEBUG_BUMPER_VERBOSE: 2
+          DEBUG_BUMPER_LEVEL: INFO
+        description: extra environment variables injected into the container.
+
+      bumper_extra_files:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      bumper_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.
+
+      bumper_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional container entrypoint override.

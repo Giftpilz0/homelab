@@ -1,0 +1,153 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy Keycloak identity and access management as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        default: "{{ ansible_user }}"
+        description: system user for rootless podman operations.
+
+      keycloak_proxy_enabled:
+        type: bool
+        required: false
+        default: false
+        description: enable HTTP proxy for image pulls.
+
+      keycloak_proxy_http:
+        type: str
+        required: false
+        default: ""
+        description: HTTP proxy URL.
+
+      keycloak_proxy_https:
+        type: str
+        required: false
+        default: ""
+        description: HTTPS proxy URL.
+
+      keycloak_proxy_no_proxy:
+        type: str
+        required: false
+        default: ""
+        description: comma-separated list of proxy exclusions.
+
+      keycloak_proxy_env:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: generated proxy environment entries.
+
+      keycloak_network_enabled:
+        type: bool
+        required: false
+        default: true
+        description: create and manage the podman network.
+
+      keycloak_network_driver:
+        type: str
+        required: false
+        default: bridge
+        description: podman network driver.
+
+      keycloak_network_name:
+        type: str
+        required: false
+        default: keycloak-internal
+        description: podman network name.
+
+      keycloak_bind_ip:
+        type: str
+        required: false
+        default: "127.0.0.1"
+        description: host IP to bind exposed ports to.
+
+      keycloak_port_map_enabled:
+        type: bool
+        required: false
+        default: true
+        description: expose container ports on the host.
+
+      keycloak_port_map:
+        type: list
+        elements: str
+        required: false
+        default:
+          - "8080:8080"
+        description: host:container port mappings.
+
+      keycloak_version:
+        type: str
+        required: false
+        default: "26.7.2"
+        description: container image version.
+
+      keycloak_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable podman auto-update for this container.
+
+      keycloak_domain:
+        type: str
+        required: false
+        default: login.nixpi.de
+        description: external domain for the Keycloak instance.
+
+      keycloak_db_name:
+        type: str
+        required: false
+        default: keycloak
+        description: database name.
+
+      keycloak_db_host:
+        type: str
+        required: false
+        default: postgresql-pod
+        description: PostgreSQL container hostname.
+
+      keycloak_db_user:
+        type: str
+        required: false
+        default: keycloak
+        description: database user.
+
+      keycloak_db_password:
+        type: str
+        required: false
+        default: ""
+        description: database user password.
+
+      keycloak_admin_password:
+        type: str
+        required: false
+        default: ""
+        description: admin bootstrap password.
+
+      keycloak_environment_vars:
+        type: dict
+        required: false
+        default: {}
+        description: extra environment variables injected into the container.
+
+      keycloak_extra_files:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      keycloak_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.
+
+      keycloak_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional container entrypoint override.

@@ -1,0 +1,62 @@
+---
+argument_specs:
+  main:
+    short_description: Manage a local user account and its SSH authorized keys.
+    options:
+      user:
+        type: list
+        elements: dict
+        required: false
+        options:
+          user_username:
+            type: str
+            required: false
+            description: login name.
+          user_state:
+            type: str
+            required: false
+            choices:
+              - present
+              - absent
+            description: whether the user exists.
+          user_password:
+            type: str
+            required: false
+            description: plaintext password (hashed at runtime).
+          user_sudo_pwless:
+            type: bool
+            required: false
+            description: grant passwordless sudo.
+          user_groups:
+            type: list
+            elements: str
+            required: false
+            description: supplementary groups.
+          user_home:
+            type: bool
+            required: false
+            description: create home directory.
+          user_shell:
+            type: str
+            required: false
+            description: login shell.
+          user_comment:
+            type: str
+            required: false
+            description: GECOS comment field.
+          user_pub:
+            type: list
+            elements: str
+            required: false
+            description: SSH public keys to add to authorized_keys.
+          user_install_key_to_targets:
+            type: bool
+            required: false
+            description: also install keys on user_key_target_users.
+        description: list of user accounts to manage.
+
+      user_key_target_users:
+        type: list
+        elements: str
+        required: false
+        description: list of users that receive all user SSH public keys.

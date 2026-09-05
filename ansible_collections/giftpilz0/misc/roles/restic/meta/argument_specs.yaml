@@ -1,0 +1,122 @@
+---
+argument_specs:
+  main:
+    short_description: Install and configure restic/resticprofile for automated repository backups.
+    options:
+      resticprofile_version:
+        type: str
+        required: false
+        description: resticprofile release version.
+
+      rest_server_version:
+        type: str
+        required: false
+        description: rest-server release version.
+
+      restic_mode:
+        type: str
+        required: false
+        choices:
+          - client
+          - server
+          - both
+        description: role operating mode.
+
+      restic_user:
+        type: str
+        required: false
+        description: system user for restic operations.
+
+      restic_user_home:
+        type: str
+        required: false
+        description: home directory of the restic user.
+
+      restic_config_dir:
+        type: str
+        required: false
+        description: directory for resticprofile configuration.
+
+      restic_cache_dir:
+        type: str
+        required: false
+        description: directory for restic cache data.
+
+      restic_log_dir:
+        type: str
+        required: false
+        description: directory for restic log files.
+
+      restic_password_dir:
+        type: str
+        required: false
+        description: directory for repository password files.
+
+      restic_ssh_key_type:
+        type: str
+        required: false
+        description: SSH key type for backup connections.
+
+      restic_ssh_key_path:
+        type: str
+        required: false
+        description: path to the SSH private key.
+
+      restic_server_repo_base:
+        type: str
+        required: false
+        description: base directory for server-side repositories.
+
+      restic_server_host:
+        type: str
+        required: false
+        description: hostname or IP of the rest-server.
+
+      restic_repositories:
+        type: list
+        elements: dict
+        required: false
+        options:
+          name:
+            type: str
+            required: false
+            description: repository name.
+          password:
+            type: str
+            required: false
+            description: repository password.
+          backup_paths:
+            type: list
+            elements: str
+            required: false
+            description: paths to back up.
+          exclude_patterns:
+            type: list
+            elements: str
+            required: false
+            description: patterns to exclude from backup.
+          schedule:
+            type: str
+            required: false
+            description: systemd calendar schedule (e.g. *-*-* 02:00:00).
+          retention:
+            type: dict
+            required: false
+            options:
+              keep_daily:
+                type: int
+                required: false
+                description: number of daily snapshots to keep.
+              keep_weekly:
+                type: int
+                required: false
+                description: number of weekly snapshots to keep.
+              keep_monthly:
+                type: int
+                required: false
+                description: number of monthly snapshots to keep.
+              keep_yearly:
+                type: int
+                required: false
+                description: number of yearly snapshots to keep.
+        description: list of restic repositories to manage.

@@ -1,13 +1,13 @@
 ---
 argument_specs:
   main:
-    short_description: The main entry point for the pcp role.
+    short_description: Install and enable Performance Co-Pilot for system performance monitoring.
     options:
       pcp_service_name:
         type: list
         elements: str
         required: false
-        description: pcp_service_name
+        description: list of PCP systemd services to manage.
 
       pcp_service_state:
         type: str
@@ -17,12 +17,12 @@ argument_specs:
           - restarted
           - started
           - stopped
-        description: pcp_service_state
+        description: desired state of PCP services.
 
       pcp_service_enabled:
         type: bool
         required: false
-        description: pcp_service_enabled
+        description: whether PCP services are enabled at boot.
 
       pcp_package_state:
         type: str
@@ -31,10 +31,10 @@ argument_specs:
           - present
           - absent
           - latest
-        description: pcp_package_state
+        description: desired state of PCP packages.
 
       pcp_package:
         type: list
         elements: str
         required: false
-        description: pcp_package
+        description: list of packages to install.

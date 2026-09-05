@@ -1,0 +1,175 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy PostgreSQL as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        default: "{{ ansible_user }}"
+        description: system user for rootless podman operations.
+
+      postgresql_network_enabled:
+        type: bool
+        required: false
+        default: true
+        description: create and manage the podman network.
+
+      postgresql_network_name:
+        type: str
+        required: false
+        default: postgresql-internal
+        description: podman network name.
+
+      postgresql_bind_ip:
+        type: str
+        required: false
+        default: "127.0.0.1"
+        description: host IP to bind exposed ports to.
+
+      postgresql_port_map_enabled:
+        type: bool
+        required: false
+        default: false
+        description: expose container ports on the host.
+
+      postgresql_port_map:
+        type: list
+        elements: str
+        required: false
+        default:
+          - "5432:5432"
+        description: host:container port mappings.
+
+      postgresql_version:
+        type: str
+        required: false
+        default: "18.6-alpine"
+        description: container image version.
+
+      postgresql_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable podman auto-update for PostgreSQL.
+
+      postgresql_backup_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable podman auto-update for the backup container.
+
+      postgresql_admin_database:
+        type: str
+        required: false
+        default: postgres
+        description: administrator database created by the PostgreSQL image.
+
+      postgresql_admin_user:
+        type: str
+        required: false
+        default: postgres
+        description: administrator user created by the PostgreSQL image.
+
+      postgresql_admin_password:
+        type: str
+        required: false
+        default: ""
+        description: password for the PostgreSQL administrator user.
+
+      postgresql_databases:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: secondary databases and users to provision and include in backups; each entry has name, user, and password.
+
+      postgresql_backup_schedule_times:
+        type: str
+        required: false
+        default: "03:00"
+        description: time of day to run backup (HH:MM format).
+
+      postgresql_backup_retention_days:
+        type: int
+        required: false
+        default: 7
+        description: number of days to keep backups.
+
+      postgresql_backup_compression:
+        type: int
+        required: false
+        default: 6
+        description: gzip compression level (1-9).
+
+      postgresql_extra_files:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      postgresql_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.
+
+      postgresql_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional PostgreSQL container entrypoint override.
+
+      postgresql_backup_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional PostgreSQL backup container entrypoint override.
+
+      postgresql_proxy_enabled:
+        type: bool
+        required: false
+        default: false
+        description: enable HTTP proxy for image pulls.
+
+      postgresql_proxy_http:
+        type: str
+        required: false
+        default: ""
+        description: HTTP proxy URL.
+
+      postgresql_proxy_https:
+        type: str
+        required: false
+        default: ""
+        description: HTTPS proxy URL.
+
+      postgresql_proxy_no_proxy:
+        type: str
+        required: false
+        default: ""
+        description: comma-separated list of proxy exclusions.
+
+      postgresql_proxy_env:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: generated proxy environment entries.
+
+      postgresql_network_driver:
+        type: str
+        required: false
+        default: bridge
+        description: podman network driver.
+
+      postgresql_environment_vars:
+        type: dict
+        required: false
+        default:
+          POSTGRES_DB: "{{ postgresql_admin_database }}"
+          POSTGRES_USER: "{{ postgresql_admin_user }}"
+          POSTGRES_PASSWORD: "{{ postgresql_admin_password }}"
+        description: extra environment variables for the container.
