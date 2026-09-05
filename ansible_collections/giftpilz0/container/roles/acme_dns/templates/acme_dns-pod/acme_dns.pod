@@ -1,0 +1,19 @@
+[Unit]
+Description=ACME DNS Pod
+
+[Pod]
+PodName=acme_dns-pod
+
+Network={{ acme_dns_network_name }}
+
+{% if acme_dns_port_map_enabled %}
+{% for port_mapping in acme_dns_port_map %}
+PublishPort={{ acme_dns_bind_ip }}:{{ port_mapping }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

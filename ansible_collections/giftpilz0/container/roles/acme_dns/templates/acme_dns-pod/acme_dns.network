@@ -1,0 +1,9 @@
+{% if acme_dns_network_enabled %}
+[Unit]
+Description=ACME DNS Internal Network
+
+[Network]
+NetworkName={{ acme_dns_network_name }}
+Driver={{ acme_dns_network_driver }}
+Internal={{ acme_dns_network_internal | bool | lower }}
+{% endif %}

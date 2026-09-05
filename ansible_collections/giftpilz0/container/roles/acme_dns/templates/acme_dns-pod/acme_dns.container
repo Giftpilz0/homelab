@@ -1,0 +1,37 @@
+[Unit]
+Description=ACME DNS Container
+
+[Container]
+ContainerName=acme_dns
+Image=docker.io/joohoi/acme-dns:{{ acme_dns_version }}
+
+Pod=acme_dns.pod
+
+{% if acme_dns_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+{% if acme_dns_entrypoint %}
+Entrypoint={{ acme_dns_entrypoint }}
+{% endif %}
+
+{% if acme_dns_environment_vars is defined %}
+{% for env_name, env_value in acme_dns_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% endif %}
+
+{% if acme_dns_proxy_enabled %}
+{% for env_var in acme_dns_proxy_env %}
+Environment={{ env_var }}
+{% endfor %}
+{% endif %}
+
+Volume=acme_dns-data.volume:/var/lib/acme-dns
+Volume=%h/.config/containers/systemd/acme_dns-pod/config/config.cfg:/etc/acme-dns/config.cfg:ro,Z
+
+{% for item in (acme_dns_extra_files | default([]) + acme_dns_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume={{ item.source | default('%h/.config/containers/systemd/acme_dns-pod/' ~ item.dest) }}:{{ item.mount }}:Z
+{% endfor %}
+
+[Service]
+Restart=always

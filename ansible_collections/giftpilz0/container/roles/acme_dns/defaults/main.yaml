@@ -1,0 +1,84 @@
+---
+podman_user: "{{ ansible_user }}"
+
+# Proxy
+acme_dns_proxy_enabled: false
+acme_dns_proxy_http: ""
+acme_dns_proxy_https: ""
+acme_dns_proxy_no_proxy: ""
+acme_dns_proxy_env: "{{ (['https_proxy=' ~ acme_dns_proxy_https] + (['http_proxy=' ~ acme_dns_proxy_http] if acme_dns_proxy_http else []) + (['no_proxy='
+  ~ acme_dns_proxy_no_proxy] if acme_dns_proxy_no_proxy else [])) if acme_dns_proxy_enabled else [] }}"
+
+# Network
+acme_dns_network_enabled: true
+acme_dns_network_driver: "bridge"
+acme_dns_network_internal: false
+
+# Network to join even when _network_enabled: false
+acme_dns_network_name: "acme_dns-internal"
+
+# The DNS service (53/udp + 53/tcp) must answer queries from the public internet
+# for the NS delegation of the auth zone, so it is published on the host's
+# primary interface (not loopback). The REST API (port 80) is deliberately NOT
+# published: Traefik reaches it directly over the shared Podman network using
+# the pod name and pod port, e.g. http://acme_dns-pod:80.
+acme_dns_bind_ip: "{{ ansible_facts['default_ipv4']['address'] }}"
+acme_dns_port_map_enabled: true
+acme_dns_port_map:
+  - "53:53"
+  - "53:53/udp"
+
+# Versions
+# renovate: datasource=docker depName=joohoi/acme-dns
+acme_dns_version: "v2.0.2"
+
+# Autoupdate
+acme_dns_autoupdate: true
+
+# Config
+# The auth domain served by acme-dns. Delegate this zone at your DNS provider
+# with an NS record for <domain> pointing to <nsname>. Prefer an
+# out-of-bailiwick name (for example, acme.nixpi.de) when the public IP changes,
+# so the nameserver address remains in the parent zone and is updated by DDNS.
+acme_dns_domain: "auth.example.org"
+acme_dns_nsname: "ns1.example.org"
+acme_dns_nsadmin: "admin.example.org"
+acme_dns_records:
+  - "{{ acme_dns_domain }}. NS {{ acme_dns_nsname }}."
+
+# REST API
+acme_dns_disable_registration: false
+acme_dns_api_port: "80"
+
+# Logging
+acme_dns_loglevel: "info"
+acme_dns_logformat: "json"
+
+# Environment
+acme_dns_environment_vars: {}
+
+# Copy arbitrary extra files/directories from the inventory into this role's
+# quadlet directory (relative to the acme_dns-pod dir).
+# Each entry supports src (controller path) or source (target path), dest,
+# optional mount, mode, and template (files only).
+# Example:
+#   acme_dns_extra_files:
+#     - src: "assets/example/config.yaml"
+#       dest: "config/example.yaml"
+#       mode: "0640"
+#       template: true
+#       mount: "/etc/example/config.yaml"
+#     - source: "/srv/example/license.key"
+#       dest: "host-license.key"
+#       mount: "/run/secrets/license.key"
+#   acme_dns_extra_dirs:
+#     - src: "assets/example/plugins/"
+#       dest: "plugins"
+#       mount: "/usr/local/share/example/plugins"
+#     - source: "/srv/example/plugins"
+#       dest: "host-plugins"
+#       mount: "/usr/local/share/example/host-plugins"
+acme_dns_extra_files: []
+acme_dns_extra_dirs: []
+
+acme_dns_entrypoint: ""
