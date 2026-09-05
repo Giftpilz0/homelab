@@ -1,0 +1,305 @@
+---
+argument_specs:
+  main:
+    short_description: Issue and renew ACME certificates with Lego on Linux or Windows.
+    options:
+      lego_state_path:
+        type: path
+        required: false
+        description: private shared Lego state directory containing account keys and certificates.
+
+      lego_service_user:
+        type: str
+        required: false
+        description: Linux account used to run Lego.
+
+      lego_service_group:
+        type: str
+        required: false
+        description: Linux group used to run Lego.
+
+      lego_tag:
+        type: str
+        required: false
+        description: Lego release version.
+
+      lego_arch:
+        type: str
+        required: false
+        description: Lego release architecture.
+
+      lego_path:
+        type: path
+        required: false
+        description: Lego installation directory.
+
+      lego_url:
+        type: str
+        required: false
+        description: Linux Lego archive URL.
+
+      lego_windows_url:
+        type: str
+        required: false
+        description: Windows Lego archive URL.
+
+      lego_windows_state_acl:
+        type: list
+        elements: dict
+        required: false
+        description: Windows identities allowed to access private Lego state.
+        options:
+          user:
+            type: str
+            required: true
+            description: Windows identity receiving access.
+          rights:
+            type: str
+            required: true
+            description: Windows filesystem rights to grant.
+
+      lego_binary:
+        type: path
+        required: false
+        description: Lego executable path.
+
+      lego_bin_state:
+        type: str
+        choices:
+          - present
+          - skip
+        required: false
+        description: whether to install Lego or use an existing binary.
+
+      lego_issue_on_deploy:
+        type: bool
+        required: false
+        default: false
+        description: issue missing certificates immediately when the role is applied.
+
+      lego_renewal_threshold:
+        type: int
+        required: false
+        default: 30
+        description: renew certificates when fewer than this many days remain.
+
+      lego_acme_email:
+        type: str
+        required: false
+        description: ACME account email address.
+
+      lego_acme_server:
+        type: str
+        required: false
+        description: ACME directory URL.
+
+      lego_acme_dns_resolvers:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: DNS resolvers passed to Lego for DNS-01 validation.
+
+      lego_certificates:
+        type: list
+        elements: dict
+        required: false
+        description: certificates to issue; each entry must define domains and a challenge.
+        options:
+          name:
+            type: str
+            required: true
+            description: unique identifier used for generated environment files and deployment markers.
+
+          domains:
+            type: list
+            elements: str
+            required: true
+            description: domain names included in the certificate; the first domain names the output files.
+
+          key_type:
+            type: str
+            required: false
+            choices:
+              - RSA2048
+              - RSA3072
+              - RSA4096
+              - EC256
+              - EC384
+              - EC521
+            description: Lego private-key type.
+
+          account_id:
+            type: str
+            required: false
+            description: optional ACME account directory identifier when one email uses multiple accounts.
+
+          renewal:
+            type: dict
+            required: false
+            description: per-certificate renewal settings.
+            options:
+              threshold:
+                type: int
+                required: false
+                description: override the global renewal threshold in days.
+
+          challenge:
+            type: dict
+            required: true
+            description: ACME challenge method and provider credentials.
+            options:
+              type:
+                type: str
+                required: true
+                choices:
+                  - dns-01
+                  - http-01
+                  - tls-alpn-01
+                description: ACME validation method.
+              provider:
+                type: str
+                required: false
+                description: Lego DNS provider name; required for dns-01.
+              environment:
+                type: dict
+                required: false
+                description: provider environment variables, normally populated from Ansible Vault.
+
+          deploy:
+            type: dict
+            required: false
+            description: optional certificate deployment targets.
+            options:
+              pem:
+                type: dict
+                required: false
+                description: Linux PEM deployment.
+                options:
+                  directory:
+                    type: path
+                    required: true
+                    description: target directory for fullchain.pem and privkey.pem.
+                  owner:
+                    type: str
+                    required: false
+                    description: owner of the deployed files and directory.
+                  group:
+                    type: str
+                    required: false
+                    description: group of the deployed files and directory.
+                  directory_mode:
+                    type: str
+                    required: false
+                    description: target directory mode.
+                  certificate_mode:
+                    type: str
+                    required: false
+                    description: fullchain.pem mode.
+                  private_key_mode:
+                    type: str
+                    required: false
+                    description: privkey.pem mode.
+              pfx:
+                type: dict
+                required: false
+                description: PFX deployment for Windows or applications that consume a PFX file.
+                options:
+                  path:
+                    type: path
+                    required: true
+                    description: target PFX path.
+                  password:
+                    type: str
+                    required: true
+                    no_log: true
+                    description: password used to protect the PFX.
+                  owner:
+                    type: str
+                    required: false
+                    description: owner of the PFX on Linux.
+                  group:
+                    type: str
+                    required: false
+                    description: group of the PFX on Linux.
+                  mode:
+                    type: str
+                    required: false
+                    description: mode of the PFX on Linux.
+                  directory_mode:
+                    type: str
+                    required: false
+                    description: parent directory mode on Linux.
+              windows_store:
+                type: dict
+                required: false
+                description: optional Windows certificate-store import for a deployed PFX.
+                options:
+                  store_location:
+                    type: str
+                    required: false
+                    choices:
+                      - CurrentUser
+                      - LocalMachine
+                    description: Windows certificate-store location.
+                  store_name:
+                    type: str
+                    required: false
+                    description: Windows certificate-store name.
+
+          hooks:
+            type: dict
+            required: false
+            description: commands run only after a changed certificate is deployed.
+            options:
+              changed:
+                type: list
+                elements: dict
+                required: false
+                options:
+                  type:
+                    type: str
+                    required: false
+                    choices:
+                      - command
+                      - powershell
+                    description: hook interpreter.
+                  command:
+                    type: str
+                    required: false
+                    description: shell command used by a Linux hook.
+                  script:
+                    type: str
+                    required: false
+                    description: PowerShell script used by a Windows hook.
+
+          extra_args:
+            type: list
+            elements: str
+            required: false
+            description: additional Lego arguments for this certificate.
+
+      lego_default_deploy_directory_mode:
+        type: str
+        required: false
+        default: "0750"
+        description: default mode for Linux certificate deployment directories.
+
+      lego_default_deploy_file_mode:
+        type: str
+        required: false
+        default: "0640"
+        description: default mode for Linux deployed certificate files.
+
+      lego_default_deploy_private_key_mode:
+        type: str
+        required: false
+        default: "0640"
+        description: default mode for Linux deployed private keys.
+
+      lego_extra_args:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: additional Lego arguments passed to every certificate.

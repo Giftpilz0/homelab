@@ -1,0 +1,83 @@
+---
+- name: "Lego: Create program directories"
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ lego_state_path }}"
+    - "{{ lego_path }}"
+
+- name: "Lego: Protect Windows Lego state"
+  ansible.windows.win_acl_inheritance:
+    path: "{{ lego_state_path }}"
+    state: absent
+  when: lego_windows_state_acl | length > 0
+
+- name: "Lego: Grant Windows Lego state access"
+  ansible.windows.win_acl:
+    path: "{{ lego_state_path }}"
+    user: "{{ item.user }}"
+    rights: "{{ item.rights }}"
+    type: allow
+    state: present
+    inherit: ContainerInherit, ObjectInherit
+    propagation: None
+  loop: "{{ lego_windows_state_acl }}"
+  loop_control:
+    label: "{{ item.user }}"
+
+- name: "Lego: Download Windows binary"
+  ansible.windows.win_get_url:
+    url: "{{ lego_windows_url }}"
+    dest: "{{ lego_path }}\\lego.zip"
+  when: lego_bin_state != 'skip'
+
+- name: "Lego: Extract Windows binary"
+  community.windows.win_unzip:
+    src: "{{ lego_path }}\\lego.zip"
+    dest: "{{ lego_path }}"
+    creates: "{{ lego_path }}\\lego.exe"
+  when: lego_bin_state != 'skip'
+
+- name: "Lego: Create PFX deployment directories"
+  ansible.windows.win_file:
+    path: "{{ item.deploy.pfx.path | regex_replace('\\\\[^\\\\]+$', '') }}"
+    state: directory
+  loop: "{{ lego_certificates }}"
+  when: item.deploy is defined and item.deploy.pfx is defined
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: "Lego: Create certificate environment files"
+  ansible.windows.win_template:
+    src: certificate.env.ps1.j2
+    dest: "{{ lego_state_path }}\\{{ item.name }}.ps1"
+  loop: "{{ lego_certificates }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: "Lego: Install renewal script"
+  ansible.windows.win_template:
+    src: renew-windows.ps1.j2
+    dest: "{{ lego_path }}\\renew.ps1"
+
+- name: "Lego: Register renewal task"
+  community.windows.win_scheduled_task:
+    name: Lego Certificate Renewal
+    description: Renew ACME certificates managed by Lego
+    actions:
+      - path: powershell.exe
+        arguments: "-NoProfile -NonInteractive -ExecutionPolicy Bypass -File \"{{ lego_path }}\\renew.ps1\""
+    triggers:
+      - type: daily
+        start_boundary: "2024-01-01T03:00:00"
+        random_delay: PT1H
+    username: SYSTEM
+    run_level: highest
+    enabled: true
+    state: present
+
+- name: "Lego: Issue certificates on deployment"
+  ansible.windows.win_command:
+    cmd: powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "{{ lego_path }}\renew.ps1"
+  when: lego_issue_on_deploy

@@ -1,96 +1,36 @@
 ---
-# tasks file for lego
+- name: "Lego: Validate certificate definitions"
+  ansible.builtin.assert:
+    that:
+      - lego_certificates | map(attribute='name') | list | unique | length == lego_certificates | length
+      - item.name is match('^[A-Za-z0-9_-]+$')
+      - item.domains is defined
+      - item.domains | length > 0
+      - item.challenge is defined
+      - item.challenge.type in ['dns-01', 'http-01', 'tls-alpn-01']
+      - item.challenge.type != 'dns-01' or item.challenge.provider is defined
+      - item.deploy is not defined or item.deploy.pem is defined or item.deploy.pfx is defined
+      - item.deploy is not defined or item.deploy.windows_store is not defined or item.deploy.pfx is defined
+      - item.deploy is not defined or item.deploy.pfx is not defined or item.deploy.pfx.password is defined
+      - item.deploy is not defined or item.deploy.pem is not defined or ansible_system == 'Linux'
+      - item.deploy is not defined or item.deploy.windows_store is not defined or ansible_os_family == 'Windows'
+      - lego_acme_email | length > 0
+    fail_msg: "Invalid Lego certificate definition or missing lego_acme_email: {{ item.name | default('unnamed') }}"
+  loop: "{{ lego_certificates }}"
+  loop_control:
+    label: "{{ item.name | default('unnamed') }}"
 
-######################################
-### packages
+- name: "Lego: Configure Linux"
+  ansible.builtin.include_tasks: linux.yaml
+  when: ansible_system == 'Linux'
 
-- name: "Lego: Gather package facts"
-  ansible.builtin.package_facts:
-    manager: auto
+- name: "Lego: Configure Windows"
+  ansible.builtin.include_tasks: windows.yaml
+  when: ansible_os_family == 'Windows'
 
-- name: "Lego: Manage dependencies"
-  become: true
-  ansible.builtin.package:
-    name: "{{ lego_package }}"
-    state: "{{ lego_package_state }}"
-
-- name: "Lego: Manage directory"
-  become: true
-  ansible.builtin.file:
-    name: "{{ lego_path }}"
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
+- name: "Lego: Reject unsupported operating system"
+  ansible.builtin.fail:
+    msg: "The Lego role supports Linux and Windows only (detected {{ ansible_system }})."
   when:
-    - lego_bin_state != 'skip'
-
-- name: "Lego: Download"
-  become: true
-  ansible.builtin.unarchive:
-    src: "{{ lego_url }}"
-    dest: "{{ lego_path }}"
-    owner: root
-    group: root
-    mode: "0755"
-    remote_src: true
-    extra_opts:
-      - --add-file
-      - lego
-  when:
-    - lego_bin_state != 'skip'
-
-######################################
-### config
-
-- name: "Lego: Manage directory"
-  become: true
-  ansible.builtin.file:
-    name: "{{ lego_cert_path }}"
-    state: directory
-    owner: root
-    group: root
-    mode: "0700"
-  when:
-    - lego_bin_state != 'skip'
-
-- name: "Lego: Manage lego systemd files"
-  become: true
-  ansible.builtin.template:
-    src: "{{ item.src }}"
-    dest: "/etc/systemd/system/{{ item.dest }}"
-    owner: root
-    group: root
-    mode: "0644"
-  loop:
-    - { src: "lego-manage.service.j2", dest: "lego-manage.service" }
-    - { src: "lego-manage.timer.j2", dest: "lego-manage.timer" }
-  when:
-    - lego_package_state != 'skip'
-
-- name: "Lego: Systemd daemon-reload"
-  become: true
-  ansible.builtin.systemd_service:
-    daemon_reload: true
-
-- name: "Lego: Manage lego systemd files"
-  become: true
-  ansible.builtin.template:
-    src: manage_lego_certs.sh
-    dest: "{{ lego_manager_script_path }}"
-    owner: root
-    group: root
-    mode: "0755"
-
-######################################
-### services
-
-- name: "Lego: Manage services"
-  become: true
-  ansible.builtin.systemd:
-    name: "{{ item }}"
-    state: "{{ lego_service_state }}"
-    enabled: "{{ lego_service_enabled }}"
-  loop: "{{ lego_service_name }}"
-  when:
-    - lego_package_state != 'absent'
+    - ansible_system != 'Linux'
+    - ansible_os_family != 'Windows'

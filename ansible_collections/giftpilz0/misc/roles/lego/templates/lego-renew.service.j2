@@ -1,0 +1,10 @@
+[Unit]
+Description=Renew ACME certificates with Lego
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/lego-renew
+User=root
+Group=root

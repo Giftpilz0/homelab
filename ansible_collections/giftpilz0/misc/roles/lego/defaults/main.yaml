@@ -1,28 +1,43 @@
 ---
-# defaults file for lego
+# Shared Lego state. Keep this directory private; it contains ACME account keys
+# and provider credentials such as the acme-dns account JSON.
+lego_state_path: "{{ 'C:\\ProgramData\\lego' if ansible_os_family == 'Windows' else '/var/lib/lego' }}"
+lego_service_user: lego
+lego_service_group: lego
 
-lego_keytype: rsa4096
-lego_cert_path: /etc/ssl/lego
-lego_acme_email: ""
-lego_dns_resolver: 8.8.8.8:53
-lego_acme_provider: cloudflare
-lego_cloudflare_api_key:
-lego_manager_script_path: /usr/local/bin/manage_lego_certs.sh
-
-lego_acme_domains: ""
-
-lego_service_state: started
-lego_service_enabled: true
-lego_service_name:
-  - lego-manage.service
-  - lego-manage.timer
-
-lego_bin_state: present
-lego_url: https://github.com/go-acme/lego/releases/download/v{{ lego_tag }}/lego_v{{ lego_tag }}_linux_{{ lego_arch }}.tar.gz
-lego_arch: amd64
+# Binary
 # renovate: datasource=github-releases depName=go-acme/lego extractVersion=^v(?<version>.*)$
-lego_tag: 5.3.1
-lego_path: /usr/local/bin
+lego_tag: 5.4.1
+lego_arch: amd64
+lego_path: "{{ 'C:\\ProgramData\\lego\\bin' if ansible_os_family == 'Windows' else '/usr/local/bin' }}"
+lego_binary: "{{ lego_path }}/lego"
+lego_bin_state: present
+lego_url: "https://github.com/go-acme/lego/releases/download/v{{ lego_tag }}/lego_v{{ lego_tag }}_linux_{{ lego_arch }}.tar.gz"
+lego_windows_url: "https://github.com/go-acme/lego/releases/download/v{{ lego_tag }}/lego_v{{ lego_tag }}_windows_{{ lego_arch }}.zip"
 
-lego_package: openssl
-lego_package_state: present
+# Issuance and renewal
+lego_issue_on_deploy: false
+lego_renewal_threshold: 30
+lego_acme_email: ""
+lego_acme_server: "https://acme-v02.api.letsencrypt.org/directory"
+lego_acme_dns_resolvers: []
+
+# Each item may define challenge.type as dns-01, http-01, or tls-alpn-01.
+# Provider credentials belong in challenge.environment and should normally be
+# supplied from Vault/SOPS variables.
+lego_certificates: []
+
+# Default deployment permissions for Linux PEM files.
+lego_default_deploy_directory_mode: "0750"
+lego_default_deploy_file_mode: "0640"
+lego_default_deploy_private_key_mode: "0640"
+
+# Windows identities allowed to access private Lego state.
+lego_windows_state_acl:
+  - user: SYSTEM
+    rights: FullControl
+  - user: Administrators
+    rights: FullControl
+
+# Optional extra arguments passed to every lego invocation.
+lego_extra_args: []

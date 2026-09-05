@@ -22,3 +22,5 @@ collections:
 
   - name: containers.podman
   - name: ansible.posix
+  - name: ansible.windows
+  - name: community.windows
