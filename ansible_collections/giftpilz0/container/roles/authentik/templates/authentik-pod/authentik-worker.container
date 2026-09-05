@@ -9,6 +9,10 @@ Exec=worker
 
 Pod=authentik.pod
 
+{% if authentik_worker_entrypoint %}
+Entrypoint={{ authentik_worker_entrypoint }}
+{% endif %}
+
 {% if authentik_worker_autoupdate %}
 AutoUpdate=registry
 {% endif %}

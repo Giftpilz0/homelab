@@ -7,6 +7,10 @@ Image=docker.io/library/postgres:{{ postgresql_version }}
 
 Pod=postgresql.pod
 
+{% if postgresql_entrypoint %}
+Entrypoint={{ postgresql_entrypoint }}
+{% endif %}
+
 {% if postgresql_autoupdate %}
 AutoUpdate=registry
 {% endif %}
@@ -24,6 +28,10 @@ Environment={{ env_var }}
 {% endif %}
 
 Volume=postgresql-data.volume:/var/lib/postgresql
+Volume=%h/.config/containers/systemd/postgresql-pod/config/init-databases.sql:/docker-entrypoint-initdb.d/10-databases.sql:ro,Z
 
+{% for item in (postgresql_extra_files | default([]) + postgresql_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume={{ item.source | default('%h/.config/containers/systemd/postgresql-pod/' ~ item.dest) }}:{{ item.mount }}:Z
+{% endfor %}
 [Service]
 Restart=always

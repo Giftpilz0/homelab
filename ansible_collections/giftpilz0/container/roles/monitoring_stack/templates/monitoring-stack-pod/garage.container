@@ -7,6 +7,10 @@ Image=docker.io/dxflrs/garage:{{ monitoring_stack_garage_version }}
 
 Pod=monitoring-stack.pod
 
+{% if monitoring_stack_garage_entrypoint %}
+Entrypoint={{ monitoring_stack_garage_entrypoint }}
+{% endif %}
+
 {% if monitoring_stack_garage_autoupdate %}
 AutoUpdate=registry
 {% endif %}

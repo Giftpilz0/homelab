@@ -1,17 +1,10 @@
 ---
+## Primary
+# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
-
-# Proxy
-monitoring_stack_proxy_enabled: false
-monitoring_stack_proxy_http: ""
-monitoring_stack_proxy_https: ""
-monitoring_stack_proxy_no_proxy: ""
-monitoring_stack_proxy_env: "{{ (['https_proxy=' ~ monitoring_stack_proxy_https] + (['http_proxy=' ~ monitoring_stack_proxy_http] if monitoring_stack_proxy_http else []) + (['no_proxy=' ~ monitoring_stack_proxy_no_proxy] if monitoring_stack_proxy_no_proxy else [])) if monitoring_stack_proxy_enabled else [] }}"
 
 # Network
 monitoring_stack_network_enabled: true
-monitoring_stack_network_driver: "bridge"
-monitoring_stack_network_internal: false
 monitoring_stack_network_name: "monitoring-stack-internal"
 
 # Port mapping: host_ip:host_port:container_port
@@ -19,14 +12,13 @@ monitoring_stack_network_name: "monitoring-stack-internal"
 monitoring_stack_bind_ip: "127.0.0.1"
 monitoring_stack_port_map_enabled: false
 monitoring_stack_port_map: []
-
 # Versions
 # renovate: datasource=docker depName=dxflrs/garage
 monitoring_stack_garage_version: "v2.3.0"
 # renovate: datasource=docker depName=grafana/mimir
-monitoring_stack_mimir_version: "3.1.4"
+monitoring_stack_mimir_version: "3.2.0"
 # renovate: datasource=docker depName=grafana/loki
-monitoring_stack_loki_version: "3.6.13"
+monitoring_stack_loki_version: "3.7.6"
 # renovate: datasource=docker depName=persesdev/perses
 monitoring_stack_perses_version: "v0.54.0-rc.1"
 
@@ -79,22 +71,15 @@ monitoring_stack_mimir_ingestion_rate: 100000
 monitoring_stack_mimir_max_global_series_per_user: 10000000
 monitoring_stack_mimir_out_of_order_time_window: "1h"
 
-monitoring_stack_mimir_environment_vars:
-  GOMAXPROCS: "2"
-
 # Loki
 # Docs: https://grafana.com/docs/loki/latest/configure/
 monitoring_stack_loki_http_port: 3100
 monitoring_stack_loki_grpc_port: 9096
 monitoring_stack_loki_log_level: "warn"
 
-monitoring_stack_loki_environment_vars:
-  GOMAXPROCS: "2"
-
 # Perses
 # Docs: https://perses.dev/perses/docs/
 monitoring_stack_perses_http_port: 8080
-monitoring_stack_perses_environment_vars: {}
 monitoring_stack_perses_oidc_enabled: true
 monitoring_stack_perses_oidc_client_id: perses
 monitoring_stack_perses_oidc_client_secret: ""
@@ -107,3 +92,54 @@ monitoring_stack_loki_basic_auth_user: alloy
 monitoring_stack_loki_basic_auth_hash: ""
 monitoring_stack_mimir_basic_auth_user: alloy
 monitoring_stack_mimir_basic_auth_hash: ""
+
+# Copy arbitrary extra files/directories from the inventory into this role's
+# quadlet directory (relative to the <role>-pod dir).
+# Each entry supports src (controller path) or source (target path), dest,
+# optional mount, mode, and template (files only).
+# Example:
+#   monitoring_stack_extra_files:
+#     - src: "assets/example/config.yaml"
+#       dest: "config/example.yaml"
+#       mode: "0640"
+#       template: true
+#       mount: "/etc/example/config.yaml"
+#     - source: "/srv/example/license.key"
+#       dest: "host-license.key"
+#       mount: "/run/secrets/license.key"
+#   monitoring_stack_extra_dirs:
+#     - src: "assets/example/plugins/"
+#       dest: "plugins"
+#       mount: "/usr/local/share/example/plugins"
+#     - source: "/srv/example/plugins"
+#       dest: "host-plugins"
+#       mount: "/usr/local/share/example/host-plugins"
+monitoring_stack_extra_files: []
+monitoring_stack_extra_dirs: []
+
+# Optional container entrypoint overrides.
+monitoring_stack_garage_entrypoint: ""
+monitoring_stack_mimir_entrypoint: ""
+monitoring_stack_loki_entrypoint: ""
+monitoring_stack_perses_entrypoint: ""
+
+## Advanced
+# Proxy
+monitoring_stack_proxy_enabled: false
+monitoring_stack_proxy_http: ""
+monitoring_stack_proxy_https: ""
+monitoring_stack_proxy_no_proxy: ""
+monitoring_stack_proxy_env: "{{ (['https_proxy=' ~ monitoring_stack_proxy_https] + (['http_proxy=' ~ monitoring_stack_proxy_http] if monitoring_stack_proxy_http else
+  []) + (['no_proxy=' ~ monitoring_stack_proxy_no_proxy] if monitoring_stack_proxy_no_proxy else [])) if monitoring_stack_proxy_enabled else [] }}"
+
+# Network driver
+monitoring_stack_network_driver: "bridge"
+
+# Environment
+monitoring_stack_mimir_environment_vars:
+  GOMAXPROCS: "2"
+
+monitoring_stack_loki_environment_vars:
+  GOMAXPROCS: "2"
+
+monitoring_stack_perses_environment_vars: {}

@@ -1,20 +1,11 @@
 ---
+## Primary
+# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
-# Proxy
-forgejo_proxy_enabled: false
-forgejo_proxy_http: ""
-forgejo_proxy_https: ""
-forgejo_proxy_no_proxy: ""
-forgejo_proxy_env: "{{ (['https_proxy=' ~ forgejo_proxy_https] + (['http_proxy=' ~ forgejo_proxy_http] if forgejo_proxy_http else []) + (['no_proxy=' ~ forgejo_proxy_no_proxy]
-  if forgejo_proxy_no_proxy else [])) if forgejo_proxy_enabled else [] }}"
-
 # Network
-forgejo_network_enabled: true
-forgejo_network_driver: "bridge"
-forgejo_network_internal: false
-
 # Network to join even when _network_enabled: false
+forgejo_network_enabled: true
 forgejo_network_name: "forgejo-internal"
 
 # Optional: expose this service directly on the host, bypassing Traefik.
@@ -29,14 +20,13 @@ forgejo_port_map:
   - "3000:3000"
   - "2222:2222"
 
-# Versions
+# Version
 # renovate: datasource=docker depName=codeberg.org/forgejo/forgejo
-forgejo_version: "16.0.2"
+forgejo_version: "16.0.3"
 
 # Autoupdate
 forgejo_autoupdate: true
 
-# Environment
 # Database: forgejo uses the shared giftpilz0.container.postgresql role as its
 # database backend (a separate pod on the same Podman network) rather than an
 # embedded postgres container. Point forgejo_db_host at that pod/container name.
@@ -51,6 +41,47 @@ forgejo_oauth_domain: ""
 forgejo_oauth_name: ""
 forgejo_oauth_admin_group: "forgejo-admin"
 
+# Copy arbitrary extra files/directories from the inventory into this role's
+# quadlet directory (relative to the <role>-pod dir).
+# Each entry supports src (controller path) or source (target path), dest,
+# optional mount, mode, and template (files only).
+# Example:
+#   forgejo_extra_files:
+#     - src: "assets/example/config.yaml"
+#       dest: "config/example.yaml"
+#       mode: "0640"
+#       template: true
+#       mount: "/etc/example/config.yaml"
+#     - source: "/srv/example/license.key"
+#       dest: "host-license.key"
+#       mount: "/run/secrets/license.key"
+#   forgejo_extra_dirs:
+#     - src: "assets/example/plugins/"
+#       dest: "plugins"
+#       mount: "/usr/local/share/example/plugins"
+#     - source: "/srv/example/plugins"
+#       dest: "host-plugins"
+#       mount: "/usr/local/share/example/host-plugins"
+forgejo_extra_files: []
+forgejo_extra_dirs: []
+
+# Optional container entrypoint overrides.
+forgejo_entrypoint: ""
+forgejo_oauth_init_entrypoint: ""
+
+## Advanced
+# Proxy
+forgejo_proxy_enabled: false
+forgejo_proxy_http: ""
+forgejo_proxy_https: ""
+forgejo_proxy_no_proxy: ""
+forgejo_proxy_env: "{{ (['https_proxy=' ~ forgejo_proxy_https] + (['http_proxy=' ~ forgejo_proxy_http] if forgejo_proxy_http else []) + (['no_proxy=' ~ forgejo_proxy_no_proxy]
+  if forgejo_proxy_no_proxy else [])) if forgejo_proxy_enabled else [] }}"
+
+# Network driver
+forgejo_network_driver: "bridge"
+
+# Environment
 forgejo_environment_vars:
   USER_UID: "1000"
   USER_GID: "1000"

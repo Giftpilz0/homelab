@@ -7,10 +7,13 @@ Image=docker.io/library/mariadb:{{ mariadb_version }}
 
 Pod=mariadb.pod
 
+{% if mariadb_entrypoint %}
+Entrypoint={{ mariadb_entrypoint }}
+{% endif %}
+
 {% if mariadb_autoupdate %}
 AutoUpdate=registry
 {% endif %}
-
 {% if mariadb_environment_vars is defined %}
 {% for env_name, env_value in mariadb_environment_vars.items() %}
 Environment={{ env_name }}={{ env_value }}
@@ -24,6 +27,10 @@ Environment={{ env_var }}
 {% endif %}
 
 Volume=mariadb-data.volume:/var/lib/mysql
+Volume=%h/.config/containers/systemd/mariadb-pod/config/init-databases.sql:/docker-entrypoint-initdb.d/10-databases.sql:ro,Z
 
+{% for item in (mariadb_extra_files | default([]) + mariadb_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume={{ item.source | default('%h/.config/containers/systemd/mariadb-pod/' ~ item.dest) }}:{{ item.mount }}:Z
+{% endfor %}
 [Service]
 Restart=always

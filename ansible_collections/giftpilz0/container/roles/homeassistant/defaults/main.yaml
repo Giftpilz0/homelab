@@ -1,20 +1,11 @@
 ---
+## Primary
+# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
-# Proxy
-homeassistant_proxy_enabled: false
-homeassistant_proxy_http: ""
-homeassistant_proxy_https: ""
-homeassistant_proxy_no_proxy: ""
-homeassistant_proxy_env: "{{ (['https_proxy=' ~ homeassistant_proxy_https] + (['http_proxy=' ~ homeassistant_proxy_http] if homeassistant_proxy_http else []) + (['no_proxy='
-  ~ homeassistant_proxy_no_proxy] if homeassistant_proxy_no_proxy else [])) if homeassistant_proxy_enabled else [] }}"
-
 # Network
-homeassistant_network_enabled: true
-homeassistant_network_driver: "bridge"
-homeassistant_network_internal: false
-
 # Network to join even when _network_enabled: false
+homeassistant_network_enabled: true
 homeassistant_network_name: "homeassistant-internal"
 
 # Optional: expose this service directly on the host, bypassing Traefik.
@@ -30,7 +21,7 @@ homeassistant_port_map:
 
 # Versions
 # renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant
-homeassistant_version: "2026.7.4"
+homeassistant_version: "2026.8.3"
 
 # Autoupdate
 homeassistant_autoupdate: true
@@ -42,3 +33,41 @@ homeassistant_environment_vars:
 # Config
 # homeassistant_device: "/dev/serial/by-id/usb-ITEAD_SONOFF_Zigbee_3.0_USB_Dongle_Plus_V2_20230804114425-if00:/dev/ttyACM0"
 # homeassistant_deebot_module: ""
+
+# Copy arbitrary extra files/directories from the inventory into this role's
+# quadlet directory (relative to the <role>-pod dir).
+# Each entry supports src (controller path) or source (target path), dest,
+# optional mount, mode, and template (files only).
+# Example:
+#   homeassistant_extra_files:
+#     - src: "assets/example/config.yaml"
+#       dest: "config/example.yaml"
+#       mode: "0640"
+#       template: true
+#       mount: "/etc/example/config.yaml"
+#     - source: "/srv/example/license.key"
+#       dest: "host-license.key"
+#       mount: "/run/secrets/license.key"
+#   homeassistant_extra_dirs:
+#     - src: "assets/example/plugins/"
+#       dest: "plugins"
+#       mount: "/usr/local/share/example/plugins"
+#     - source: "/srv/example/plugins"
+#       dest: "host-plugins"
+#       mount: "/usr/local/share/example/host-plugins"
+homeassistant_extra_files: []
+homeassistant_extra_dirs: []
+
+homeassistant_entrypoint: ""
+
+## Advanced
+# Proxy
+homeassistant_proxy_enabled: false
+homeassistant_proxy_http: ""
+homeassistant_proxy_https: ""
+homeassistant_proxy_no_proxy: ""
+homeassistant_proxy_env: "{{ (['https_proxy=' ~ homeassistant_proxy_https] + (['http_proxy=' ~ homeassistant_proxy_http] if homeassistant_proxy_http else []) + (['no_proxy='
+  ~ homeassistant_proxy_no_proxy] if homeassistant_proxy_no_proxy else [])) if homeassistant_proxy_enabled else [] }}"
+
+# Network driver
+homeassistant_network_driver: "bridge"

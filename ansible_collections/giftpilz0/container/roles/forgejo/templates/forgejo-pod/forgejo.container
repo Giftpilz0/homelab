@@ -10,6 +10,9 @@ Pod=forgejo.pod
 {% if forgejo_autoupdate %}
 AutoUpdate=registry
 {% endif %}
+{% if forgejo_entrypoint %}
+Entrypoint={{ forgejo_entrypoint }}
+{% endif %}
 
 {% if forgejo_environment_vars is defined %}
 {% for env_name, env_value in forgejo_environment_vars.items() %}
@@ -25,5 +28,8 @@ Environment={{ env_var }}
 
 Volume=forgejo-data.volume:/data
 
+{% for item in (forgejo_extra_files | default([]) + forgejo_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume={{ item.source | default('%h/.config/containers/systemd/forgejo-pod/' ~ item.dest) }}:{{ item.mount }}:Z
+{% endfor %}
 [Service]
 Restart=always

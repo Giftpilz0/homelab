@@ -11,6 +11,10 @@ Pod=monitoring-stack.pod
 
 Exec=-config.file=/etc/mimir/mimir.yaml
 
+{% if monitoring_stack_mimir_entrypoint %}
+Entrypoint={{ monitoring_stack_mimir_entrypoint }}
+{% endif %}
+
 {% if monitoring_stack_mimir_autoupdate %}
 AutoUpdate=registry
 {% endif %}

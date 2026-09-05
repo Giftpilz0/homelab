@@ -97,6 +97,50 @@
   with_community.general.filetree: "templates/"
   when: item.state == 'file'
 
+- name: "MariaDB: Copy extra files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/mariadb-pod/{{ item.dest }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode | default('0640') }}"
+  loop: "{{ mariadb_extra_files | default([]) }}"
+  when:
+    - "mariadb_extra_files | default([]) | length > 0"
+    - item.src is defined
+    - not (item.template | default(false))
+
+- name: "MariaDB: Template extra files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/mariadb-pod/{{ item.dest }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode | default('0640') }}"
+  loop: "{{ mariadb_extra_files | default([]) }}"
+  when:
+    - "mariadb_extra_files | default([]) | length > 0"
+    - item.src is defined
+    - item.template | default(false)
+
+- name: "MariaDB: Copy extra directories"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    src: "{{ item.src }}/"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/mariadb-pod/{{ item.dest }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode | default('0755') }}"
+  loop: "{{ mariadb_extra_dirs | default([]) }}"
+  when:
+    - "mariadb_extra_dirs | default([]) | length > 0"
+    - item.src is defined
+
 - name: "MariaDB: systemd daemon reload"
   become: true
   become_user: "{{ podman_user }}"
@@ -131,25 +175,6 @@
     enabled: true
     state: started
     scope: user
-
-- name: "MariaDB: Deploy CloudBeaver"
-  ansible.builtin.include_role:
-    name: giftpilz0.container.cloudbeaver
-  vars:
-    cloudbeaver_db_network_name: "{{ mariadb_network_name }}"
-    cloudbeaver_db_type: "mariadb"
-    cloudbeaver_db_host: "mariadb-pod"
-    cloudbeaver_db_port: "3306"
-    cloudbeaver_db_name: "{{ mariadb_db_name }}"
-    cloudbeaver_db_user: "{{ mariadb_db_user }}"
-    cloudbeaver_db_password: "{{ mariadb_db_password }}"
-    cloudbeaver_admin_user: "{{ mariadb_cloudbeaver_admin_user }}"
-    cloudbeaver_admin_password: "{{ mariadb_cloudbeaver_admin_password }}"
-    cloudbeaver_proxy_enabled: "{{ mariadb_proxy_enabled }}"
-    cloudbeaver_proxy_http: "{{ mariadb_proxy_http }}"
-    cloudbeaver_proxy_https: "{{ mariadb_proxy_https }}"
-    cloudbeaver_proxy_no_proxy: "{{ mariadb_proxy_no_proxy }}"
-  when: mariadb_cloudbeaver_enabled
 
 - name: "MariaDB: Configure traefik"
   ansible.builtin.include_role:

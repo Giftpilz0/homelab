@@ -1,6 +1,53 @@
 ---
+## Primary
+# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
+# Network
+# Network to join even when _network_enabled: false
+gitlab_runner_network_enabled: true
+gitlab_runner_network_name: "gitlab-runner-internal"
+
+# Versions
+# renovate: datasource=docker depName=gitlab/gitlab-runner
+gitlab_runner_version: "v19.3.1"
+
+# Autoupdate
+gitlab_runner_autoupdate: true
+
+# Config
+gitlab_runner_concurrent: 1
+gitlab_runner_name: ""
+gitlab_runner_url: ""
+gitlab_runner_token: ""
+
+# Copy arbitrary extra files/directories from the inventory into this role's
+# quadlet directory (relative to the <role>-pod dir).
+# Each entry supports src (controller path) or source (target path), dest,
+# optional mount, mode, and template (files only).
+# Example:
+#   gitlab_runner_extra_files:
+#     - src: "assets/example/config.yaml"
+#       dest: "config/example.yaml"
+#       mode: "0640"
+#       template: true
+#       mount: "/etc/example/config.yaml"
+#     - source: "/srv/example/license.key"
+#       dest: "host-license.key"
+#       mount: "/run/secrets/license.key"
+#   gitlab_runner_extra_dirs:
+#     - src: "assets/example/plugins/"
+#       dest: "plugins"
+#       mount: "/usr/local/share/example/plugins"
+#     - source: "/srv/example/plugins"
+#       dest: "host-plugins"
+#       mount: "/usr/local/share/example/host-plugins"
+gitlab_runner_extra_files: []
+gitlab_runner_extra_dirs: []
+
+gitlab_runner_entrypoint: ""
+
+## Advanced
 # Proxy
 gitlab_runner_proxy_enabled: false
 gitlab_runner_proxy_http: ""
@@ -9,26 +56,8 @@ gitlab_runner_proxy_no_proxy: ""
 gitlab_runner_proxy_env: "{{ (['https_proxy=' ~ gitlab_runner_proxy_https] + (['http_proxy=' ~ gitlab_runner_proxy_http] if gitlab_runner_proxy_http else []) + (['no_proxy='
   ~ gitlab_runner_proxy_no_proxy] if gitlab_runner_proxy_no_proxy else [])) if gitlab_runner_proxy_enabled else [] }}"
 
-# Network
-gitlab_runner_network_enabled: true
+# Network driver
 gitlab_runner_network_driver: "bridge"
-gitlab_runner_network_internal: false
-
-# Network to join even when _network_enabled: false
-gitlab_runner_network_name: "gitlab-runner-internal"
-
-# Versions
-# renovate: datasource=docker depName=gitlab/gitlab-runner
-gitlab_runner_version: "v19.2.1"
-
-# Autoupdate
-gitlab_runner_autoupdate: true
 
 # Environment
 gitlab_runner_environment_vars: {}
-
-# Config
-gitlab_runner_concurrent: 1
-gitlab_runner_name: ""
-gitlab_runner_url: ""
-gitlab_runner_token: ""

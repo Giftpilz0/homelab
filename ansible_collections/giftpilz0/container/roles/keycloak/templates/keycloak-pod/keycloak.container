@@ -8,6 +8,9 @@ Image=quay.io/keycloak/keycloak:{{ keycloak_version }}
 Pod=keycloak.pod
 
 Exec=start
+{% if keycloak_entrypoint %}
+Entrypoint={{ keycloak_entrypoint }}
+{% endif %}
 
 {% if keycloak_autoupdate %}
 AutoUpdate=registry
@@ -26,9 +29,9 @@ Environment={{ env_var }}
 {% endif %}
 
 Volume=keycloak-data.volume:/opt/keycloak/data
-{% if keycloak_theme_jar_enabled %}
-Volume=%h/.config/containers/systemd/keycloak-pod/config/keycloak-theme.jar:/opt/keycloak/providers/keycloak-theme.jar:Z
-{% endif %}
+{% for item in (keycloak_extra_files | default([]) + keycloak_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume={{ item.source | default('%h/.config/containers/systemd/keycloak-pod/' ~ item.dest) }}:{{ item.mount }}:Z
+{% endfor %}
 
 [Service]
 Restart=always

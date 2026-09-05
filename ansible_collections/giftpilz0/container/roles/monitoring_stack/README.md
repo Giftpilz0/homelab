@@ -73,9 +73,6 @@ Provision the matching confidential `perses` OIDC client through
 ### Expose via Traefik
 
 ```yaml
-monitoring_stack_extra_networks:
-  - traefik
-
 traefik_networks:
   - monitoring_stack
 

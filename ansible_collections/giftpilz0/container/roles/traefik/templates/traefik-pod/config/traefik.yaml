@@ -9,6 +9,7 @@ global:
 # ENTRYPOINTS
 # =============================================================================
 entryPoints:
+{% if traefik_http_services | default([]) | length > 0 %}
   web:
     address: ":{{ traefik_http_internal_port }}"
 {% if traefik_http_redirect_https | default(true) %}
@@ -36,6 +37,7 @@ entryPoints:
     http:
       middlewares:
         - security-headers@file
+{% endif %}
 
 {% if traefik_metrics_enabled %}
   metrics:
@@ -67,11 +69,19 @@ certificatesResolvers:
 {% if traefik_acme_challenge_type == 'dns' %}
       dnsChallenge:
         provider: {{ traefik_acme_dns_provider }}
+{% if traefik_acme_dns_resolvers | length > 0 %}
+        resolvers:
+{% for resolver in traefik_acme_dns_resolvers %}
+          - "{{ resolver }}"
+{% endfor %}
+{% endif %}
         propagation:
             delayBeforeChecks: 60
 {% elif traefik_acme_challenge_type == 'http' %}
+{% if traefik_http_services | default([]) | length > 0 %}
       httpChallenge:
         entryPoint: web
+{% endif %}
 {% elif traefik_acme_challenge_type == 'tls' %}
       tlsChallenge: {}
 {% endif %}

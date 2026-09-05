@@ -11,6 +11,10 @@ Pod=monitoring-stack.pod
 
 Exec=-config.file=/etc/loki/loki.yaml
 
+{% if monitoring_stack_loki_entrypoint %}
+Entrypoint={{ monitoring_stack_loki_entrypoint }}
+{% endif %}
+
 {% if monitoring_stack_loki_autoupdate %}
 AutoUpdate=registry
 {% endif %}

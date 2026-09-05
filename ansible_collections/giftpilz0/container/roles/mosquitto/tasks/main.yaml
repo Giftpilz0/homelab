@@ -49,6 +49,46 @@
     group: "{{ podman_user }}"
     mode: "0755"
 
+- name: "Mosquitto: Create build directory"
+  become: true
+  ansible.builtin.file:
+    path: "/tmp/mosquitto-build"
+    state: directory
+    mode: "0755"
+
+- name: "Mosquitto: Copy image build files"
+  become: true
+  ansible.builtin.copy:
+    src: "containerbuild/"
+    dest: "/tmp/mosquitto-build/"
+    mode: preserve
+
+- name: "Mosquitto: Build custom podman image"
+  become: true
+  become_user: "{{ podman_user }}"
+  containers.podman.podman_image:
+    name: "{{ mosquitto_image_name }}"
+    tag: "{{ mosquitto_image_tag }}"
+    path: "/tmp/mosquitto-build"
+    build:
+      file: "/tmp/mosquitto-build/Dockerfile"
+      format: oci
+      cache: false
+      force_rm: true
+      extra_args: "--build-arg GO_AUTH_VERSION={{ mosquitto_go_auth_version }}"
+    force: true
+  environment:
+    https_proxy: "{{ mosquitto_proxy_https if mosquitto_proxy_enabled else '' }}"
+    http_proxy: "{{ mosquitto_proxy_http if mosquitto_proxy_enabled else '' }}"
+    no_proxy: "{{ mosquitto_proxy_no_proxy if mosquitto_proxy_enabled else '' }}"
+  register: mosquitto_image_build
+
+- name: "Mosquitto: Clean up build directory"
+  become: true
+  ansible.builtin.file:
+    path: "/tmp/mosquitto-build"
+    state: absent
+
 - name: "Mosquitto: Create directory structure"
   become: true
   become_user: "{{ podman_user }}"
@@ -61,6 +101,46 @@
   with_community.general.filetree: "templates/"
   when: item.state == 'directory'
 
+- name: "Mosquitto: Validate go-auth configuration"
+  ansible.builtin.assert:
+    that:
+      - mosquitto_go_auth_options.backends is defined
+    fail_msg: "mosquitto_go_auth_options.backends must define at least one go-auth backend."
+
+- name: "Mosquitto: Initialize generated password users"
+  ansible.builtin.set_fact:
+    mosquitto_generated_pwfile_users: {}
+
+- name: "Mosquitto: Generate password hashes"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.command:
+    argv:
+      - podman
+      - run
+      - --rm
+      - --entrypoint
+      - /usr/bin/mosquitto-go-auth-pw
+      - "{{ mosquitto_image }}"
+      - -p
+      - "{{ item.value }}"
+  loop: "{{ mosquitto_users | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: mosquitto_generated_passwords
+  changed_when: false
+  no_log: true
+  when: mosquitto_users | length > 0
+
+- name: "Mosquitto: Store generated password hashes"
+  ansible.builtin.set_fact:
+    mosquitto_generated_pwfile_users: >-
+      {{ mosquitto_generated_pwfile_users | combine({item.item.key: item.stdout | trim}) }}
+  loop: "{{ mosquitto_generated_passwords.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item.key }}"
+  no_log: true
+
 - name: "Mosquitto: Template quadlet files"
   become: true
   become_user: "{{ podman_user }}"
@@ -72,6 +152,50 @@
     mode: "{{ item.mode }}"
   with_community.general.filetree: "templates/"
   when: item.state == 'file'
+
+- name: "Mosquitto: Copy extra files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/mosquitto-pod/{{ item.dest }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode | default('0640') }}"
+  loop: "{{ mosquitto_extra_files | default([]) }}"
+  when:
+    - "mosquitto_extra_files | default([]) | length > 0"
+    - item.src is defined
+    - not (item.template | default(false))
+
+- name: "Mosquitto: Template extra files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/mosquitto-pod/{{ item.dest }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode | default('0640') }}"
+  loop: "{{ mosquitto_extra_files | default([]) }}"
+  when:
+    - "mosquitto_extra_files | default([]) | length > 0"
+    - item.src is defined
+    - item.template | default(false)
+
+- name: "Mosquitto: Copy extra directories"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    src: "{{ item.src }}/"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/mosquitto-pod/{{ item.dest }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "{{ item.mode | default('0755') }}"
+  loop: "{{ mosquitto_extra_dirs | default([]) }}"
+  when:
+    - "mosquitto_extra_dirs | default([]) | length > 0"
+    - item.src is defined
 
 - name: "Mosquitto: systemd daemon reload"
   become: true

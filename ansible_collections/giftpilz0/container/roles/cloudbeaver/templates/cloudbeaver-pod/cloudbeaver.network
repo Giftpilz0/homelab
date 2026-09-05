@@ -1,9 +1,0 @@
-{% if cloudbeaver_network_enabled and not cloudbeaver_db_network_name %}
-[Unit]
-Description=CloudBeaver Internal Network
-
-[Network]
-NetworkName={{ cloudbeaver_network_name }}
-Driver={{ cloudbeaver_network_driver }}
-Internal={{ cloudbeaver_network_internal | bool | lower }}
-{% endif %}

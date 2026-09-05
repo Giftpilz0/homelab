@@ -7,21 +7,27 @@ Image=docker.io/library/postgres:{{ postgresql_version }}
 
 Pod=postgresql.pod
 
+{% if postgresql_backup_entrypoint %}
+Entrypoint={{ postgresql_backup_entrypoint }}
+{% endif %}
+
 {% if postgresql_backup_autoupdate %}
 AutoUpdate=registry
 {% endif %}
 
 Environment=PGHOST=127.0.0.1
 Environment=PGPORT=5432
-Environment=PGDATABASE={{ postgresql_db_name }}
-Environment=PGUSER={{ postgresql_db_user }}
-Environment=PGPASSWORD={{ postgresql_db_password }}
+Environment=PGDATABASE={{ postgresql_admin_database }}
+Environment=PGDATABASES={{ (([postgresql_admin_database] + (postgresql_databases | map(attribute='name') | list)) | unique) | join(' ') }}
+Environment=PGUSER={{ postgresql_admin_user }}
+Environment=PGPASSWORD={{ postgresql_admin_password }}
 Environment=BACKUP_SCHEDULE_TIMES={{ postgresql_backup_schedule_times }}
 Environment=BACKUP_RETENTION_DAYS={{ postgresql_backup_retention_days }}
 Environment=BACKUP_COMPRESSION_LEVEL={{ postgresql_backup_compression }}
 Environment=BACKUP_DIR=/backups
 
 Volume=postgresql-backup.volume:/backups
+Volume=%h/.config/containers/systemd/postgresql-pod/config/init-databases.sql:/usr/local/bin/init-databases.sql:ro,Z
 Volume=%h/.config/containers/systemd/postgresql-pod/config/backup.sh:/usr/local/bin/backup.sh:ro,Z
 Volume=%h/.config/containers/systemd/postgresql-pod/config/restore.sh:/usr/local/bin/restore.sh:ro,Z
 Volume=%h/.config/containers/systemd/postgresql-pod/config/backup-daemon.sh:/usr/local/bin/backup-daemon.sh:ro,Z

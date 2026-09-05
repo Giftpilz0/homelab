@@ -6,6 +6,7 @@ BACKUP_DIR="${BACKUP_DIR:-/backups}"
 PGHOST="${PGHOST:-localhost}"
 PGPORT="${PGPORT:-5432}"
 PGDATABASE="${PGDATABASE:-postgres}"
+PGDATABASES="${PGDATABASES:-$PGDATABASE}"
 PGUSER="${PGUSER:-postgres}"
 PGPASSWORD="${PGPASSWORD:-}"
 
@@ -18,7 +19,7 @@ list_backups() {
         echo "[ERROR] Backup directory not found: $BACKUP_DIR"
         exit 1
     fi
-    find "$BACKUP_DIR" -name "${PGDATABASE}_backup_*.dump" -type f | sort -r | while IFS= read -r f; do
+    find "$BACKUP_DIR" -name "*_backup_*.dump" -type f | sort -r | while IFS= read -r f; do
         size=$(du -h "$f" 2>/dev/null | cut -f1)
         date=$(stat -c '%y' "$f" 2>/dev/null | cut -d. -f1)
         printf "  %-50s %10s  %s\n" "$(basename "$f")" "$size" "$date"
@@ -43,8 +44,15 @@ restore_backup() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] Creating pre-restore backup..."
     backup.sh
 
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Restoring data..."
-    pg_restore --host="$PGHOST" --port="$PGPORT" --username="$PGUSER" --dbname="$PGDATABASE" \
+    database_name=$(basename "$backup_file")
+    database_name=${database_name%%_backup_*}
+    if [ -z "$database_name" ]; then
+        echo "[ERROR] Could not determine database name from backup file"
+        exit 1
+    fi
+
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Restoring database: $database_name"
+    pg_restore --host="$PGHOST" --port="$PGPORT" --username="$PGUSER" --dbname="$database_name" \
         --clean --if-exists --no-owner --exit-on-error --no-password "$backup_file"
 
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] Restore complete"

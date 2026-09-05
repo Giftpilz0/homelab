@@ -10,6 +10,9 @@ Pod=misc.pod
 {% if misc_autoupdate %}
 AutoUpdate=registry
 {% endif %}
+{% if misc_entrypoint %}
+Entrypoint={{ misc_entrypoint }}
+{% endif %}
 
 {% if misc_environment_vars is defined %}
 {% for env_name, env_value in misc_environment_vars.items() %}
@@ -23,5 +26,8 @@ Environment={{ env_var }}
 {% endfor %}
 {% endif %}
 
+{% for item in (misc_extra_files | default([]) + misc_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume={{ item.source | default('%h/.config/containers/systemd/misc-pod/' ~ item.dest) }}:{{ item.mount }}:Z
+{% endfor %}
 [Service]
 Restart=always
