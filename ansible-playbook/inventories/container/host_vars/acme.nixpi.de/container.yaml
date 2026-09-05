@@ -50,7 +50,7 @@ traefik_proxy_no_proxy: ""
 
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.11"
+traefik_version: "v3.7.13"
 
 # Rootless ports
 traefik_unprivileged_port_start: 53

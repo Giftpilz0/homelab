@@ -12,7 +12,7 @@ homeassistant_network_name: "homeassistant-internal"
 
 # Versions
 # renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant
-homeassistant_version: "2026.8.3"
+homeassistant_version: "2026.9.1"
 
 # Autoupdate
 homeassistant_autoupdate: true
@@ -62,7 +62,7 @@ traefik_networks:
 
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.11"
+traefik_version: "v3.7.13"
 
 # Rootless ports
 traefik_unprivileged_port_start: 80
