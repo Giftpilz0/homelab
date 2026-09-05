@@ -1,5 +1,110 @@
 ---
-#  argument_specs:
-#    main:
-#      short_description: The main entry point for the k3s role.
-#      options:
+argument_specs:
+  main:
+    short_description: Install and configure a single-server k3s cluster with kube-vip.
+    options:
+      k3s_version:
+        type: str
+        required: false
+        description: k3s install version.
+
+      k3s_vip_api_endpoint:
+        type: str
+        required: false
+        description: virtual IP for the API server.
+
+      k3s_api_port:
+        type: int
+        required: false
+        description: API server port.
+
+      k3s_token:
+        type: str
+        required: false
+        description: shared cluster token for node authentication.
+
+      k3s_extra_server_args:
+        type: str
+        required: false
+        description: additional arguments passed to k3s server.
+
+      k3s_service_name:
+        type: str
+        required: false
+        description: systemd service unit name.
+
+      k3s_service_state:
+        type: str
+        required: false
+        choices:
+          - reloaded
+          - restarted
+          - started
+          - stopped
+        description: desired state of the k3s service.
+
+      k3s_service_enabled:
+        type: bool
+        required: false
+        description: whether the k3s service is enabled at boot.
+
+      k3s_kube_vip_tag:
+        type: str
+        required: false
+        description: kube-vip container image tag.
+
+      k3s_kube_vip_iface:
+        type: str
+        required: false
+        description: network interface for kube-vip.
+
+      k3s_service_cidr:
+        type: str
+        required: false
+        description: cluster service CIDR range.
+
+      k3s_cluster_cidr:
+        type: str
+        required: false
+        description: cluster pod CIDR range.
+
+      k3s_firewalld_state:
+        type: str
+        required: false
+        choices:
+          - present
+          - absent
+          - enabled
+          - disabled
+          - skip
+        description: desired state of firewall rules.
+
+      k3s_firewalld_zone:
+        type: str
+        required: false
+        description: firewall zone for k3s rules.
+
+      k3s_manage_cilium:
+        type: bool
+        required: false
+        description: whether to install and configure cilium.
+
+      k9s_tag:
+        type: str
+        required: false
+        description: k9s version tag passed to the k9s role.
+
+      fluxcli_tag:
+        type: str
+        required: false
+        description: flux CLI version tag passed to the fluxcli role.
+
+      helm_tag:
+        type: str
+        required: false
+        description: helm version tag passed to the helm role.
+
+      cilium_version:
+        type: str
+        required: false
+        description: cilium chart version passed to the cilium role.

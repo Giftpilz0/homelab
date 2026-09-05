@@ -1,7 +1,7 @@
 ---
 argument_specs:
   main:
-    short_description: The main entry point for the timezone role.
+    short_description: Set the system timezone.
     options:
       timezone_package_state:
         type: str
@@ -10,15 +10,15 @@ argument_specs:
           - present
           - absent
           - latest
-        description: timezone_package_state
+        description: desired state of timezone packages.
 
       timezone_package:
         type: list
         elements: str
         required: false
-        description: timezone_package
+        description: list of packages to install.
 
       timezone_timezone:
         type: str
         required: false
-        description: timezone_timezone
+        description: system timezone (e.g. Europe/Berlin).

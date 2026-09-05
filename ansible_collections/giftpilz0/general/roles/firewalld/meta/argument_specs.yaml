@@ -1,0 +1,204 @@
+---
+argument_specs:
+  main:
+    short_description: Install, configure, and manage firewalld zones and rules.
+    options:
+      firewalld_service_name:
+        type: str
+        required: false
+        description: systemd service unit name.
+
+      firewalld_service_state:
+        type: str
+        required: false
+        choices:
+          - reloaded
+          - restarted
+          - started
+          - stopped
+        description: desired state of the firewalld service.
+
+      firewalld_service_enabled:
+        type: bool
+        required: false
+        description: whether the firewalld service is enabled at boot.
+
+      firewalld_package_state:
+        type: str
+        required: false
+        choices:
+          - present
+          - absent
+          - latest
+        description: desired state of firewalld packages.
+
+      firewalld_package:
+        type: list
+        elements: str
+        required: false
+        description: list of packages to install.
+
+      firewalld_logging:
+        type: str
+        required: false
+        description: LogDenied setting in firewalld.conf.
+
+      firewalld_permanent:
+        type: bool
+        required: false
+        description: whether rules are applied permanently.
+
+      firewalld_immediate:
+        type: bool
+        required: false
+        description: whether rules are applied immediately.
+
+      firewalld_default_zone:
+        type: str
+        required: false
+        description: default firewall zone.
+
+      firewalld_zones_define:
+        type: list
+        elements: dict
+        required: false
+        options:
+          zone:
+            type: str
+            required: false
+            description: zone name.
+          source:
+            type: str
+            required: false
+            description: zone source (e.g. CIDR).
+          target:
+            type: str
+            required: false
+            description: zone target.
+        description: list of zones to create and configure.
+
+      firewalld_rules_icmp:
+        type: list
+        elements: dict
+        required: false
+        options:
+          icmp_type:
+            type: str
+            required: false
+            description: ICMP type to block.
+          zone:
+            type: str
+            required: false
+            description: target zone.
+          state:
+            type: str
+            required: false
+            choices:
+              - enabled
+              - disabled
+            description: whether the rule is enabled or disabled.
+        description: list of ICMP block rules.
+
+      firewalld_rules_services:
+        type: list
+        elements: dict
+        required: false
+        options:
+          service:
+            type: str
+            required: false
+            description: service name.
+          zone:
+            type: str
+            required: false
+            description: target zone.
+          state:
+            type: str
+            required: false
+            choices:
+              - enabled
+              - disabled
+            description: whether the rule is enabled or disabled.
+        description: list of service rules.
+
+      firewalld_rules_ports:
+        type: list
+        elements: dict
+        required: false
+        options:
+          port:
+            type: str
+            required: false
+            description: port number.
+          protocol:
+            type: str
+            required: false
+            choices:
+              - tcp
+              - udp
+            description: protocol.
+          zone:
+            type: str
+            required: false
+            description: target zone.
+          state:
+            type: str
+            required: false
+            choices:
+              - enabled
+              - disabled
+            description: whether the rule is enabled or disabled.
+        description: list of port rules.
+
+      firewalld_richrules_ports:
+        type: list
+        elements: dict
+        required: false
+        options:
+          allowip:
+            type: str
+            required: false
+            description: source IP to allow.
+          port:
+            type: str
+            required: false
+            description: port number.
+          protocol:
+            type: str
+            required: false
+            choices:
+              - tcp
+              - udp
+            description: protocol.
+          action:
+            type: str
+            required: false
+            description: rich rule action (e.g. accept).
+          zone:
+            type: str
+            required: false
+            description: target zone.
+        description: list of rich rules for port access.
+
+      firewalld_richrules_services:
+        type: list
+        elements: dict
+        required: false
+        options:
+          allowip:
+            type: str
+            required: false
+            description: source IP to allow.
+          service:
+            type: str
+            required: false
+            description: service name.
+          action:
+            type: str
+            required: false
+            description: rich rule action (e.g. accept).
+          zone:
+            type: str
+            required: false
+            description: target zone.
+        description: list of rich rules for service access.

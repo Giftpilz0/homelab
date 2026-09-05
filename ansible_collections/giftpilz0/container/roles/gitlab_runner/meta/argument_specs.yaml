@@ -1,0 +1,121 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy a GitLab Runner as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        default: "{{ ansible_user }}"
+        description: system user for rootless podman operations.
+
+      gitlab_runner_proxy_enabled:
+        type: bool
+        required: false
+        default: false
+        description: enable HTTP proxy for image pulls.
+
+      gitlab_runner_proxy_http:
+        type: str
+        required: false
+        default: ""
+        description: HTTP proxy URL.
+
+      gitlab_runner_proxy_https:
+        type: str
+        required: false
+        default: ""
+        description: HTTPS proxy URL.
+
+      gitlab_runner_proxy_no_proxy:
+        type: str
+        required: false
+        default: ""
+        description: comma-separated list of proxy exclusions.
+
+      gitlab_runner_proxy_env:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: generated proxy environment entries.
+
+      gitlab_runner_network_enabled:
+        type: bool
+        required: false
+        default: true
+        description: create and manage the podman network.
+
+      gitlab_runner_network_driver:
+        type: str
+        required: false
+        default: bridge
+        description: podman network driver.
+
+      gitlab_runner_network_name:
+        type: str
+        required: false
+        default: gitlab-runner-internal
+        description: podman network name.
+
+      gitlab_runner_version:
+        type: str
+        required: false
+        default: "v19.3.1"
+        description: container image version.
+
+      gitlab_runner_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable podman auto-update for this container.
+
+      gitlab_runner_environment_vars:
+        type: dict
+        required: false
+        default: {}
+        description: extra environment variables injected into the container.
+
+      gitlab_runner_concurrent:
+        type: int
+        required: false
+        default: 1
+        description: maximum number of concurrent jobs.
+
+      gitlab_runner_name:
+        type: str
+        required: false
+        default: ""
+        description: runner display name.
+
+      gitlab_runner_url:
+        type: str
+        required: false
+        default: ""
+        description: GitLab instance URL.
+
+      gitlab_runner_token:
+        type: str
+        required: false
+        default: ""
+        description: runner registration token.
+
+      gitlab_runner_extra_files:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      gitlab_runner_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.
+
+      gitlab_runner_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional container entrypoint override.

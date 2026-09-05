@@ -1,7 +1,7 @@
 ---
 argument_specs:
   main:
-    short_description: The main entry point for the git role.
+    short_description: Install git and optionally configure system-wide git settings.
     options:
       git_package_state:
         type: str
@@ -10,13 +10,13 @@ argument_specs:
           - present
           - absent
           - latest
-        description: git_package_state
+        description: desired state of git packages.
 
       git_package:
         type: list
         elements: str
         required: false
-        description: git_package
+        description: list of packages to install.
 
       git_config_system:
         type: list
@@ -26,10 +26,12 @@ argument_specs:
           key:
             type: str
             required: false
+            description: git configuration key.
           value:
             type: str
             required: false
-        description: git_config_system
+            description: git configuration value.
+        description: system-wide git configuration entries.
 
       git_config:
         type: list
@@ -39,9 +41,11 @@ argument_specs:
           key:
             type: str
             required: false
+            description: git configuration key.
           value:
             type: str
             required: false
+            description: git configuration value.
           scope:
             type: str
             required: false
@@ -49,4 +53,5 @@ argument_specs:
               - file
               - local
               - global
-        description: git_config
+            description: git configuration scope.
+        description: per-user git configuration entries.

@@ -1,7 +1,7 @@
 ---
 argument_specs:
   main:
-    short_description: The main entry point for the packages role.
+    short_description: Install and manage RPM, Flatpak, and Python packages and repositories.
     options:
       packages_package_state:
         type: str
@@ -11,7 +11,7 @@ argument_specs:
           - absent
           - latest
           - skip
-        description: packages_package_state
+        description: desired state of system packages.
 
       packages_rpmfusion_package_state:
         type: str
@@ -20,7 +20,7 @@ argument_specs:
           - present
           - latest
           - skip
-        description: packages_rpmfusion_package_state
+        description: desired state of RPM Fusion packages.
 
       packages_additional_package_state:
         type: str
@@ -30,7 +30,7 @@ argument_specs:
           - absent
           - latest
           - skip
-        description: packages_additional_package_state
+        description: desired state of additional packages.
 
       packages_flatpak_package_state:
         type: str
@@ -40,7 +40,7 @@ argument_specs:
           - absent
           - latest
           - skip
-        description: packages_flatpak_package_state
+        description: desired state of Flatpak packages.
 
       packages_python_package_state:
         type: str
@@ -50,52 +50,52 @@ argument_specs:
           - absent
           - latest
           - skip
-        description: packages_python_package_state
+        description: desired state of Python packages.
 
       packages_package:
         type: list
         elements: str
         required: false
-        description: packages_package
+        description: list of system packages to manage.
 
       packages_rpmfusion_package:
         type: list
         elements: str
         required: false
-        description: packages_rpmfusion_package
+        description: list of RPM Fusion packages to manage.
 
       packages_additional_package:
         type: list
         elements: str
         required: false
-        description: packages_additional_package
+        description: list of additional packages to manage.
 
       packages_flatpak_package:
         type: list
         elements: dict
         required: false
-        description: packages_flatpak_package
+        description: list of Flatpak packages to manage.
 
       packages_python_package:
         type: list
         elements: str
         required: false
-        description: packages_python_package
+        description: list of Python packages to manage.
 
       packages_flatpak_repos:
         type: list
         elements: dict
         required: false
-        description: packages_flatpak_repos
+        description: Flatpak remotes to add.
 
       packages_flatpak_repos_remove:
         type: list
         elements: str
         required: false
-        description: packages_flatpak_repos_remove
+        description: Flatpak remotes to remove.
 
       packages_copr_repos:
         type: list
         elements: dict
         required: false
-        description: packages_copr_repos
+        description: COPR repositories to enable.

@@ -1,0 +1,184 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy the Forgejo Git service as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        default: "{{ ansible_user }}"
+        description: system user for rootless podman operations.
+
+      forgejo_proxy_enabled:
+        type: bool
+        required: false
+        default: false
+        description: enable HTTP proxy for image pulls.
+
+      forgejo_proxy_http:
+        type: str
+        required: false
+        default: ""
+        description: HTTP proxy URL.
+
+      forgejo_proxy_https:
+        type: str
+        required: false
+        default: ""
+        description: HTTPS proxy URL.
+
+      forgejo_proxy_no_proxy:
+        type: str
+        required: false
+        default: ""
+        description: comma-separated list of proxy exclusions.
+
+      forgejo_proxy_env:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: generated proxy environment entries.
+
+      forgejo_network_enabled:
+        type: bool
+        required: false
+        default: true
+        description: create and manage the podman network.
+
+      forgejo_network_driver:
+        type: str
+        required: false
+        default: bridge
+        description: podman network driver.
+
+      forgejo_network_name:
+        type: str
+        required: false
+        default: forgejo-internal
+        description: podman network name.
+
+      forgejo_bind_ip:
+        type: str
+        required: false
+        default: "127.0.0.1"
+        description: host IP to bind exposed ports to.
+
+      forgejo_port_map_enabled:
+        type: bool
+        required: false
+        default: true
+        description: expose container ports on the host.
+
+      forgejo_port_map:
+        type: list
+        elements: str
+        required: false
+        default:
+          - "3000:3000"
+          - "2222:2222"
+        description: host:container port mappings.
+
+      forgejo_version:
+        type: str
+        required: false
+        default: "16.0.3"
+        description: container image version.
+
+      forgejo_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable podman auto-update for this container.
+
+      forgejo_db_host:
+        type: str
+        required: false
+        default: postgresql-pod
+        description: PostgreSQL container hostname.
+
+      forgejo_db_name:
+        type: str
+        required: false
+        default: forgejo
+        description: database name.
+
+      forgejo_db_user:
+        type: str
+        required: false
+        default: forgejo
+        description: database user.
+
+      forgejo_db_password:
+        type: str
+        required: false
+        default: ""
+        description: database user password.
+
+      forgejo_domain:
+        type: str
+        required: false
+        default: ""
+        description: external domain for the Forgejo instance.
+
+      forgejo_oauth_client_id:
+        type: str
+        required: false
+        default: ""
+        description: OAuth2 client ID for external authentication.
+
+      forgejo_oauth_client_secret:
+        type: str
+        required: false
+        default: ""
+        description: OAuth2 client secret.
+
+      forgejo_oauth_domain:
+        type: str
+        required: false
+        default: ""
+        description: OAuth2 provider domain.
+
+      forgejo_oauth_name:
+        type: str
+        required: false
+        default: ""
+        description: OAuth2 provider display name.
+
+      forgejo_oauth_admin_group:
+        type: str
+        required: false
+        default: forgejo-admin
+        description: OAuth2 group that grants admin access.
+
+      forgejo_environment_vars:
+        type: dict
+        required: false
+        default: {}
+        description: extra environment variables injected into the container.
+
+      forgejo_extra_files:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      forgejo_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.
+
+      forgejo_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional Forgejo container entrypoint override.
+
+      forgejo_oauth_init_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional Forgejo OAuth initialization container entrypoint override.

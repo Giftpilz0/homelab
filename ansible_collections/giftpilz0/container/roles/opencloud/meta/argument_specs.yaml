@@ -1,0 +1,265 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy OpenCloud as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        default: "{{ ansible_user }}"
+        description: system user for rootless podman operations.
+
+      opencloud_network_enabled:
+        type: bool
+        required: false
+        default: true
+        description: create and manage the podman network.
+
+      opencloud_network_name:
+        type: str
+        required: false
+        default: opencloud-internal
+        description: podman network name.
+
+      opencloud_bind_ip:
+        type: str
+        required: false
+        default: "127.0.0.1"
+        description: host IP to bind exposed ports to.
+
+      opencloud_port_map_enabled:
+        type: bool
+        required: false
+        default: true
+        description: expose container ports on the host.
+
+      opencloud_port_map:
+        type: list
+        elements: str
+        required: false
+        default:
+          - "9200:9200"
+        description: host:container port mappings.
+
+      opencloud_version:
+        type: str
+        required: false
+        default: "7.5.0"
+        description: container image version.
+
+      opencloud_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable podman auto-update for this container.
+
+      opencloud_domain:
+        type: str
+        required: false
+        default: ""
+        description: external domain for the OpenCloud instance.
+
+      opencloud_admin_password:
+        type: str
+        required: false
+        default: ""
+        description: admin user password.
+
+      opencloud_log_level:
+        type: str
+        required: false
+        default: info
+        description: OpenCloud log level.
+
+      opencloud_csp_oidc_origin:
+        type: str
+        required: false
+        default: ""
+        description: OIDC origin for Content Security Policy.
+
+      opencloud_collabora_enabled:
+        type: bool
+        required: false
+        default: false
+        description: deploy Collabora Online for document editing.
+
+      opencloud_collabora_version:
+        type: str
+        required: false
+        default: "26.04.3.1.1"
+        description: Collabora container image version.
+
+      opencloud_collabora_url:
+        type: str
+        required: false
+        default: ""
+        description: browser-facing URL for the Collabora editor.
+
+      opencloud_collabora_admin_username:
+        type: str
+        required: false
+        default: admin
+        description: Collabora admin username.
+
+      opencloud_collabora_admin_password:
+        type: str
+        required: false
+        default: ""
+        description: Collabora admin password.
+
+      opencloud_collabora_ssl_enable:
+        type: bool
+        required: false
+        default: true
+        description: enable SSL in Collabora.
+
+      opencloud_collabora_ssl_verification:
+        type: bool
+        required: false
+        default: true
+        description: enable SSL certificate verification in Collabora.
+
+      opencloud_collabora_ssl_termination:
+        type: bool
+        required: false
+        default: true
+        description: enable SSL termination in Collabora.
+
+      opencloud_collabora_home_mode:
+        type: bool
+        required: false
+        default: false
+        description: enable Collabora home mode.
+
+      opencloud_radicale_enabled:
+        type: bool
+        required: false
+        default: false
+        description: deploy Radicale CalDAV/CardDAV server.
+
+      opencloud_radicale_version:
+        type: str
+        required: false
+        default: "v3.7.8"
+        description: Radicale container image version.
+
+      opencloud_oidc_clients:
+        type: list
+        elements: dict
+        required: false
+        default: "{{ opencloud_standard_clients + opencloud_custom_clients }}"
+        description: merged list of standard and custom OIDC clients.
+
+      opencloud_extra_files:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      opencloud_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.
+
+      opencloud_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional OpenCloud container entrypoint override.
+
+      opencloud_collabora_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional Collabora container entrypoint override.
+
+      opencloud_collabora_proof_key_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional Collabora proof-key container entrypoint override.
+
+      opencloud_radicale_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional Radicale container entrypoint override.
+
+      opencloud_proxy_enabled:
+        type: bool
+        required: false
+        default: false
+        description: enable HTTP proxy for image pulls.
+
+      opencloud_proxy_http:
+        type: str
+        required: false
+        default: ""
+        description: HTTP proxy URL.
+
+      opencloud_proxy_https:
+        type: str
+        required: false
+        default: ""
+        description: HTTPS proxy URL.
+
+      opencloud_proxy_no_proxy:
+        type: str
+        required: false
+        default: ""
+        description: comma-separated list of proxy exclusions.
+
+      opencloud_proxy_env:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: generated proxy environment entries.
+
+      opencloud_network_driver:
+        type: str
+        required: false
+        default: bridge
+        description: podman network driver.
+
+      opencloud_environment_vars:
+        type: dict
+        required: false
+        default: {}
+        description: extra environment variables injected into the container.
+
+      opencloud_standard_clients:
+        type: list
+        elements: dict
+        required: false
+        default:
+          - id: web
+            name: "OpenCloud Web App"
+            trusted: true
+            secret: ""
+          - id: OpenCloudDesktop
+            name: "OpenCloud Desktop Client"
+            trusted: false
+            secret: ""
+            application_type: "native"
+          - id: OpenCloudAndroid
+            name: "OpenCloud Android App"
+            trusted: false
+            secret: ""
+            application_type: "native"
+          - id: OpenCloudIOS
+            name: "OpenCloud iOS App"
+            trusted: false
+            secret: ""
+            application_type: "native"
+        description: built-in OIDC client definitions.
+
+      opencloud_custom_clients:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: additional OIDC client definitions from inventory.

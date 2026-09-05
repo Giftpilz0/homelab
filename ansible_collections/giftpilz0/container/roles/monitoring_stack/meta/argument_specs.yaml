@@ -1,0 +1,394 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy the monitoring stack (Garage object store, Mimir, Loki, and Perses UI) as Podman quadlets.
+    options:
+      podman_user:
+        type: str
+        required: false
+        default: "{{ ansible_user }}"
+        description: system user for rootless podman operations.
+
+      monitoring_stack_network_enabled:
+        type: bool
+        required: false
+        default: true
+        description: create and manage the podman network.
+
+      monitoring_stack_network_name:
+        type: str
+        required: false
+        default: monitoring-stack-internal
+        description: podman network name.
+
+      monitoring_stack_bind_ip:
+        type: str
+        required: false
+        default: "127.0.0.1"
+        description: host IP to bind exposed ports to.
+
+      monitoring_stack_port_map_enabled:
+        type: bool
+        required: false
+        default: false
+        description: expose container ports on the host.
+
+      monitoring_stack_port_map:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: host:container port mappings.
+
+      monitoring_stack_garage_version:
+        type: str
+        required: false
+        default: "v2.3.0"
+        description: GarageHQ container image version.
+
+      monitoring_stack_mimir_version:
+        type: str
+        required: false
+        default: "3.2.0"
+        description: Mimir container image version.
+
+      monitoring_stack_loki_version:
+        type: str
+        required: false
+        default: "3.7.6"
+        description: Loki container image version.
+
+      monitoring_stack_perses_version:
+        type: str
+        required: false
+        default: "v0.54.0-rc.1"
+        description: Perses container image version.
+
+      monitoring_stack_garage_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable podman auto-update for GarageHQ.
+
+      monitoring_stack_mimir_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable podman auto-update for Mimir.
+
+      monitoring_stack_loki_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable podman auto-update for Loki.
+
+      monitoring_stack_perses_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable podman auto-update for Perses.
+
+      monitoring_stack_garage_rpc_secret:
+        type: str
+        required: false
+        default: ""
+        description: GarageHQ RPC secret (openssl rand -hex 32).
+
+      monitoring_stack_garage_admin_token:
+        type: str
+        required: false
+        default: ""
+        description: GarageHQ admin token (openssl rand -base64 32).
+
+      monitoring_stack_garage_metrics_token:
+        type: str
+        required: false
+        default: ""
+        description: GarageHQ metrics token (openssl rand -base64 32).
+
+      monitoring_stack_garage_region:
+        type: str
+        required: false
+        default: garage
+        description: GarageHQ region name.
+
+      monitoring_stack_garage_rpc_port:
+        type: int
+        required: false
+        default: 3901
+        description: GarageHQ internal RPC port.
+
+      monitoring_stack_garage_s3_api_port:
+        type: int
+        required: false
+        default: 3900
+        description: GarageHQ S3 API port.
+
+      monitoring_stack_garage_web_port:
+        type: int
+        required: false
+        default: 3902
+        description: GarageHQ web UI port.
+
+      monitoring_stack_garage_admin_port:
+        type: int
+        required: false
+        default: 3903
+        description: GarageHQ admin port.
+
+      monitoring_stack_garage_mimir_bucket:
+        type: str
+        required: false
+        default: mimir
+        description: S3 bucket name for Mimir.
+
+      monitoring_stack_garage_loki_bucket:
+        type: str
+        required: false
+        default: loki
+        description: S3 bucket name for Loki.
+
+      monitoring_stack_garage_storage_capacity:
+        type: str
+        required: false
+        default: "100G"
+        description: storage capacity hint for layout assignment.
+
+      monitoring_stack_garage_init:
+        type: bool
+        required: false
+        default: false
+        description: run GarageHQ one-time initialization (set true on first deploy).
+
+      monitoring_stack_mimir_access_key_id:
+        type: str
+        required: false
+        default: ""
+        description: Mimir S3 access key ID for GarageHQ.
+
+      monitoring_stack_mimir_secret_access_key:
+        type: str
+        required: false
+        default: ""
+        description: Mimir S3 secret access key for GarageHQ.
+
+      monitoring_stack_loki_access_key_id:
+        type: str
+        required: false
+        default: ""
+        description: Loki S3 access key ID for GarageHQ.
+
+      monitoring_stack_loki_secret_access_key:
+        type: str
+        required: false
+        default: ""
+        description: Loki S3 secret access key for GarageHQ.
+
+      monitoring_stack_mimir_http_port:
+        type: int
+        required: false
+        default: 9009
+        description: Mimir HTTP port inside the container.
+
+      monitoring_stack_mimir_grpc_port:
+        type: int
+        required: false
+        default: 9095
+        description: Mimir gRPC port inside the container.
+
+      monitoring_stack_mimir_log_level:
+        type: str
+        required: false
+        default: warn
+        description: Mimir log level.
+
+      monitoring_stack_mimir_ingestion_rate:
+        type: int
+        required: false
+        default: 100000
+        description: Mimir ingestion rate limit.
+
+      monitoring_stack_mimir_max_global_series_per_user:
+        type: int
+        required: false
+        default: 10000000
+        description: Mimir max global series per user.
+
+      monitoring_stack_mimir_out_of_order_time_window:
+        type: str
+        required: false
+        default: "1h"
+        description: Mimir out-of-order ingestion time window.
+
+      monitoring_stack_loki_http_port:
+        type: int
+        required: false
+        default: 3100
+        description: Loki HTTP port inside the container.
+
+      monitoring_stack_loki_grpc_port:
+        type: int
+        required: false
+        default: 9096
+        description: Loki gRPC port inside the container.
+
+      monitoring_stack_loki_log_level:
+        type: str
+        required: false
+        default: warn
+        description: Loki log level.
+
+      monitoring_stack_perses_http_port:
+        type: int
+        required: false
+        default: 8080
+        description: Perses HTTP port inside the container.
+
+      monitoring_stack_perses_oidc_enabled:
+        type: bool
+        required: false
+        default: true
+        description: enable OIDC authentication for Perses.
+
+      monitoring_stack_perses_oidc_client_id:
+        type: str
+        required: false
+        default: perses
+        description: OIDC client ID for Perses.
+
+      monitoring_stack_perses_oidc_client_secret:
+        type: str
+        required: false
+        default: ""
+        description: OIDC client secret for Perses.
+
+      monitoring_stack_perses_oidc_issuer:
+        type: str
+        required: false
+        default: "https://login.nixpi.de/realms/nixpi"
+        description: OIDC issuer URL for Perses.
+
+      monitoring_stack_perses_external_url:
+        type: str
+        required: false
+        default: "https://monitoring.nixpi.de"
+        description: browser-facing URL for the monitoring stack.
+
+      monitoring_stack_loki_basic_auth_user:
+        type: str
+        required: false
+        default: alloy
+        description: basic auth username for Loki (Alloy scraping).
+
+      monitoring_stack_loki_basic_auth_hash:
+        type: str
+        required: false
+        default: ""
+        description: bcrypt hash for Loki basic auth password.
+
+      monitoring_stack_mimir_basic_auth_user:
+        type: str
+        required: false
+        default: alloy
+        description: basic auth username for Mimir (Alloy scraping).
+
+      monitoring_stack_mimir_basic_auth_hash:
+        type: str
+        required: false
+        default: ""
+        description: bcrypt hash for Mimir basic auth password.
+
+      monitoring_stack_extra_files:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      monitoring_stack_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.
+
+      monitoring_stack_garage_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional GarageHQ container entrypoint override.
+
+      monitoring_stack_mimir_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional Mimir container entrypoint override.
+
+      monitoring_stack_loki_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional Loki container entrypoint override.
+
+      monitoring_stack_perses_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional Perses container entrypoint override.
+
+      monitoring_stack_proxy_enabled:
+        type: bool
+        required: false
+        default: false
+        description: enable HTTP proxy for image pulls.
+
+      monitoring_stack_proxy_http:
+        type: str
+        required: false
+        default: ""
+        description: HTTP proxy URL.
+
+      monitoring_stack_proxy_https:
+        type: str
+        required: false
+        default: ""
+        description: HTTPS proxy URL.
+
+      monitoring_stack_proxy_no_proxy:
+        type: str
+        required: false
+        default: ""
+        description: comma-separated list of proxy exclusions.
+
+      monitoring_stack_proxy_env:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: generated proxy environment entries.
+
+      monitoring_stack_network_driver:
+        type: str
+        required: false
+        default: bridge
+        description: podman network driver.
+
+      monitoring_stack_mimir_environment_vars:
+        type: dict
+        required: false
+        default:
+          GOMAXPROCS: "2"
+        description: extra environment variables for Mimir.
+
+      monitoring_stack_loki_environment_vars:
+        type: dict
+        required: false
+        default:
+          GOMAXPROCS: "2"
+        description: extra environment variables for Loki.
+
+      monitoring_stack_perses_environment_vars:
+        type: dict
+        required: false
+        default: {}
+        description: extra environment variables for Perses.

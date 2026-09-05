@@ -1,16 +1,18 @@
 ---
 argument_specs:
   main:
-    short_description: The main entry point for the nfs role.
+    short_description: Install and configure the NFS server and its exports.
     options:
       nfs_service_name:
         type: list
         elements: dict
+        required: false
         options:
           name:
             type: str
             required: false
-        description: nfs_service_name
+            description: systemd service unit name.
+        description: list of NFS services to manage.
 
       nfs_service_state:
         type: str
@@ -20,12 +22,12 @@ argument_specs:
           - restarted
           - started
           - stopped
-        description: nfs_service_state
+        description: desired state of NFS services.
 
       nfs_service_enabled:
         type: bool
         required: false
-        description: nfs_service_enabled
+        description: whether NFS services are enabled at boot.
 
       nfs_package_state:
         type: str
@@ -34,18 +36,18 @@ argument_specs:
           - present
           - absent
           - latest
-        description: nfs_package_state
+        description: desired state of NFS packages.
 
       nfs_package:
         type: list
         elements: str
         required: false
-        description: nfs_package
+        description: list of packages to install.
 
       nfs_exports_file:
         type: str
         required: false
-        description: nfs_exports_file
+        description: path to the exports file.
 
       nfs_exports:
         type: list
@@ -55,22 +57,28 @@ argument_specs:
           path:
             type: str
             required: false
+            description: exported directory path.
           host:
             type: str
             required: false
+            description: allowed client host or CIDR.
           options:
             type: str
             required: false
+            description: export options (e.g. rw,sync,no_root_squash).
           group:
             type: str
             required: false
+            description: directory group owner.
           user:
             type: str
             required: false
+            description: directory user owner.
           permissions:
             type: str
             required: false
-        description: nfs_exports
+            description: directory permissions (e.g. 0755).
+        description: list of NFS exports to manage.
 
       nfs_exports_state:
         type: str
@@ -79,17 +87,17 @@ argument_specs:
           - present
           - absent
           - skip
-        description: nfs_exports_state
+        description: desired state of export entries.
 
       nfs_firewalld_zone:
         type: str
         required: false
-        description: nfs_firewalld_zone
+        description: firewall zone for NFS rules.
 
       nfs_firewalld_service:
         type: str
         required: false
-        description: nfs_firewalld_service
+        description: firewall service name.
 
       nfs_firewalld_state:
         type: str
@@ -100,4 +108,4 @@ argument_specs:
           - enabled
           - disabled
           - skip
-        description: nfs_firewalld_state
+        description: desired state of firewall rules.

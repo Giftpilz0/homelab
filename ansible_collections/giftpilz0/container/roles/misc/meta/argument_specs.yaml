@@ -1,0 +1,126 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy the Misc web application (built from a git commit) as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        default: "{{ ansible_user }}"
+        description: system user for rootless podman operations.
+
+      misc_proxy_enabled:
+        type: bool
+        required: false
+        default: false
+        description: enable HTTP proxy for image pulls.
+
+      misc_proxy_http:
+        type: str
+        required: false
+        default: ""
+        description: HTTP proxy URL.
+
+      misc_proxy_https:
+        type: str
+        required: false
+        default: ""
+        description: HTTPS proxy URL.
+
+      misc_proxy_no_proxy:
+        type: str
+        required: false
+        default: ""
+        description: comma-separated list of proxy exclusions.
+
+      misc_proxy_env:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: generated proxy environment entries.
+
+      misc_network_enabled:
+        type: bool
+        required: false
+        default: true
+        description: create and manage the podman network.
+
+      misc_network_driver:
+        type: str
+        required: false
+        default: bridge
+        description: podman network driver.
+
+      misc_network_name:
+        type: str
+        required: false
+        default: misc-internal
+        description: podman network name.
+
+      misc_bind_ip:
+        type: str
+        required: false
+        default: "{{ ansible_facts['default_ipv4']['address'] }}"
+        description: host IP to bind exposed ports to.
+
+      misc_port_map_enabled:
+        type: bool
+        required: false
+        default: true
+        description: expose container ports on the host.
+
+      misc_port_map:
+        type: list
+        elements: str
+        required: false
+        default:
+          - "8080:8080"
+        description: host:container port mappings.
+
+      misc_version:
+        type: str
+        required: false
+        default: latest
+        description: container image version.
+
+      misc_commit:
+        type: str
+        required: false
+        default: "db16ab7ca40f6e1e98e6e7a3947fb9e2aa04f527"
+        description: git commit to build from.
+
+      misc_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable podman auto-update for this container.
+
+      misc_environment_vars:
+        type: dict
+        required: false
+        default:
+          TZ: Europe/Berlin
+          LOGLEVEL: INFO
+          PORT: 8080
+        description: extra environment variables injected into the container.
+
+      misc_extra_files:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      misc_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.
+
+      misc_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional container entrypoint override.

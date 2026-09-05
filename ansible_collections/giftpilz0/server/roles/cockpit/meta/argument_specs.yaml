@@ -1,12 +1,12 @@
 ---
 argument_specs:
   main:
-    short_description: The main entry point for the cockpit role.
+    short_description: Install and enable the Cockpit web console.
     options:
       cockpit_service_name:
         type: str
         required: false
-        description: cockpit_service_name
+        description: systemd service unit name.
 
       cockpit_service_state:
         type: str
@@ -16,12 +16,12 @@ argument_specs:
           - restarted
           - started
           - stopped
-        description: cockpit_service_state
+        description: desired state of the cockpit service.
 
       cockpit_service_enabled:
         type: bool
         required: false
-        description: cockpit_service_enabled
+        description: whether the cockpit service is enabled at boot.
 
       cockpit_package_state:
         type: str
@@ -30,13 +30,13 @@ argument_specs:
           - present
           - absent
           - latest
-        description: cockpit_package_state
+        description: desired state of cockpit packages.
 
       cockpit_package:
         type: list
         elements: str
         required: false
-        description: cockpit_package
+        description: list of cockpit packages to install.
 
       cockpit_additional_package_state:
         type: str
@@ -46,7 +46,7 @@ argument_specs:
           - absent
           - latest
           - skip
-        description: cockpit_additional_package_state
+        description: desired state of additional cockpit packages.
 
       cockpit_additional_package:
         type: list
@@ -56,9 +56,11 @@ argument_specs:
           package:
             type: str
             required: false
+            description: package name.
           requirement:
             type: str
             required: false
+            description: requirement package name.
           state:
             type: str
             required: false
@@ -67,17 +69,18 @@ argument_specs:
               - absent
               - latest
               - skip
-        description: cockpit_additional_package
+            description: desired state of the package.
+        description: list of additional cockpit packages with requirements.
 
       cockpit_firewalld_zone:
         type: str
         required: false
-        description: cockpit_firewalld_zone
+        description: firewall zone for cockpit rules.
 
       cockpit_firewalld_service:
         type: str
         required: false
-        description: cockpit_firewalld_service
+        description: firewall service name.
 
       cockpit_firewalld_state:
         type: str
@@ -88,4 +91,4 @@ argument_specs:
           - enabled
           - disabled
           - skip
-        description: cockpit_firewalld_state
+        description: desired state of firewall rules.

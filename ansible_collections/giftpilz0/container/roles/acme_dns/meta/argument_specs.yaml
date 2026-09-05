@@ -1,0 +1,174 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy the acme-dns ACME challenge server as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        default: "{{ ansible_user }}"
+        description: system user for rootless podman operations.
+
+      acme_dns_proxy_enabled:
+        type: bool
+        required: false
+        default: false
+        description: enable HTTP proxy for image pulls.
+
+      acme_dns_proxy_http:
+        type: str
+        required: false
+        default: ""
+        description: HTTP proxy URL.
+
+      acme_dns_proxy_https:
+        type: str
+        required: false
+        default: ""
+        description: HTTPS proxy URL.
+
+      acme_dns_proxy_no_proxy:
+        type: str
+        required: false
+        default: ""
+        description: comma-separated list of proxy exclusions.
+
+      acme_dns_proxy_env:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: generated proxy environment entries.
+
+      acme_dns_network_enabled:
+        type: bool
+        required: false
+        default: true
+        description: create and manage the Podman network.
+
+      acme_dns_network_driver:
+        type: str
+        required: false
+        default: bridge
+        description: Podman network driver.
+
+      acme_dns_network_internal:
+        type: bool
+        required: false
+        default: false
+        description: create an internal-only Podman network.
+
+      acme_dns_network_name:
+        type: str
+        required: false
+        default: acme_dns-internal
+        description: Podman network name.
+
+      acme_dns_bind_ip:
+        type: str
+        required: false
+        default: "{{ ansible_facts['default_ipv4']['address'] }}"
+        description: host IP to bind the public DNS ports to.
+
+      acme_dns_port_map_enabled:
+        type: bool
+        required: false
+        default: true
+        description: expose DNS ports on the host.
+
+      acme_dns_port_map:
+        type: list
+        elements: str
+        required: false
+        default:
+          - "53:53"
+          - "53:53/udp"
+        description: host:container port mappings.
+
+      acme_dns_version:
+        type: str
+        required: false
+        default: "v2.0.2"
+        description: acme-dns container image version.
+
+      acme_dns_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: enable Podman auto-update for this container.
+
+      acme_dns_domain:
+        type: str
+        required: false
+        default: auth.example.org
+        description: delegated zone served by acme-dns.
+
+      acme_dns_nsname:
+        type: str
+        required: false
+        default: ns1.example.org
+        description: authoritative nameserver name advertised for the delegated zone.
+
+      acme_dns_nsadmin:
+        type: str
+        required: false
+        default: admin.example.org
+        description: administrative email with the @ represented as a dot.
+
+      acme_dns_records:
+        type: list
+        elements: str
+        required: false
+        default:
+          - "auth.example.org. NS ns1.example.org."
+        description: additional records served by acme-dns.
+
+      acme_dns_disable_registration:
+        type: bool
+        required: false
+        default: false
+        description: disable the registration endpoint.
+
+      acme_dns_api_port:
+        type: str
+        required: false
+        default: "80"
+        description: REST API listen port.
+
+      acme_dns_loglevel:
+        type: str
+        required: false
+        default: info
+        description: logging level.
+
+      acme_dns_logformat:
+        type: str
+        required: false
+        default: json
+        description: logging format.
+
+      acme_dns_environment_vars:
+        type: dict
+        required: false
+        default: {}
+        description: extra environment variables injected into the container.
+
+      acme_dns_extra_files:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary file entries with src or source, dest, optional mount, mode, and template.
+
+      acme_dns_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary directory entries with src or source, dest, optional mount and mode.
+
+      acme_dns_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional container entrypoint override.
