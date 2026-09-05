@@ -14,10 +14,11 @@ packages_flatpak_repo_state: skip
 packages_additional_package:
   - bash-completion
   - epel-release
+  - nfs-utils
   - git-core
   - mkpasswd
-  - nfs-utils
   - nmap
+  - tuned
   - htop
   - gum
 

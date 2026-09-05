@@ -1,0 +1,91 @@
+---
+podman_user: "container"
+
+######################################
+### giftpilz0.container.acme_dns
+
+# Proxy
+acme_dns_proxy_enabled: false
+acme_dns_proxy_http: ""
+acme_dns_proxy_https: ""
+acme_dns_proxy_no_proxy: ""
+
+# Network
+acme_dns_network_enabled: true
+acme_dns_network_driver: "bridge"
+acme_dns_network_internal: false
+
+# Network to join even when _network_enabled: false
+acme_dns_network_name: "acme_dns-internal"
+
+# Versions
+# renovate: datasource=docker depName=joohoi/acme-dns
+acme_dns_version: "v2.0.2"
+
+# Autoupdate
+acme_dns_autoupdate: true
+
+# ACME DNS Settings
+acme_dns_domain: "auth.acme.nixpi.de"
+acme_dns_nsname: "acme.nixpi.de"
+acme_dns_nsadmin: "admin.nixpi.de"
+acme_dns_records:
+  - "auth.acme.nixpi.de. NS acme.nixpi.de."
+
+# REST API
+acme_dns_disable_registration: false
+acme_dns_api_port: "80"
+
+# Environment
+acme_dns_environment_vars: {}
+
+######################################
+### giftpilz0.container.traefik
+
+# Proxy
+traefik_proxy_enabled: false
+traefik_proxy_http: ""
+traefik_proxy_https: ""
+traefik_proxy_no_proxy: ""
+
+# Version
+# renovate: datasource=docker depName=traefik
+traefik_version: "v3.7.11"
+
+# Rootless ports
+traefik_unprivileged_port_start: 53
+
+# Autoupdate
+traefik_autoupdate: true
+
+# ACME
+traefik_acme_enabled: true
+traefik_acme_ca_server: "https://acme-v02.api.letsencrypt.org/directory"
+traefik_acme_challenge_type: dns
+traefik_acme_dns_provider: "acme-dns"
+traefik_acme_eab_enabled: false
+
+# Environment
+traefik_environment_vars:
+  ACME_DNS_API_BASE: "http://acme_dns-pod:80"
+  ACME_DNS_STORAGE_PATH: "/acme/acme-dns-accounts.json"
+
+# Logging
+traefik_log_level: "INFO"
+
+# Podman networks traefik should join to reach backends directly
+traefik_networks:
+  - acme_dns
+
+# HTTP services
+traefik_http_services:
+  - name: acme_dns
+    domain: acme.nixpi.de
+    rule: "Host(`acme.nixpi.de`)"
+    servers:
+      - url: "http://acme_dns-pod:80"
+    tls_enabled: true
+    acme_enabled: true
+    health_check:
+      path: "/health"
+      interval: "30s"

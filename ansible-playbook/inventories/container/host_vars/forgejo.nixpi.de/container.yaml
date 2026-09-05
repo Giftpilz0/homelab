@@ -5,10 +5,18 @@ podman_user: "container"
 ### giftpilz0.container.postgresql (provisioned by giftpilz0.container.forgejo)
 
 postgresql_port_map_enabled: true
+# normally use a separate administrator user; keep this legacy superuser here.
+postgresql_admin_database: "forgejo"
+postgresql_admin_user: "forgejo"
+postgresql_admin_password: "{{ forgejo_db_password }}"
+postgresql_databases:
+  - name: "forgejo"
+    user: "forgejo"
+    password: "{{ forgejo_db_password }}"
 
 # Versions
 # renovate: datasource=docker depName=postgres
-postgresql_version: "18.4-alpine"
+postgresql_version: "18.6-alpine"
 
 # Autoupdate
 postgresql_autoupdate: true
@@ -19,31 +27,18 @@ postgresql_backup_schedule_times: "03:00"
 postgresql_backup_retention_days: 7
 postgresql_backup_compression: 6
 
-# CloudBeaver management UI
-postgresql_cloudbeaver_enabled: false
-postgresql_cloudbeaver_admin_user: "cbadmin"
-postgresql_cloudbeaver_admin_password: "cbadmin123"
-
 ###############################
 ### giftpilz0.container.forgejo
 
-# Proxy
-forgejo_proxy_enabled: false
-forgejo_proxy_http: ""
-forgejo_proxy_https: ""
-forgejo_proxy_no_proxy: ""
-
 # Network
 forgejo_network_enabled: true
-forgejo_network_driver: "bridge"
-forgejo_network_internal: false
 
 # Network to join even when _network_enabled: false
 forgejo_network_name: "forgejo-internal"
 
 # Versions
 # renovate: datasource=docker depName=codeberg.org/forgejo/forgejo
-forgejo_version: "16.0.2"
+forgejo_version: "16.0.3"
 
 # Autoupdate
 forgejo_autoupdate: true
@@ -58,15 +53,12 @@ forgejo_oauth_admin_group: "forgejo-admin"
 ######################################
 ### giftpilz0.container.traefik
 
-# Proxy
-traefik_proxy_enabled: false
-traefik_proxy_http: ""
-traefik_proxy_https: ""
-traefik_proxy_no_proxy: ""
-
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.10"
+traefik_version: "v3.7.11"
+
+# Rootless ports
+traefik_unprivileged_port_start: 80
 
 # Autoupdate
 traefik_autoupdate: true

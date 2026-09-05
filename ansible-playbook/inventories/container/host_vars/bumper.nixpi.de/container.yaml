@@ -4,16 +4,8 @@ podman_user: "container"
 ######################################
 ### giftpilz0.container.bumper
 
-# Proxy
-bumper_proxy_enabled: false
-bumper_proxy_http: ""
-bumper_proxy_https: ""
-bumper_proxy_no_proxy: ""
-
 # Network
 bumper_network_enabled: true
-bumper_network_driver: "bridge"
-bumper_network_internal: false
 
 # Network to join even when _network_enabled: false
 bumper_network_name: "bumper-internal"
