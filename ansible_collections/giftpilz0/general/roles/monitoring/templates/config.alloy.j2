@@ -48,10 +48,27 @@ loki.source.journal "system" {
   relabel_rules = loki.relabel.journal.rules
   labels = {
     host = "{{ inventory_hostname }}",
-    job  = "journal",
+    source = "journal",
   }
-  forward_to = [loki.write.loki.receiver]
+  forward_to = [loki.process.journal.receiver]
   max_age    = "{{ monitoring_alloy_loki_journal_max_age }}"
+}
+
+loki.process "journal" {
+  forward_to = [loki.write.loki.receiver]
+
+  stage.match {
+    selector = `{container="postgresql"}`
+
+    stage.regex {
+      expression = `.*db=(?P<database>[^,]+),user=.*`
+    }
+    stage.labels {
+      values = {
+        database = "",
+      }
+    }
+  }
 }
 
 loki.write "loki" {

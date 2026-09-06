@@ -27,6 +27,10 @@ postgresql_backup_schedule_times: "03:00"
 postgresql_backup_retention_days: 7
 postgresql_backup_compression: 6
 
+# SQL logging for troubleshooting
+postgresql_log_statement: "none" # all
+postgresql_log_min_duration_statement: 1000
+
 ######################################
 ### giftpilz0.container.keycloak
 

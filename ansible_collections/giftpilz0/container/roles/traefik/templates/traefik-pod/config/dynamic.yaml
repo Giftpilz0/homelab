@@ -161,7 +161,7 @@ http:
 {% endif %}
 {% endif %}
 
-{% if traefik_tcp_services is defined %}
+{% if traefik_tcp_services | default([]) | length > 0 %}
 # =============================================================================
 # TCP CONFIGURATION
 # =============================================================================

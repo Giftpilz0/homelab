@@ -52,3 +52,16 @@ argument_specs:
         type: str
         required: false
         description: rootless port forwarder backend (e.g. pasta, slirp4netns).
+
+      podman_log_driver:
+        type: str
+        required: false
+        default: ""
+        choices:
+          - ""
+          - k8s-file
+          - journald
+          - json-file
+          - passthrough
+          - none
+        description: default log driver for rootless containers.

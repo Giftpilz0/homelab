@@ -53,6 +53,12 @@ monitoring_stack_loki_environment_vars: {}
 monitoring_stack_perses_http_port: 8080
 monitoring_stack_perses_environment_vars: {}
 
+# Perses provisioning
+monitoring_stack_extra_dirs:
+  - src: "{{ inventory_dir | dirname }}/host_vars/{{ inventory_hostname }}/assets/perses/provisioning"
+    dest: "config/provisioning"
+    mount: "/etc/perses/provisioning"
+
 ######################################
 ### giftpilz0.container.traefik
 

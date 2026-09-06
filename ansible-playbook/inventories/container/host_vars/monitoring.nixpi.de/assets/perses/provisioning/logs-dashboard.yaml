@@ -1,0 +1,59 @@
+# Perses dashboard provisioning - inventory owned.
+# Docs: https://perses.dev/plugins/docs/loki/
+kind: Dashboard
+metadata:
+  name: logs
+  project: default
+spec:
+  display:
+    name: "Logs"
+    description: "Search journal logs by host"
+  duration: 6h
+  refreshInterval: 30s
+
+  variables:
+    - kind: TextVariable
+      spec:
+        name: host
+        display:
+          name: "Host (regex)"
+        value: ".*"
+    - kind: TextVariable
+      spec:
+        name: search
+        display:
+          name: "Text search"
+        value: ""
+
+  panels:
+    logs:
+      kind: Panel
+      spec:
+        display:
+          name: "Logs"
+        plugin:
+          kind: LogsTable
+          spec: {}
+        queries:
+          - kind: LogQuery
+            spec:
+              plugin:
+                kind: LokiLogQuery
+                spec:
+                  datasource: { kind: LokiDatasource, name: loki }
+                  query: '{host=~"${host}", source="journal"} |= "${search}"'
+
+  layouts:
+    - kind: Grid
+      spec:
+        display:
+          title: "Logs"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 24
+            height: 16
+            content:
+              $ref: "#/spec/panels/logs"

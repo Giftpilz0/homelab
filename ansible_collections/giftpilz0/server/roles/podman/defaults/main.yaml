@@ -19,3 +19,6 @@ podman_package:
 # until the host is upgraded to podman >= 6. The legacy "rootlesskit"
 # forwarder (default before this is set) does not preserve client IPs.
 podman_rootless_port_forwarder: "pasta"
+
+# journald or k8s-file
+podman_log_driver: ""

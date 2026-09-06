@@ -1,0 +1,4 @@
+# Perses provisioning - default project
+kind: Project
+metadata:
+  name: default
