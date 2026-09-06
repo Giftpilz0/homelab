@@ -1,0 +1,14 @@
+# Perses provisioning - Mimir global datasource
+kind: GlobalDatasource
+metadata:
+  name: mimir
+spec:
+  default: false
+  plugin:
+    kind: PrometheusDatasource
+    spec:
+      proxy:
+        kind: HTTPProxy
+        spec:
+          url: >-
+            http://127.0.0.1:{{ monitoring_stack_mimir_http_port }}/prometheus

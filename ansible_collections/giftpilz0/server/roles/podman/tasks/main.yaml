@@ -59,6 +59,23 @@
     mode: "0644"
   when: podman_rootless_port_forwarder | length > 0
 
+- name: "Podman: Configure rootless log driver"
+  become: true
+  ansible.builtin.template:
+    src: "containers.conf.d/logging.conf.j2"
+    dest: "/home/{{ podman_user }}/.config/containers/containers.conf.d/logging.conf"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0644"
+  when: podman_log_driver | length > 0
+
+- name: "Podman: Remove rootless log driver override"
+  become: true
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/containers/containers.conf.d/logging.conf"
+    state: absent
+  when: podman_log_driver | length == 0
+
 ######################################
 ### services
 

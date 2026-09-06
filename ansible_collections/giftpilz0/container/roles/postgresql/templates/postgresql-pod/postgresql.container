@@ -11,6 +11,8 @@ Pod=postgresql.pod
 Entrypoint={{ postgresql_entrypoint }}
 {% endif %}
 
+Exec=postgres -c log_destination={{ postgresql_log_destination }} -c log_statement={{ postgresql_log_statement }} -c log_min_duration_statement={{ postgresql_log_min_duration_statement }} -c log_connections={{ postgresql_log_connections | ternary('on', 'off') }} -c log_disconnections={{ postgresql_log_disconnections | ternary('on', 'off') }} -c log_checkpoints={{ postgresql_log_checkpoints | ternary('on', 'off') }} -c log_lock_waits={{ postgresql_log_lock_waits | ternary('on', 'off') }} -c log_line_prefix="{{ postgresql_log_line_prefix | replace('%', '%%') }}"
+
 {% if postgresql_autoupdate %}
 AutoUpdate=registry
 {% endif %}

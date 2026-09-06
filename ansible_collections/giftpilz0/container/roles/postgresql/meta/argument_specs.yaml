@@ -59,6 +59,59 @@ argument_specs:
         default: true
         description: enable podman auto-update for the backup container.
 
+      postgresql_log_destination:
+        type: str
+        required: false
+        default: stderr
+        description: PostgreSQL log destination.
+
+      postgresql_log_statement:
+        type: str
+        required: false
+        default: none
+        choices:
+          - none
+          - ddl
+          - mod
+          - all
+        description: SQL statement logging level.
+
+      postgresql_log_min_duration_statement:
+        type: int
+        required: false
+        default: 1000
+        description: log statements running at least this many milliseconds.
+
+      postgresql_log_connections:
+        type: bool
+        required: false
+        default: true
+        description: log successful connection attempts.
+
+      postgresql_log_disconnections:
+        type: bool
+        required: false
+        default: true
+        description: log session disconnections.
+
+      postgresql_log_checkpoints:
+        type: bool
+        required: false
+        default: true
+        description: log checkpoint activity.
+
+      postgresql_log_lock_waits:
+        type: bool
+        required: false
+        default: true
+        description: log waits exceeding deadlock timeout.
+
+      postgresql_log_line_prefix:
+        type: str
+        required: false
+        default: "%m [%p] db=%d,user=%u,app=%a,client=%h "
+        description: context prefix for each PostgreSQL log line.
+
       postgresql_admin_database:
         type: str
         required: false

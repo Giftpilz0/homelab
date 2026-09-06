@@ -1,5 +1,4 @@
-# Perses provisioning – Loki global datasource
-# Docs: https://perses.dev/perses/docs/api/datasource/
+# Perses provisioning - Loki global datasource
 kind: GlobalDatasource
 metadata:
   name: loki

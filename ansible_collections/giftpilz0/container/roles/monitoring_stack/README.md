@@ -86,16 +86,21 @@ traefik_http_services:
     acme_enabled: true
 ```
 
-## Provided Dashboards
+## Perses provisioning
 
-The role provisions **Host Overview** and **Traefik Overview** dashboards in Perses
-(project `default`) with panels for:
+Perses provisioning is intentionally owned by inventory rather than by this role.
+Use `monitoring_stack_extra_dirs` to copy an inventory directory into the
+quadlet directory and mount it at `/etc/perses/provisioning`:
 
-- CPU, memory, filesystem, load, and network metrics
-- Traefik request rate, 5xx responses, and p95 latency
-- Journal log searches by systemd unit, application/syslog identifier, container, and text
+```yaml
+monitoring_stack_extra_dirs:
+  - src: "{{ inventory_dir | dirname }}/host_vars/{{ inventory_hostname }}/assets/perses/provisioning"
+    dest: "config/provisioning"
+    mount: "/etc/perses/provisioning"
+```
 
-Datasources for both Mimir and Loki are registered as global datasources.
+The container inventory includes a logs-first example with Loki and Mimir global
+datasources. The role does not impose dashboard layout or metric panels.
 
 ## Component Docs
 
