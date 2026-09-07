@@ -130,12 +130,19 @@ argument_specs:
         default: ""
         description: password for the PostgreSQL administrator user.
 
+      postgresql_users:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: users to provision; each entry has name and password.
+
       postgresql_databases:
         type: list
         elements: dict
         required: false
         default: []
-        description: secondary databases and users to provision and include in backups; each entry has name, user, and password.
+        description: secondary databases to provision and include in backups; each entry has name and owner.
 
       postgresql_backup_schedule_times:
         type: str
