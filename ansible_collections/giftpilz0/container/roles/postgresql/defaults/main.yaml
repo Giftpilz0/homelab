@@ -43,8 +43,13 @@ postgresql_log_line_prefix: "%m [%p] db=%d,user=%u,app=%a,client=%h "
 postgresql_admin_database: "postgres"
 postgresql_admin_user: "postgres"
 postgresql_admin_password: ""
-# Secondary databases/users are created by the role after the administrator
-# database is available.
+
+# Users are created by the role after the administrator database is
+# available. Database entries can reference these users through owner.
+postgresql_users: []
+
+# Secondary databases are created by the role after the administrator
+# database is available. Each entry must define a name and owner.
 postgresql_databases: []
 
 # Backup
