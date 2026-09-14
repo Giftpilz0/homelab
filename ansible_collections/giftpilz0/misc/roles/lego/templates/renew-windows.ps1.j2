@@ -76,7 +76,11 @@ $Changed = -not (Test-Path -LiteralPath $Marker) -or
   ((Get-Item -LiteralPath $Certificate).LastWriteTime -gt (Get-Item -LiteralPath $Marker).LastWriteTime)
 if ($Changed) {
 {% if item.deploy is defined and item.deploy.pfx is defined %}
-  Copy-Item -LiteralPath (Join-Path $State 'certificates\{{ item.domains[0] | replace('*', '_') }}.pfx') -Destination '{{ item.deploy.pfx.path }}' -Force
+  $PfxSource = Join-Path $State 'certificates\{{ item.domains[0] | replace('*', '_') }}.pfx'
+  $PfxDestination = '{{ item.deploy.pfx.path }}'
+  if (-not [String]::Equals($PfxSource, $PfxDestination, [StringComparison]::OrdinalIgnoreCase)) {
+    Copy-Item -LiteralPath $PfxSource -Destination $PfxDestination -Force
+  }
 {% if item.deploy.windows_store is defined %}
   $PfxPassword = ConvertTo-SecureString $env:LEGO_PFX_PASSWORD -AsPlainText -Force
   Import-PfxCertificate -FilePath '{{ item.deploy.pfx.path }}' -CertStoreLocation 'Cert:\{{ item.deploy.windows_store.store_location | default('LocalMachine') }}\{{ item.deploy.windows_store.store_name | default('My') }}' -Password $PfxPassword | Out-Null
