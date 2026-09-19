@@ -9,8 +9,9 @@ $$;
 {% endfor %}
 
 {% for database in postgresql_databases %}
-SELECT 'CREATE DATABASE "{{ database.name | replace('"', '""') }}" OWNER "{{ database.owner | replace('"', '""') }}"'
+{% set owner = database.owner | default(postgresql_admin_user, true) %}
+SELECT 'CREATE DATABASE "{{ database.name | replace('"', '""') }}" OWNER "{{ owner | replace('"', '""') }}"'
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '{{ database.name | replace("'", "''") }}')\gexec
 
-ALTER DATABASE "{{ database.name | replace('"', '""') }}" OWNER TO "{{ database.owner | replace('"', '""') }}";
+ALTER DATABASE "{{ database.name | replace('"', '""') }}" OWNER TO "{{ owner | replace('"', '""') }}";
 {% endfor %}

@@ -12,7 +12,7 @@ vaultwarden_network_name: "vaultwarden-internal"
 
 # Versions
 # renovate: datasource=docker depName=vaultwarden/server
-vaultwarden_version: "1.37.2-alpine"
+vaultwarden_version: "1.37.3-alpine"
 
 # Autoupdate
 vaultwarden_autoupdate: true
