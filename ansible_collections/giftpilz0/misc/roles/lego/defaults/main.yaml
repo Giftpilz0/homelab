@@ -7,7 +7,7 @@ lego_service_group: lego
 
 # Binary
 # renovate: datasource=github-releases depName=go-acme/lego extractVersion=^v(?<version>.*)$
-lego_tag: 5.4.1
+lego_tag: 5.5.1
 lego_arch: amd64
 lego_path: "{{ 'C:\\ProgramData\\lego\\bin' if ansible_os_family == 'Windows' else '/usr/local/bin' }}"
 lego_binary: "{{ lego_path }}/lego"
