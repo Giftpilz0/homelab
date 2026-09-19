@@ -21,7 +21,7 @@ mariadb_port_map:
 
 # Versions
 # renovate: datasource=docker depName=mariadb
-mariadb_version: "12.3"
+mariadb_version: "13.0"
 
 # Autoupdate
 mariadb_autoupdate: true
