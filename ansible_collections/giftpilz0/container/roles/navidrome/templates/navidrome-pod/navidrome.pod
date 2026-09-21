@@ -1,0 +1,19 @@
+[Unit]
+Description=Navidrome Pod
+
+[Pod]
+PodName=navidrome-pod
+
+Network={{ navidrome_network_name }}
+
+{% if navidrome_port_map_enabled %}
+{% for port_mapping in navidrome_port_map %}
+PublishPort={{ navidrome_bind_ip }}:{{ port_mapping }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

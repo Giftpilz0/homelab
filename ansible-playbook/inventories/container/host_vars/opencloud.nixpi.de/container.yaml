@@ -69,6 +69,20 @@ opencloud_environment_vars:
   SETTINGS_SETUP_DEFAULT_ASSIGNMENTS: "false"
 
 ######################################
+### giftpilz0.container.navidrome
+
+# Network
+navidrome_network_enabled: true
+navidrome_network_name: "navidrome-internal"
+
+# Versions
+# renovate: datasource=docker depName=deluan/navidrome
+navidrome_version: "0.64.0"
+
+# Autoupdate
+navidrome_autoupdate: true
+
+######################################
 ### giftpilz0.container.traefik
 
 # Version
@@ -94,6 +108,7 @@ traefik_log_level: "INFO"
 # Podman networks traefik should join to reach backends directly
 traefik_networks:
   - opencloud
+  - navidrome
 
 # Transport
 traefik_transport_timeouts_enabled: true
@@ -119,3 +134,10 @@ traefik_http_services:
     tls_enabled: true
     acme_enabled: true
     insecure_skip_verify: true
+  - name: navidrome
+    domain: navidrome.nixpi.de
+    rule: "Host(`navidrome.nixpi.de`)"
+    servers:
+      - url: "http://navidrome-pod:4533"
+    tls_enabled: true
+    acme_enabled: true

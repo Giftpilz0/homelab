@@ -1,0 +1,9 @@
+[containers]
+http_proxy = false
+
+[engine]
+{% if navidrome_proxy_enabled and navidrome_proxy_env %}
+env = ["{{ navidrome_proxy_env | join('","') }}"]
+{% else %}
+env = []
+{% endif %}

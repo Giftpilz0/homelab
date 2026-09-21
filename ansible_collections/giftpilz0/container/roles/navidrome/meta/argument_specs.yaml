@@ -1,0 +1,117 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy Navidrome as a Podman Quadlet pod.
+    options:
+      podman_user:
+        type: str
+        required: false
+        default: "{{ ansible_user }}"
+        description: System user for rootless Podman operations.
+
+      navidrome_network_enabled:
+        type: bool
+        required: false
+        default: true
+        description: Create and manage the Podman network.
+
+      navidrome_network_name:
+        type: str
+        required: false
+        default: navidrome-internal
+        description: Podman network name.
+
+      navidrome_network_driver:
+        type: str
+        required: false
+        default: bridge
+        description: Podman network driver.
+
+      navidrome_bind_ip:
+        type: str
+        required: false
+        default: "127.0.0.1"
+        description: Host IP for optional direct port publishing.
+
+      navidrome_port_map_enabled:
+        type: bool
+        required: false
+        default: false
+        description: Publish Navidrome ports directly on the host.
+
+      navidrome_port_map:
+        type: list
+        elements: str
+        required: false
+        default:
+          - "4533:4533"
+        description: Host-to-container port mappings.
+
+      navidrome_version:
+        type: str
+        required: false
+        default: "0.64.0"
+        description: Navidrome image tag.
+
+      navidrome_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: Enable Podman registry auto-update for Navidrome.
+
+      navidrome_environment_vars:
+        type: dict
+        required: false
+        default: {}
+        description: Environment variables passed to Navidrome.
+
+      navidrome_extra_files:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      navidrome_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.
+
+      navidrome_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: optional container entrypoint override.
+
+      navidrome_proxy_enabled:
+        type: bool
+        required: false
+        default: false
+        description: enable HTTP proxy for image pulls.
+
+      navidrome_proxy_http:
+        type: str
+        required: false
+        default: ""
+        description: HTTP proxy URL.
+
+      navidrome_proxy_https:
+        type: str
+        required: false
+        default: ""
+        description: HTTPS proxy URL.
+
+      navidrome_proxy_no_proxy:
+        type: str
+        required: false
+        default: ""
+        description: comma-separated list of proxy exclusions.
+
+      navidrome_proxy_env:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: generated proxy environment entries.
