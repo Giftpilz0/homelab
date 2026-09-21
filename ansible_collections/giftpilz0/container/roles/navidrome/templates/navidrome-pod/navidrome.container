@@ -1,0 +1,36 @@
+[Unit]
+Description=Navidrome Container
+
+[Container]
+ContainerName=navidrome
+Image=docker.io/deluan/navidrome:{{ navidrome_version }}
+User=1001:1001
+
+Pod=navidrome.pod
+
+{% if navidrome_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+{% if navidrome_entrypoint %}
+Entrypoint={{ navidrome_entrypoint }}
+{% endif %}
+
+{% for env_name, env_value in navidrome_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+{% if navidrome_proxy_enabled %}
+{% for env_var in navidrome_proxy_env %}
+Environment={{ env_var }}
+{% endfor %}
+{% endif %}
+
+Volume=navidrome-data.volume:/data
+Volume=navidrome-cache.volume:/cache
+Volume=navidrome-music.volume:/music:ro
+
+{% for item in (navidrome_extra_files | default([]) + navidrome_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume={{ item.source | default('%h/.config/containers/systemd/navidrome-pod/' ~ item.dest) }}:{{ item.mount }}:Z
+{% endfor %}
+[Service]
+Restart=always
