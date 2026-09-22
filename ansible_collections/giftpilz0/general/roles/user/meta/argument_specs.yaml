@@ -10,7 +10,7 @@ argument_specs:
         options:
           user_username:
             type: str
-            required: false
+            required: true
             description: login name.
           user_state:
             type: str
@@ -36,6 +36,11 @@ argument_specs:
             type: bool
             required: false
             description: create home directory.
+          user_remove_home:
+            type: bool
+            required: false
+            default: false
+            description: remove the home directory when the user is absent.
           user_shell:
             type: str
             required: false
@@ -60,3 +65,9 @@ argument_specs:
         elements: str
         required: false
         description: list of users that receive all user SSH public keys.
+
+      user_retired_ssh_keys:
+        type: list
+        elements: str
+        required: false
+        description: SSH public keys to remove from all managed users and key targets.
