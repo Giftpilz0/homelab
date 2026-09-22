@@ -3,3 +3,5 @@
 
 user_key_target_users:
   - root
+
+user_retired_ssh_keys: []

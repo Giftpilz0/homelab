@@ -12,18 +12,27 @@
     msg: "{{ ansible_facts['os_family'] }} is not supported"
   when: user_mkpasswd_package is undefined
 
-- name: "User: Manage group"
+- name: "User: Get passwd entries"
+  become: true
+  ansible.builtin.getent:
+    database: passwd
+
+- name: "User: Manage groups for present users"
   become: true
   ansible.builtin.group:
     name: "{{ item.user_username }}"
-    state: "{{ item.user_state }}"
-  with_items: "{{ user }}"
+    state: present
+  loop: "{{ user }}"
+  when:
+    - item.user_state != 'absent'
 
 - name: "User: Install mkpasswd"
   become: true
   ansible.builtin.package:
     name: "{{ user_mkpasswd_package }}"
     state: present
+  when:
+    - user | selectattr('user_state', 'equalto', 'present') | list | length > 0
 
 - name: "User: Hash passwords"
   ansible.builtin.command: mkpasswd "{{ item.user_password }}"
@@ -31,6 +40,7 @@
   changed_when: false
   loop: "{{ user }}"
   when:
+    - item.user_state != 'absent'
     - item.user_password != "!"
 
 - name: "User: Create password hash mapping"
@@ -41,37 +51,60 @@
     - item is not skipped
     - item.stdout is defined
 
-- name: "User: Allow passwordless sudo"
+- name: "User: Manage passwordless sudo"
   become: true
   ansible.builtin.lineinfile:
     path: /etc/sudoers.d/ansible_users
-    regexp: "#? *{{ item.user_username }} "
+    regexp: "^#? *{{ item.user_username | regex_escape }} "
     line: "{{ item.user_username }} ALL=(ALL) NOPASSWD: ALL"
-    create: true
+    state: "{{ 'present' if item.user_state != 'absent' and item.user_sudo_pwless else 'absent' }}"
+    create: "{{ item.user_state != 'absent' }}"
     mode: "0440"
     group: root
     owner: root
     backup: true
-  with_items: "{{ user }}"
-  when:
-    - item.user_sudo_pwless
+  loop: "{{ user }}"
 
-- name: "User: Disallow passwordless sudo"
+- name: "User: Remove configured SSH keys from removed users"
   become: true
   ansible.builtin.lineinfile:
-    path: /etc/sudoers.d/ansible_users
-    regexp: "#? *{{ item.user_username }} "
-    line: "# {{ item.user_username }} ALL=(ALL) NOPASSWD: ALL"
-    create: true
-    mode: "0440"
-    group: root
-    owner: root
-    backup: true
-  with_items: "{{ user }}"
+    path: "{{ getent_passwd[item.0.user_username][4] }}/.ssh/authorized_keys"
+    regexp: "^(?:\\S+\\s+)*{{ (item.1.split()[:2] | join(' ')) | regex_escape }}(?:\\s+.*)?$"
+    state: absent
+  loop: "{{ user | subelements('user_pub', skip_missing=True) }}"
   when:
-    - not item.user_sudo_pwless
+    - item.0.user_state == 'absent'
+    - item.0.user_username in getent_passwd
 
-- name: "User: Manage user"
+- name: "User: Remove configured SSH keys from specified users"
+  become: true
+  ansible.builtin.lineinfile:
+    path: "{{ getent_passwd[item.0][4] }}/.ssh/authorized_keys"
+    regexp: "^(?:\\S+\\s+)*{{ (item.1.1.split()[:2] | join(' ')) | regex_escape }}(?:\\s+.*)?$"
+    state: absent
+  loop: "{{ user_key_target_users | product(user | subelements('user_pub', skip_missing=True)) | list }}"
+  when:
+    - item.1.0.user_state == 'absent'
+    - item.1.0.user_install_key_to_targets
+    - item.0 in getent_passwd
+
+- name: "User: Remove retired SSH keys"
+  become: true
+  ansible.builtin.lineinfile:
+    path: "{{ getent_passwd[item.0][4] }}/.ssh/authorized_keys"
+    regexp: "^(?:\\S+\\s+)*{{ (item.1.split()[:2] | join(' ')) | regex_escape }}(?:\\s+.*)?$"
+    state: absent
+  loop: >-
+    {{
+      (
+        (user | map(attribute='user_username') | list) +
+        user_key_target_users
+      ) | unique | product(user_retired_ssh_keys) | list
+    }}
+  when:
+    - item.0 in getent_passwd
+
+- name: "User: Manage present users"
   become: true
   ansible.builtin.user:
     name: "{{ item.user_username }}"
@@ -80,9 +113,11 @@
     create_home: "{{ item.user_home | default({}) }}"
     shell: "{{ item.user_shell | default({}) }}"
     password: "{{ user_password_map[item.user_username] | default('!') }}"
-    state: "{{ item.user_state }}"
     comment: "{{ item.user_comment }}"
-  with_items: "{{ user }}"
+    state: present
+  loop: "{{ user }}"
+  when:
+    - item.user_state != 'absent'
 
 - name: "User: Add authorized_keys"
   become: true
@@ -91,6 +126,8 @@
     key: "{{ item.1 }}"
     state: present
   loop: "{{ user | subelements('user_pub', skip_missing=True) }}"
+  when:
+    - item.0.user_state != 'absent'
 
 - name: "User: Add authorized_keys to specified users"
   become: true
@@ -98,7 +135,36 @@
     user: "{{ item.0 }}"
     key: "{{ item.1.1 }}"
     state: present
-  loop: "{{ user_key_target_users | default([]) | product(user | subelements('user_pub', skip_missing=True)) | list }}"
+  loop: "{{ user_key_target_users | product(user | subelements('user_pub', skip_missing=True)) | list }}"
   when:
-    - user_key_target_users | length > 0
-    - item.1.0.user_install_key_to_targets | default(true)
+    - item.1.0.user_state != 'absent'
+    - item.1.0.user_install_key_to_targets
+
+- name: "User: Remove absent users"
+  become: true
+  ansible.builtin.user:
+    name: "{{ item.user_username }}"
+    state: absent
+    remove: "{{ item.user_remove_home }}"
+  loop: "{{ user }}"
+  when:
+    - item.user_state == 'absent'
+
+- name: "User: Remove home directories for absent users"
+  become: true
+  ansible.builtin.file:
+    path: "/home/{{ item.user_username }}"
+    state: absent
+  loop: "{{ user }}"
+  when:
+    - item.user_state == 'absent'
+    - item.user_remove_home
+
+- name: "User: Remove groups for absent users"
+  become: true
+  ansible.builtin.group:
+    name: "{{ item.user_username }}"
+    state: absent
+  loop: "{{ user }}"
+  when:
+    - item.user_state == 'absent'
