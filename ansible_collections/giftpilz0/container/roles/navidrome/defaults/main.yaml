@@ -21,7 +21,7 @@ navidrome_port_map:
 
 # Versions
 # renovate: datasource=docker depName=deluan/navidrome
-navidrome_version: "0.64.0"
+navidrome_version: "0.64.2"
 
 # Autoupdate
 navidrome_autoupdate: true
