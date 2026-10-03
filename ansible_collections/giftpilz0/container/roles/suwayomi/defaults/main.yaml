@@ -1,0 +1,80 @@
+---
+## Primary
+# The system user under which Podman containers are managed.
+podman_user: "{{ ansible_user }}"
+
+# Network
+# Network to join even when _network_enabled: false
+suwayomi_network_enabled: true
+suwayomi_network_name: "suwayomi-internal"
+
+# Optional: expose this service directly on the host, bypassing Traefik.
+# Not required for Traefik to reach it -- Traefik connects directly over the
+# shared Podman network using the pod name and container port.
+# _bind_ip and _port_map are independent: override _bind_ip alone to change
+# where it's exposed, or _port_map alone ("host_port:container_port") to
+# change which ports -- no need to redefine both together.
+suwayomi_bind_ip: "127.0.0.1"
+suwayomi_port_map_enabled: false
+suwayomi_port_map:
+  - "4567:4567"
+
+# Versions
+# renovate: datasource=docker depName=ghcr.io/suwayomi/suwayomi-server
+suwayomi_version: "v2.4.2366"
+# renovate: datasource=docker depName=ghcr.io/thephaseless/byparr
+suwayomi_flaresolverr_version: "3.0.4"
+
+# Autoupdate
+suwayomi_autoupdate: true
+suwayomi_flaresolverr_autoupdate: true
+
+# FlareSolverr-compatible service
+suwayomi_flaresolverr_environment_vars:
+  TZ: "Europe/Berlin"
+
+# Environment
+suwayomi_environment_vars:
+  TZ: "Europe/Berlin"
+  BIND_IP: "0.0.0.0"
+  BIND_PORT: "4567"
+  AUTH_MODE: "none"
+  WEB_UI_UPDATE_INTERVAL: "0"
+  DOWNLOAD_AS_CBZ: "true"
+  FLARESOLVERR_ENABLED: "true"
+  FLARESOLVERR_URL: "http://127.0.0.1:8191"
+
+# Copy arbitrary extra files/directories from the inventory into this role's
+# quadlet directory (relative to the <role>-pod dir).
+# Each entry supports src (controller path) or source (target path), dest,
+# optional mount, mode, and template (files only).
+# Example:
+#   suwayomi_extra_files:
+#     - src: "assets/example/config.yaml"
+#       dest: "config/example.yaml"
+#       mode: "0640"
+#       template: true
+#       mount: "/etc/example/config.yaml"
+#     - source: "/srv/example/license.key"
+#       dest: "host-license.key"
+#       mount: "/run/secrets/license.key"
+#   suwayomi_extra_dirs:
+#     - src: "assets/example/plugins/"
+#       dest: "plugins"
+#       mount: "/usr/local/share/example/plugins"
+suwayomi_extra_files: []
+suwayomi_extra_dirs: []
+
+suwayomi_entrypoint: ""
+suwayomi_flaresolverr_entrypoint: ""
+
+## Advanced
+# Proxy
+suwayomi_proxy_enabled: false
+suwayomi_proxy_http: ""
+suwayomi_proxy_https: ""
+suwayomi_proxy_no_proxy: ""
+suwayomi_proxy_env: "{{ (['https_proxy=' ~ suwayomi_proxy_https] + (['http_proxy=' ~ suwayomi_proxy_http] if suwayomi_proxy_http else []) + (['no_proxy=' ~ suwayomi_proxy_no_proxy] if suwayomi_proxy_no_proxy else [])) if suwayomi_proxy_enabled else [] }}"
+
+# Network driver
+suwayomi_network_driver: "bridge"

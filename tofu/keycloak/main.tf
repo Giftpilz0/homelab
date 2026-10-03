@@ -565,6 +565,114 @@ resource "keycloak_openid_client_default_scopes" "forgejo_default_scopes" {
 }
 
 # ======================================================================================================================
+# CLIENT: suwayomi
+# ======================================================================================================================
+resource "keycloak_openid_client" "suwayomi" {
+  realm_id    = keycloak_realm.nixpi.id
+  client_id   = "suwayomi"
+  name        = "Suwayomi"
+  description = "Suwayomi reader"
+
+  access_type   = "CONFIDENTIAL"
+  client_secret = local.secrets.data.suwayomi_client_secret
+
+  # Authentication flow
+  standard_flow_enabled        = true
+  implicit_flow_enabled        = false
+  direct_access_grants_enabled = false
+
+  # Session settings
+  use_refresh_tokens         = true
+  pkce_code_challenge_method = "S256"
+
+  valid_redirect_uris = [
+    "https://suwayomi.nixpi.de/oidc/callback"
+  ]
+
+  # Valid redirect URIs
+  valid_post_logout_redirect_uris = [
+    "https://suwayomi.nixpi.de/"
+  ]
+
+  # Web origins for CORS
+  web_origins = [
+    "https://suwayomi.nixpi.de"
+  ]
+
+  # Service accounts
+  service_accounts_enabled = false
+
+  # Authentication flow
+  authentication_flow_binding_overrides {
+    browser_id = keycloak_authentication_flow.browser_flow_2.id
+  }
+}
+
+resource "keycloak_openid_client_default_scopes" "suwayomi_default_scopes" {
+  realm_id  = keycloak_realm.nixpi.id
+  client_id = keycloak_openid_client.suwayomi.id
+
+  default_scopes = [
+    "profile",
+    "email",
+  ]
+}
+
+# ======================================================================================================================
+# CLIENT: music library WebUI
+# ======================================================================================================================
+resource "keycloak_openid_client" "music_webui" {
+  realm_id    = keycloak_realm.nixpi.id
+  client_id   = "music-webui"
+  name        = "Music Library WebUI"
+  description = "Navidrome music library management"
+
+  access_type   = "CONFIDENTIAL"
+  client_secret = local.secrets.data.music_webui_client_secret
+
+  # Authentication flow
+  standard_flow_enabled        = true
+  implicit_flow_enabled        = false
+  direct_access_grants_enabled = false
+
+  # Session settings
+  use_refresh_tokens         = true
+  pkce_code_challenge_method = "S256"
+
+  valid_redirect_uris = [
+    "https://music.nixpi.de/oidc/callback"
+  ]
+
+  # Valid redirect URIs
+  valid_post_logout_redirect_uris = [
+    "https://music.nixpi.de/"
+  ]
+
+  # Web origins for CORS
+  web_origins = [
+    "https://music.nixpi.de"
+  ]
+
+  # Service accounts
+  service_accounts_enabled = false
+
+  # Authentication flow
+  authentication_flow_binding_overrides {
+    browser_id = keycloak_authentication_flow.browser_flow_2.id
+  }
+}
+
+resource "keycloak_openid_client_default_scopes" "music_webui_default_scopes" {
+  realm_id  = keycloak_realm.nixpi.id
+  client_id = keycloak_openid_client.music_webui.id
+
+  default_scopes = [
+    "profile",
+    "email",
+  ]
+}
+
+# ======================================================================================================================
 # CLIENT: perses
 # ======================================================================================================================
 resource "keycloak_openid_client" "perses" {

@@ -1,0 +1,9 @@
+[containers]
+http_proxy = false
+
+[engine]
+{% if suwayomi_proxy_enabled and suwayomi_proxy_env %}
+env = ["{{ suwayomi_proxy_env | join('","') }}"]
+{% else %}
+env = []
+{% endif %}

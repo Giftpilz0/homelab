@@ -1,0 +1,33 @@
+[Unit]
+Description=Suwayomi Server Container
+
+[Container]
+ContainerName=suwayomi
+Image=ghcr.io/suwayomi/suwayomi-server:{{ suwayomi_version }}
+
+Pod=suwayomi.pod
+
+{% if suwayomi_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+{% if suwayomi_entrypoint %}
+Entrypoint={{ suwayomi_entrypoint }}
+{% endif %}
+
+{% for env_name, env_value in suwayomi_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+{% if suwayomi_proxy_enabled %}
+{% for env_var in suwayomi_proxy_env %}
+Environment={{ env_var }}
+{% endfor %}
+{% endif %}
+
+Volume=suwayomi-data.volume:/home/suwayomi/.local/share/Tachidesk
+{% for item in (suwayomi_extra_files | default([]) + suwayomi_extra_dirs | default([])) if item.mount is defined and item.mount %}
+Volume={{ item.source | default('%h/.config/containers/systemd/suwayomi-pod/' ~ item.dest) }}:{{ item.mount }}:Z
+{% endfor %}
+
+[Service]
+Restart=always
