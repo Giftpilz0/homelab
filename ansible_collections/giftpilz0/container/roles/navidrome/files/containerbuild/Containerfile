@@ -17,7 +17,7 @@ RUN apt-get update \
         opus-tools \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=ghcr.io/astral-sh/uv:0.12.9 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.12.22 /uv /uvx /bin/
 WORKDIR /app
 COPY pyproject.toml uv.lock* ./
 RUN uv sync --no-dev --no-install-project
