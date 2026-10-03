@@ -5,6 +5,20 @@ global:
   checkNewVersion: false
   sendAnonymousUsage: false
 
+{% if traefik_plugins | default({}) %}
+# =============================================================================
+# EXPERIMENTAL PLUGINS
+# =============================================================================
+experimental:
+  plugins:
+{% for plugin_name, plugin_config in traefik_plugins.items() %}
+    {{ plugin_name }}:
+{% for key, value in plugin_config.items() %}
+      {{ key }}: "{{ value }}"
+{% endfor %}
+{% endfor %}
+{% endif %}
+
 # =============================================================================
 # ENTRYPOINTS
 # =============================================================================

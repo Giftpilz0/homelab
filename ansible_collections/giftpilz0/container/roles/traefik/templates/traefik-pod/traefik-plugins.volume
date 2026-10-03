@@ -1,0 +1,5 @@
+[Unit]
+Description=Traefik Plugin Storage Volume
+
+[Volume]
+VolumeName=traefik-plugins

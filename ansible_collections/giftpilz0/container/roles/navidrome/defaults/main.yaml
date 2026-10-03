@@ -32,8 +32,18 @@ navidrome_environment_vars:
   ND_DATAFOLDER: "/data"
   ND_CACHEFOLDER: "/cache"
   ND_SCANSCHEDULE: "1h"
+  ND_SCANNER_PURGEMISSING: "always"
   ND_LOGLEVEL: "info"
   ND_TRANSCODINGCACHESIZE: "1GB"
+
+# Music library management WebUI.
+navidrome_webui_enabled: false
+navidrome_webui_image_name: "localhost/music-library-webui"
+navidrome_webui_image_tag: "0.1.0"
+navidrome_webui_image: "{{ navidrome_webui_image_name }}:{{ navidrome_webui_image_tag }}"
+navidrome_webui_user: "1001:1001"
+navidrome_webui_environment_vars:
+  MUSIC_LIBRARY_ROOT: "/music"
 
 # Copy arbitrary extra files/directories from the inventory into this role's
 # quadlet directory (relative to the <role>-pod dir).

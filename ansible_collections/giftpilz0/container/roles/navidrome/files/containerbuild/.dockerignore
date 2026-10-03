@@ -1,0 +1,8 @@
+transcoded
+original
+webui-data
+__pycache__
+*.pyc
+.venv
+*.egg-info
+.git

@@ -1,0 +1,27 @@
+[project]
+name = "music-library-webui"
+version = "0.1.0"
+description = "Web ingestion and metadata review UI for a beets-managed music library"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi",
+  "python-multipart",
+  "uvicorn[standard]",
+  "mutagen",
+  "yt-dlp",
+  "beets[chroma]",
+  "pylast",
+]
+
+[project.scripts]
+music-library-webui = "webui.app:main"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["webui*", "tools*"]
+
+[tool.uv]
+package = true

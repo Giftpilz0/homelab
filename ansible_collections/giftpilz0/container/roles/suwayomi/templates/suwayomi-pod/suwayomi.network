@@ -1,0 +1,8 @@
+{% if suwayomi_network_enabled %}
+[Unit]
+Description=Suwayomi Internal Network
+
+[Network]
+NetworkName={{ suwayomi_network_name }}
+Driver={{ suwayomi_network_driver }}
+{% endif %}

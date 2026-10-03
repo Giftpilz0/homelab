@@ -1,0 +1,19 @@
+[Unit]
+Description=Suwayomi Server Pod
+
+[Pod]
+PodName=suwayomi-pod
+
+Network={{ suwayomi_network_name }}
+
+{% if suwayomi_port_map_enabled %}
+{% for port_mapping in suwayomi_port_map %}
+PublishPort={{ suwayomi_bind_ip }}:{{ port_mapping }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

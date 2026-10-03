@@ -28,6 +28,7 @@
   roles:
     - role: giftpilz0.container.opencloud
     - role: giftpilz0.container.navidrome
+    - role: giftpilz0.container.suwayomi
 
 - name: Configure hosts - vaultwarden
   hosts: vaultwarden

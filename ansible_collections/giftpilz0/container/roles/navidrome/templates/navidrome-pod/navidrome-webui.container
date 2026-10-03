@@ -1,0 +1,23 @@
+[Unit]
+Description=Navidrome Music Library WebUI Container
+
+[Container]
+ContainerName=navidrome-webui
+Image={{ navidrome_webui_image }}
+User={{ navidrome_webui_user }}
+Pod=navidrome.pod
+
+{% for env_name, env_value in navidrome_webui_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+{% if navidrome_proxy_enabled %}
+{% for env_var in navidrome_proxy_env %}
+Environment={{ env_var }}
+{% endfor %}
+{% endif %}
+
+Volume=navidrome-music.volume:/music
+
+[Service]
+Restart=always

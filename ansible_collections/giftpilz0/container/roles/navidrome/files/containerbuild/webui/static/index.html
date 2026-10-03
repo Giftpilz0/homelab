@@ -1,0 +1,2545 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Music Library — Picard Tagging & Management</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font: 13px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --bg: #12151a;
+      --pane-bg: #181c22;
+      --header-bg: #21262d;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #3182ce;
+      --accent-hover: #2b6cb0;
+      --selected: #1f385c;
+      --selected-border: #4299e1;
+      --green: #2ea043;
+      --green-bg: rgba(46, 160, 67, 0.15);
+      --yellow: #d29922;
+      --yellow-bg: rgba(210, 153, 34, 0.15);
+      --red: #f85149;
+      --red-bg: rgba(248, 81, 73, 0.15);
+      --input-bg: #0d1117;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100vh;
+      max-height: 100vh;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+    }
+    button, input, select {
+      font: inherit; color: inherit; background: var(--input-bg);
+      border: 1px solid var(--border); border-radius: 4px; padding: 5px 10px;
+    }
+    button {
+      cursor: pointer; background: var(--header-bg); border-color: var(--border);
+      display: inline-flex; align-items: center; gap: 5px; user-select: none;
+    }
+    button:hover { background: #30363d; }
+    button.primary { background: var(--accent); border-color: #2b6cb0; color: #fff; }
+    button.primary:hover { background: var(--accent-hover); }
+    button.danger { background: #b91c1c; border-color: #991b1b; color: #fff; }
+    button.danger:hover { background: #dc2626; }
+    button.icon-btn { padding: 4px 7px; font-size: 12px; }
+    input[type="text"] { background: var(--input-bg); color: var(--text); }
+    input[type="text"]:focus, select:focus { outline: none; border-color: var(--accent); }
+
+    /* Top Navigation Header */
+    .app-header {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 44px; flex: 0 0 44px; width: 100%; box-sizing: border-box;
+      padding: 0 16px; background: #161b22; border-bottom: 1px solid var(--border);
+    }
+    .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
+    .brand svg { fill: var(--accent); }
+    .nav-tabs { display: flex; gap: 6px; }
+    .nav-tab {
+      background: transparent; border: 1px solid transparent; border-radius: 6px;
+      padding: 6px 12px; color: var(--text-muted); font-weight: 500;
+    }
+    .nav-tab:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    .nav-tab.active { color: #fff; background: #21262d; border-color: var(--border); }
+    .job-selector-bar { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .job-badge {
+      display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px;
+      border-radius: 12px; font-size: 11px; font-weight: 600;
+      background: #21262d; border: 1px solid var(--border); color: #90cdf4;
+    }
+    .job-badge.failed { color: #feb2b2; border-color: var(--red); }
+    .job-badge.completed { color: #86efac; border-color: var(--green); }
+
+    /* Picard Desktop Toolbar */
+    .picard-toolbar {
+      width: 100%; box-sizing: border-box; flex: 0 0 auto;
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 6px; padding: 6px 14px; background: #1f242c; border-bottom: 1px solid var(--border);
+    }
+    .toolbar-group { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .toolbar-sep { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
+    .search-box { display: flex; align-items: center; gap: 4px; }
+    .search-box input { width: 220px; padding: 4px 8px; }
+    .search-box select { padding: 4px 6px; background: var(--input-bg); }
+
+    /* Pipeline Status Drawer / Banner */
+    .pipeline-drawer {
+      width: 100%; box-sizing: border-box; flex: 0 0 auto;
+      background: #14181f; border-bottom: 1px solid var(--border); padding: 8px 16px;
+    }
+    .pipeline-summary {
+      display: flex; align-items: center; justify-content: space-between; font-size: 12px;
+    }
+    .pipeline-stages {
+      display: flex; gap: 6px; overflow-x: auto; padding: 6px 0; margin-top: 4px;
+    }
+    .p-stage {
+      padding: 4px 10px; border-radius: 4px; background: #1c2128;
+      border: 1px solid var(--border); font-size: 11px; white-space: nowrap;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .p-stage.completed { border-color: var(--green); color: #86efac; }
+    .p-stage.running { border-color: var(--accent); color: #93c5fd; box-shadow: 0 0 4px var(--accent); }
+    .p-stage.failed { border-color: var(--red); color: #feb2b2; }
+    .p-stage.available { border-color: var(--yellow); color: #fde047; }
+    .pipeline-progress {
+      height: 4px; background: #21262d; border-radius: 2px; overflow: hidden; margin-top: 6px;
+    }
+    .pipeline-progress-bar { height: 100%; background: linear-gradient(90deg, #3182ce, #63b3ed); transition: width .3s; }
+
+    /* Main Workspace Layout */
+    .view {
+      display: none;
+      width: 100%;
+      height: calc(100vh - 44px);
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .view.active {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 0;
+      min-height: 0;
+      width: 100%;
+      height: calc(100vh - 44px);
+      max-height: calc(100vh - 44px);
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    #view-tagging.active,
+    #view-picard.active,
+    .picard-view.active {
+      display: flex !important;
+      flex-direction: column !important;
+      flex: 1 1 0 !important;
+      min-height: 0 !important;
+      width: 100% !important;
+      height: calc(100vh - 44px) !important;
+      max-height: calc(100vh - 44px) !important;
+      overflow: hidden !important;
+      position: relative;
+      box-sizing: border-box;
+    }
+    #view-library.active {
+      display: block !important;
+      flex: 1 1 0 !important;
+      min-height: 0 !important;
+      width: 100% !important;
+      height: calc(100vh - 44px) !important;
+      overflow-y: auto !important;
+      box-sizing: border-box;
+    }
+
+    /* Picard Two-Pane View */
+    .picard-panes-container {
+      width: 100%;
+      box-sizing: border-box;
+      display: flex; flex-direction: row;
+      flex: 1 1 0; min-height: 80px; overflow: hidden;
+      border-bottom: none;
+    }
+    .pane {
+      display: flex; flex-direction: column; height: 100%; overflow: hidden;
+      background: var(--pane-bg);
+    }
+    .pane.left-pane {
+      flex: 0 0 50%; min-width: 160px; max-width: calc(100% - 160px);
+      border-right: none;
+    }
+    .pane.right-pane {
+      flex: 1 1 0; min-width: 160px;
+      border-left: none;
+    }
+    .pane-header-row {
+      flex: 0 0 auto;
+      display: grid; grid-template-columns: 1fr 70px 160px;
+      padding: 6px 12px; background: var(--header-bg); border-bottom: 1px solid var(--border);
+      font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.5px; user-select: none;
+    }
+    .pane-header-row span:nth-child(2) { text-align: right; padding-right: 8px; }
+    .pane-tree {
+      flex: 1 1 0; height: 100%; overflow-y: auto; overflow-x: hidden; padding: 4px 0;
+    }
+
+    /* Vertical Resizer between Left and Right Panes */
+    .pane-vertical-resizer {
+      width: 6px; flex: 0 0 6px; background: #161b22;
+      border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+      cursor: col-resize; display: flex; align-items: center; justify-content: center;
+      user-select: none; transition: background 0.15s; z-index: 10;
+    }
+    .pane-vertical-resizer:hover, .pane-vertical-resizer.resizing {
+      background: var(--accent);
+    }
+    .pane-vertical-resizer-handle {
+      width: 2px; height: 32px; background: #484f58; border-radius: 1px;
+    }
+    .pane-vertical-resizer:hover .pane-vertical-resizer-handle,
+    .pane-vertical-resizer.resizing .pane-vertical-resizer-handle {
+      background: #ffffff;
+    }
+
+    /* Picard Tree Nodes (Left & Right) */
+    .tree-node-group {
+      user-select: none;
+    }
+    .collapse-toggle {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; font-size: 10px; color: var(--text-muted);
+      cursor: pointer; user-select: none; border-radius: 3px; flex-shrink: 0;
+    }
+    .collapse-toggle:hover { color: #fff; background: rgba(255,255,255,0.1); }
+    .tree-group-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 10px; font-weight: 600; font-size: 12px; color: #90cdf4;
+      background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.04);
+      cursor: pointer;
+    }
+    .tree-group-header:hover { background: rgba(255,255,255,0.05); }
+    .tree-group-title { display: flex; align-items: center; gap: 6px; }
+    .tree-group-actions { display: flex; align-items: center; gap: 4px; }
+    .tree-group-actions button { padding: 2px 6px; font-size: 10px; }
+
+    /* Track Row (Left & Right) */
+    .track-row {
+      display: grid; grid-template-columns: 1fr 70px 160px;
+      padding: 4px 10px 4px 24px; align-items: center;
+      font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.02);
+      cursor: pointer; user-select: none;
+    }
+    .track-row:hover { background: rgba(255,255,255,0.04); }
+    .track-row.selected {
+      background: var(--selected) !important;
+      outline: 1px solid var(--selected-border);
+    }
+    .track-col-title {
+      display: flex; align-items: center; gap: 6px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .track-col-len {
+      text-align: right; padding-right: 8px; color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .track-col-artist {
+      color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .match-icon {
+      display: inline-block; width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
+    }
+    .match-icon.perfect { background: var(--green); }
+    .match-icon.medium { background: var(--yellow); }
+    .match-icon.unmatched {
+      border: 1px solid var(--text-muted); background: transparent; border-radius: 50%;
+    }
+    .matched-file-subline {
+      display: flex; align-items: center; justify-content: space-between;
+      margin: 2px 0 2px 28px; padding: 2px 6px; font-size: 11px;
+      background: rgba(46, 160, 67, 0.08); border-left: 2px solid var(--green);
+      border-radius: 2px; color: #a7f3d0;
+    }
+    .matched-file-subline .unmatch-btn {
+      background: transparent; border: 0; color: var(--text-muted); padding: 0 4px; font-size: 14px;
+    }
+    .matched-file-subline .unmatch-btn:hover { color: var(--red); }
+
+    /* Release Card / Group in Right Pane */
+    .release-node {
+      border-bottom: 1px solid var(--border); margin-bottom: 8px;
+    }
+    .release-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 10px; background: #1c2128; border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .release-header.selected { background: var(--selected); }
+    .release-info-left { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; }
+    .release-info-left strong { color: #f0f6fc; }
+    .release-meta-badge {
+      font-size: 11px; color: var(--text-muted); font-weight: normal; margin-left: 4px;
+    }
+    .release-actions { display: flex; align-items: center; gap: 6px; }
+    .release-version-select {
+      font-size: 11px; padding: 2px 6px; max-width: 170px; background: var(--input-bg);
+    }
+
+    /* Drag & Drop Visuals */
+    .drag-over {
+      background: rgba(66, 153, 225, 0.2) !important;
+      outline: 2px dashed #63b3ed !important;
+    }
+    .dragging { opacity: 0.5; }
+
+    /* Draggable Splitter / Resizer Handle */
+    .pane-resizer {
+      width: 100%; box-sizing: border-box;
+      height: 7px; flex: 0 0 7px; background: #161b22;
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      cursor: row-resize; display: flex; align-items: center; justify-content: center;
+      user-select: none; transition: background 0.15s; z-index: 15;
+    }
+    .pane-resizer:hover, .pane-resizer.resizing {
+      background: var(--accent);
+    }
+    .pane-resizer-handle {
+      width: 44px; height: 2px; background: #484f58; border-radius: 1px;
+    }
+    .pane-resizer:hover .pane-resizer-handle, .pane-resizer.resizing .pane-resizer-handle {
+      background: #ffffff;
+    }
+
+    /* Bottom Picard Comparison Pane */
+    .picard-bottom-pane {
+      width: 100%; box-sizing: border-box;
+      display: grid; grid-template-columns: 280px 1fr;
+      flex: 0 0 auto; height: 260px; min-height: 34px; max-height: calc(100vh - 200px);
+      background: var(--pane-bg); overflow: hidden;
+    }
+    .picard-bottom-pane.minimized {
+      height: 34px !important;
+      min-height: 34px !important;
+    }
+    .picard-bottom-pane.minimized .artwork-previews,
+    .picard-bottom-pane.minimized .artwork-upload-btn,
+    .picard-bottom-pane.minimized .metadata-table-body {
+      display: none !important;
+    }
+    .picard-bottom-pane.minimized .bottom-artwork-section {
+      padding: 0 12px;
+      height: 34px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .picard-bottom-pane.minimized .bottom-section-title {
+      margin-bottom: 0;
+      line-height: 34px;
+    }
+    .picard-bottom-pane.minimized .bottom-metadata-section {
+      height: 34px;
+      overflow: hidden;
+    }
+    .picard-bottom-pane.minimized .metadata-table-header {
+      height: 34px;
+      padding: 0 12px;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .bottom-artwork-section {
+      border-right: 1px solid var(--border); padding: 10px;
+      display: flex; flex-direction: column; gap: 8px; overflow-y: auto;
+    }
+    .bottom-section-title {
+      font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.5px; margin-bottom: 4px;
+    }
+    .artwork-previews {
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .artwork-box {
+      display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px;
+      color: var(--text-muted);
+    }
+    .artwork-img {
+      width: 100px; height: 100px; object-fit: cover; border-radius: 4px;
+      background: #0d1117; border: 1px solid var(--border);
+    }
+    .artwork-upload-btn {
+      font-size: 11px; padding: 4px 8px; align-self: flex-start;
+    }
+
+    /* Metadata Comparison Table */
+    .bottom-metadata-section {
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .metadata-table-header {
+      display: grid; grid-template-columns: 140px 1fr 1fr;
+      padding: 6px 12px; background: var(--header-bg); border-bottom: 1px solid var(--border);
+      font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;
+    }
+    .metadata-table-body {
+      flex: 1; overflow-y: auto; padding: 4px 0;
+    }
+    .metadata-row {
+      display: grid; grid-template-columns: 140px 1fr 1fr;
+      padding: 3px 12px; align-items: center; gap: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.02); font-size: 12px;
+    }
+    .metadata-row.changed {
+      background: var(--yellow-bg); border-left: 3px solid var(--yellow); padding-left: 9px;
+    }
+    .meta-tag-label { color: var(--text-muted); font-weight: 500; }
+    .meta-orig-val {
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #c9d1d9;
+    }
+    .meta-new-val input {
+      width: 100%; padding: 2px 6px; font-size: 12px; height: 24px;
+    }
+
+    /* Approval & Actions Footer */
+    .picard-footer-bar {
+      width: 100%; box-sizing: border-box;
+      flex: 0 0 44px;
+      margin-top: auto;
+      height: 44px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px; background: #161b22; border-top: 1px solid var(--border);
+      z-index: 25;
+    }
+    .footer-options { display: flex; align-items: center; gap: 12px; font-size: 12px; }
+    .footer-options label { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+      display: none; align-items: center; justify-content: center; z-index: 100;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-content {
+      background: var(--pane-bg); border: 1px solid var(--border); border-radius: 8px;
+      width: 550px; max-width: 90vw; max-height: 80vh; display: flex; flex-direction: column;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 600;
+    }
+    .modal-body { padding: 16px; overflow-y: auto; flex: 1; }
+    .modal-footer {
+      display: flex; justify-content: flex-end; gap: 8px;
+      padding: 12px 16px; border-top: 1px solid var(--border);
+    }
+
+    /* Search Results in Modal */
+    .search-result-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 10px; border-bottom: 1px solid var(--border); gap: 10px;
+    }
+    .search-result-item:hover { background: rgba(255,255,255,0.03); }
+
+    /* Activity Log Pop-out Terminal Window */
+    .terminal-log-body {
+      flex: 1; overflow-y: auto; padding: 6px 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 11px; line-height: 1.45; color: #c9d1d9; background: #090d13;
+    }
+    .log-row {
+      display: flex; gap: 8px; align-items: flex-start; padding: 3px 6px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .log-row:hover { background: rgba(255,255,255,0.04); }
+    .log-row-time { color: #8b949e; flex: 0 0 65px; font-variant-numeric: tabular-nums; }
+    .log-row-lvl {
+      flex: 0 0 52px; font-weight: 700; text-align: center; border-radius: 3px;
+      padding: 0 4px; font-size: 10px;
+    }
+    .log-row-lvl.info { color: #58a6ff; background: rgba(56,139,253,0.15); }
+    .log-row-lvl.warning { color: #f2cc60; background: rgba(210,153,34,0.15); }
+    .log-row-lvl.error { color: #f85149; background: rgba(248,81,73,0.15); }
+    .log-row-msg { flex: 1; word-break: break-word; white-space: pre-wrap; }
+
+    /* Library View */
+    .library-view-container { padding: 16px 20px; }
+    .library-shell {
+      display: grid; grid-template-columns: 320px 1fr; gap: 16px; margin-top: 14px;
+    }
+    .library-tree-pane {
+      background: var(--pane-bg); border: 1px solid var(--border); border-radius: 6px;
+      padding: 8px; max-height: calc(100vh - 160px); overflow-y: auto;
+    }
+    .library-album-btn {
+      display: block; width: 100%; text-align: left; background: transparent;
+      border: 1px solid transparent; border-radius: 4px; padding: 6px 8px; margin: 2px 0;
+    }
+    .library-album-btn:hover { background: rgba(255,255,255,0.04); }
+    .library-album-btn.selected { background: var(--selected); border-color: var(--selected-border); }
+    .album-card {
+      background: var(--pane-bg); border: 1px solid var(--border); border-radius: 6px; padding: 16px;
+    }
+    .album-detail-head { display: flex; gap: 16px; margin-bottom: 16px; }
+    .album-detail-cover {
+      width: 140px; height: 140px; object-fit: cover; border-radius: 6px; background: #0d1117;
+      border: 1px solid var(--border);
+    }
+    .library-track-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 6px 0; border-top: 1px solid var(--border); font-size: 12px;
+    }
+
+    /* Notification message banner */
+    .message-banner {
+      position: fixed; bottom: 45px; right: 20px; z-index: 200;
+      background: #2b6cb0; color: #fff; padding: 8px 14px; border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4); font-size: 13px; display: none;
+    }
+    .message-banner.active { display: block; }
+    .message-banner.error { background: #b83232; }
+    .message-banner.warning { background: #a05a00; }
+  </style>
+</head>
+<body>
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="brand">
+      <svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+      <span>Music Library</span>
+    </div>
+    <nav class="nav-tabs">
+      <button id="tab-tagging" class="nav-tab active" onclick="switchTab('tagging')">Picard Tagging</button>
+      <button id="tab-library" class="nav-tab" onclick="switchTab('library')">Library</button>
+    </nav>
+    <div id="job-header-status" class="job-selector-bar">
+      <span class="job-badge">No active jobs</span>
+    </div>
+  </header>
+
+  <!-- Tagging & Ingestion View -->
+  <main id="view-tagging" class="view picard-view active">
+    <!-- Picard Desktop Toolbar -->
+    <div class="picard-toolbar">
+      <div class="toolbar-group">
+        <button onclick="openAddFiles()" title="Stage audio files from your computer">
+          <span>📁 Add Files…</span>
+        </button>
+        <button onclick="openAddFolder()" title="Stage a folder from original/untagged">
+          <span>📂 Add Folder…</span>
+        </button>
+        <button onclick="openDownloadModal()" title="Download from YouTube / URL with yt-dlp">
+          <span>⬇️ Download URL…</span>
+        </button>
+
+        <div class="toolbar-sep"></div>
+
+        <button onclick="actionCluster()" title="Cluster unclustered files into album groups by artist and album tags">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="12" cy="18" r="3"/><path d="M7.5 8l3.5 7 3.5-7" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+          <span>Cluster</span>
+        </button>
+        <button class="primary" onclick="actionLookup()" title="Query MusicBrainz for album releases matching the selected cluster or files">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <span>Lookup</span>
+        </button>
+        <button onclick="actionScan()" title="Compute AcoustID Chromaprint audio fingerprints and scan online">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.81 4.47c-.08 0-.16-.02-.23-.06C15.66 3.42 14 3 12.01 3c-1.98 0-3.86.47-5.57 1.41-.24.13-.54.04-.68-.2-.13-.24-.04-.55.2-.68C7.82 2.52 9.86 2 12.01 2c2.13 0 3.99.47 5.76 1.5.24.14.32.44.18.69-.11.18-.3.28-.54.28zM3.5 9.72c-.1 0-.2-.03-.29-.09-.23-.16-.28-.47-.12-.7.99-1.4 2.25-2.5 3.75-3.27C9.9 4.04 12 4.02 12.04 4.02c.28 0 .5.22.5.5s-.22.5-.5.5c-.01 0-1.97.02-4.7 1.47-1.39.71-2.56 1.73-3.48 3.03-.09.13-.23.2-.36.2zm16.99 0c-.13 0-.27-.07-.36-.2-.92-1.3-2.09-2.32-3.48-3.03-2.73-1.45-4.69-1.47-4.7-1.47-.28 0-.5-.22-.5-.5s.22-.5.5-.5c.04 0 2.14.02 5.2 1.64 1.5.77 2.76 1.87 3.75 3.27.16.23.11.54-.12.7-.09.06-.19.09-.29.09z"/></svg>
+          <span>Scan</span>
+        </button>
+        <button onclick="actionLookupBrowser()" title="Open selected release in MusicBrainz web browser">
+          <span>🌐 Lookup in Browser</span>
+        </button>
+        <button onclick="actionSaveTags()" title="Save mapped metadata and apply to files">
+          <span>💾 Save</span>
+        </button>
+        <button onclick="toggleInfoPane()" title="Toggle metadata comparison pane">
+          <span>ℹ️ Info</span>
+        </button>
+        <button class="danger" onclick="actionRemoveSelected()" title="Remove selected release or unmap file">
+          <span>✕ Remove</span>
+        </button>
+        <button onclick="actionResetJob()" title="Reset all mappings and edits back to original tags">
+          <span>↺ Reset</span>
+        </button>
+      </div>
+
+      <!-- Search Box on Right (Picard Toolbar style) -->
+      <div class="toolbar-group">
+        <div class="search-box">
+          <select id="search-type">
+            <option value="release">Album</option>
+            <option value="artist">Artist</option>
+            <option value="mbid">MBID</option>
+          </select>
+          <input id="search-input" type="text" placeholder="Search MusicBrainz…" onkeydown="if(event.key==='Enter')actionSearchMB()">
+          <button class="icon-btn" onclick="actionSearchMB()" title="Search MusicBrainz">🔍</button>
+        </div>
+        <button id="toolbar-log-btn" class="icon-btn" onclick="openActivityModal()" title="View activity and debug log">📋 Log</button>
+      </div>
+    </div>
+
+    <!-- Pipeline Progress Strip -->
+    <div id="pipeline-strip" class="pipeline-drawer">
+      <div class="pipeline-summary">
+        <div>
+          <strong id="pipeline-job-title">Job: No active staged download/import</strong>
+          <span id="pipeline-job-status" class="job-badge" style="margin-left: 8px;">Idle</span>
+        </div>
+        <div id="pipeline-stage-count" class="text-muted">0/8 stages</div>
+      </div>
+      <div class="pipeline-progress"><div id="pipeline-progress-bar" class="pipeline-progress-bar" style="width: 0%"></div></div>
+      <div id="pipeline-stages" class="pipeline-stages"></div>
+    </div>
+
+    <!-- Picard Two-Pane View -->
+    <div id="picard-panes-container" class="picard-panes-container">
+      <!-- Left Pane: Source Files (Unclustered & Clusters) -->
+      <div id="picard-left-pane" class="pane left-pane" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDropOnLeftPane(event);this.classList.remove('drag-over')">
+        <div class="pane-header-row">
+          <span>Title</span>
+          <span>Length</span>
+          <span>Artist</span>
+        </div>
+        <div id="left-pane-tree" class="pane-tree">
+          <div style="padding: 20px; color: var(--text-muted); text-align: center;">
+            No audio files staged. Click <strong>Add Files</strong>, <strong>Add Folder</strong>, or <strong>Download URL</strong> above.
+          </div>
+        </div>
+      </div>
+
+      <!-- Vertical Resizer Handle between Left and Right Panes -->
+      <div id="picard-vertical-resizer" class="pane-vertical-resizer" title="Drag left/right to resize panes. Double-click to reset.">
+        <div class="pane-vertical-resizer-handle"></div>
+      </div>
+
+      <!-- Right Pane: MusicBrainz Releases -->
+      <div id="picard-right-pane" class="pane right-pane">
+        <div class="pane-header-row">
+          <span>Title</span>
+          <span>Length</span>
+          <span>Artist</span>
+        </div>
+        <div id="right-pane-tree" class="pane-tree">
+          <div style="padding: 30px 20px; color: var(--text-muted); text-align: center;">
+            No releases loaded from MusicBrainz.<br><br>
+            Select a cluster or file on the left and click <strong>Lookup</strong> or <strong>Scan</strong>, or search an album using the search bar above.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Draggable Resizer Handle -->
+    <div id="picard-pane-resizer" class="pane-resizer" title="Drag up/down to resize tag pane. Double-click to collapse/expand.">
+      <div class="pane-resizer-handle"></div>
+    </div>
+
+    <!-- Bottom Metadata & Cover Art Comparison Pane (Picard style) -->
+    <div id="picard-bottom-pane" class="picard-bottom-pane">
+      <!-- Left: Artwork Comparison -->
+      <div class="bottom-artwork-section">
+        <div class="bottom-section-title">Album Artwork</div>
+        <div class="artwork-previews">
+          <div class="artwork-box">
+            <img id="artwork-orig-img" class="artwork-img" src="" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'><rect width=\'100%\' height=\'100%\' fill=\'%23161b22\'/><text x=\'50%\' y=\'50%\' fill=\'%238b949e\' font-size=\'11\' text-anchor=\'middle\' dy=\'.3em\'>No Artwork</text></svg>'">
+            <span>Original</span>
+          </div>
+          <div class="artwork-box">
+            <img id="artwork-prop-img" class="artwork-img" src="" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'><rect width=\'100%\' height=\'100%\' fill=\'%23161b22\'/><text x=\'50%\' y=\'50%\' fill=\'%238b949e\' font-size=\'11\' text-anchor=\'middle\' dy=\'.3em\'>No Artwork</text></svg>'">
+            <span>Proposed</span>
+          </div>
+        </div>
+        <button class="artwork-upload-btn" onclick="$('artwork-file-input').click()">Replace Artwork…</button>
+        <input id="artwork-file-input" type="file" accept="image/*" style="display:none" onchange="handleArtworkUpload(this.files[0])">
+      </div>
+
+      <!-- Right: Metadata Comparison Table -->
+      <div class="bottom-metadata-section">
+        <div class="metadata-table-header">
+          <span>Tag</span>
+          <span>Original Value</span>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span>New Value (Editable)</span>
+            <button class="icon-btn" onclick="toggleBottomPaneSize()" title="Minimize / Expand Tag Pane" style="padding: 1px 6px; font-size: 11px;">↕</button>
+          </div>
+        </div>
+        <div id="metadata-table-rows" class="metadata-table-body">
+          <div style="padding: 20px; color: var(--text-muted); text-align: center;">Select a track or release to view and edit metadata tags.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pipeline Approval Footer Bar -->
+    <div class="picard-footer-bar">
+      <div class="footer-options">
+        <label><input id="opt-fingerprint" type="checkbox" checked> Fingerprint AcoustID</label>
+        <label><input id="opt-replaygain" type="checkbox" checked> ReplayGain</label>
+        <label><input id="opt-transcode" type="checkbox" checked> Opus Transcode</label>
+      </div>
+      <div>
+        <button class="primary" onclick="actionApprovePipeline()">
+          <span>🚀 Approve & Run Library Pipeline</span>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Library View -->
+  <main id="view-library" class="view">
+    <div class="library-view-container">
+      <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+        <input id="library-search" type="text" placeholder="Search artist, album, title or year…" style="width: 320px;" onkeydown="if(event.key==='Enter')loadLibrary()">
+        <button onclick="loadLibrary()">Search</button>
+        <button onclick="actionCheckDB()">Check database</button>
+        <button onclick="actionCheckTranscoding()">Check transcoding</button>
+        <button onclick="actionRepairDB()">Repair paths</button>
+        <span id="library-maint-status" style="font-size: 12px; color: var(--text-muted);"></span>
+      </div>
+      <div id="library-maint-results"></div>
+      <div class="library-shell">
+        <div id="library-album-list" class="library-tree-pane">Loading albums…</div>
+        <div id="library-album-detail" class="album-card">Select an album from the left.</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modals -->
+  <!-- Download URL Modal -->
+  <div id="modal-download" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span>Download with yt-dlp</span>
+        <button class="icon-btn" onclick="closeModal('modal-download')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-muted); margin-bottom: 10px;">Enter a YouTube URL, playlist URL, or any media link supported by yt-dlp:</p>
+        <input id="modal-download-url" type="text" placeholder="https://www.youtube.com/watch?v=…" style="width: 100%;">
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeModal('modal-download')">Cancel</button>
+        <button class="primary" onclick="submitDownloadUrl()">Stage Download</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Folder Modal -->
+  <div id="modal-folder" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span>Stage Folder from untagged/</span>
+        <button class="icon-btn" onclick="closeModal('modal-folder')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-muted); margin-bottom: 10px;">Select files or folders from <code>original/untagged/</code>:</p>
+        <div id="import-folder-list" style="max-height: 250px; overflow-y: auto;">Loading…</div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeModal('modal-folder')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MusicBrainz Search Results Modal -->
+  <div id="modal-search" class="modal-overlay">
+    <div class="modal-content" style="width: 650px;">
+      <div class="modal-header">
+        <span>MusicBrainz Search Results</span>
+        <button class="icon-btn" onclick="closeModal('modal-search')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="mb-search-results">Searching…</div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeModal('modal-search')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity & Debug Log Pop-out Modal -->
+  <div id="modal-activity" class="modal-overlay">
+    <div class="modal-content" style="width: 850px; max-width: 95vw; height: 540px; max-height: 85vh;">
+      <div class="modal-header" style="padding: 10px 16px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>📋 Activity & Debug Log</span>
+          <span id="log-count-badge" class="job-badge">0 events</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input id="log-filter-text" type="text" placeholder="Filter log text…" style="padding: 3px 8px; font-size: 11px; width: 140px;" oninput="filterLogs()">
+          <select id="log-level-filter" style="padding: 3px 6px; font-size: 11px;" onchange="filterLogs()">
+            <option value="all">All Levels</option>
+            <option value="error">Errors only</option>
+            <option value="warning">Warnings + Errors</option>
+            <option value="info">Info only</option>
+          </select>
+          <button class="icon-btn" onclick="copyLogsToClipboard()" title="Copy entire log to clipboard" style="padding: 3px 8px; font-size: 11px;">📋 Copy</button>
+          <button class="icon-btn" onclick="closeModal('modal-activity')">✕</button>
+        </div>
+      </div>
+      <div class="modal-body" style="padding: 0; background: #090d13; display: flex; flex-direction: column;">
+        <div id="activity-log-entries" class="terminal-log-body">
+          <div style="padding: 20px; color: var(--text-muted); text-align: center;">No activity logged yet.</div>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding: 8px 16px; font-size: 11px; justify-content: space-between; align-items: center;">
+        <label style="display: flex; align-items: center; gap: 6px; color: var(--text-muted); cursor: pointer; user-select: none;">
+          <input id="log-autoscroll" type="checkbox" checked> Auto-scroll to latest
+        </label>
+        <button onclick="closeModal('modal-activity')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden File Input for Uploading Local Files -->
+  <input id="hidden-file-input" type="file" multiple accept="audio/*" style="display:none" onchange="handleFileUpload(this.files)">
+
+  <!-- Notification Banner -->
+  <div id="message-banner" class="message-banner"></div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const esc = val => String(val ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#39;");
+
+    function notify(text, level = "info") {
+      const banner = $("message-banner");
+      banner.textContent = text;
+      banner.className = `message-banner ${level}`;
+      banner.classList.add("active");
+      clearTimeout(banner._timeout);
+      banner._timeout = setTimeout(() => banner.classList.remove("active"), 3500);
+    }
+
+    async function api(url, opts = {}) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000);
+      try {
+        const res = await fetch(url, { ...opts, signal: controller.signal });
+        if (res.status === 204) return null;
+        const contentType = res.headers.get("content-type") || "";
+        const data = contentType.includes("application/json")
+          ? await res.json().catch(() => ({}))
+          : await res.text();
+        if (!res.ok) {
+          const detail = typeof data === "string" ? data : data.detail;
+          if (res.status === 401) {
+            throw new Error("Authentication expired; reload the page to sign in again.");
+          }
+          throw new Error(detail || `Request failed (${res.status})`);
+        }
+        return data;
+      } catch (err) {
+        if (err.name === "AbortError") throw new Error("Request timed out.");
+        if (err instanceof TypeError) throw new Error("Network request failed.");
+        throw err;
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    function formatDuration(sec) {
+      if (!sec || isNaN(sec)) return "0:00";
+      const s = Math.round(Number(sec));
+      const m = Math.floor(s / 60);
+      const rem = s % 60;
+      return `${m}:${rem.toString().padStart(2, "0")}`;
+    }
+
+    function switchTab(tab) {
+      const taggingTab = $("tab-tagging");
+      const libraryTab = $("tab-library");
+      const taggingView = $("view-tagging");
+      const libraryView = $("view-library");
+
+      if (tab === "library") {
+        taggingTab?.classList.remove("active");
+        libraryTab?.classList.add("active");
+        taggingView?.classList.remove("active");
+        libraryView?.classList.add("active");
+        loadLibrary();
+      } else {
+        libraryTab?.classList.remove("active");
+        taggingTab?.classList.add("active");
+        libraryView?.classList.remove("active");
+        taggingView?.classList.add("active");
+      }
+    }
+
+    function toggleInfoPane() {
+      toggleBottomPaneSize();
+    }
+
+    /* Core App State */
+    const state = {
+      jobs: [],
+      activeJobId: null,
+      selectedItem: null, // { type: 'staged_track' | 'cluster' | 'release' | 'release_track', id, releaseId, slotIndex }
+      clusters: new Map(), // jobId -> { clusters: [], unclustered: [] }
+      loadedReleases: new Map(), // jobId -> [ releaseObj ]
+      drafts: new Map(), // jobId -> { trackId: { ...metadata } }
+      releaseDrafts: new Map(), // jobId -> { releaseId: { ...metadata } }
+      collapsedReleases: new Set(), // releaseId
+      collapsedLeftNodes: new Set(), // nodeKey ("unclustered", cluster.id)
+      polling: false,
+    };
+
+    const TAG_FIELDS = [
+      ["title", "Title"],
+      ["artist", "Artist"],
+      ["albumartist", "Album Artist"],
+      ["album", "Album"],
+      ["tracknumber", "Track Number"],
+      ["tracktotal", "Total Tracks"],
+      ["discnumber", "Disc Number"],
+      ["disctotal", "Total Discs"],
+      ["date", "Date"],
+      ["genre", "Genre"],
+      ["musicbrainz_albumid", "MB Album ID"],
+      ["musicbrainz_trackid", "MB Track ID"],
+      ["country", "Country"],
+      ["barcode", "Barcode"],
+    ];
+
+    function getActiveJob() {
+      return state.jobs.find(j => j.id === state.activeJobId) || state.jobs[0] || null;
+    }
+
+    function findMappedRelease(jobId, trackId) {
+      const releases = state.loadedReleases.get(jobId) || [];
+      for (const rel of releases) {
+        for (const [slotIdx, sTrackId] of Object.entries(rel.mapping || {})) {
+          if (Number(sTrackId) === Number(trackId)) {
+            return { release: rel, slotIndex: Number(slotIdx) };
+          }
+        }
+      }
+      return null;
+    }
+
+    function getTrackProposedMetadata(job, trackId) {
+      const track = job.tracks.find(t => t.id === trackId);
+      const orig = track?.original_metadata || {};
+      const current = track?.metadata || orig;
+      const mapped = findMappedRelease(job.id, trackId);
+      let proposed = {};
+      if (mapped) {
+        const { release: rel, slotIndex } = mapped;
+        const slot = rel.tracks?.[slotIndex];
+        const relDraft = state.releaseDrafts.get(job.id)?.[rel.release_id] || {};
+        proposed = {
+          title: slot?.title || current.title || orig.title || "",
+          artist: slot?.artist || relDraft.albumartist || rel.artist || current.artist || orig.artist || "",
+          album: relDraft.album || rel.title || current.album || orig.album || "",
+          albumartist: relDraft.albumartist || rel.artist || current.albumartist || orig.albumartist || "",
+          tracknumber: slot ? String(slot.position || slotIndex + 1) : (current.tracknumber || orig.tracknumber || ""),
+          tracktotal: relDraft.tracktotal || String(rel.total_tracks || rel.tracks?.length || current.tracktotal || orig.tracktotal || ""),
+          discnumber: slot ? String(slot.discnumber || "1") : (current.discnumber || orig.discnumber || "1"),
+          disctotal: String(rel.disctotal || current.disctotal || orig.disctotal || "1"),
+          date: relDraft.date || rel.date || current.date || orig.date || "",
+          country: relDraft.country || rel.country || current.country || orig.country || "",
+          genre: relDraft.genre || rel.genre || current.genre || orig.genre || "",
+          musicbrainz_albumid: rel.release_id || current.musicbrainz_albumid || "",
+          musicbrainz_trackid: slot?.recording_id || slot?.track_id || current.musicbrainz_trackid || "",
+          barcode: relDraft.barcode || rel.barcode || current.barcode || orig.barcode || "",
+        };
+      } else {
+        proposed = { ...current };
+      }
+      const userDraft = state.drafts.get(job.id)?.[trackId] || {};
+      return { ...proposed, ...userDraft };
+    }
+
+    function getDraftMetadata(jobId, trackId) {
+      const job = state.jobs.find(j => j.id === jobId);
+      if (!job) return {};
+      return getTrackProposedMetadata(job, trackId);
+    }
+
+    function setDraftField(jobId, trackId, field, value) {
+      if (!state.drafts.has(jobId)) state.drafts.set(jobId, {});
+      if (!state.drafts.get(jobId)[trackId]) state.drafts.get(jobId)[trackId] = {};
+      state.drafts.get(jobId)[trackId][field] = value;
+      updateBottomPane();
+    }
+
+    function setReleaseDraftField(jobId, releaseId, field, value) {
+      if (!state.releaseDrafts.has(jobId)) state.releaseDrafts.set(jobId, {});
+      if (!state.releaseDrafts.get(jobId)[releaseId]) state.releaseDrafts.get(jobId)[releaseId] = {};
+      state.releaseDrafts.get(jobId)[releaseId][field] = value;
+      const releases = state.loadedReleases.get(jobId) || [];
+      const rel = releases.find(r => r.release_id === releaseId);
+      if (rel) {
+        rel[field] = value;
+        const mappedTrackIds = Object.values(rel.mapping || {}).map(Number);
+        for (const tid of mappedTrackIds) {
+          if (!state.drafts.has(jobId)) state.drafts.set(jobId, {});
+          if (!state.drafts.get(jobId)[tid]) state.drafts.get(jobId)[tid] = {};
+          state.drafts.get(jobId)[tid][field] = value;
+        }
+      }
+      updateBottomPane();
+    }
+
+    /* Modals */
+    function openModal(id) { $(id).classList.add("active"); }
+    function closeModal(id) { $(id).classList.remove("active"); }
+    function openDownloadModal() { openModal("modal-download"); $("modal-download-url").focus(); }
+    function openAddFiles() { $("hidden-file-input").click(); }
+
+    async function openAddFolder() {
+      openModal("modal-folder");
+      try {
+        const files = await api("/api/import-files");
+        const folders = [...new Set(files.map(f => f.split("/")[0]))].filter(Boolean);
+        if (!folders.length) {
+          $("import-folder-list").innerHTML = "<p class='text-muted'>No audio folders found in original/untagged/.</p>";
+          return;
+        }
+        $("import-folder-list").innerHTML = folders.map(folder => `
+          <div class="search-result-item">
+            <span>📁 <strong>${esc(folder)}</strong></span>
+            <button class="primary" onclick="stageImportFolder('${esc(folder)}')">Stage Folder</button>
+          </div>
+        `).join("");
+      } catch (err) {
+        $("import-folder-list").innerHTML = `<p class="error">${esc(err.message)}</p>`;
+      }
+    }
+
+    async function stageImportFolder(folder) {
+      closeModal("modal-folder");
+      try {
+        const res = await api("/api/jobs/import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path: folder }),
+        });
+        notify("Folder staged for review.");
+        await pollJobs();
+        state.activeJobId = res.id;
+        renderPicardPanes();
+      } catch (err) {
+        notify("Error staging folder: " + err.message);
+      }
+    }
+
+    async function submitDownloadUrl() {
+      const url = $("modal-download-url").value.trim();
+      if (!url) return;
+      closeModal("modal-download");
+      try {
+        const res = await api("/api/jobs/url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url }),
+        });
+        $("modal-download-url").value = "";
+        notify("Download queued.");
+        await pollJobs();
+        state.activeJobId = res.id;
+        renderPicardPanes();
+      } catch (err) {
+        notify("Error starting download: " + err.message);
+      }
+    }
+
+    async function handleFileUpload(fileList) {
+      if (!fileList || !fileList.length) return;
+      const formData = new FormData();
+      for (const file of fileList) formData.append("files", file);
+      try {
+        notify("Uploading files to staging…");
+        const res = await api("/api/jobs/upload", { method: "POST", body: formData });
+        notify(`Staged ${fileList.length} file(s).`);
+        await pollJobs();
+        state.activeJobId = res.id;
+        renderPicardPanes();
+      } catch (err) {
+        notify("Upload failed: " + err.message);
+      }
+    }
+
+    /* Polling & Job Lifecycle */
+    let pollInFlight = false;
+    async function pollJobs() {
+      if (pollInFlight) return;
+      pollInFlight = true;
+      try {
+        const jobs = await api("/api/jobs");
+        state.jobs = jobs;
+        if (!state.activeJobId && jobs.length) {
+          state.activeJobId = jobs[0].id;
+        }
+        updateJobHeaderStatus();
+        updatePipelineStrip();
+        renderPicardPanes();
+      } catch (err) {
+        console.error("Polling error:", err);
+      } finally {
+        pollInFlight = false;
+      }
+    }
+
+    function updateJobHeaderStatus() {
+      const bar = $("job-header-status");
+      if (!state.jobs.length) {
+        bar.innerHTML = `<span class="job-badge">No active jobs</span>`;
+        return;
+      }
+      const options = state.jobs.map(j => `
+        <option value="${esc(j.id)}" ${j.id === state.activeJobId ? "selected" : ""}>
+          ${esc(j.source)} (${j.status})
+        </option>
+      `).join("");
+      const activeJob = getActiveJob();
+      const cancelBtn = activeJob && activeJob.status === "downloading"
+        ? `<button class="danger icon-btn" onclick="cancelCurrentJob()">Cancel</button>` : "";
+      const dismissBtn = activeJob && ["completed", "failed", "cancelled", "review"].includes(activeJob.status)
+        ? `<button class="icon-btn" onclick="dismissCurrentJob()" title="Dismiss job">✕</button>` : "";
+      bar.innerHTML = `
+        <select onchange="changeActiveJob(this.value)">${options}</select>
+        ${cancelBtn}
+        ${dismissBtn}
+      `;
+    }
+
+    function changeActiveJob(id) {
+      state.activeJobId = id;
+      state.selectedItem = null;
+      renderPicardPanes();
+      updatePipelineStrip();
+      updateBottomPane();
+    }
+
+    async function cancelCurrentJob() {
+      const job = getActiveJob();
+      if (!job) return;
+      try {
+        await api(`/api/jobs/${job.id}/cancel`, { method: "POST" });
+        notify("Cancelling download…");
+        await pollJobs();
+      } catch (err) {
+        notify(err.message);
+      }
+    }
+
+    async function dismissCurrentJob() {
+      const job = getActiveJob();
+      if (!job) return;
+      if (!confirm(`Dismiss and remove job "${job.source}"?`)) return;
+      try {
+        await api(`/api/jobs/${job.id}`, { method: "DELETE", headers: { "x-confirm-delete": "yes" } });
+        state.loadedReleases.delete(job.id);
+        state.clusters.delete(job.id);
+        state.drafts.delete(job.id);
+        state.activeJobId = null;
+        notify("Job dismissed.");
+        await pollJobs();
+      } catch (err) {
+        notify(err.message);
+      }
+    }
+
+    function updatePipelineStrip() {
+      const job = getActiveJob();
+      if (!job) {
+        $("pipeline-job-title").textContent = "No active job";
+        $("pipeline-job-status").textContent = "Idle";
+        $("pipeline-stages").innerHTML = "";
+        $("pipeline-progress-bar").style.width = "0%";
+        $("pipeline-stage-count").textContent = "0/8 stages";
+        return;
+      }
+      $("pipeline-job-title").textContent = `${job.kind}: ${job.source}`;
+      $("pipeline-job-status").textContent = job.status;
+      $("pipeline-job-status").className = `job-badge ${job.status === "failed" ? "failed" : job.status === "completed" ? "completed" : ""}`;
+
+      const completed = job.stages.filter(s => s.status === "completed").length;
+      $("pipeline-stage-count").textContent = `${completed}/${job.stages.length} stages`;
+      $("pipeline-progress-bar").style.width = `${Math.round(completed / job.stages.length * 100)}%`;
+
+      $("pipeline-stages").innerHTML = job.stages.map(s => `
+        <div class="p-stage ${s.status}">
+          <span>${s.status === "completed" ? "✓" : s.status === "running" ? "⏳" : s.status === "failed" ? "✗" : "○"}</span>
+          <span>${esc(s.label)}</span>
+        </div>
+      `).join("");
+
+      // Update activity logs
+      renderActivityLogs();
+    }
+
+    function openActivityModal() {
+      openModal("modal-activity");
+      renderActivityLogs();
+      const el = $("activity-log-entries");
+      if (el && $("log-autoscroll")?.checked) {
+        el.scrollTop = el.scrollHeight;
+      }
+    }
+
+    function renderActivityLogs() {
+      const job = getActiveJob();
+      const entries = job?.events || [];
+      const errorCount = entries.filter(e => e.level === "error").length;
+      const warnCount = entries.filter(e => e.level === "warning").length;
+
+      const logBtn = $("toolbar-log-btn");
+      if (logBtn) {
+        if (errorCount > 0) {
+          logBtn.innerHTML = `📋 Log <span style="color:#f85149;font-weight:700;">(${errorCount})</span>`;
+        } else if (warnCount > 0) {
+          logBtn.innerHTML = `📋 Log <span style="color:#f2cc60;font-weight:700;">(${warnCount})</span>`;
+        } else {
+          logBtn.innerHTML = `📋 Log (${entries.length})`;
+        }
+      }
+
+      const modalBadge = $("log-count-badge");
+      if (modalBadge) {
+        modalBadge.textContent = `${entries.length} event(s)${errorCount ? ` · ${errorCount} error(s)` : ""}`;
+        modalBadge.className = `job-badge ${errorCount ? "failed" : ""}`;
+      }
+
+      filterLogs();
+    }
+
+    function filterLogs() {
+      const job = getActiveJob();
+      const entries = job?.events || [];
+      const filterText = ($("log-filter-text")?.value || "").toLowerCase().trim();
+      const levelFilter = $("log-level-filter")?.value || "all";
+
+      const filtered = entries.filter(e => {
+        if (levelFilter === "error" && e.level !== "error") return false;
+        if (levelFilter === "warning" && e.level !== "warning" && e.level !== "error") return false;
+        if (levelFilter === "info" && e.level !== "info") return false;
+        if (filterText && !e.message.toLowerCase().includes(filterText)) return false;
+        return true;
+      });
+
+      const container = $("activity-log-entries");
+      if (!container) return;
+
+      if (!filtered.length) {
+        container.innerHTML = `<div style="padding: 20px; color: var(--text-muted); text-align: center;">No log events matching filter.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(e => `
+        <div class="log-row">
+          <span class="log-row-time">${esc(e.created_at.slice(11, 19))}</span>
+          <span class="log-row-lvl ${esc(e.level)}">[${esc((e.level || "info").toUpperCase())}]</span>
+          <span class="log-row-msg">${esc(e.message)}</span>
+        </div>
+      `).join("");
+
+      if ($("log-autoscroll")?.checked) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+
+    function copyLogsToClipboard() {
+      const job = getActiveJob();
+      const entries = job?.events || [];
+      const text = entries.map(e => `[${e.created_at.slice(11, 19)}] [${(e.level||"info").toUpperCase()}] ${e.message}`).join("\n");
+      navigator.clipboard.writeText(text).then(() => {
+        notify("Logs copied to clipboard.");
+      }).catch(err => {
+        notify("Copy failed: " + err.message);
+      });
+    }
+
+    /* Picard Two-Pane Rendering */
+    function renderPicardPanes() {
+      const job = getActiveJob();
+      if (!job || !job.tracks || !job.tracks.length) {
+        $("left-pane-tree").innerHTML = `<div style="padding: 20px; color: var(--text-muted); text-align: center;">No tracks staged in this job.</div>`;
+        $("right-pane-tree").innerHTML = `<div style="padding: 30px 20px; color: var(--text-muted); text-align: center;">No releases loaded.</div>`;
+        return;
+      }
+
+      // Initialize cluster structure if needed
+      initJobClusters(job);
+      // Initialize saved releases from job options if needed
+      initJobReleases(job);
+
+      renderLeftPaneTree(job);
+      renderRightPaneTree(job);
+      updateBottomPane();
+    }
+
+    function initJobClusters(job) {
+      if (state.clusters.has(job.id)) return;
+      // Auto-cluster initially by metadata album
+      const clustersMap = new Map();
+      const unclustered = [];
+
+      job.tracks.forEach(track => {
+        const meta = track.metadata || track.original_metadata || {};
+        const album = (meta.album || "").trim();
+        const artist = (meta.albumartist || meta.artist || "").trim();
+        if (album) {
+          const key = artist ? `${artist} - ${album}` : album;
+          if (!clustersMap.has(key)) {
+            clustersMap.set(key, {
+              id: "c_" + Math.random().toString(36).slice(2, 8),
+              name: key,
+              artist: artist || "Unknown Artist",
+              album,
+              track_ids: [],
+              total_duration: 0,
+            });
+          }
+          const c = clustersMap.get(key);
+          c.track_ids.push(track.id);
+          c.total_duration += Number(meta.duration || 0);
+        } else {
+          unclustered.push(track.id);
+        }
+      });
+
+      state.clusters.set(job.id, {
+        clusters: Array.from(clustersMap.values()),
+        unclustered: unclustered,
+      });
+    }
+
+    function initJobReleases(job) {
+      if (state.loadedReleases.has(job.id)) return;
+      const saved = job.options?.clusters || [];
+      if (saved.length) {
+        state.loadedReleases.set(job.id, saved);
+      } else {
+        state.loadedReleases.set(job.id, []);
+      }
+    }
+
+    /* Left Pane: Source Files Tree */
+    function toggleLeftNode(nodeKey) {
+      if (state.collapsedLeftNodes.has(nodeKey)) {
+        state.collapsedLeftNodes.delete(nodeKey);
+      } else {
+        state.collapsedLeftNodes.add(nodeKey);
+      }
+      const job = getActiveJob();
+      if (job) renderLeftPaneTree(job);
+    }
+
+    function toggleReleaseCollapse(releaseId) {
+      if (state.collapsedReleases.has(releaseId)) {
+        state.collapsedReleases.delete(releaseId);
+      } else {
+        state.collapsedReleases.add(releaseId);
+      }
+      const job = getActiveJob();
+      if (job) renderRightPaneTree(job);
+    }
+
+    function renderLeftPaneTree(job) {
+      const clusterState = state.clusters.get(job.id) || { clusters: [], unclustered: [] };
+      const tracksById = new Map(job.tracks.map(t => [t.id, t]));
+
+      let html = "";
+
+      // 1. Unclustered Files Node
+      const unclusteredTracks = clusterState.unclustered.map(id => tracksById.get(id)).filter(Boolean);
+      const isUnclusteredCollapsed = state.collapsedLeftNodes.has("unclustered");
+      html += `
+        <div class="tree-node-group">
+          <div class="tree-group-header" onclick="toggleLeftNode('unclustered')">
+            <span class="tree-group-title">
+              <span class="collapse-toggle">${isUnclusteredCollapsed ? "▶" : "▼"}</span>
+              <span>📁</span>
+              <strong>Unclustered Files (${unclusteredTracks.length})</strong>
+            </span>
+          </div>
+          <div id="unclustered-node" style="${isUnclusteredCollapsed ? "display: none;" : ""}">
+            ${unclusteredTracks.map(t => renderStagedTrackRow(job, t)).join("")}
+          </div>
+        </div>
+      `;
+
+      // 2. Clusters Nodes
+      const isClustersGroupCollapsed = state.collapsedLeftNodes.has("clusters_root");
+      html += `
+        <div class="tree-node-group" style="margin-top: 8px;">
+          <div class="tree-group-header" onclick="toggleLeftNode('clusters_root')">
+            <span class="tree-group-title">
+              <span class="collapse-toggle">${isClustersGroupCollapsed ? "▶" : "▼"}</span>
+              <span>📁</span>
+              <strong>Clusters (${clusterState.clusters.length})</strong>
+            </span>
+          </div>
+          <div style="${isClustersGroupCollapsed ? "display: none;" : ""}">
+            ${clusterState.clusters.map(cluster => {
+              const clusterTracks = (cluster.track_ids || []).map(id => tracksById.get(id)).filter(Boolean);
+              const isClusterCollapsed = state.collapsedLeftNodes.has(cluster.id);
+              return `
+                <div class="cluster-subgroup" style="margin-top: 4px;"
+                     ondragover="event.preventDefault();this.classList.add('drag-over')"
+                     ondragleave="this.classList.remove('drag-over')"
+                     ondrop="handleDropOnCluster(event, '${cluster.id}');this.classList.remove('drag-over')">
+                  <div class="tree-group-header" style="padding-left: 12px; font-weight: 500;"
+                       draggable="true" ondragstart="handleDragStartCluster(event, '${cluster.id}')"
+                       onclick="toggleLeftNode('${cluster.id}')">
+                    <span class="tree-group-title">
+                      <span class="collapse-toggle">${isClusterCollapsed ? "▶" : "▼"}</span>
+                      <span>📁</span>
+                      <span>${esc(cluster.name)} (${clusterTracks.length})</span>
+                      <small class="text-muted" style="margin-left: 6px;">${formatDuration(cluster.total_duration)}</small>
+                    </span>
+                    <div class="tree-group-actions" onclick="event.stopPropagation()">
+                      <button class="icon-btn" onclick="actionLookupCluster('${cluster.id}')">Lookup</button>
+                    </div>
+                  </div>
+                  <div id="cluster-node-${cluster.id}" style="${isClusterCollapsed ? "display: none;" : ""}">
+                    ${clusterTracks.map(t => renderStagedTrackRow(job, t)).join("")}
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+
+      $("left-pane-tree").innerHTML = html;
+    }
+
+    function renderStagedTrackRow(job, track) {
+      const meta = track.metadata || track.original_metadata || {};
+      const isSelected = state.selectedItem?.type === "staged_track" && state.selectedItem?.id === track.id;
+      const mappedInfo = findMappedRelease(job.id, track.id);
+      const title = meta.title || track.path.split("/").pop();
+      const artist = meta.artist || meta.albumartist || "Unknown Artist";
+      const len = formatDuration(meta.duration);
+
+      return `
+        <div class="track-row ${isSelected ? "selected" : ""}"
+             draggable="true"
+             ondragstart="handleDragStartTrack(event, ${track.id})"
+             onclick="selectTrack(${track.id})">
+          <div class="track-col-title">
+            <span>🎵</span>
+            <span title="${esc(title)}">${esc(title)}</span>
+            ${mappedInfo ? `<span style="color:var(--green);font-size:10px;">✓ Matched</span>` : ""}
+          </div>
+          <div class="track-col-len">${len}</div>
+          <div class="track-col-artist" title="${esc(artist)}">${esc(artist)}</div>
+        </div>
+      `;
+    }
+
+    /* Right Pane: MusicBrainz Releases Tree */
+    function renderRightPaneTree(job) {
+      const releases = state.loadedReleases.get(job.id) || [];
+      if (!releases.length) {
+        $("right-pane-tree").innerHTML = `
+          <div style="padding: 30px 20px; color: var(--text-muted); text-align: center;">
+            No releases loaded from MusicBrainz.<br><br>
+            Select a cluster or file on the left and click <strong>Lookup</strong> or <strong>Scan</strong>, or search for an album using the search bar above.
+          </div>
+        `;
+        return;
+      }
+
+      const tracksById = new Map(job.tracks.map(t => [t.id, t]));
+
+      $("right-pane-tree").innerHTML = releases.map((rel, relIndex) => {
+        const releaseTracks = rel.tracks || [];
+        const mapping = rel.mapping || {};
+        const matchedCount = Object.keys(mapping).length;
+        const totalTracks = releaseTracks.length;
+        const totalDuration = formatDuration(rel.total_length ? rel.total_length / 1000 : 0);
+        const isRelSelected = state.selectedItem?.type === "release" && state.selectedItem?.releaseId === rel.release_id;
+        const isCollapsed = state.collapsedReleases.has(rel.release_id);
+        const isApplied = rel.applied || (
+          matchedCount > 0 &&
+          Object.values(mapping).every(id => {
+            const t = tracksById.get(Number(id));
+            return t?.metadata?.musicbrainz_albumid === rel.release_id;
+          })
+        );
+
+        // Alternatives dropdown options
+        const altOptions = (rel.alternatives || []).map(alt => `
+          <option value="${esc(alt.id)}" ${alt.id === rel.release_id ? "selected" : ""}>
+            ${esc(alt.date ? alt.date.slice(0, 4) : "—")} ${esc(alt.country || "XW")} (${alt.track_count} trk) ${esc(alt.status || "")}
+          </option>
+        `).join("");
+
+        return `
+          <div class="release-node"
+               ondragover="event.preventDefault();this.classList.add('drag-over')"
+               ondragleave="this.classList.remove('drag-over')"
+               ondrop="handleDropOnRelease(event, '${rel.release_id}');this.classList.remove('drag-over')">
+            <div class="release-header ${isRelSelected ? "selected" : ""}"
+                 onclick="selectRelease('${rel.release_id}')"
+                 ondblclick="toggleReleaseCollapse('${rel.release_id}')">
+              <div class="release-info-left">
+                <span class="collapse-toggle" onclick="event.stopPropagation();toggleReleaseCollapse('${rel.release_id}')" title="Collapse / expand album tracks">
+                  ${isCollapsed ? "▶" : "▼"}
+                </span>
+                <span style="font-size: 16px;">💿</span>
+                <strong title="${esc(rel.title)}">${esc(rel.title)}</strong>
+                <span class="release-meta-badge">(${matchedCount}/${totalTracks}; ${rel.confidence || 0}%; 1 image)</span>
+                ${isApplied ? `<span class="job-badge completed" style="font-size: 10px; padding: 1px 6px;">✓ Applied</span>` : ""}
+                <span class="text-muted" style="margin-left: 8px;">${totalDuration}</span>
+                <span class="text-muted" style="margin-left: 8px;" title="${esc(rel.artist)}">${esc(rel.artist)}</span>
+              </div>
+              <div class="release-actions" onclick="event.stopPropagation()">
+                <button class="primary" style="padding: 2px 8px; font-size: 11px;" onclick="actionApproveRelease('${rel.release_id}')" title="Approve and apply this album to matched tracks">
+                  ${isApplied ? "✓ Re-apply" : "✓ Apply Album"}
+                </button>
+                ${altOptions ? `
+                  <select class="release-version-select" onchange="actionSwitchReleaseVersion('${rel.release_id}', this.value)" title="Switch alternative release edition">
+                    ${altOptions}
+                  </select>
+                ` : ""}
+                <button class="icon-btn danger" onclick="actionRemoveRelease('${rel.release_id}')" title="Remove this release">✕</button>
+              </div>
+            </div>
+
+            <!-- Track Slots -->
+            <div class="release-tracks-list" style="${isCollapsed ? "display: none;" : ""}">
+              ${releaseTracks.map((slot, slotIdx) => {
+                const assignedTrackId = mapping[slotIdx];
+                const stagedTrack = assignedTrackId ? tracksById.get(Number(assignedTrackId)) : null;
+                const score = rel.scores?.[slotIdx] || (stagedTrack ? 75 : 0);
+                const isSlotSelected = state.selectedItem?.type === "release_track"
+                  && state.selectedItem?.releaseId === rel.release_id
+                  && state.selectedItem?.slotIndex === slotIdx;
+
+                let matchClass = "unmatched";
+                if (stagedTrack) {
+                  matchClass = score >= 60 ? "perfect" : "medium";
+                }
+
+                const trackNo = String(slot.position || slotIdx + 1).padStart(2, "0");
+                const slotTitle = `${trackNo} ${slot.title}`;
+                const slotLen = formatDuration(slot.length ? slot.length / 1000 : 0);
+                const slotArtist = slot.artist || rel.artist;
+
+                return `
+                  <div class="release-track-slot-container"
+                       ondragover="event.preventDefault();this.classList.add('drag-over')"
+                       ondragleave="this.classList.remove('drag-over')"
+                       ondrop="handleDropOnSlot(event, '${rel.release_id}', ${slotIdx});this.classList.remove('drag-over')">
+                    <div class="track-row ${isSlotSelected ? "selected" : ""}"
+                         onclick="selectReleaseTrack('${rel.release_id}', ${slotIdx})">
+                      <div class="track-col-title">
+                        <span class="match-icon ${matchClass}"></span>
+                        <span title="${esc(slotTitle)}">${esc(slotTitle)}</span>
+                      </div>
+                      <div class="track-col-len">${slotLen}</div>
+                      <div class="track-col-artist" title="${esc(slotArtist)}">${esc(slotArtist)}</div>
+                    </div>
+
+                    ${stagedTrack ? `
+                      <div class="matched-file-subline"
+                           draggable="true"
+                           ondragstart="handleDragStartMatched(event, '${rel.release_id}', ${slotIdx}, ${stagedTrack.id})"
+                           onclick="event.stopPropagation();selectReleaseTrack('${rel.release_id}', ${slotIdx})">
+                        <span>🎵 ${esc(stagedTrack.metadata?.title || stagedTrack.path.split("/").pop())} <small style="color:var(--text-muted);margin-left:6px;">(${formatDuration(stagedTrack.metadata?.duration)} / ${slotLen})</small></span>
+                        <button class="unmatch-btn" onclick="event.stopPropagation();actionUnmatchSlot('${rel.release_id}', ${slotIdx})" title="Unmatch this track">✕</button>
+                      </div>
+                    ` : ""}
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    /* Selection & Bottom Metadata Comparison Pane */
+    function selectTrack(trackId) {
+      state.selectedItem = { type: "staged_track", id: trackId };
+      renderPicardPanes();
+    }
+
+    function selectRelease(releaseId) {
+      state.selectedItem = { type: "release", releaseId };
+      renderPicardPanes();
+    }
+
+    function selectReleaseTrack(releaseId, slotIndex) {
+      state.selectedItem = { type: "release_track", releaseId, slotIndex };
+      renderPicardPanes();
+    }
+
+    function updateBottomPane() {
+      const job = getActiveJob();
+      if (!job) return;
+
+      const sel = state.selectedItem;
+      let origMeta = {};
+      let newMeta = {};
+      let trackId = null;
+      let coverOrigUrl = "";
+      let coverPropUrl = "";
+
+      if (sel?.type === "staged_track") {
+        trackId = sel.id;
+        const track = job.tracks.find(t => t.id === trackId);
+        origMeta = track?.original_metadata || track?.metadata || {};
+        newMeta = getTrackProposedMetadata(job, trackId);
+        coverOrigUrl = `/api/jobs/${job.id}/tracks/${trackId}/cover`;
+        const mapped = findMappedRelease(job.id, trackId);
+        if (mapped) {
+          coverPropUrl = mapped.release.cover_url || `/api/musicbrainz/release/${mapped.release.release_id}/cover`;
+        } else {
+          coverPropUrl = `/api/jobs/${job.id}/tracks/${trackId}/artwork?variant=proposed`;
+        }
+      } else if (sel?.type === "release_track") {
+        const releases = state.loadedReleases.get(job.id) || [];
+        const rel = releases.find(r => r.release_id === sel.releaseId);
+        const slot = rel?.tracks?.[sel.slotIndex];
+        const assignedTrackId = rel?.mapping?.[sel.slotIndex];
+
+        if (assignedTrackId) {
+          trackId = Number(assignedTrackId);
+          const track = job.tracks.find(t => t.id === trackId);
+          origMeta = track?.original_metadata || track?.metadata || {};
+          newMeta = getTrackProposedMetadata(job, trackId);
+          coverOrigUrl = `/api/jobs/${job.id}/tracks/${trackId}/cover`;
+          coverPropUrl = rel.cover_url || `/api/musicbrainz/release/${rel.release_id}/cover`;
+        } else if (slot) {
+          // Unassigned slot preview
+          origMeta = {};
+          newMeta = {
+            title: slot.title || "",
+            artist: slot.artist || rel?.artist || "",
+            album: rel?.title || "",
+            albumartist: rel?.artist || "",
+            tracknumber: String(slot.position || sel.slotIndex + 1),
+            tracktotal: String(rel?.total_tracks || rel?.tracks?.length || ""),
+            discnumber: String(slot.discnumber || "1"),
+            disctotal: String(rel?.disctotal || "1"),
+            date: rel?.date || "",
+            country: rel?.country || "",
+            genre: rel?.genre || "",
+            musicbrainz_albumid: rel?.release_id || "",
+            musicbrainz_trackid: slot.recording_id || slot.track_id || "",
+            barcode: rel?.barcode || "",
+          };
+          coverOrigUrl = "";
+          coverPropUrl = rel?.cover_url || (rel?.release_id ? `/api/musicbrainz/release/${rel.release_id}/cover` : "");
+        }
+      } else if (sel?.type === "release") {
+        const releases = state.loadedReleases.get(job.id) || [];
+        const rel = releases.find(r => r.release_id === sel.releaseId);
+        if (rel) {
+          const mappedTrackIds = Object.values(rel.mapping || {}).map(Number);
+          const mappedTracks = job.tracks.filter(t => mappedTrackIds.includes(t.id));
+          const sampleTrack = mappedTracks[0] || job.tracks[0];
+          const sOrig = sampleTrack?.original_metadata || sampleTrack?.metadata || {};
+
+          origMeta = {
+            album: sOrig.album || "",
+            albumartist: sOrig.albumartist || sOrig.artist || "",
+            date: sOrig.date || "",
+            country: sOrig.country || "",
+            tracktotal: sOrig.tracktotal || "",
+            genre: sOrig.genre || "",
+            musicbrainz_albumid: sOrig.musicbrainz_albumid || "",
+            barcode: sOrig.barcode || "",
+          };
+
+          const relDraft = state.releaseDrafts.get(job.id)?.[rel.release_id] || {};
+          newMeta = {
+            album: relDraft.album || rel.title || "",
+            albumartist: relDraft.albumartist || rel.artist || "",
+            date: relDraft.date || rel.date || "",
+            country: relDraft.country || rel.country || "",
+            tracktotal: relDraft.tracktotal || String(rel.total_tracks || rel.tracks?.length || ""),
+            genre: relDraft.genre || rel.genre || sOrig.genre || "",
+            musicbrainz_albumid: rel.release_id || "",
+            barcode: relDraft.barcode || rel.barcode || "",
+          };
+
+          coverOrigUrl = sampleTrack ? `/api/jobs/${job.id}/tracks/${sampleTrack.id}/cover` : "";
+          coverPropUrl = rel.cover_url || `/api/musicbrainz/release/${rel.release_id}/cover`;
+        }
+      }
+
+      // Update Cover Images
+      $("artwork-orig-img").src = coverOrigUrl || "";
+      $("artwork-prop-img").src = coverPropUrl || "";
+
+      // Render Metadata Table Rows
+      const container = $("metadata-table-rows");
+      if (!sel) {
+        container.innerHTML = `<div style="padding: 20px; color: var(--text-muted); text-align: center;">Select a track or release above to review tags.</div>`;
+        return;
+      }
+
+      const rowsHtml = TAG_FIELDS.map(([key, label]) => {
+        const origVal = origMeta[key] ?? "";
+        const newVal = newMeta[key] ?? "";
+        const changed = String(origVal).trim() !== String(newVal).trim() && (origVal || newVal);
+
+        return `
+          <div class="metadata-row ${changed ? "changed" : ""}">
+            <div class="meta-tag-label">${esc(label)}</div>
+            <div class="meta-orig-val" title="${esc(origVal)}">${esc(origVal) || "—"}</div>
+            <div class="meta-new-val">
+              <input type="text"
+                     value="${esc(newVal)}"
+                     placeholder="Empty"
+                     ${trackId ? `oninput="setDraftField('${job.id}', ${trackId}, '${key}', this.value)"` : (sel?.type === 'release' ? `oninput="setReleaseDraftField('${job.id}', '${sel.releaseId}', '${key}', this.value)"` : "readonly")}>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      container.innerHTML = rowsHtml;
+    }
+
+    async function handleArtworkUpload(file) {
+      if (!file) return;
+      const job = getActiveJob();
+      if (!job) return;
+      const sel = state.selectedItem;
+      const trackId = sel?.type === "staged_track" ? sel.id : sel?.type === "release_track" ? (state.loadedReleases.get(job.id)?.find(r => r.release_id === sel.releaseId)?.mapping?.[sel.slotIndex]) : job.tracks[0]?.id;
+      if (!trackId) {
+        notify("Select an album track to assign artwork to.");
+        return;
+      }
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        await api(`/api/jobs/${job.id}/tracks/${trackId}/artwork`, { method: "POST", body: formData });
+        notify("Custom artwork uploaded for this album.");
+        $("artwork-prop-img").src = `/api/jobs/${job.id}/tracks/${trackId}/artwork?variant=proposed&_t=${Date.now()}`;
+      } catch (err) {
+        notify("Artwork upload failed: " + err.message);
+      }
+    }
+
+    /* Picard Actions: Cluster, Lookup, Scan */
+    async function actionCluster() {
+      const job = getActiveJob();
+      if (!job) return;
+      try {
+        const res = await api(`/api/jobs/${job.id}/cluster`, { method: "POST" });
+        state.clusters.set(job.id, {
+          clusters: res.clusters || [],
+          unclustered: res.unclustered_track_ids || [],
+        });
+        notify(`Created ${res.clusters?.length || 0} cluster(s).`);
+        renderLeftPaneTree(job);
+      } catch (err) {
+        notify("Clustering failed: " + err.message);
+      }
+    }
+
+    async function actionLookup() {
+      const job = getActiveJob();
+      if (!job) return;
+      const sel = state.selectedItem;
+      let trackIds = null;
+
+      if (sel?.type === "cluster") {
+        const cluster = state.clusters.get(job.id)?.clusters.find(c => c.id === sel.id);
+        trackIds = cluster?.track_ids || null;
+      } else if (sel?.type === "staged_track") {
+        const clusters = state.clusters.get(job.id)?.clusters || [];
+        const parentCluster = clusters.find(c => c.track_ids.includes(sel.id));
+        if (parentCluster) {
+          trackIds = parentCluster.track_ids;
+        } else {
+          trackIds = [sel.id];
+        }
+      }
+
+      const searchInputVal = $("search-input")?.value?.trim() || "";
+      const body = { track_ids: trackIds };
+      if (searchInputVal) {
+        body.query = searchInputVal;
+      }
+
+      notify("Looking up album on MusicBrainz…");
+      try {
+        const res = await api(`/api/jobs/${job.id}/lookup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const releases = res.releases || [];
+        if (!releases.length) {
+          notify("No matching releases found on MusicBrainz.");
+          return;
+        }
+        // Merge with loaded releases
+        const existing = state.loadedReleases.get(job.id) || [];
+        const newReleases = [...existing];
+        for (const r of releases) {
+          const idx = newReleases.findIndex(x => x.release_id === r.release_id);
+          if (idx >= 0) newReleases[idx] = r;
+          else newReleases.push(r);
+        }
+        state.loadedReleases.set(job.id, newReleases);
+        await saveReleasesState(job.id);
+        notify(`Loaded release: ${releases[0].title} (${releases[0].matched_count}/${releases[0].total_tracks} tracks matched).`);
+        renderRightPaneTree(job);
+        // Automatically select first matched track or release
+        const firstSlot = Object.keys(releases[0].mapping || {})[0];
+        if (firstSlot !== undefined) {
+          selectReleaseTrack(releases[0].release_id, Number(firstSlot));
+        } else {
+          selectRelease(releases[0].release_id);
+        }
+      } catch (err) {
+        notify("Lookup failed: " + err.message);
+      }
+    }
+
+    async function actionLookupCluster(clusterId) {
+      const job = getActiveJob();
+      if (!job) return;
+      const cluster = state.clusters.get(job.id)?.clusters.find(c => c.id === clusterId);
+      if (!cluster) return;
+      notify(`Looking up cluster "${cluster.name}"…`);
+      try {
+        const res = await api(`/api/jobs/${job.id}/lookup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ track_ids: cluster.track_ids }),
+        });
+        const releases = res.releases || [];
+        if (!releases.length) {
+          notify("No matching releases found.");
+          return;
+        }
+        const existing = state.loadedReleases.get(job.id) || [];
+        const newReleases = [...existing];
+        for (const r of releases) {
+          const idx = newReleases.findIndex(x => x.release_id === r.release_id);
+          if (idx >= 0) newReleases[idx] = r;
+          else newReleases.push(r);
+        }
+        state.loadedReleases.set(job.id, newReleases);
+        await saveReleasesState(job.id);
+        notify(`Loaded release: ${releases[0].title}.`);
+        renderRightPaneTree(job);
+      } catch (err) {
+        notify("Lookup failed: " + err.message);
+      }
+    }
+
+    async function actionScan() {
+      const job = getActiveJob();
+      if (!job) return;
+      notify("Computing Chromaprint fingerprints and scanning AcoustID…");
+      try {
+        await api(`/api/jobs/${job.id}/fingerprint`, { method: "POST" });
+        notify("Fingerprinting started. Lookups will populate automatically.");
+        await pollJobs();
+      } catch (err) {
+        notify("Scan failed: " + err.message);
+      }
+    }
+
+    function actionLookupBrowser() {
+      const job = getActiveJob();
+      if (!job) return;
+      const sel = state.selectedItem;
+      let releaseId = null;
+      if (sel?.releaseId) {
+        releaseId = sel.releaseId;
+      } else {
+        const releases = state.loadedReleases.get(job.id) || [];
+        if (releases.length) releaseId = releases[0].release_id;
+      }
+      if (releaseId) {
+        window.open(`https://musicbrainz.org/release/${releaseId}`, "_blank");
+      } else {
+        window.open("https://musicbrainz.org", "_blank");
+      }
+    }
+
+    async function actionSearchMB() {
+      const q = $("search-input").value.trim();
+      const type = $("search-type").value;
+      if (!q) return;
+      openModal("modal-search");
+      $("mb-search-results").innerHTML = "Searching MusicBrainz…";
+      try {
+        const data = await api(`/api/musicbrainz/search?q=${encodeURIComponent(q)}&type=${type}`);
+        const releases = data.releases || [];
+        if (!releases.length) {
+          $("mb-search-results").innerHTML = "<p class='text-muted'>No releases found.</p>";
+          return;
+        }
+        $("mb-search-results").innerHTML = releases.map(r => `
+          <div class="search-result-item">
+            <div>
+              <strong>${esc(r.title)}</strong> — ${esc((r["artist-credit"]||[]).map(a=>a.name).join(", "))}<br>
+              <small class="text-muted">${esc(r.date || "Unknown date")} · ${esc(r.country || "XW")} · ${r["track-count"] || "?"} tracks</small>
+            </div>
+            <button class="primary" onclick="loadSearchedRelease('${r.id}')">Load Release</button>
+          </div>
+        `).join("");
+      } catch (err) {
+        $("mb-search-results").innerHTML = `<p class="error">${esc(err.message)}</p>`;
+      }
+    }
+
+    async function loadSearchedRelease(releaseId) {
+      closeModal("modal-search");
+      const job = getActiveJob();
+      if (!job) return;
+      notify("Loading release into Picard…");
+      try {
+        const res = await api(`/api/jobs/${job.id}/lookup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ release_id: releaseId }),
+        });
+        const releases = res.releases || [];
+        if (!releases.length) return;
+        const existing = state.loadedReleases.get(job.id) || [];
+        const newReleases = [...existing.filter(x => x.release_id !== releaseId), releases[0]];
+        state.loadedReleases.set(job.id, newReleases);
+        await saveReleasesState(job.id);
+        notify(`Loaded release: ${releases[0].title} (${releases[0].matched_count}/${releases[0].total_tracks} tracks matched).`);
+        renderRightPaneTree(job);
+        const firstSlot = Object.keys(releases[0].mapping || {})[0];
+        if (firstSlot !== undefined) {
+          selectReleaseTrack(releases[0].release_id, Number(firstSlot));
+        } else {
+          selectRelease(releaseId);
+        }
+      } catch (err) {
+        notify("Failed to load release: " + err.message);
+      }
+    }
+
+    async function actionSwitchReleaseVersion(oldReleaseId, newReleaseId) {
+      const job = getActiveJob();
+      if (!job) return;
+      try {
+        notify("Switching release version…");
+        const res = await api(`/api/jobs/${job.id}/lookup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ release_id: newReleaseId }),
+        });
+        const releases = res.releases || [];
+        if (!releases.length) return;
+        const existing = state.loadedReleases.get(job.id) || [];
+        const idx = existing.findIndex(r => r.release_id === oldReleaseId);
+        if (idx >= 0) existing[idx] = releases[0];
+        else existing.push(releases[0]);
+        state.loadedReleases.set(job.id, existing);
+        await saveReleasesState(job.id);
+        notify(`Switched to: ${releases[0].title} (${releases[0].date || ""}).`);
+        renderRightPaneTree(job);
+      } catch (err) {
+        notify("Switch version failed: " + err.message);
+      }
+    }
+
+    async function actionRemoveRelease(releaseId) {
+      const job = getActiveJob();
+      if (!job) return;
+      const existing = state.loadedReleases.get(job.id) || [];
+      state.loadedReleases.set(job.id, existing.filter(r => r.release_id !== releaseId));
+      await saveReleasesState(job.id);
+      notify("Release unloaded.");
+      renderRightPaneTree(job);
+      renderLeftPaneTree(job);
+      updateBottomPane();
+    }
+
+    function actionRemoveSelected() {
+      const job = getActiveJob();
+      if (!job || !state.selectedItem) return;
+      const sel = state.selectedItem;
+      if (sel.type === "release") {
+        actionRemoveRelease(sel.releaseId);
+      } else if (sel.type === "release_track") {
+        actionUnmatchSlot(sel.releaseId, sel.slotIndex);
+      }
+    }
+
+    function actionUnmatchSlot(releaseId, slotIndex) {
+      const job = getActiveJob();
+      if (!job) return;
+      const releases = state.loadedReleases.get(job.id) || [];
+      const rel = releases.find(r => r.release_id === releaseId);
+      if (rel && rel.mapping) {
+        delete rel.mapping[slotIndex];
+        saveReleasesState(job.id);
+        renderRightPaneTree(job);
+        renderLeftPaneTree(job);
+        updateBottomPane();
+        notify("Track unmapped.");
+      }
+    }
+
+    async function actionApproveRelease(releaseId) {
+      const job = getActiveJob();
+      if (!job) return;
+      const releases = state.loadedReleases.get(job.id) || [];
+      const rel = releases.find(r => r.release_id === releaseId);
+      if (!rel) return;
+      const trackMap = rel.mapping || {};
+      const trackIds = [...new Set(Object.values(trackMap).map(Number))];
+      if (!trackIds.length) {
+        notify("No tracks are matched to this album yet. Drag or lookup tracks first.");
+        return;
+      }
+      try {
+        notify(`Approving and applying "${rel.title}"…`);
+        await api(`/api/jobs/${job.id}/musicbrainz-release`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            release_id: rel.release_id,
+            track_ids: trackIds,
+            track_map: trackMap,
+          }),
+        });
+
+        // Save any custom user overrides in drafts for these tracks
+        const jobDrafts = state.drafts.get(job.id) || {};
+        const updates = trackIds
+          .filter(id => jobDrafts[id])
+          .map(id => ({ id: Number(id), metadata: jobDrafts[id] }));
+        if (updates.length) {
+          await api(`/api/jobs/${job.id}/metadata`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ tracks: updates }),
+          });
+          for (const tid of trackIds) {
+            delete jobDrafts[tid];
+          }
+        }
+
+        rel.applied = true;
+        await saveReleasesState(job.id);
+        await pollJobs();
+        notify(`✓ Approved & applied "${rel.title}" (${trackIds.length} tracks updated)!`);
+        renderPicardPanes();
+      } catch (err) {
+        notify("Failed applying release: " + err.message);
+      }
+    }
+
+    async function actionSaveTags() {
+      const job = getActiveJob();
+      if (!job) return;
+      const releases = state.loadedReleases.get(job.id) || [];
+      try {
+        notify("Applying and saving metadata…");
+        for (const rel of releases) {
+          const trackMap = rel.mapping || {};
+          const trackIds = [...new Set(Object.values(trackMap).map(Number))];
+          if (trackIds.length) {
+            await api(`/api/jobs/${job.id}/musicbrainz-release`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                release_id: rel.release_id,
+                track_ids: trackIds,
+                track_map: trackMap,
+              }),
+            });
+            rel.applied = true;
+          }
+        }
+        // Save any custom user overrides in drafts
+        const jobDrafts = state.drafts.get(job.id) || {};
+        const updates = Object.entries(jobDrafts).map(([id, meta]) => ({
+          id: Number(id),
+          metadata: meta,
+        }));
+        if (updates.length) {
+          await api(`/api/jobs/${job.id}/metadata`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ tracks: updates }),
+          });
+          state.drafts.set(job.id, {});
+        }
+        await saveReleasesState(job.id);
+        notify("Saved metadata tags to staged tracks.");
+        await pollJobs();
+        renderPicardPanes();
+      } catch (err) {
+        notify("Failed saving tags: " + err.message);
+      }
+    }
+
+    async function actionApprovePipeline() {
+      const job = getActiveJob();
+      if (!job) return;
+      await actionSaveTags();
+      try {
+        notify("Starting beets import & processing pipeline…");
+        await api(`/api/jobs/${job.id}/approve`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fingerprint: $("opt-fingerprint").checked,
+            replaygain: $("opt-replaygain").checked,
+            transcode: $("opt-transcode").checked,
+          }),
+        });
+        notify("Pipeline active.");
+        await pollJobs();
+      } catch (err) {
+        notify("Pipeline approval failed: " + err.message);
+      }
+    }
+
+    async function actionResetJob() {
+      const job = getActiveJob();
+      if (!job) return;
+      if (!confirm("Reset all MusicBrainz releases, track mappings, and tag edits back to original file tags?")) return;
+      try {
+        state.loadedReleases.set(job.id, []);
+        state.drafts.delete(job.id);
+        const origUpdates = job.tracks.map(t => ({ id: t.id, metadata: t.original_metadata || {} }));
+        await api(`/api/jobs/${job.id}/metadata`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tracks: origUpdates }),
+        });
+        await saveReleasesState(job.id);
+        notify("Reset review back to original file metadata.");
+        await pollJobs();
+      } catch (err) {
+        notify("Reset failed: " + err.message);
+      }
+    }
+
+    async function saveReleasesState(jobId) {
+      const releases = state.loadedReleases.get(jobId) || [];
+      await api(`/api/jobs/${jobId}/clusters`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clusters: releases }),
+      }).catch(err => console.error("Could not persist clusters:", err));
+    }
+
+    /* Drag and Drop Handlers */
+    function handleDragStartTrack(event, trackId) {
+      event.dataTransfer.setData("text/plain", JSON.stringify({ type: "track", trackId: Number(trackId) }));
+      event.dataTransfer.effectAllowed = "move";
+    }
+
+    function handleDragStartCluster(event, clusterId) {
+      event.dataTransfer.setData("text/plain", JSON.stringify({ type: "cluster", clusterId }));
+      event.dataTransfer.effectAllowed = "move";
+    }
+
+    function handleDragStartMatched(event, releaseId, slotIndex, trackId) {
+      event.dataTransfer.setData("text/plain", JSON.stringify({ type: "matched", releaseId, slotIndex: Number(slotIndex), trackId: Number(trackId) }));
+      event.dataTransfer.effectAllowed = "move";
+    }
+
+    function handleDropOnSlot(event, releaseId, slotIndex) {
+      event.preventDefault();
+      event.stopPropagation();
+      const raw = event.dataTransfer.getData("text/plain");
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      const job = getActiveJob();
+      if (!job) return;
+
+      const releases = state.loadedReleases.get(job.id) || [];
+      const targetRel = releases.find(r => r.release_id === releaseId);
+      if (!targetRel) return;
+      if (!targetRel.mapping) targetRel.mapping = {};
+
+      if (data.type === "track" || data.type === "matched") {
+        const trackId = data.trackId;
+        // Unmap from any existing slot in all loaded releases
+        releases.forEach(rel => {
+          Object.keys(rel.mapping || {}).forEach(s => {
+            if (Number(rel.mapping[s]) === trackId) delete rel.mapping[s];
+          });
+        });
+        targetRel.mapping[slotIndex] = trackId;
+        saveReleasesState(job.id);
+        renderRightPaneTree(job);
+        renderLeftPaneTree(job);
+        selectReleaseTrack(releaseId, slotIndex);
+      }
+    }
+
+    function handleDropOnRelease(event, releaseId) {
+      event.preventDefault();
+      event.stopPropagation();
+      const raw = event.dataTransfer.getData("text/plain");
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      const job = getActiveJob();
+      if (!job) return;
+
+      const releases = state.loadedReleases.get(job.id) || [];
+      const targetRel = releases.find(r => r.release_id === releaseId);
+      if (!targetRel) return;
+
+      let tracksToMap = [];
+      if (data.type === "cluster") {
+        const cluster = state.clusters.get(job.id)?.clusters.find(c => c.id === data.clusterId);
+        tracksToMap = (cluster?.track_ids || []).map(id => job.tracks.find(t => t.id === id)).filter(Boolean);
+      } else if (data.type === "track") {
+        const t = job.tracks.find(x => x.id === data.trackId);
+        if (t) tracksToMap = [t];
+      }
+
+      if (tracksToMap.length) {
+        // Auto map into empty slots
+        const mapping = targetRel.mapping || {};
+        targetRel.tracks.forEach((slot, sIdx) => {
+          if (!mapping[sIdx] && tracksToMap.length) {
+            const nextTrack = tracksToMap.shift();
+            mapping[sIdx] = nextTrack.id;
+          }
+        });
+        targetRel.mapping = mapping;
+        saveReleasesState(job.id);
+        renderRightPaneTree(job);
+        renderLeftPaneTree(job);
+      }
+    }
+
+    function handleDropOnLeftPane(event) {
+      event.preventDefault();
+      const raw = event.dataTransfer.getData("text/plain");
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (data.type === "matched") {
+        actionUnmatchSlot(data.releaseId, data.slotIndex);
+      }
+    }
+
+    function handleDropOnCluster(event, targetClusterId) {
+      event.preventDefault();
+      event.stopPropagation();
+      const raw = event.dataTransfer.getData("text/plain");
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      const job = getActiveJob();
+      if (!job || data.type !== "track") return;
+
+      const cState = state.clusters.get(job.id);
+      if (!cState) return;
+      // Remove from unclustered or other clusters
+      cState.unclustered = cState.unclustered.filter(id => id !== data.trackId);
+      cState.clusters.forEach(c => { c.track_ids = c.track_ids.filter(id => id !== data.trackId); });
+      const targetC = cState.clusters.find(c => c.id === targetClusterId);
+      if (targetC) targetC.track_ids.push(data.trackId);
+      renderLeftPaneTree(job);
+    }
+
+    /* Library Tab Functionality */
+    let libraryAlbums = [];
+    let selectedLibraryIndex = 0;
+
+    async function loadLibrary() {
+      const q = $("library-search").value.trim();
+      $("library-album-list").innerHTML = `<p class="text-muted" style="padding:10px;">Loading library…</p>`;
+      try {
+        libraryAlbums = await api(`/api/library?q=${encodeURIComponent(q)}`);
+        selectedLibraryIndex = Math.min(selectedLibraryIndex, Math.max(0, libraryAlbums.length - 1));
+        renderLibrary();
+      } catch (err) {
+        $("library-album-list").innerHTML = `<p class="text-muted" style="padding:10px;">Could not load the library.</p>`;
+        notify("Library load error: " + err.message, "error");
+      }
+    }
+
+    function renderLibrary() {
+      const container = $("library-album-list");
+      if (!libraryAlbums.length) {
+        container.innerHTML = `<p class="text-muted" style="padding:10px;">No albums found in library.</p>`;
+        $("library-album-detail").innerHTML = "Select an album.";
+        return;
+      }
+
+      container.innerHTML = libraryAlbums.map((album, idx) => `
+        <button class="library-album-btn ${idx === selectedLibraryIndex ? "selected" : ""}" onclick="selectLibraryAlbum(${idx})">
+          <strong>${esc(album.album)}</strong><br>
+          <small class="text-muted">${esc(album.albumartist)} · ${esc(album.year)} · ${album.tracks.length} tracks</small>
+        </button>
+      `).join("");
+
+      const album = libraryAlbums[selectedLibraryIndex];
+      if (!album) return;
+
+      $("library-album-detail").innerHTML = `
+        <div class="album-detail-head">
+          <img class="album-detail-cover" src="/api/library/cover?path=${encodeURIComponent(album.cover_path)}" onerror="this.style.display='none'">
+          <div>
+            <h2 style="font-size: 18px; margin-bottom: 4px;">${esc(album.album)}</h2>
+            <div style="color: var(--text-muted); margin-bottom: 10px;">${esc(album.albumartist)} · ${esc(album.year)} · ${album.tracks.length} tracks</div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+              <button onclick="actionLibraryMaint('${encodeURIComponent(album.representative_path)}', 'fingerprint')">Fingerprint</button>
+              <button onclick="actionLibraryMaint('${encodeURIComponent(album.representative_path)}', 'replaygain')">ReplayGain</button>
+              <button onclick="actionLibraryMaint('${encodeURIComponent(album.representative_path)}', 'transcode')">Transcode Opus</button>
+              <button class="danger" onclick="actionDeleteLibraryAlbum('${encodeURIComponent(album.representative_path)}')">Remove Album</button>
+            </div>
+          </div>
+        </div>
+        <div class="library-tracks-list">
+          ${album.tracks.map(t => `
+            <div class="library-track-row">
+              <span><strong>${esc(t.tracknumber ? t.tracknumber.padStart(2, '0') : '--')}</strong> ${esc(t.title)} <small class="text-muted">· ${esc(t.artist)} · ${esc(t.format)}</small></span>
+              <span class="job-badge ${t.has_transcode ? 'completed' : 'failed'}">${t.has_transcode ? 'Opus ready' : 'Opus missing'}</span>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function selectLibraryAlbum(idx) {
+      selectedLibraryIndex = idx;
+      renderLibrary();
+    }
+
+    async function actionLibraryMaint(encodedPath, action) {
+      const path = decodeURIComponent(encodedPath);
+      try {
+        notify(`Running ${action} on album…`);
+        const res = await api("/api/library/action", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path, action }),
+        });
+        notify(`${action} started.`);
+        switchTab("tagging");
+        await pollJobs();
+      } catch (err) {
+        notify("Library action failed: " + err.message);
+      }
+    }
+
+    async function actionDeleteLibraryAlbum(encodedPath) {
+      const path = decodeURIComponent(encodedPath);
+      if (!confirm(`Are you sure you want to permanently delete this album and its Opus copies from disk?`)) return;
+      try {
+        await api("/api/library/album", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path, confirmation: "DELETE" }),
+        });
+        notify("Album removed from library.");
+        await loadLibrary();
+      } catch (err) {
+        notify("Removal failed: " + err.message);
+      }
+    }
+
+    async function actionCheckDB() {
+      $("library-maint-status").textContent = "Checking beets database…";
+      try {
+        const res = await api("/api/maintenance/database");
+        $("library-maint-status").textContent = `DB check: ${res.status} (${res.checked || res.tracked || 0} tracks)`;
+        notify("Database check completed.");
+      } catch (err) {
+        $("library-maint-status").textContent = "Check failed: " + err.message;
+      }
+    }
+
+    async function actionCheckTranscoding() {
+      $("library-maint-status").textContent = "Checking Opus transcode consistency…";
+      try {
+        const res = await api("/api/maintenance/transcoding");
+        $("library-maint-status").textContent = `Transcoding: ${res.status} (${res.missing?.length || 0} missing)`;
+        notify("Transcoding check completed.");
+      } catch (err) {
+        $("library-maint-status").textContent = "Check failed: " + err.message;
+      }
+    }
+
+    async function actionRepairDB() {
+      $("library-maint-status").textContent = "Repairing database paths…";
+      try {
+        const res = await api("/api/maintenance/database/repair", { method: "POST" });
+        $("library-maint-status").textContent = `Repaired: ${res.updated || 0} path(s)`;
+        notify("Path repair finished.");
+      } catch (err) {
+        $("library-maint-status").textContent = "Repair failed: " + err.message;
+      }
+    }
+
+    /* Splitters / Resizers */
+    function initSplitters() {
+      // 1. Horizontal Splitter (Between Middle Panes and Bottom Metadata Pane)
+      const hResizer = $("picard-pane-resizer");
+      const bottomPane = $("picard-bottom-pane");
+      
+      if (hResizer && bottomPane) {
+        const savedHeight = localStorage.getItem("picard_bottom_pane_height");
+        if (savedHeight) {
+          const h = parseInt(savedHeight, 10);
+          if (h >= 34 && h <= window.innerHeight - 180) {
+            bottomPane.style.height = `${h}px`;
+            if (h <= 45) bottomPane.classList.add("minimized");
+          }
+        }
+
+        let isDraggingH = false;
+
+        const onHStart = (clientY) => {
+          isDraggingH = true;
+          hResizer.classList.add("resizing");
+          document.body.style.cursor = "row-resize";
+          document.body.style.userSelect = "none";
+        };
+
+        const onHMove = (clientY) => {
+          if (!isDraggingH) return;
+          const footerBar = document.querySelector(".picard-footer-bar");
+          const footerTop = footerBar ? footerBar.getBoundingClientRect().top : window.innerHeight;
+          const desiredHeight = footerTop - clientY;
+          const minH = 34;
+          const maxH = window.innerHeight - 200;
+          const newHeight = Math.max(minH, Math.min(maxH, desiredHeight));
+          bottomPane.style.height = `${newHeight}px`;
+          if (newHeight <= 45) {
+            bottomPane.classList.add("minimized");
+          } else {
+            bottomPane.classList.remove("minimized");
+            bottomPane.dataset.expandedHeight = newHeight;
+          }
+        };
+
+        const onHEnd = () => {
+          if (isDraggingH) {
+            isDraggingH = false;
+            hResizer.classList.remove("resizing");
+            document.body.style.cursor = "";
+            document.body.style.userSelect = "";
+            localStorage.setItem("picard_bottom_pane_height", bottomPane.getBoundingClientRect().height);
+          }
+        };
+
+        hResizer.addEventListener("mousedown", (e) => { onHStart(e.clientY); e.preventDefault(); });
+        window.addEventListener("mousemove", (e) => { onHMove(e.clientY); });
+        window.addEventListener("mouseup", onHEnd);
+
+        hResizer.addEventListener("touchstart", (e) => {
+          if (e.touches.length) onHStart(e.touches[0].clientY);
+        }, { passive: false });
+        window.addEventListener("touchmove", (e) => {
+          if (isDraggingH && e.touches.length) {
+            onHMove(e.touches[0].clientY);
+            e.preventDefault();
+          }
+        }, { passive: false });
+        window.addEventListener("touchend", onHEnd);
+
+        hResizer.addEventListener("dblclick", () => {
+          toggleBottomPaneSize();
+        });
+      }
+
+      // 2. Vertical Splitter (Between Left and Right Panes)
+      const vResizer = $("picard-vertical-resizer");
+      const leftPane = $("picard-left-pane");
+      const panesContainer = $("picard-panes-container");
+
+      if (vResizer && leftPane && panesContainer) {
+        const savedLeftWidth = localStorage.getItem("picard_left_pane_width");
+        if (savedLeftWidth) {
+          const w = parseInt(savedLeftWidth, 10);
+          if (w >= 160 && w <= window.innerWidth - 200) {
+            leftPane.style.flex = `0 0 ${w}px`;
+          }
+        }
+
+        let isDraggingV = false;
+
+        const onVStart = (clientX) => {
+          isDraggingV = true;
+          vResizer.classList.add("resizing");
+          document.body.style.cursor = "col-resize";
+          document.body.style.userSelect = "none";
+        };
+
+        const onVMove = (clientX) => {
+          if (!isDraggingV) return;
+          const containerRect = panesContainer.getBoundingClientRect();
+          const desiredWidth = clientX - containerRect.left;
+          const minW = 160;
+          const maxW = containerRect.width - 160;
+          const newWidth = Math.max(minW, Math.min(maxW, desiredWidth));
+          leftPane.style.flex = `0 0 ${newWidth}px`;
+        };
+
+        const onVEnd = () => {
+          if (isDraggingV) {
+            isDraggingV = false;
+            vResizer.classList.remove("resizing");
+            document.body.style.cursor = "";
+            document.body.style.userSelect = "";
+            localStorage.setItem("picard_left_pane_width", leftPane.getBoundingClientRect().width);
+          }
+        };
+
+        vResizer.addEventListener("mousedown", (e) => { onVStart(e.clientX); e.preventDefault(); });
+        window.addEventListener("mousemove", (e) => { onVMove(e.clientX); });
+        window.addEventListener("mouseup", onVEnd);
+
+        vResizer.addEventListener("touchstart", (e) => {
+          if (e.touches.length) onVStart(e.touches[0].clientX);
+        }, { passive: false });
+        window.addEventListener("touchmove", (e) => {
+          if (isDraggingV && e.touches.length) {
+            onVMove(e.touches[0].clientX);
+            e.preventDefault();
+          }
+        }, { passive: false });
+        window.addEventListener("touchend", onVEnd);
+
+        vResizer.addEventListener("dblclick", () => {
+          leftPane.style.flex = "0 0 50%";
+          localStorage.removeItem("picard_left_pane_width");
+        });
+      }
+    }
+
+    function toggleBottomPaneSize() {
+      const bottomPane = $("picard-bottom-pane");
+      if (!bottomPane) return;
+      const isMin = bottomPane.classList.contains("minimized") || bottomPane.getBoundingClientRect().height <= 45;
+      if (!isMin) {
+        bottomPane.dataset.expandedHeight = bottomPane.getBoundingClientRect().height;
+        bottomPane.style.height = "34px";
+        bottomPane.classList.add("minimized");
+        localStorage.setItem("picard_bottom_pane_height", "34");
+      } else {
+        const target = parseInt(bottomPane.dataset.expandedHeight || "260", 10) || 260;
+        const targetHeight = Math.max(160, target);
+        bottomPane.style.height = `${targetHeight}px`;
+        bottomPane.classList.remove("minimized");
+        localStorage.setItem("picard_bottom_pane_height", targetHeight);
+      }
+    }
+
+    /* Start Resizers & Polling */
+    initSplitters();
+    pollJobs();
+    setInterval(pollJobs, 4000);
+  </script>
+</body>
+</html>
