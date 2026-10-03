@@ -81,6 +81,14 @@ traefik_middlewares_redirect: {}
 #         - "admin:$2y$10$..."
 traefik_custom_middlewares: {}
 
+# Experimental Traefik plugins.
+# Example:
+#   traefik_plugins:
+#     traefik-oidc-auth:
+#       moduleName: github.com/sevensolutions/traefik-oidc-auth
+#       version: v0.21.0
+traefik_plugins: {}
+
 # TCP entrypoints
 traefik_tcp_entrypoints: []
 # traefik_tcp_entrypoints:

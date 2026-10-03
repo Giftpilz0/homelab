@@ -27,6 +27,7 @@ Environment={{ env_var }}
 {% endif %}
 
 Volume=traefik-acme.volume:/acme/
+Volume=traefik-plugins.volume:/plugins-storage
 Volume=%h/.config/containers/systemd/traefik-pod/config/dynamic.yaml:/etc/traefik/dynamic/dynamic.yaml:Z
 Volume=%h/.config/containers/systemd/traefik-pod/config/traefik.yaml:/etc/traefik/traefik.yaml:Z
 

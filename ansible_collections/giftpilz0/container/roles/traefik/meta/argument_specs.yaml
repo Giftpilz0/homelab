@@ -125,6 +125,12 @@ argument_specs:
         default: {}
         description: custom traefik middleware definitions.
 
+      traefik_plugins:
+        type: dict
+        required: false
+        default: {}
+        description: experimental Traefik plugin definitions keyed by plugin name.
+
       traefik_tcp_entrypoints:
         type: list
         elements: dict

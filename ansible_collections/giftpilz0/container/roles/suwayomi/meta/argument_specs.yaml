@@ -1,0 +1,141 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy Suwayomi Server and its FlareSolverr companion as a Podman Quadlet pod.
+    options:
+      podman_user:
+        type: str
+        required: false
+        default: "{{ ansible_user }}"
+        description: System user for rootless Podman operations.
+
+      suwayomi_network_enabled:
+        type: bool
+        required: false
+        default: true
+        description: Create and manage the Podman network.
+
+      suwayomi_network_name:
+        type: str
+        required: false
+        default: suwayomi-internal
+        description: Podman network name.
+
+      suwayomi_network_driver:
+        type: str
+        required: false
+        default: bridge
+        description: Podman network driver.
+
+      suwayomi_bind_ip:
+        type: str
+        required: false
+        default: "127.0.0.1"
+        description: Host IP for optional direct port publishing.
+
+      suwayomi_port_map_enabled:
+        type: bool
+        required: false
+        default: false
+        description: Publish Suwayomi ports directly on the host.
+
+      suwayomi_port_map:
+        type: list
+        elements: str
+        required: false
+        default:
+          - "4567:4567"
+        description: Host-to-container port mappings.
+
+      suwayomi_version:
+        type: str
+        required: false
+        default: "v2.4.2366"
+        description: Suwayomi Server image tag.
+
+      suwayomi_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: Enable Podman registry auto-update for Suwayomi.
+
+      suwayomi_flaresolverr_version:
+        type: str
+        required: false
+        default: "3.0.4"
+        description: Byparr image tag used for the FlareSolverr-compatible companion.
+
+      suwayomi_flaresolverr_autoupdate:
+        type: bool
+        required: false
+        default: true
+        description: Enable Podman registry auto-update for FlareSolverr.
+
+      suwayomi_environment_vars:
+        type: dict
+        required: false
+        default: {}
+        description: Environment variables passed to Suwayomi. Set WebUI update interval to 0 for manual updates.
+
+      suwayomi_flaresolverr_environment_vars:
+        type: dict
+        required: false
+        default: {}
+        description: Environment variables passed to FlareSolverr.
+
+      suwayomi_extra_files:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: Arbitrary file entries with src or source, dest, optional mount, mode, and template.
+
+      suwayomi_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: Arbitrary directory entries with src or source, dest, optional mount and mode.
+
+      suwayomi_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: Optional Suwayomi container entrypoint override.
+
+      suwayomi_flaresolverr_entrypoint:
+        type: str
+        required: false
+        default: ""
+        description: Optional FlareSolverr container entrypoint override.
+
+      suwayomi_proxy_enabled:
+        type: bool
+        required: false
+        default: false
+        description: Enable HTTP proxy for image pulls and container traffic.
+
+      suwayomi_proxy_http:
+        type: str
+        required: false
+        default: ""
+        description: HTTP proxy URL.
+
+      suwayomi_proxy_https:
+        type: str
+        required: false
+        default: ""
+        description: HTTPS proxy URL.
+
+      suwayomi_proxy_no_proxy:
+        type: str
+        required: false
+        default: ""
+        description: Comma-separated list of proxy exclusions.
+
+      suwayomi_proxy_env:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: Generated proxy environment entries.

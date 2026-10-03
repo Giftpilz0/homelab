@@ -1,0 +1,28 @@
+[Unit]
+Description=Suwayomi FlareSolverr Container
+
+[Container]
+ContainerName=flaresolverr
+Image=ghcr.io/thephaseless/byparr:{{ suwayomi_flaresolverr_version }}
+
+Pod=suwayomi.pod
+
+{% if suwayomi_flaresolverr_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+{% if suwayomi_flaresolverr_entrypoint %}
+Entrypoint={{ suwayomi_flaresolverr_entrypoint }}
+{% endif %}
+
+{% for env_name, env_value in suwayomi_flaresolverr_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+{% if suwayomi_proxy_enabled %}
+{% for env_var in suwayomi_proxy_env %}
+Environment={{ env_var }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always

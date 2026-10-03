@@ -1,5 +1,5 @@
 ---
-- name: "Navidrome: Create Podman config directory"
+- name: "Suwayomi: Create Podman config directory"
   become: true
   ansible.builtin.file:
     path: /etc/containers/containers.conf.d
@@ -8,29 +8,29 @@
     group: root
     mode: "0755"
 
-- name: "Navidrome: Deploy Podman proxy configuration"
+- name: "Suwayomi: Deploy Podman proxy configuration"
   become: true
   ansible.builtin.template:
-    src: "navidrome-pod/proxy.conf.j2"
+    src: "suwayomi-pod/proxy.conf.j2"
     dest: "/etc/containers/containers.conf.d/proxy.conf"
     owner: root
     group: root
     mode: "0644"
-  when: navidrome_proxy_enabled
+  when: suwayomi_proxy_enabled
 
-- name: "Navidrome: Remove old Quadlet directory"
+- name: "Suwayomi: Remove old Quadlet directory"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.file:
-    path: "/home/{{ podman_user }}/.config/containers/systemd/navidrome-pod"
+    path: "/home/{{ podman_user }}/.config/containers/systemd/suwayomi-pod"
     state: absent
 
-- name: "Navidrome: Enable lingering"
+- name: "Suwayomi: Enable lingering"
   become: true
   ansible.builtin.command: "loginctl enable-linger {{ podman_user }}"
   changed_when: true
 
-- name: "Navidrome: Configure unprivileged port range"
+- name: "Suwayomi: Configure unprivileged port range"
   become: true
   ansible.posix.sysctl:
     name: net.ipv4.ip_unprivileged_port_start
@@ -39,7 +39,7 @@
     sysctl_file: /etc/sysctl.d/99-rootless-ports.conf
     reload: true
 
-- name: "Navidrome: Create Quadlet directory"
+- name: "Suwayomi: Create Quadlet directory"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.file:
@@ -49,51 +49,7 @@
     group: "{{ podman_user }}"
     mode: "0755"
 
-- name: "Navidrome: Create WebUI image build directory"
-  become: true
-  ansible.builtin.file:
-    path: "/tmp/navidrome-webui-build"
-    state: directory
-    mode: "0755"
-  when: navidrome_webui_enabled
-
-- name: "Navidrome: Clone WebUI image build repository"
-  become: true
-  ansible.builtin.git:
-    repo: "https://forgejo.nixpi.de/moritz/music-library-webui.git"
-    dest: "/tmp/navidrome-webui-build"
-    version: "{{ navidrome_webui_commit }}"
-    force: true
-    depth: 1
-  when: navidrome_webui_enabled
-
-- name: "Navidrome: Build WebUI image"
-  become: true
-  become_user: "{{ podman_user }}"
-  containers.podman.podman_image:
-    name: "{{ navidrome_webui_image_name }}"
-    tag: "{{ navidrome_webui_image_tag }}"
-    path: "/tmp/navidrome-webui-build"
-    build:
-      file: "/tmp/navidrome-webui-build/{{ navidrome_webui_build_file }}"
-      format: oci
-      cache: true
-      force_rm: true
-    force: true
-  environment:
-    https_proxy: "{{ navidrome_proxy_https if navidrome_proxy_enabled else '' }}"
-    http_proxy: "{{ navidrome_proxy_http if navidrome_proxy_enabled else '' }}"
-    no_proxy: "{{ navidrome_proxy_no_proxy if navidrome_proxy_enabled else '' }}"
-  when: navidrome_webui_enabled
-
-- name: "Navidrome: Clean up WebUI image build directory"
-  become: true
-  ansible.builtin.file:
-    path: "/tmp/navidrome-webui-build"
-    state: absent
-  when: navidrome_webui_enabled
-
-- name: "Navidrome: Create Quadlet directory structure"
+- name: "Suwayomi: Create Quadlet directory structure"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.file:
@@ -105,7 +61,7 @@
   with_community.general.filetree: "templates/"
   when: item.state == 'directory'
 
-- name: "Navidrome: Template Quadlet files"
+- name: "Suwayomi: Template Quadlet files"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.template:
@@ -115,80 +71,88 @@
     group: "{{ podman_user }}"
     mode: "{{ item.mode }}"
   with_community.general.filetree: "templates/"
-  when:
-    - item.state == 'file'
+  when: item.state == 'file'
 
-- name: "Navidrome: Copy extra files"
+- name: "Suwayomi: Copy extra files"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.copy:
     src: "{{ item.src }}"
-    dest: "/home/{{ podman_user }}/.config/containers/systemd/navidrome-pod/{{ item.dest }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/suwayomi-pod/{{ item.dest }}"
     owner: "{{ podman_user }}"
     group: "{{ podman_user }}"
     mode: "{{ item.mode | default('0640') }}"
-  loop: "{{ navidrome_extra_files | default([]) }}"
+  loop: "{{ suwayomi_extra_files | default([]) }}"
   when:
-    - "navidrome_extra_files | default([]) | length > 0"
+    - "suwayomi_extra_files | default([]) | length > 0"
     - item.src is defined
     - not (item.template | default(false))
 
-- name: "Navidrome: Template extra files"
+- name: "Suwayomi: Template extra files"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.template:
     src: "{{ item.src }}"
-    dest: "/home/{{ podman_user }}/.config/containers/systemd/navidrome-pod/{{ item.dest }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/suwayomi-pod/{{ item.dest }}"
     owner: "{{ podman_user }}"
     group: "{{ podman_user }}"
     mode: "{{ item.mode | default('0640') }}"
-  loop: "{{ navidrome_extra_files | default([]) }}"
+  loop: "{{ suwayomi_extra_files | default([]) }}"
   when:
-    - "navidrome_extra_files | default([]) | length > 0"
+    - "suwayomi_extra_files | default([]) | length > 0"
     - item.src is defined
     - item.template | default(false)
 
-- name: "Navidrome: Copy extra directories"
+- name: "Suwayomi: Copy extra directories"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.copy:
     src: "{{ item.src }}/"
-    dest: "/home/{{ podman_user }}/.config/containers/systemd/navidrome-pod/{{ item.dest }}"
+    dest: "/home/{{ podman_user }}/.config/containers/systemd/suwayomi-pod/{{ item.dest }}"
     owner: "{{ podman_user }}"
     group: "{{ podman_user }}"
     mode: "{{ item.mode | default('0755') }}"
-  loop: "{{ navidrome_extra_dirs | default([]) }}"
+  loop: "{{ suwayomi_extra_dirs | default([]) }}"
   when:
-    - "navidrome_extra_dirs | default([]) | length > 0"
+    - "suwayomi_extra_dirs | default([]) | length > 0"
     - item.src is defined
 
-- name: "Navidrome: Reload user systemd"
+- name: "Suwayomi: Reload user systemd"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.systemd:
     daemon_reload: true
     scope: user
 
-- name: "Navidrome: Start network service"
+- name: "Suwayomi: Start network service"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.systemd:
-    name: navidrome-network.service
+    name: suwayomi-network.service
     enabled: true
     state: restarted
     scope: user
-  when: navidrome_network_enabled
+  when: suwayomi_network_enabled
 
-- name: "Navidrome: Start pod service"
+- name: "Suwayomi: Start FlareSolverr service"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.systemd:
-    name: navidrome-pod.service
+    name: suwayomi-flaresolverr.service
     enabled: true
     state: restarted
     scope: user
 
-- name: "Navidrome: Enable Podman auto-update timer"
+- name: "Suwayomi: Start pod service"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: suwayomi-pod.service
+    enabled: true
+    state: restarted
+    scope: user
+
+- name: "Suwayomi: Enable Podman auto-update timer"
   become: true
   become_user: "{{ podman_user }}"
   ansible.builtin.systemd:
@@ -197,7 +161,7 @@
     state: started
     scope: user
 
-- name: "Navidrome: Configure Traefik"
+- name: "Suwayomi: Configure Traefik"
   ansible.builtin.include_role:
     name: giftpilz0.container.traefik
   when: traefik_http_services is defined or traefik_tcp_services is defined
