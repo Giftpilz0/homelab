@@ -23,6 +23,11 @@ packages_additional_package:
   - gum
 
 ######################################
+### giftpilz0.general.autoupgrade
+
+autoupgrade_reboot: true
+
+######################################
 ### giftpilz0.general.user
 
 admin_group: "{{ 'wheel' if ansible_os_family == 'RedHat' else 'sudo' }}"
