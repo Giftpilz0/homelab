@@ -94,7 +94,7 @@ suwayomi_network_name: "suwayomi-internal"
 
 # Versions
 # renovate: datasource=docker depName=ghcr.io/suwayomi/suwayomi-server
-suwayomi_version: "v2.4.2366"
+suwayomi_version: "v2.4.2376"
 # renovate: datasource=docker depName=ghcr.io/thephaseless/byparr
 suwayomi_flaresolverr_version: "3.0.4"
 
