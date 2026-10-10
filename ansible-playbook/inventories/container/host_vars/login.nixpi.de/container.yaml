@@ -103,7 +103,7 @@ keycloak_environment_vars:
 
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.13"
+traefik_version: "v3.7.14"
 
 # Rootless ports
 traefik_unprivileged_port_start: 80
