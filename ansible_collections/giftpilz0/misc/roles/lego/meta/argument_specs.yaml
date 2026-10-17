@@ -58,6 +58,29 @@ argument_specs:
             required: true
             description: Windows filesystem rights to grant.
 
+      lego_windows_task_username:
+        type: str
+        required: false
+        default: SYSTEM
+        description: Windows identity used by the scheduled renewal task.
+
+      lego_windows_task_logon_type:
+        type: str
+        required: false
+        default: service_account
+        choices:
+          - service_account
+          - password
+          - s4u
+          - interactive_token
+        description: Windows scheduled-task logon type.
+
+      lego_windows_task_password:
+        type: str
+        required: false
+        no_log: true
+        description: Password for a password-based scheduled-task identity.
+
       lego_binary:
         type: path
         required: false

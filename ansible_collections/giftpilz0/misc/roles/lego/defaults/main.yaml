@@ -39,5 +39,9 @@ lego_windows_state_acl:
   - user: Administrators
     rights: FullControl
 
+lego_windows_task_username: SYSTEM
+lego_windows_task_logon_type: service_account
+lego_windows_task_password: ""
+
 # Optional extra arguments passed to every lego invocation.
 lego_extra_args: []

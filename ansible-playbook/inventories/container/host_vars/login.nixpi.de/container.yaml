@@ -42,7 +42,7 @@ keycloak_network_name: "keycloak-internal"
 
 # Versions
 # renovate: datasource=docker depName=quay.io/keycloak/keycloak
-keycloak_version: "26.8.0"
+keycloak_version: "26.8.1"
 
 # Autoupdate
 keycloak_autoupdate: true
@@ -103,7 +103,7 @@ keycloak_environment_vars:
 
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.13"
+traefik_version: "v3.7.14"
 
 # Rootless ports
 traefik_unprivileged_port_start: 80
