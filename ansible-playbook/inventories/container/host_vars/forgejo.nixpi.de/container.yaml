@@ -42,7 +42,7 @@ forgejo_network_name: "forgejo-internal"
 
 # Versions
 # renovate: datasource=docker depName=codeberg.org/forgejo/forgejo
-forgejo_version: "16.0.6"
+forgejo_version: "17.0.0"
 
 # Autoupdate
 forgejo_autoupdate: true
