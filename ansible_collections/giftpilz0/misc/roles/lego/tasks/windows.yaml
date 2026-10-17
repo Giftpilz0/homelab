@@ -26,6 +26,36 @@
   loop_control:
     label: "{{ item.user }}"
 
+- name: "Lego: Grant renewal task access to Lego state"
+  ansible.windows.win_acl:
+    path: "{{ lego_state_path }}"
+    user: "{{ lego_windows_task_username }}"
+    rights: FullControl
+    type: allow
+    state: present
+    inherit: ContainerInherit, ObjectInherit
+    propagation: None
+  when: lego_windows_task_username | lower not in ['system', 'nt authority\\system']
+
+- name: "Lego: Grant renewal task execute access to Lego binary"
+  ansible.windows.win_acl:
+    path: "{{ lego_path }}"
+    user: "{{ lego_windows_task_username }}"
+    rights: ReadAndExecute
+    type: allow
+    state: present
+    inherit: ContainerInherit, ObjectInherit
+    propagation: None
+  when: lego_windows_task_username | lower not in ['system', 'nt authority\\system']
+
+- name: "Lego: Grant renewal task batch-logon right"
+  ansible.windows.win_user_right:
+    name: SeBatchLogonRight
+    users:
+      - "{{ lego_windows_task_username }}"
+    action: add
+  when: lego_windows_task_username | lower not in ['system', 'nt authority\\system']
+
 - name: "Lego: Download Windows binary"
   ansible.windows.win_get_url:
     url: "{{ lego_windows_url }}"
@@ -72,7 +102,9 @@
       - type: daily
         start_boundary: "2024-01-01T03:00:00"
         random_delay: PT1H
-    username: SYSTEM
+    username: "{{ lego_windows_task_username }}"
+    logon_type: "{{ lego_windows_task_logon_type }}"
+    password: "{{ lego_windows_task_password | default(omit, true) }}"
     run_level: highest
     enabled: true
     state: present

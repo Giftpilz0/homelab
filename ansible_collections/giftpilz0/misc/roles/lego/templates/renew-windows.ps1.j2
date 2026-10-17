@@ -1,10 +1,23 @@
+param(
+  [switch]$RunHook,
+  [string]$CertificateName
+)
+
 $ErrorActionPreference = 'Stop'
 $Lego = '{{ lego_path }}\lego.exe'
 $State = '{{ lego_state_path }}'
 $Server = '{{ lego_acme_server }}'
 $ServerHost = ([Uri]$Server).Host -replace ':', '_'
+try {
+  Write-Host "Started Lego processing at $(Get-Date -Format o); hook-only mode: $RunHook"
+  if ($RunHook -and -not $CertificateName) {
+    throw 'RunHook requires -CertificateName so only the requested deployment hook is executed'
+  }
 
 {% for item in lego_certificates %}
+if ($CertificateName -and $CertificateName -ne '{{ item.name }}') {
+  continue
+}
 Write-Host 'Processing {{ item.name }}'
 $Environment = Join-Path $State '{{ item.name }}.ps1'
 if (Test-Path -LiteralPath $Environment) {
@@ -12,6 +25,11 @@ if (Test-Path -LiteralPath $Environment) {
 }
 
 $Certificate = Join-Path $State 'certificates\{{ item.domains[0] | replace('*', '_') }}.crt'
+if ($RunHook) {
+  $Arguments = @()
+  $ExitCode = 0
+}
+else {
 $Arguments = @(
   'run'
   '--accept-tos'
@@ -70,10 +88,12 @@ if (($ExitCode -ne 0) -and ($Output -match 'accountDoesNotExist')) {
 if ($ExitCode -ne 0) {
   throw "Lego failed for {{ item.name }} with exit code $ExitCode"
 }
+}
 
 $Marker = Join-Path $State '.{{ item.name }}.deployed'
-$Changed = -not (Test-Path -LiteralPath $Marker) -or
+$Changed = $RunHook -or (-not (Test-Path -LiteralPath $Marker) -or
   ((Get-Item -LiteralPath $Certificate).LastWriteTime -gt (Get-Item -LiteralPath $Marker).LastWriteTime)
+)
 if ($Changed) {
 {% if item.deploy is defined and item.deploy.pfx is defined %}
   $PfxSource = Join-Path $State 'certificates\{{ item.domains[0] | replace('*', '_') }}.pfx'
@@ -91,6 +111,14 @@ if ($Changed) {
   {{ hook.script }}
 {% endif %}
 {% endfor %}
-  New-Item -ItemType File -Path $Marker -Force | Out-Null
+  if (-not $RunHook) {
+    New-Item -ItemType File -Path $Marker -Force | Out-Null
+  }
 }
 {% endfor %}
+  Write-Host "Completed Lego processing at $(Get-Date -Format o)"
+}
+catch {
+  Write-Error $_
+  exit 1
+}
