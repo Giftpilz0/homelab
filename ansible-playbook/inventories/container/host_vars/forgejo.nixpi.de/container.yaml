@@ -59,7 +59,7 @@ forgejo_oauth_admin_group: "forgejo-admin"
 
 # Version
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.14"
+traefik_version: "v3.7.15"
 
 # Rootless ports
 traefik_unprivileged_port_start: 80

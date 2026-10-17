@@ -20,7 +20,7 @@ monitoring_stack_mimir_version: "3.2.2"
 # renovate: datasource=docker depName=grafana/loki
 monitoring_stack_loki_version: "3.7.8"
 # renovate: datasource=docker depName=persesdev/perses
-monitoring_stack_perses_version: "v0.54.0-rc.1"
+monitoring_stack_perses_version: "v0.55.0-rc.1"
 
 # Autoupdate
 monitoring_stack_garage_autoupdate: true
