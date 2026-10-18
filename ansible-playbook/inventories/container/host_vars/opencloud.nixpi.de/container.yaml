@@ -84,6 +84,18 @@ navidrome_autoupdate: true
 
 # Music library management WebUI.
 navidrome_webui_enabled: true
+# renovate: datasource=docker depName=ghcr.io/giftpilz0/musiclibrary
+navidrome_webui_version: "edge"
+navidrome_webui_autoupdate: true
+navidrome_webui_environment_vars:
+  MUSIC_LIBRARY_ROOT: "/music"
+  MUSIC_LIBRARY_NAVIDROME_LIBRARY_PATH: "/music/transcoded"
+  BASE_URL: "https://music.nixpi.de"
+  # Enables "Scan" (AcoustID fingerprints)
+  MUSIC_LIBRARY_ACOUSTID_API_KEY: "{{ navidrome_webui_acoustid_api_key }}"
+  MUSIC_LIBRARY_NAVIDROME_USERNAME: navidrome
+  MUSIC_LIBRARY_NAVIDROME_PASSWORD: "{{ navidrome_admin_password }}"
+  MUSIC_LIBRARY_NAVIDROME_URL: "http://127.0.0.1:4533"
 
 ######################################
 ### giftpilz0.container.suwayomi

@@ -28,21 +28,25 @@ navidrome_autoupdate: true
 
 # Environment
 navidrome_environment_vars:
-  ND_MUSICFOLDER: "/music/transcoded"
+  ND_MUSICFOLDER: "/music/transcoded/shared"
   ND_DATAFOLDER: "/data"
   ND_CACHEFOLDER: "/cache"
   ND_SCANSCHEDULE: "1h"
   ND_SCANNER_PURGEMISSING: "always"
   ND_LOGLEVEL: "info"
   ND_TRANSCODINGCACHESIZE: "1GB"
+  ND_DEFAULTPLAYLISTPUBLICVISIBILITY: true
 
-# Music library management WebUI.
+# Music library management WebUI (https://github.com/giftpilz0/musiclibrary).
+# Shares the music volume with Navidrome: the WebUI writes original/ and
+# transcoded/, Navidrome reads transcoded/ (ND_MUSICFOLDER).
 navidrome_webui_enabled: false
-navidrome_webui_image_name: "localhost/music-library-webui"
-navidrome_webui_image_tag: "0.1.0"
-navidrome_webui_image: "{{ navidrome_webui_image_name }}:{{ navidrome_webui_image_tag }}"
-navidrome_webui_commit: "657b0256dd2b8f7e048c92b824f92d11e57dce3f"
-navidrome_webui_build_file: "Containerfile"
+navidrome_webui_image_name: "ghcr.io/giftpilz0/musiclibrary"
+# renovate: datasource=docker depName=ghcr.io/giftpilz0/musiclibrary
+navidrome_webui_version: "edge"
+navidrome_webui_image: "{{ navidrome_webui_image_name }}:{{ navidrome_webui_version }}"
+navidrome_webui_autoupdate: true
+# Same UID/GID as Navidrome so both can use the shared volume without chowning.
 navidrome_webui_user: "1001:1001"
 navidrome_webui_environment_vars:
   MUSIC_LIBRARY_ROOT: "/music"

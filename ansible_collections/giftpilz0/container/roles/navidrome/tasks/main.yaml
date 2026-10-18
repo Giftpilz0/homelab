@@ -49,50 +49,6 @@
     group: "{{ podman_user }}"
     mode: "0755"
 
-- name: "Navidrome: Create WebUI image build directory"
-  become: true
-  ansible.builtin.file:
-    path: "/tmp/navidrome-webui-build"
-    state: directory
-    mode: "0755"
-  when: navidrome_webui_enabled
-
-- name: "Navidrome: Clone WebUI image build repository"
-  become: true
-  ansible.builtin.git:
-    repo: "https://forgejo.nixpi.de/moritz/music-library-webui.git"
-    dest: "/tmp/navidrome-webui-build"
-    version: "{{ navidrome_webui_commit }}"
-    force: true
-    depth: 1
-  when: navidrome_webui_enabled
-
-- name: "Navidrome: Build WebUI image"
-  become: true
-  become_user: "{{ podman_user }}"
-  containers.podman.podman_image:
-    name: "{{ navidrome_webui_image_name }}"
-    tag: "{{ navidrome_webui_image_tag }}"
-    path: "/tmp/navidrome-webui-build"
-    build:
-      file: "/tmp/navidrome-webui-build/{{ navidrome_webui_build_file }}"
-      format: oci
-      cache: true
-      force_rm: true
-    force: true
-  environment:
-    https_proxy: "{{ navidrome_proxy_https if navidrome_proxy_enabled else '' }}"
-    http_proxy: "{{ navidrome_proxy_http if navidrome_proxy_enabled else '' }}"
-    no_proxy: "{{ navidrome_proxy_no_proxy if navidrome_proxy_enabled else '' }}"
-  when: navidrome_webui_enabled
-
-- name: "Navidrome: Clean up WebUI image build directory"
-  become: true
-  ansible.builtin.file:
-    path: "/tmp/navidrome-webui-build"
-    state: absent
-  when: navidrome_webui_enabled
-
 - name: "Navidrome: Create Quadlet directory structure"
   become: true
   become_user: "{{ podman_user }}"
