@@ -50,7 +50,7 @@ argument_specs:
       navidrome_version:
         type: str
         required: false
-        default: "0.64.0"
+        default: "0.64.2"
         description: Navidrome image tag.
 
       navidrome_autoupdate:
@@ -74,32 +74,32 @@ argument_specs:
       navidrome_webui_image_name:
         type: str
         required: false
-        default: localhost/music-library-webui
-        description: Local image name for the music library WebUI.
+        default: ghcr.io/giftpilz0/musiclibrary
+        description: Image name for the music library WebUI.
 
-      navidrome_webui_image_tag:
+      navidrome_webui_version:
         type: str
         required: false
-        default: "0.1.0"
-        description: Local image tag for the music library WebUI.
+        default: edge
+        description: Image tag for the music library WebUI.
 
-      navidrome_webui_commit:
+      navidrome_webui_image:
         type: str
         required: false
-        default: 657b0256dd2b8f7e048c92b824f92d11e57dce3f
-        description: Git commit to clone for the music library WebUI image build.
+        default: "{{ navidrome_webui_image_name }}:{{ navidrome_webui_version }}"
+        description: Full image reference for the music library WebUI.
 
-      navidrome_webui_build_file:
-        type: str
+      navidrome_webui_autoupdate:
+        type: bool
         required: false
-        default: Containerfile
-        description: Container build file relative to the WebUI repository root.
+        default: true
+        description: Enable Podman registry auto-update for the music library WebUI.
 
       navidrome_webui_user:
         type: str
         required: false
         default: "1001:1001"
-        description: UID and GID used by the WebUI container for shared-volume writes.
+        description: UID and GID used by the WebUI container for shared-volume writes (match Navidrome).
 
       navidrome_webui_environment_vars:
         type: dict
