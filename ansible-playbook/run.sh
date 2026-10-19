@@ -1,79 +1,77 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+# Run a playbook with the Python/Ansible versions pinned in pyproject.toml/uv.lock.
+#
+# Usage: ./run.sh [--skip-collections] [inventory] [ansible-playbook args...]
+#   ./run.sh                        pick an inventory interactively
+#   ./run.sh container --check      dry-run the container inventory
+#   ./run.sh --skip-collections container -l login.nixpi.de
+# Collections are reinstalled when requirements.yaml changed; git/url/dir sources on every run.
+# Expects: pyproject.toml + uv.lock, requirements.yaml (optional), inventories/<name>/{hosts/hosts.yaml,playbook.yaml}
+set -euo pipefail
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+cd "$(dirname "$(readlink -f "$0")")"
 
-export ANSIBLE_PIPELINING=True
+info() { echo -e "[\033[0;34mℹ\033[0m] $*"; }
+fail() { echo -e "[\033[0;31m✘\033[0m] $*" >&2; exit 1; }
 
-INVENTORIES=($(find "./inventories" -maxdepth 1 -type d | tail -n +2 | xargs -n1 basename | sort))
-
-if [[ ${#INVENTORIES[@]} -eq 0 ]]; then
-    echo -e "[${RED}✘${NC}] No inventories found"
-    exit 1
-fi
-
-if [[ -n "$1" ]]; then
-    INVENTORY_DIR="$1"
+skip_collections=false
+if [[ "${1:-}" == "--skip-collections" ]]; then
+    skip_collections=true
     shift
-    if [[ ! -d "./inventories/$INVENTORY_DIR" ]]; then
-        echo -e "[${RED}✘${NC}] Inventory '$INVENTORY_DIR' not found"
-        exit 1
-    fi
-else
-    INVENTORY_DIR=$(gum choose "${INVENTORIES[@]}" --header="Select inventory to run")
 fi
 
-decrypt_sops_files() {
-    local sops_files=($(find "./inventories/$INVENTORY_DIR" -name "*.y*ml" -exec grep -l "ENC\[" {} \; 2>/dev/null || true))
+command -v uv >/dev/null || fail "uv is required (https://docs.astral.sh/uv/)"
+if [[ -n "$(find inventories -name '*.sops.y*ml' -print -quit)" ]]; then
+    command -v sops >/dev/null || fail "sops is required to decrypt inventory secrets"
+fi
 
-    if [[ ${#sops_files[@]} -eq 0 ]]; then
-        return 0
+mapfile -t inventories < <(find inventories -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort)
+
+if [[ -n "${1:-}" && "$1" != -* ]]; then
+    inventory="$1"
+    shift
+elif command -v gum >/dev/null; then
+    inventory=$(gum choose --header="Select inventory to run" "${inventories[@]}")
+else
+    fail "No inventory given. Available: ${inventories[*]}"
+fi
+[[ -d "inventories/$inventory" ]] || fail "Inventory '$inventory' not found. Available: ${inventories[*]}"
+
+info "Syncing Python environment..."
+uv sync --locked --quiet
+
+galaxy_install() {
+    local log
+    log=$(mktemp)
+    if ! uv run ansible-galaxy collection install -r requirements.yaml -p "$collections_dir" >"$log" 2>&1; then
+        cat "$log" >&2
+        rm -f "$log"
+        fail "Collection install failed"
     fi
+    rm -f "$log"
+}
 
-    if ! command -v sops &>/dev/null; then
-        echo -e "[${RED}✘${NC}] SOPS required but not installed"
-        exit 1
+# Reinstall from scratch whenever requirements.yaml changed: pins apply exactly and removed
+# collections disappear (ansible-galaxy never uninstalls). Git/URL/dir sources can change
+# without that file changing; galaxy reinstalls those on every run.
+collections_dir=.ansible/collections
+stamp="$collections_dir/.requirements.sha256"
+if [[ "$skip_collections" == false && -f requirements.yaml ]]; then
+    if ! sha256sum --check --status "$stamp" 2>/dev/null; then
+        info "Installing Ansible collections..."
+        rm -rf "$collections_dir"
+        galaxy_install
+        sha256sum requirements.yaml >"$stamp"
+    elif grep -qE '^\s*type:\s*(git|url|dir|file|subdirs)\b|git\+|\.git(#|\s|$)' requirements.yaml; then
+        info "Updating git/url/dir collections..."
+        galaxy_install
+    else
+        info "Ansible collections up to date"
     fi
+fi
 
-    echo -e "[${BLUE}ℹ${NC}] Decrypting ${#sops_files[@]} SOPS file(s) in-place..."
-    for file in "${sops_files[@]}"; do
-        sops --decrypt --in-place "$file" || {
-            echo -e "[${RED}✘${NC}] Failed to decrypt $file"
-            exit 1
-        }
-    done
-
-    printf '%s\n' "${sops_files[@]}"
-}
-
-encrypt_sops_files() {
-    while IFS= read -r file; do
-        [[ -f "$file" ]] && sops --encrypt --in-place "$file"
-    done
-}
-
-main() {
-    gum confirm "Run playbook for '$INVENTORY_DIR'?" || exit 0
-
-    echo -e "[${BLUE}ℹ${NC}] Installing Ansible requirements..."
-    ansible-playbook "./requirements/install-requirements.yaml" || {
-        echo -e "[${RED}✘${NC}] Failed to install requirements"
-        exit 1
-    }
-
-    local sops_files_list
-    sops_files_list=$(mktemp)
-    decrypt_sops_files > "$sops_files_list"
-
-    trap "encrypt_sops_files < '$sops_files_list'; rm -f '$sops_files_list'" EXIT
-
-    echo -e "[${BLUE}ℹ${NC}] Running playbook with decrypted secrets..."
-    ansible-playbook "./inventories/$INVENTORY_DIR/playbook.yaml" --ask-become-pass "$@" -i "./inventories/$INVENTORY_DIR/hosts/hosts.yaml"
-
-    echo -e "[${GREEN}✔${NC}] Playbook completed"
-}
-
-main "$@"
+info "Running playbook for '$inventory'..."
+exec uv run ansible-playbook \
+    -i "inventories/$inventory/hosts/hosts.yaml" \
+    "inventories/$inventory/playbook.yaml" \
+    --ask-become-pass "$@"

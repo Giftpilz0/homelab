@@ -1,7 +1,12 @@
 ---
 exclude_paths:
-  - secrets.yaml
-  - monitoring-secrets.yaml
+  - "**/*.sops.yaml"
+  - .ansible/
+  - ansible-playbook/.ansible/
+  - ansible-playbook/.venv/
+  - ansible-playbook/requirements.yaml
+  - tofu/
+  - packer/
 
 skip_list:
   - ignore-errors

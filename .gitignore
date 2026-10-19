@@ -1,4 +1,10 @@
-*tfstate
-*tfstate.backup
-.ansible
-.terraform*
+# OpenTofu: plain state is never committed, see tofu/README.md
+*.tfstate
+*.tfstate.backup
+*.tfstate.*.backup
+.terraform/
+
+# Ansible / uv
+.ansible/
+.venv/
+__pycache__/

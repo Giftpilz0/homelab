@@ -1,0 +1,22 @@
+---
+# External collections only. The giftpilz0.* collections are loaded straight
+# from ../ansible_collections via collections_path in ansible.cfg.
+collections:
+  - name: ansible.posix
+    version: "2.2.2"
+  - name: ansible.utils
+    version: "6.1.1"
+  - name: ansible.windows
+    version: "3.8.0"
+  - name: community.crypto
+    version: "3.5.1"
+  - name: community.general
+    version: "13.5.0"
+  - name: community.sops
+    version: "2.5.0"
+  - name: community.windows
+    version: "3.3.0"
+  - name: containers.podman
+    version: "1.21.1"
+  - name: kubernetes.core
+    version: "6.6.0"
