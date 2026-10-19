@@ -6,7 +6,7 @@ version: 1.0.0
 description: Ansible collection for linux server management
 readme: README.md
 license:
-  - GPL-3.0-only
+  - MIT
 
 authors:
   - Moritz Schmidt <schmidtmoritz404@gmail.com>
