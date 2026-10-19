@@ -4,39 +4,39 @@ resticprofile_version: "0.33.1"
 # renovate: datasource=github-releases depName=restic/rest-server extractVersion=^v(?<version>.*)$
 rest_server_version: "0.14.0"
 
-# Mode: 'client', 'server', or 'both'
+# client, server or both
 restic_mode: client
 
-# User configuration
 restic_user: backup
 restic_user_home: "/home/{{ restic_user }}"
 
-# Path configuration
+# Paths
 restic_config_dir: "/etc/resticprofile"
 restic_cache_dir: "/var/cache/restic"
 restic_log_dir: "{{ restic_config_dir }}/logs"
 restic_password_dir: "{{ restic_config_dir }}/passwords"
 
-# SSH configuration
+# SSH key of the client
 restic_ssh_key_type: ed25519
 restic_ssh_key_path: "{{ restic_user_home }}/.ssh/id_{{ restic_ssh_key_type }}"
 
-# Server configuration
+# Server
 restic_server_repo_base: "/var/lib/restic"
-restic_server_host: "" # Define in inventory/group_vars
+restic_server_host: ""
 
-# Client repositories (define in group_vars/host_vars)
-restic_repositories: []
 # Example:
-# restic_repositories:
-#   - name: podman-volumes
-#     password: "SecurePasswordHere"
-#     backup_paths:
-#       - /home/container/.local/share/containers/storage/volumes
-#     exclude_patterns: []
-#     schedule: "*-*-* 02:00:00"
-#     retention:
-#       keep_daily: 14
-#       keep_weekly: 8
-#       keep_monthly: 12
-#       keep_yearly: 3
+#   restic_repositories:
+#     - name: podman-volumes
+#       password: "{{ vault_restic_password }}"
+#       backup_paths:
+#         - /home/container/.local/share/containers/storage/volumes
+#       schedule: "*-*-* 02:00:00"
+restic_repositories: []
+
+restic_repository_defaults:
+  exclude_patterns: []
+  retention:
+    keep_daily: 14
+    keep_weekly: 8
+    keep_monthly: 12
+    keep_yearly: 3

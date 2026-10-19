@@ -1,6 +1,4 @@
 ---
-# tasks file for git
-
 ######################################
 ### packages
 
@@ -11,7 +9,7 @@
     state: "{{ git_package_state }}"
 
 ######################################
-### jobs
+### config
 
 - name: "Git: Manage system git config"
   become: true
@@ -19,11 +17,11 @@
     name: "{{ item.key }}"
     value: "{{ item.value }}"
     scope: system
-  with_items: "{{ git_config_system }}"
+  loop: "{{ git_config_system }}"
 
 - name: "Git: Manage git config"
   community.general.git_config:
     name: "{{ item.key }}"
     value: "{{ item.value }}"
     scope: "{{ item.scope }}"
-  with_items: "{{ git_config }}"
+  loop: "{{ git_config }}"

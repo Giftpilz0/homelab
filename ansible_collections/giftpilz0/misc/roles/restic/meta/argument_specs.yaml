@@ -120,3 +120,8 @@ argument_specs:
                 required: false
                 description: number of yearly snapshots to keep.
         description: list of restic repositories to manage.
+
+      restic_repository_defaults:
+        type: dict
+        required: false
+        description: values for keys missing in restic_repositories entries (merged recursively).

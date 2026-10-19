@@ -1,2 +1,5 @@
 ---
-# handlers file for lego
+- name: "Lego: Reload systemd"
+  become: true
+  ansible.builtin.systemd_service:
+    daemon_reload: true

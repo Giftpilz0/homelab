@@ -1,0 +1,2 @@
+---
+_lego_certificates: "{{ [lego_certificate_defaults] | product(lego_certificates) | map('combine', recursive=True) }}"

@@ -1,18 +1,13 @@
 ---
-# tasks file for autoupgrade
-
-- name: "Autoupgrade: Load variables file"
-  ansible.builtin.include_vars: "vars/{{ ansible_facts['os_family'] }}.yaml"
-
 ######################################
 ### packages
 
-- name: "Autoupgrade: Swap libcurl-minimal (dnf only)"
+- name: "Autoupgrade: Replace libcurl-minimal"
   become: true
-  ansible.builtin.shell: |
-    dnf swap -y libcurl-minimal libcurl
-  register: autoupgrade_dnf_swap_libcurl
-  changed_when: autoupgrade_dnf_swap_libcurl.rc != 0
+  ansible.builtin.dnf:
+    name: libcurl
+    state: present
+    allowerasing: true
   when:
     - ansible_facts['os_family'] == 'RedHat'
     - autoupgrade_package_state != 'absent'
@@ -22,15 +17,12 @@
   ansible.builtin.package:
     name: "{{ autoupgrade_package_list }}"
     state: "{{ autoupgrade_package_state }}"
-  when:
-    - autoupgrade_package_state != 'absent'
-  notify:
-    - "Autoupgrade: Restart"
+  notify: "Autoupgrade: Restart"
 
 ######################################
-### jobs
+### config
 
-- name: "Autoupgrade: Copy dnf-automatic config"
+- name: "Autoupgrade: Configure dnf-automatic"
   become: true
   ansible.builtin.template:
     src: automatic.conf.j2
@@ -40,10 +32,10 @@
     mode: "0644"
   when:
     - ansible_facts['os_family'] == 'RedHat'
-  notify:
-    - "Autoupgrade: Restart"
+    - autoupgrade_package_state != 'absent'
+  notify: "Autoupgrade: Restart"
 
-- name: "Autoupgrade: Copy apt config"
+- name: "Autoupgrade: Configure unattended-upgrades"
   become: true
   ansible.builtin.template:
     src: apt-autoupgrade.conf.j2
@@ -53,8 +45,8 @@
     mode: "0644"
   when:
     - ansible_facts['os_family'] == 'Debian'
-  notify:
-    - "Autoupgrade: Restart"
+    - autoupgrade_package_state != 'absent'
+  notify: "Autoupgrade: Restart"
 
 ######################################
 ### services
@@ -65,5 +57,4 @@
     name: "{{ autoupgrade_service_name }}"
     state: "{{ autoupgrade_service_state }}"
     enabled: "{{ autoupgrade_service_enabled }}"
-  when:
-    - autoupgrade_package_state != 'absent'
+  when: autoupgrade_package_state != 'absent'

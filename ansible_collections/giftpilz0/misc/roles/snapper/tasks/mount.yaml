@@ -6,27 +6,15 @@
     lsblk -no UUID "$DEVICE"
   args:
     executable: /bin/bash
-  register: config_uuids
+  register: _snapper_uuids
   changed_when: false
   check_mode: false
   loop: "{{ snapper_configs }}"
   loop_control:
     label: "{{ item.path }}"
 
-- name: "Snapper: Add .snapshots subvolumes to fstab"
-  ansible.posix.mount:
-    path: "{{ item.item.path }}/.snapshots"
-    src: "UUID={{ item.stdout }}"
-    fstype: btrfs
-    opts: "subvol={{ item.item.name }}/.snapshots"
-    state: present
-    dump: "0"
-    passno: "0"
-  loop: "{{ config_uuids.results }}"
-  loop_control:
-    label: "{{ item.item.path }}"
-
-- name: "Snapper: Mount .snapshots subvolumes"
+- name: "Snapper: Mount .snapshots subvolumes (fstab)"
+  become: true
   ansible.posix.mount:
     path: "{{ item.item.path }}/.snapshots"
     src: "UUID={{ item.stdout }}"
@@ -35,6 +23,6 @@
     state: mounted
     dump: "0"
     passno: "0"
-  loop: "{{ config_uuids.results }}"
+  loop: "{{ _snapper_uuids.results }}"
   loop_control:
     label: "{{ item.item.path }}"

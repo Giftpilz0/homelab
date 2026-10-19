@@ -11,7 +11,7 @@ API_TOKEN = {{ cfdyndns_api_token | to_json }}
 UPDATE_URL = {{ cfdyndns_update_url | to_json }}
 LAST_IP_FILE = Path({{ cfdyndns_last_ip_file | to_json }})
 CLOUDFLARE_TRACE_URL = {{ cfdyndns_cloudflare_trace_url | to_json }}
-UPDATE_HOSTNAMES = {{ cfdyndns_update_hostnames | default([]) | to_json }}
+UPDATE_HOSTNAMES = {{ cfdyndns_update_hostnames | to_json }}
 
 def get_public_ip():
     """Fetch public IP from Cloudflare trace endpoint"""

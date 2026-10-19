@@ -32,16 +32,6 @@ argument_specs:
           - skip
         description: desired state of additional packages.
 
-      packages_flatpak_package_state:
-        type: str
-        required: false
-        choices:
-          - present
-          - absent
-          - latest
-          - skip
-        description: desired state of Flatpak packages.
-
       packages_python_package_state:
         type: str
         required: false

@@ -22,7 +22,6 @@ argument_specs:
         type: list
         elements: str
         required: false
-        default: []
         description: hostnames to update in one DDNS request.
 
       cfdyndns_cloudflare_trace_url:

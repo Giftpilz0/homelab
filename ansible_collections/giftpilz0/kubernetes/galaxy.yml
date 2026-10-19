@@ -22,6 +22,7 @@ tags:
 
 dependencies:
   ansible.posix: ">=1.0.0"
+  ansible.utils: ">=2.0.0"
   community.general: ">=1.0.0"
   kubernetes.core: ">=1.0.0"
 

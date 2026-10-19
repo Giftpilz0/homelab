@@ -9,7 +9,7 @@ global:
   priority: low
 
 profiles:
-{% for repo in restic_repositories %}
+{% for repo in _restic_repositories %}
   {{ repo.name }}:
     repository: "rest:http://{{ restic_server_host }}:8000/{{ inventory_hostname }}/{{ repo.name }}"
     password-file: "{{ restic_password_dir }}/{{ repo.name }}.txt"
@@ -22,7 +22,7 @@ profiles:
 {% for path in repo.backup_paths %}
         - "{{ path }}"
 {% endfor %}
-{% if repo.exclude_patterns | default([]) | length > 0 %}
+{% if repo.exclude_patterns | length > 0 %}
       exclude:
 {% for pattern in repo.exclude_patterns %}
         - "{{ pattern }}"
@@ -47,10 +47,10 @@ profiles:
 
     retention:
       after-backup: true
-      keep-daily: {{ repo.retention.keep_daily | default(14) }}
-      keep-weekly: {{ repo.retention.keep_weekly | default(8) }}
-      keep-monthly: {{ repo.retention.keep_monthly | default(12) }}
-      keep-yearly: {{ repo.retention.keep_yearly | default(3) }}
+      keep-daily: {{ repo.retention.keep_daily }}
+      keep-weekly: {{ repo.retention.keep_weekly }}
+      keep-monthly: {{ repo.retention.keep_monthly }}
+      keep-yearly: {{ repo.retention.keep_yearly }}
       prune: true
       host: true
       tag: true

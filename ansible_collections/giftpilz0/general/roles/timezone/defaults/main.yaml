@@ -1,6 +1,4 @@
 ---
-# defaults file for timezone
-
 timezone_package_state: present
 timezone_package:
   - tzdata

@@ -18,13 +18,3 @@ argument_specs:
         type: bool
         required: false
         description: only apply bugfix updates.
-
-      update_reboot_enabled:
-        type: bool
-        required: false
-        description: whether to reboot after updates if required.
-
-      update_reboot_timeout:
-        type: int
-        required: false
-        description: timeout in seconds to wait for reboot completion.

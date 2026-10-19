@@ -56,25 +56,32 @@
     action: add
   when: lego_windows_task_username | lower not in ['system', 'nt authority\\system']
 
-- name: "Lego: Download Windows binary"
-  ansible.windows.win_get_url:
-    url: "{{ lego_windows_url }}"
-    dest: "{{ lego_path }}\\lego.zip"
+- name: "Lego: Install Windows binary"
   when: lego_bin_state != 'skip'
+  block:
+    - name: "Lego: Download Windows binary"
+      ansible.windows.win_get_url:
+        url: "{{ lego_windows_url }}"
+        dest: "{{ lego_path }}\\lego-{{ lego_tag }}.zip"
+        force: false
 
-- name: "Lego: Extract Windows binary"
-  community.windows.win_unzip:
-    src: "{{ lego_path }}\\lego.zip"
-    dest: "{{ lego_path }}"
-    creates: "{{ lego_path }}\\lego.exe"
-  when: lego_bin_state != 'skip'
+    - name: "Lego: Extract Windows binary"
+      community.windows.win_unzip:
+        src: "{{ lego_path }}\\lego-{{ lego_tag }}.zip"
+        dest: "{{ lego_path }}\\{{ lego_tag }}"
+        creates: "{{ lego_path }}\\{{ lego_tag }}\\lego.exe"
+
+    - name: "Lego: Activate Windows binary"
+      ansible.windows.win_copy:
+        src: "{{ lego_path }}\\{{ lego_tag }}\\lego.exe"
+        dest: "{{ lego_path }}\\lego.exe"
+        remote_src: true
 
 - name: "Lego: Create PFX deployment directories"
   ansible.windows.win_file:
     path: "{{ item.deploy.pfx.path | regex_replace('\\\\[^\\\\]+$', '') }}"
     state: directory
-  loop: "{{ lego_certificates }}"
-  when: item.deploy is defined and item.deploy.pfx is defined
+  loop: "{{ _lego_certificates | selectattr('deploy.pfx', 'defined') }}"
   loop_control:
     label: "{{ item.name }}"
 
@@ -82,7 +89,7 @@
   ansible.windows.win_template:
     src: certificate.env.ps1.j2
     dest: "{{ lego_state_path }}\\{{ item.name }}.ps1"
-  loop: "{{ lego_certificates }}"
+  loop: "{{ _lego_certificates }}"
   loop_control:
     label: "{{ item.name }}"
 
@@ -104,7 +111,7 @@
         random_delay: PT1H
     username: "{{ lego_windows_task_username }}"
     logon_type: "{{ lego_windows_task_logon_type }}"
-    password: "{{ lego_windows_task_password | default(omit, true) }}"
+    password: "{{ lego_windows_task_password if lego_windows_task_password | length > 0 else omit }}"
     run_level: highest
     enabled: true
     state: present

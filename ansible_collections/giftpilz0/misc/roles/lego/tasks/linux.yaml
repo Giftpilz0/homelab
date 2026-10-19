@@ -61,11 +61,12 @@
   ansible.builtin.file:
     path: "{{ item.deploy.pem.directory }}"
     state: directory
-    owner: "{{ item.deploy.pem.owner | default('root') }}"
-    group: "{{ item.deploy.pem.group | default('root') }}"
-    mode: "{{ item.deploy.pem.directory_mode | default(lego_default_deploy_directory_mode) }}"
-  loop: "{{ lego_certificates }}"
-  when: item.deploy is defined and item.deploy.pem is defined
+    owner: "{{ _pem.owner }}"
+    group: "{{ _pem.group }}"
+    mode: "{{ _pem.directory_mode }}"
+  vars:
+    _pem: "{{ lego_deploy_pem_defaults | combine(item.deploy.pem) }}"
+  loop: "{{ _lego_certificates | selectattr('deploy.pem', 'defined') }}"
   loop_control:
     label: "{{ item.name }}"
 
@@ -77,7 +78,7 @@
     owner: "{{ lego_service_user }}"
     group: "{{ lego_service_group }}"
     mode: "0600"
-  loop: "{{ lego_certificates }}"
+  loop: "{{ _lego_certificates }}"
   loop_control:
     label: "{{ item.name }}"
 
@@ -101,11 +102,10 @@
   loop:
     - { src: lego-renew.service.j2, dest: lego-renew.service }
     - { src: lego-renew.timer.j2, dest: lego-renew.timer }
+  notify: "Lego: Reload systemd"
 
-- name: "Lego: Reload systemd"
-  become: true
-  ansible.builtin.systemd_service:
-    daemon_reload: true
+- name: "Lego: Apply systemd changes"
+  ansible.builtin.meta: flush_handlers
 
 - name: "Lego: Enable renewal timer"
   become: true

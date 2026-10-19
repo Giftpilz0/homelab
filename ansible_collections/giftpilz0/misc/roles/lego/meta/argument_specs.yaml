@@ -61,13 +61,11 @@ argument_specs:
       lego_windows_task_username:
         type: str
         required: false
-        default: SYSTEM
         description: Windows identity used by the scheduled renewal task.
 
       lego_windows_task_logon_type:
         type: str
         required: false
-        default: service_account
         choices:
           - service_account
           - password
@@ -97,13 +95,11 @@ argument_specs:
       lego_issue_on_deploy:
         type: bool
         required: false
-        default: false
         description: issue missing certificates immediately when the role is applied.
 
       lego_renewal_threshold:
         type: int
         required: false
-        default: 30
         description: renew certificates when fewer than this many days remain.
 
       lego_acme_email:
@@ -120,7 +116,6 @@ argument_specs:
         type: list
         elements: str
         required: false
-        default: []
         description: DNS resolvers passed to Lego for DNS-01 validation.
 
       lego_certificates:
@@ -286,7 +281,7 @@ argument_specs:
                     choices:
                       - command
                       - powershell
-                    description: hook interpreter.
+                    description: informational; Linux runs command, Windows runs script.
                   command:
                     type: str
                     required: false
@@ -302,27 +297,43 @@ argument_specs:
             required: false
             description: additional Lego arguments for this certificate.
 
+      lego_certificate_defaults:
+        type: dict
+        required: false
+        description: values for keys missing in lego_certificates entries (merged recursively).
+
       lego_default_deploy_directory_mode:
         type: str
         required: false
-        default: "0750"
         description: default mode for Linux certificate deployment directories.
 
       lego_default_deploy_file_mode:
         type: str
         required: false
-        default: "0640"
         description: default mode for Linux deployed certificate files.
 
       lego_default_deploy_private_key_mode:
         type: str
         required: false
-        default: "0640"
         description: default mode for Linux deployed private keys.
+
+      lego_deploy_pem_defaults:
+        type: dict
+        required: false
+        description: values for keys missing in deploy.pem.
+
+      lego_deploy_pfx_defaults:
+        type: dict
+        required: false
+        description: values for keys missing in deploy.pfx.
+
+      lego_deploy_windows_store_defaults:
+        type: dict
+        required: false
+        description: values for keys missing in deploy.windows_store.
 
       lego_extra_args:
         type: list
         elements: str
         required: false
-        default: []
         description: additional Lego arguments passed to every certificate.

@@ -1,100 +1,86 @@
 ---
-# tasks file for packages
-
 ######################################
-### packages
+### repositories
 
-- name: "Packages: Gather package facts"
-  ansible.builtin.package_facts:
-    manager: auto
-
-- name: "Packages: Load variables file"
-  ansible.builtin.include_vars: "vars/{{ ansible_facts['os_family'] }}.yaml"
-
-- name: "Packages: Manage rpmfusion repository keys"
-  become: true
-  ansible.builtin.rpm_key:
-    key: "{{ item }}"
-    state: "{{ packages_rpmfusion_package_state }}"
-  loop:
-    - /usr/share/distribution-gpg-keys/rpmfusion/RPM-GPG-KEY-rpmfusion-free-fedora-{{ ansible_facts['distribution_version'] }}
-    - /usr/share/distribution-gpg-keys/rpmfusion/RPM-GPG-KEY-rpmfusion-nonfree-fedora-{{ ansible_facts['distribution_version'] }}
+- name: "Packages: Configure RPM Fusion"
   when:
     - packages_rpmfusion_package_state != 'skip'
-    - ansible_facts['os_family'] == "RedHat"
+    - ansible_facts['os_family'] == 'RedHat'
+  block:
+    - name: "Packages: Manage RPM Fusion repository keys"
+      become: true
+      ansible.builtin.rpm_key:
+        key: "{{ item }}"
+        state: "{{ packages_rpmfusion_package_state }}"
+      loop:
+        - /usr/share/distribution-gpg-keys/rpmfusion/RPM-GPG-KEY-rpmfusion-free-fedora-{{ ansible_facts['distribution_version'] }}
+        - /usr/share/distribution-gpg-keys/rpmfusion/RPM-GPG-KEY-rpmfusion-nonfree-fedora-{{ ansible_facts['distribution_version'] }}
 
-- name: "Packages: Manage rpmfusion repository"
-  become: true
-  ansible.builtin.package:
-    name: "{{ packages_rpmfusion_package }}"
-    state: "{{ packages_rpmfusion_package_state }}"
-  when:
-    - packages_rpmfusion_package_state != 'skip'
-    - ansible_facts['os_family'] == "RedHat"
+    - name: "Packages: Manage RPM Fusion repositories"
+      become: true
+      ansible.builtin.package:
+        name: "{{ packages_rpmfusion_package }}"
+        state: "{{ packages_rpmfusion_package_state }}"
 
-- name: "Packages: Configure rpmfusion codecs"
-  become: true
-  ansible.builtin.shell: |
-    dnf swap -y ffmpeg-free ffmpeg --allowerasing
-    dnf group install multimedia --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin -y
-  register: packages_rpmfusion_codecs
-  changed_when: packages_rpmfusion_codecs.rc != 0
-  when:
-    - packages_rpmfusion_package_state != 'skip'
-    - ansible_facts['os_family'] == "RedHat"
+    - name: "Packages: Install full ffmpeg"
+      become: true
+      ansible.builtin.dnf:
+        name: ffmpeg
+        state: present
+        allowerasing: true
 
-- name: "Packages: Configure rpmfusion"
-  become: true
-  ansible.builtin.dnf:
-    name:
-      - "@core"
-      - "@multimedia"
-    update_only: true
-    state: latest
-  when:
-    - packages_rpmfusion_package_state != 'skip'
-    - ansible_facts['os_family'] == "RedHat"
+    - name: "Packages: Install multimedia group"
+      become: true
+      ansible.builtin.dnf:
+        name: "@multimedia"
+        state: present
+        install_weak_deps: false
+        exclude: PackageKit-gstreamer-plugin
 
-- name: "Packages: Configure rpmfusion codecs - amd"
-  become: true
-  ansible.builtin.shell: |
-    dnf swap -y mesa-va-drivers mesa-va-drivers-freeworld
-    dnf swap -y mesa-vdpau-drivers mesa-vdpau-drivers-freeworld
-  register: packages_rpmfusion_codecs_amd
-  changed_when: packages_rpmfusion_codecs_amd.rc != 0
-  when:
-    - packages_rpmfusion_package_state != 'skip'
-    - ansible_facts['os_family'] == "RedHat"
+    - name: "Packages: Update core and multimedia groups"
+      become: true
+      ansible.builtin.dnf:
+        name:
+          - "@core"
+          - "@multimedia"
+        state: latest
+        update_only: true
 
-- name: "Packages: Configure rpmfusion codecs - intel"
-  become: true
-  ansible.builtin.package:
-    name:
-      - intel-media-driver
-      - libva-intel-driver
-    state: "{{ packages_rpmfusion_package_state }}"
-  when:
-    - packages_rpmfusion_package_state != 'skip'
-    - ansible_facts['os_family'] == "RedHat"
+    - name: "Packages: Install freeworld mesa drivers"
+      become: true
+      ansible.builtin.dnf:
+        name:
+          - mesa-va-drivers-freeworld
+          - mesa-vdpau-drivers-freeworld
+        state: present
+        allowerasing: true
 
-- name: "Packages: Manage Copr Repositories"
+    - name: "Packages: Install Intel media drivers"
+      become: true
+      ansible.builtin.package:
+        name:
+          - intel-media-driver
+          - libva-intel-driver
+        state: "{{ packages_rpmfusion_package_state }}"
+
+- name: "Packages: Manage Copr repositories"
   become: true
   community.general.copr:
     host: copr.fedorainfracloud.org
     name: "{{ item.name }}"
     state: "{{ item.state }}"
-  loop: "{{ packages_copr_repos }}"
-  when:
-    - item.state != 'skip'
-    - ansible_facts['os_family'] == "RedHat"
+  loop: "{{ packages_copr_repos | rejectattr('state', 'eq', 'skip') }}"
+  when: ansible_facts['os_family'] == 'RedHat'
+
+######################################
+### packages
 
 - name: "Packages: Manage packages"
   become: true
   ansible.builtin.package:
     name: "{{ packages_package }}"
     state: "{{ packages_package_state }}"
-  when:
-    - packages_package_state != 'skip'
+  when: packages_package_state != 'skip'
 
 - name: "Packages: Manage additional packages"
   become: true
@@ -103,45 +89,7 @@
     state: "{{ packages_additional_package_state }}"
   when:
     - packages_additional_package_state != 'skip'
-
-- name: "Packages: Gather package facts"
-  ansible.builtin.package_facts:
-    manager: auto
-
-- name: "Packages: Manage flatpak repository"
-  become: true
-  community.general.flatpak_remote:
-    name: "{{ item.name }}"
-    flatpakrepo_url: "{{ item.flatpakrepo_url }}"
-    method: system
-    state: "{{ item.state }}"
-  loop: "{{ packages_flatpak_repos }}"
-  when:
-    - "'flatpak' in ansible_facts['packages']"
-    - item.state != 'skip'
-  ignore_errors: true
-
-- name: "Packages: Remove unwanted flatpak remotes"
-  become: true
-  community.general.flatpak_remote:
-    name: "{{ item }}"
-    method: system
-    state: absent
-  loop: "{{ packages_flatpak_repos_remove }}"
-  when:
-    - "'flatpak' in ansible_facts['packages']"
-    - packages_flatpak_repos_remove | length > 0
-
-- name: "Packages: Manage flatpaks"
-  become: true
-  community.general.flatpak:
-    name: "{{ item.name }}"
-    state: "{{ item.state }}"
-    remote: "{{ item.remote }}"
-  loop: "{{ packages_flatpak_package }}"
-  when:
-    - "'flatpak' in ansible_facts['packages']"
-    - item.state != 'skip'
+    - packages_additional_package | length > 0
 
 - name: "Packages: Manage python packages"
   become: true
@@ -150,3 +98,40 @@
     state: "{{ packages_python_package_state }}"
   when:
     - packages_python_package_state != 'skip'
+    - packages_python_package | length > 0
+
+######################################
+### flatpak
+
+- name: "Packages: Gather package facts"
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: "Packages: Configure flatpak"
+  when: "'flatpak' in ansible_facts['packages']"
+  block:
+    - name: "Packages: Manage flatpak repositories"
+      become: true
+      community.general.flatpak_remote:
+        name: "{{ item.name }}"
+        flatpakrepo_url: "{{ item.flatpakrepo_url }}"
+        method: system
+        state: "{{ item.state }}"
+      loop: "{{ packages_flatpak_repos | rejectattr('state', 'eq', 'skip') }}"
+      ignore_errors: true
+
+    - name: "Packages: Remove unwanted flatpak remotes"
+      become: true
+      community.general.flatpak_remote:
+        name: "{{ item }}"
+        method: system
+        state: absent
+      loop: "{{ packages_flatpak_repos_remove }}"
+
+    - name: "Packages: Manage flatpaks"
+      become: true
+      community.general.flatpak:
+        name: "{{ item.name }}"
+        remote: "{{ item.remote }}"
+        state: "{{ item.state }}"
+      loop: "{{ packages_flatpak_package | rejectattr('state', 'eq', 'skip') }}"

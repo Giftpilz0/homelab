@@ -1,17 +1,15 @@
 ---
+- name: "Restic: Validate configuration"
+  ansible.builtin.assert:
+    that: restic_server_host | length > 0
+    fail_msg: "Set restic_server_host."
+    quiet: true
+
 - name: "Restic: Scan server SSH host keys"
   ansible.builtin.command:
     cmd: "ssh-keyscan -p 22 {{ restic_server_host }}"
-  register: ssh_host_key_raw
+  register: _restic_host_keys
   changed_when: false
-  failed_when: ssh_host_key_raw.rc != 0
-  when:
-    - restic_server_host is defined
-
-- name: "Restic: Filter valid host keys"
-  ansible.builtin.set_fact:
-    ssh_host_keys: "{{ ssh_host_key_raw.stdout_lines | select('match', '^[^#].*') | select('search', '\\S') | list }}"
-  when: ssh_host_key_raw is defined and ssh_host_key_raw.stdout_lines is defined
 
 - name: "Restic: Add server to known_hosts"
   become: true
@@ -22,11 +20,7 @@
     owner: "{{ restic_user }}"
     group: "{{ restic_user }}"
     mode: "0644"
-    state: present
-  loop: "{{ ssh_host_keys }}"
-  when:
-    - ssh_host_keys is defined
-    - item | length > 0
+  loop: "{{ _restic_host_keys.stdout_lines | reject('match', '^#') | select('search', '\\S') }}"
 
 - name: "Restic: Create configuration directory"
   become: true
@@ -63,9 +57,10 @@
     owner: root
     group: root
     mode: "0600"
-  loop: "{{ restic_repositories }}"
+  loop: "{{ _restic_repositories }}"
+  loop_control:
+    label: "{{ item.name }}"
   no_log: true
-  when: restic_repositories | length > 0
 
 - name: "Restic: Create cache directories"
   become: true
@@ -75,8 +70,9 @@
     owner: "{{ restic_user }}"
     group: "{{ restic_user }}"
     mode: "0755"
-  loop: "{{ restic_repositories }}"
-  when: restic_repositories | length > 0
+  loop: "{{ _restic_repositories }}"
+  loop_control:
+    label: "{{ item.name }}"
 
 - name: "Restic: Create resticprofile configuration"
   become: true
@@ -90,10 +86,17 @@
 
 - name: "Restic: Schedule backup jobs"
   become: true
-  become_user: "{{ restic_user }}"
-  ansible.builtin.shell: "cd {{ restic_user_home }} && /usr/bin/sudo /usr/local/bin/resticprofile --config {{ restic_config_dir }}/profiles.yaml --name {{ item.name
-    }} schedule"
-  loop: "{{ restic_repositories }}"
-  register: schedule_result
-  changed_when: "'schedule created' in schedule_result.stdout or 'schedule updated' in schedule_result.stdout"
-  when: restic_repositories | length > 0
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/resticprofile
+      - --config
+      - "{{ restic_config_dir }}/profiles.yaml"
+      - --name
+      - "{{ item.name }}"
+      - schedule
+    chdir: "{{ restic_config_dir }}"
+  loop: "{{ _restic_repositories }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: _restic_schedule
+  changed_when: "'schedule created' in _restic_schedule.stdout or 'schedule updated' in _restic_schedule.stdout"

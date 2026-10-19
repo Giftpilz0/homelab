@@ -1,7 +1,0 @@
----
-packages_package:
-  - curl
-  - whois
-  - python-pip
-  - rsync
-  - zstd

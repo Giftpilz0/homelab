@@ -1,6 +1,4 @@
 ---
-# tasks file for timezone
-
 ######################################
 ### packages
 
@@ -11,7 +9,7 @@
     state: "{{ timezone_package_state }}"
 
 ######################################
-### jobs
+### config
 
 - name: "Timezone: Set timezone"
   become: true

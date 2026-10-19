@@ -20,6 +20,7 @@ argument_specs:
           - present
           - absent
           - latest
+          - skip
         description: desired state of the alloy package.
 
       monitoring_agent_package:

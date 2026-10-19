@@ -39,7 +39,6 @@ argument_specs:
           user_remove_home:
             type: bool
             required: false
-            default: false
             description: remove the home directory when the user is absent.
           user_shell:
             type: str
@@ -71,3 +70,13 @@ argument_specs:
         elements: str
         required: false
         description: SSH public keys to remove from all managed users and key targets.
+
+      user_defaults:
+        type: dict
+        required: false
+        description: values for keys missing in user entries.
+
+      user_mkpasswd_package:
+        type: str
+        required: false
+        description: package providing mkpasswd.

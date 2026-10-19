@@ -1,36 +1,22 @@
 ---
-- name: "Profile: Check if fastfetch is available in repos (Debian-based)"
+- name: "Profile: Check fastfetch availability"
   ansible.builtin.command:
-    cmd: "apt-cache show fastfetch"
-  register: apt_check
+    cmd: "{{ 'apt-cache show fastfetch' if ansible_facts['os_family'] == 'Debian' else 'dnf info fastfetch' }}"
+  register: _profile_fastfetch
   failed_when: false
   changed_when: false
-  when: ansible_facts['os_family'] == "Debian"
-
-- name: "Profile: Check if fastfetch is available in repos (RHEL-based)"
-  ansible.builtin.command:
-    cmd: "dnf info fastfetch"
-  register: rpm_check
-  failed_when: false
-  changed_when: false
-  when: ansible_facts['os_family'] == "RedHat"
-
-- name: "Profile: Set fastfetch availability fact"
-  ansible.builtin.set_fact:
-    fastfetch_available: >-
-      {{
-        (ansible_facts['os_family'] == 'Debian'  and apt_check.rc | default(1) == 0) or
-        (ansible_facts['os_family'] == 'RedHat'  and rpm_check.rc | default(1) == 0)
-      }}
+  when: ansible_facts['os_family'] in ['Debian', 'RedHat']
 
 - name: "Profile: Install fastfetch"
   become: true
   ansible.builtin.package:
     name: fastfetch
     state: present
-  when: fastfetch_available
+  when:
+    - _profile_fastfetch is not skipped
+    - _profile_fastfetch.rc == 0
 
-- name: "Profile: Create systemwide fastfetch config script"
+- name: "Profile: Run fastfetch on login"
   become: true
   ansible.builtin.copy:
     dest: /etc/profile.d/fastfetch.sh
@@ -43,20 +29,21 @@
     owner: root
     group: root
 
-- name: "Profile: Get all user accounts from passwd"
+- name: "Profile: Get user accounts"
   ansible.builtin.getent:
     database: passwd
 
-- name: "Profile: Check if home directories exist"
+- name: "Profile: Check home directories of login users"
   ansible.builtin.stat:
     path: "{{ item.value.4 }}"
-  loop: "{{ getent_passwd | dict2items }}"
-  register: home_dirs_stat
-  when:
-    - getent_passwd is defined
-    - item.value.5 in ['/bin/bash', '/bin/sh', '/bin/zsh', '/usr/bin/bash', '/usr/bin/zsh']
+  loop: "{{ ansible_facts['getent_passwd'] | dict2items | selectattr('value.5', 'in', _profile_login_shells) }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: _profile_homes
+  vars:
+    _profile_login_shells: ['/bin/bash', '/bin/sh', '/bin/zsh', '/usr/bin/bash', '/usr/bin/zsh']
 
-- name: "Profile: Suppress default login messages for all users with valid shells"
+- name: "Profile: Suppress default login messages"
   become: true
   ansible.builtin.file:
     path: "{{ item.item.value.4 }}/.hushlogin"
@@ -66,8 +53,6 @@
     mode: "0644"
     modification_time: preserve
     access_time: preserve
-  loop: "{{ home_dirs_stat.results }}"
-  when:
-    - item is not skipped
-    - item.stat.exists
-    - item.stat.isdir
+  loop: "{{ _profile_homes.results | selectattr('stat.isdir', 'defined') | selectattr('stat.isdir') }}"
+  loop_control:
+    label: "{{ item.item.key }}"

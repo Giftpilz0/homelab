@@ -13,17 +13,11 @@ authors:
 
 tags:
   - linux
-  - cockpit
-  - haproxy
-  - httpd
-  - mariadb
-  - nfs
-  - pcp
+  - keepalived
   - podman
 
 dependencies:
   ansible.posix: ">=1.0.0"
   community.general: ">=1.0.0"
-  community.mysql: ">=1.0.0"
 
 repository: https://github.com/giftpilz0/homelab

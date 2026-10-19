@@ -57,15 +57,9 @@ argument_specs:
         description: type of upgrades to apply.
 
       autoupgrade_reboot:
-        type: str
+        type: bool
         required: false
-        choices:
-          - "false"
-          - "true"
-          - never
-          - when-changed
-          - when-needed
-        description: reboot policy; use false or true on Debian and never, when-changed, or when-needed on Red Hat.
+        description: reboot when an upgrade requires it.
 
       autoupgrade_blacklist:
         type: list

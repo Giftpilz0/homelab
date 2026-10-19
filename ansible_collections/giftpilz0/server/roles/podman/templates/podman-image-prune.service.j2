@@ -1,0 +1,7 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Remove unused Podman images
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/podman image prune --all --force --filter until={{ podman_image_prune_until }} --filter label!=quadlet.build=true

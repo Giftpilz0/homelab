@@ -14,7 +14,7 @@ try {
     throw 'RunHook requires -CertificateName so only the requested deployment hook is executed'
   }
 
-{% for item in lego_certificates %}
+{% for item in _lego_certificates %}
 if ($CertificateName -and $CertificateName -ne '{{ item.name }}') {
   continue
 }
@@ -36,7 +36,7 @@ $Arguments = @(
   '--email', '{{ lego_acme_email }}',
   '--server', $Server,
   '--path', $State,
-  '--key-type', '{{ item.key_type | default('EC256') }}'
+  '--key-type', '{{ item.key_type }}'
 {% if item.challenge.type == 'dns-01' %}
   '--dns', '{{ item.challenge.provider }}'
 {% elif item.challenge.type == 'http-01' %}
@@ -53,20 +53,20 @@ $Arguments = @(
 {% for argument in lego_extra_args %}
   '{{ argument }}'
 {% endfor %}
-{% for argument in item.extra_args | default([]) %}
+{% for argument in item.extra_args %}
   '{{ argument }}'
 {% endfor %}
   '--pem'
-{% if item.deploy is defined and item.deploy.pfx is defined %}
+{% if item.deploy.pfx is defined %}
   '--pfx'
 {% endif %}
 )
 if (Test-Path -LiteralPath $Certificate) {
-  $Arguments += @('--renew-days', '{{ item.renewal.threshold | default(lego_renewal_threshold) }}')
+  $Arguments += @('--renew-days', '{{ item.renewal.threshold }}')
 }
 
 Write-Host "Running: $Lego $($Arguments -join ' ')"
-$AccountId = '{{ item.account_id | default(lego_acme_email) }}'
+$AccountId = '{{ item.account_id }}'
 $AccountDir = Join-Path $State "accounts\$ServerHost\$AccountId"
 $Output = (& $Lego @Arguments 2>&1 | Out-String)
 $ExitCode = $LASTEXITCODE
@@ -95,21 +95,20 @@ $Changed = $RunHook -or (-not (Test-Path -LiteralPath $Marker) -or
   ((Get-Item -LiteralPath $Certificate).LastWriteTime -gt (Get-Item -LiteralPath $Marker).LastWriteTime)
 )
 if ($Changed) {
-{% if item.deploy is defined and item.deploy.pfx is defined %}
+{% if item.deploy.pfx is defined %}
   $PfxSource = Join-Path $State 'certificates\{{ item.domains[0] | replace('*', '_') }}.pfx'
   $PfxDestination = '{{ item.deploy.pfx.path }}'
   if (-not [String]::Equals($PfxSource, $PfxDestination, [StringComparison]::OrdinalIgnoreCase)) {
     Copy-Item -LiteralPath $PfxSource -Destination $PfxDestination -Force
   }
 {% if item.deploy.windows_store is defined %}
+{% set store = lego_deploy_windows_store_defaults | combine(item.deploy.windows_store) %}
   $PfxPassword = ConvertTo-SecureString $env:LEGO_PFX_PASSWORD -AsPlainText -Force
-  Import-PfxCertificate -FilePath '{{ item.deploy.pfx.path }}' -CertStoreLocation 'Cert:\{{ item.deploy.windows_store.store_location | default('LocalMachine') }}\{{ item.deploy.windows_store.store_name | default('My') }}' -Password $PfxPassword | Out-Null
+  Import-PfxCertificate -FilePath '{{ item.deploy.pfx.path }}' -CertStoreLocation 'Cert:\{{ store.store_location }}\{{ store.store_name }}' -Password $PfxPassword | Out-Null
 {% endif %}
 {% endif %}
-{% for hook in item.hooks.changed | default([]) %}
-{% if hook.type | default('powershell') == 'powershell' %}
+{% for hook in item.hooks.changed | selectattr('script', 'defined') %}
   {{ hook.script }}
-{% endif %}
 {% endfor %}
   if (-not $RunHook) {
     New-Item -ItemType File -Path $Marker -Force | Out-Null

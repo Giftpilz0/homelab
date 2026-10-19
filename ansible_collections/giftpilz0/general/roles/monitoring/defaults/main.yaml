@@ -13,7 +13,7 @@ monitoring_agent_service_name: alloy.service
 monitoring_agent_service_state: started
 monitoring_agent_service_enabled: true
 
-# Central endpoints and credentials are defined once in encrypted group vars.
+# Remote write endpoints and credentials
 monitoring_agent_config_remoteserver_loki: ""
 monitoring_agent_config_remoteserver_prometheus: ""
 monitoring_alloy_loki_basic_auth_username: alloy
@@ -23,7 +23,7 @@ monitoring_alloy_mimir_basic_auth_password: ""
 monitoring_agent_external_labels:
   host: "{{ inventory_hostname }}"
 
-# Alloy must read the system journal
+# Journal read access
 monitoring_alloy_permissions_setup: true
 monitoring_alloy_extra_groups:
   - adm
@@ -31,10 +31,10 @@ monitoring_alloy_extra_groups:
 monitoring_alloy_node_exporter_scrape_interval: 60s
 monitoring_alloy_loki_journal_max_age: 24h
 
-# Traefik publishes this endpoint only on the host loopback interface.
+# Traefik metrics on the host loopback
 monitoring_alloy_traefik_scrape_enabled: false
 monitoring_alloy_traefik_metrics_address: 127.0.0.1:8082
 monitoring_alloy_traefik_scrape_interval: 30s
 
-# Use this only for host-specific integrations that are outside the baseline.
+# Appended raw Alloy config
 monitoring_alloy_extra_config: ""

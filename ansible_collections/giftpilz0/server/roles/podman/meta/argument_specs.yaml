@@ -3,11 +3,6 @@ argument_specs:
   main:
     short_description: Install Podman and configure the rootless port forwarder.
     options:
-      podman_kube_path:
-        type: str
-        required: false
-        description: directory for Kubernetes YAML manifests.
-
       podman_user:
         type: str
         required: false
@@ -56,7 +51,6 @@ argument_specs:
       podman_log_driver:
         type: str
         required: false
-        default: ""
         choices:
           - ""
           - k8s-file
@@ -65,3 +59,18 @@ argument_specs:
           - passthrough
           - none
         description: default log driver for rootless containers.
+
+      podman_image_prune_enabled:
+        type: bool
+        required: false
+        description: remove unused images on a timer (images labelled quadlet.build are kept).
+
+      podman_image_prune_schedule:
+        type: str
+        required: false
+        description: systemd OnCalendar expression for the prune timer.
+
+      podman_image_prune_until:
+        type: str
+        required: false
+        description: only prune images created longer ago than this duration (e.g. 168h).

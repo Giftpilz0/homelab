@@ -16,6 +16,7 @@ tags:
 
 dependencies:
   ansible.posix: ">=1.0.0"
+  community.crypto: ">=2.0.0"
   community.general: ">=1.0.0"
   ansible.windows: ">=2.0.0"
   community.windows: ">=2.0.0"

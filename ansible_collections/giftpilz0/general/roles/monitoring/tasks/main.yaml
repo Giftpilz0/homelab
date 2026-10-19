@@ -1,10 +1,4 @@
 ---
-# tasks file for monitoring
-
-- name: "Monitoring: Gather package facts"
-  ansible.builtin.package_facts:
-    manager: auto
-
 - name: "Monitoring: Validate remote write configuration"
   ansible.builtin.assert:
     that:
@@ -12,56 +6,52 @@
       - monitoring_agent_config_remoteserver_prometheus | length > 0
       - monitoring_alloy_loki_basic_auth_password | length > 0
       - monitoring_alloy_mimir_basic_auth_password | length > 0
-    fail_msg: >-
-      Define the remote write URLs and BasicAuth passwords in encrypted
-      monitoring group variables before deploying Alloy.
+    fail_msg: "Define the remote write URLs and basic auth passwords (encrypted group vars)."
+    quiet: true
 
-- name: "Monitoring: Setup permissions"
-  when:
-    - monitoring_alloy_permissions_setup | bool
-    - monitoring_agent_package_state != 'skip'
+- name: "Monitoring: Configure Alloy"
+  when: monitoring_agent_package_state != 'skip'
   block:
+    - name: "Monitoring: Install alloy"
+      become: true
+      ansible.builtin.package:
+        name: "{{ monitoring_agent_package }}"
+        state: "{{ monitoring_agent_package_state }}"
+        disable_gpg_check: true
+      notify: "Monitoring: Restart Agent"
+
+    - name: "Monitoring: Install acl"
+      become: true
+      ansible.builtin.package:
+        name: acl
+        state: present
+
     - name: "Monitoring: Add alloy user to extra groups"
+      become: true
       ansible.builtin.user:
         name: alloy
-        groups: "{{ monitoring_alloy_extra_groups | join(',') }}"
+        groups: "{{ monitoring_alloy_extra_groups }}"
         append: true
+      when:
+        - monitoring_alloy_permissions_setup
+        - monitoring_agent_package_state != 'absent'
+      notify: "Monitoring: Restart Agent"
 
-- name: "Monitoring: Download alloy"
-  become: true
-  ansible.builtin.package:
-    name: "{{ monitoring_agent_package }}"
-    state: "{{ monitoring_agent_package_state }}"
-    disable_gpg_check: true
-  when:
-    - monitoring_agent_package_state != 'skip'
+    - name: "Monitoring: Manage alloy config"
+      become: true
+      ansible.builtin.template:
+        src: config.alloy.j2
+        dest: "{{ monitoring_agent_config_path }}"
+        owner: root
+        group: alloy
+        mode: "0640"
+      when: monitoring_agent_package_state != 'absent'
+      notify: "Monitoring: Restart Agent"
 
-- name: "Monitoring: Install acl"
-  become: true
-  ansible.builtin.package:
-    name: "acl"
-    state: "{{ monitoring_agent_package_state }}"
-  when:
-    - monitoring_agent_package_state != 'skip'
-
-- name: "Monitoring: Manage alloy config"
-  become: true
-  ansible.builtin.template:
-    src: config.alloy.j2
-    dest: "{{ monitoring_agent_config_path }}"
-    owner: root
-    group: alloy
-    mode: "0640"
-  when:
-    - monitoring_agent_package_state != 'skip'
-  notify:
-    - "Monitoring: Restart Agent"
-
-- name: "Monitoring: Manage service"
-  become: true
-  ansible.builtin.service:
-    name: "{{ monitoring_agent_service_name }}"
-    state: "{{ monitoring_agent_service_state }}"
-    enabled: "{{ monitoring_agent_service_enabled }}"
-  when:
-    - monitoring_agent_package_state != 'skip'
+    - name: "Monitoring: Manage service"
+      become: true
+      ansible.builtin.service:
+        name: "{{ monitoring_agent_service_name }}"
+        state: "{{ monitoring_agent_service_state }}"
+        enabled: "{{ monitoring_agent_service_enabled }}"
+      when: monitoring_agent_package_state != 'absent'

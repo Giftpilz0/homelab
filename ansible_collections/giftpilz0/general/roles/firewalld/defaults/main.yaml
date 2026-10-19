@@ -1,6 +1,4 @@
 ---
-# defaults file for firewalld
-
 firewalld_service_name: firewalld.service
 firewalld_service_state: started
 firewalld_service_enabled: true
@@ -12,3 +10,16 @@ firewalld_logging: all
 firewalld_permanent: true
 firewalld_immediate: true
 firewalld_default_zone: block
+
+# [{zone, source, target (optional)}]
+firewalld_zones_define: []
+# [{icmp_type, zone, state}]
+firewalld_rules_icmp: []
+# [{service, zone, state}]
+firewalld_rules_services: []
+# [{port, protocol, zone, state}]
+firewalld_rules_ports: []
+# [{allowip, port, protocol, action, zone}]
+firewalld_richrules_ports: []
+# [{allowip, service, action, zone}]
+firewalld_richrules_services: []

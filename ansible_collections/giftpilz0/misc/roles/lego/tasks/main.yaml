@@ -12,8 +12,8 @@
       - item.deploy is not defined or item.deploy.pem is defined or item.deploy.pfx is defined
       - item.deploy is not defined or item.deploy.windows_store is not defined or item.deploy.pfx is defined
       - item.deploy is not defined or item.deploy.pfx is not defined or item.deploy.pfx.password is defined
-      - item.deploy is not defined or item.deploy.pem is not defined or ansible_system == 'Linux'
-      - item.deploy is not defined or item.deploy.windows_store is not defined or ansible_os_family == 'Windows'
+      - item.deploy is not defined or item.deploy.pem is not defined or ansible_facts['system'] == 'Linux'
+      - item.deploy is not defined or item.deploy.windows_store is not defined or ansible_facts['os_family'] == 'Windows'
       - lego_acme_email | length > 0
     fail_msg: "Invalid Lego certificate definition or missing lego_acme_email: {{ item.name | default('unnamed') }}"
   loop: "{{ lego_certificates }}"
@@ -22,15 +22,15 @@
 
 - name: "Lego: Configure Linux"
   ansible.builtin.include_tasks: linux.yaml
-  when: ansible_system == 'Linux'
+  when: ansible_facts['system'] == 'Linux'
 
 - name: "Lego: Configure Windows"
   ansible.builtin.include_tasks: windows.yaml
-  when: ansible_os_family == 'Windows'
+  when: ansible_facts['os_family'] == 'Windows'
 
 - name: "Lego: Reject unsupported operating system"
   ansible.builtin.fail:
-    msg: "The Lego role supports Linux and Windows only (detected {{ ansible_system }})."
+    msg: "The Lego role supports Linux and Windows only (detected {{ ansible_facts['system'] }})."
   when:
-    - ansible_system != 'Linux'
-    - ansible_os_family != 'Windows'
+    - ansible_facts['system'] != 'Linux'
+    - ansible_facts['os_family'] != 'Windows'
