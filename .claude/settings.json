@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Read(**/*.sops.yaml)",
+      "Read(**/*.sops.yml)",
+      "Read(**/*secrets*.yaml)",
+      "Read(**/*secrets*.yml)",
+      "Read(**/*secrets*.json)",
+      "Read(**/*.tfstate)",
+      "Read(**/*.tfstate.*)",
+      "Read(**/.terraform/**)",
+      "Read(**/*.key)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Edit(**/*.sops.yaml)",
+      "Edit(**/*.sops.yml)",
+      "Edit(**/*secrets*.yaml)",
+      "Edit(**/*secrets*.yml)",
+      "Edit(**/*secrets*.json)",
+      "Edit(**/*.tfstate)",
+      "Edit(**/*.tfstate.*)",
+      "Edit(**/*.key)",
+      "Bash(sops:*)",
+      "Bash(tofu apply:*)",
+      "Bash(tofu destroy:*)",
+      "Bash(tofu import:*)",
+      "Bash(tofu state:*)",
+      "Bash(git push:*)"
+    ],
+    "allow": [
+      "Bash(uv run ansible-lint:*)",
+      "Bash(uv run ansible-playbook --syntax-check:*)",
+      "Bash(uv sync:*)",
+      "Bash(tofu fmt:*)",
+      "Bash(tofu validate:*)",
+      "Bash(tofu init -backend=false:*)",
+      "Bash(pre-commit run:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/protect-secrets.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
