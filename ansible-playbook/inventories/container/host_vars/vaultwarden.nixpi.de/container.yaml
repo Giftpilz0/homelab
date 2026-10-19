@@ -1,23 +1,10 @@
 ---
-podman_user: "container"
-
 ######################################
 ### giftpilz0.container.vaultwarden
 
-# Network
-vaultwarden_network_enabled: true
-
-# Network to join even when _network_enabled: false
-vaultwarden_network_name: "vaultwarden-internal"
-
-# Versions
 # renovate: datasource=docker depName=vaultwarden/server
 vaultwarden_version: "1.37.4-alpine"
 
-# Autoupdate
-vaultwarden_autoupdate: true
-
-# Environment
 vaultwarden_domain: "https://vaultwarden.nixpi.de/"
 
 vaultwarden_environment_vars:
@@ -33,31 +20,9 @@ vaultwarden_environment_vars:
 ######################################
 ### giftpilz0.container.traefik
 
-# Version
-# renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.14"
-
-# Rootless ports
-traefik_unprivileged_port_start: 80
-
-# Autoupdate
-traefik_autoupdate: true
-
-# ACME
-traefik_acme_enabled: true
-traefik_acme_ca_server: "https://acme-v02.api.letsencrypt.org/directory"
-traefik_acme_challenge_type: dns
-traefik_acme_dns_provider: "cloudflare"
-traefik_acme_eab_enabled: false
-
-# Logging
-traefik_log_level: "INFO"
-
-# Podman networks traefik should join to reach backends directly
 traefik_networks:
   - vaultwarden
 
-# HTTP services
 traefik_http_services:
   - name: vaultwarden
     domain: vaultwarden.nixpi.de

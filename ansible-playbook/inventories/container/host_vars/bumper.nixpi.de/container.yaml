@@ -1,18 +1,6 @@
 ---
-podman_user: "container"
-
 ######################################
 ### giftpilz0.container.bumper
 
-# Network
-bumper_network_enabled: true
-
-# Network to join even when _network_enabled: false
-bumper_network_name: "bumper-internal"
-
-# Versions
 bumper_version: "latest"
 bumper_commit: "4438eb5e9ffa31b60385052102da68a3a18bf4b7"
-
-# Autoupdate
-bumper_autoupdate: true

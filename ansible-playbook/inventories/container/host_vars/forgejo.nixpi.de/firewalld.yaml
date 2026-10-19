@@ -14,6 +14,12 @@ firewalld_zones_define:
   - zone: clients
     source: 192.168.15.0/24
 
+firewalld_rules_ports:
+  - port: 2222 # forgejo ssh
+    protocol: tcp
+    zone: clients
+    state: enabled
+
 firewalld_rules_services:
   - service: ssh
     zone: clients

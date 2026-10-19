@@ -1,47 +1,26 @@
 ---
-podman_user: "container"
-
 ######################################
 ### giftpilz0.container.homeassistant
 
-# Network
-homeassistant_network_enabled: true
-
-# Network to join even when _network_enabled: false
-homeassistant_network_name: "homeassistant-internal"
-
-# Versions
 # renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant
 homeassistant_version: "2026.10.1"
 
-# Autoupdate
-homeassistant_autoupdate: true
-
-# Environment
-homeassistant_device: "/dev/serial/by-id/usb-ITEAD_SONOFF_Zigbee_3.0_USB_Dongle_Plus_V2_20230804114425-if00:/dev/ttyACM0"
-homeassistant_deebot_module: "true"
+homeassistant_device_access: true
+homeassistant_extra_files:
+  # Zigbee dongle
+  - source: "/dev/serial/by-id/usb-ITEAD_SONOFF_Zigbee_3.0_USB_Dongle_Plus_V2_20230804114425-if00"
+    mount: "/dev/ttyACM0"
+    relabel: false
+  # Patched deebot_client hardware module
+  - src: "{{ inventory_dir | dirname }}/host_vars/{{ inventory_hostname }}/assets/homeassistant/8n0t5d.py"
+    dest: "config/8n0t5d.py"
+    mount: "/usr/local/lib/python3.14/site-packages/deebot_client/hardware/8n0t5d.py"
 
 ######################################
 ### giftpilz0.container.mosquitto
 
-# Network
-mosquitto_network_enabled: true
-
-# Network to join even when _network_enabled: false
-mosquitto_network_name: "mosquitto-internal"
-
-# Versions
-# renovate: datasource=docker depName=eclipse-mosquitto
-mosquitto_version: "2.1-alpine"
-
-# Autoupdate
-mosquitto_autoupdate: true
-
-# Authentication and authorization
-mosquitto_go_auth_options:
-  backends: "files"
-  files_password_path: "/mosquitto/config/passwd"
-  files_acl_path: "/mosquitto/config/acl"
+# renovate: datasource=github-tags depName=eclipse-mosquitto/mosquitto extractVersion=^v(?<version>.+)$
+mosquitto_version: "2.1.2"
 
 mosquitto_acl_patterns: []
 mosquitto_acl_users:
@@ -52,32 +31,10 @@ mosquitto_acl_users:
 ######################################
 ### giftpilz0.container.traefik
 
-# Podman networks traefik should join to reach backends directly
 traefik_networks:
   - homeassistant
   - mosquitto
 
-# Version
-# renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.14"
-
-# Rootless ports
-traefik_unprivileged_port_start: 80
-
-# Autoupdate
-traefik_autoupdate: true
-
-# ACME
-traefik_acme_enabled: true
-traefik_acme_ca_server: "https://acme-v02.api.letsencrypt.org/directory"
-traefik_acme_challenge_type: dns
-traefik_acme_dns_provider: "cloudflare"
-traefik_acme_eab_enabled: false
-
-# Logging
-traefik_log_level: "INFO"
-
-# TCP entrypoints
 traefik_tcp_entrypoints:
   - name: mqtt-tls
     port: 8883
@@ -86,7 +43,6 @@ traefik_tcp_entrypoints:
     port: 1883
     internal_port: 1883
 
-# HTTP services
 traefik_http_services:
   - name: homeassistant
     domain: homeassistant.nixpi.de
@@ -104,7 +60,6 @@ traefik_http_services:
     tls_enabled: true
     acme_enabled: true
 
-# TCP services
 traefik_tcp_services:
   - name: mqtt
     domain: "mqtt.nixpi.de"

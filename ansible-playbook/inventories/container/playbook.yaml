@@ -60,3 +60,10 @@
   hosts: acme
   roles:
     - role: giftpilz0.container.acme_dns
+
+# Last: joins the networks of the service pods
+- name: Configure hosts - traefik
+  hosts: all
+  roles:
+    - role: giftpilz0.container.traefik
+      when: traefik_http_services | length > 0 or traefik_tcp_services | length > 0

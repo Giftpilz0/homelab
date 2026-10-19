@@ -1,25 +1,10 @@
 ---
-podman_user: "container"
-
 ######################################
 ### giftpilz0.container.opencloud
 
-# Network
-opencloud_network_enabled: true
-
-# Network to join even when _network_enabled: false
-opencloud_network_name: "opencloud-internal"
-
-# Versions
 # renovate: datasource=docker depName=opencloudeu/opencloud-rolling
 opencloud_version: "8.1.0"
 
-# Autoupdate
-opencloud_autoupdate: true
-
-# Custom theming and plugins are copied from the inventory into the quadlet dir
-# and bind-mounted into the OpenCloud container via the mount field.
-# Mounting to the theme/apps asset paths auto-enables the theming/plugin env vars.
 opencloud_extra_dirs:
   - src: "{{ inventory_dir | dirname }}/host_vars/{{ inventory_hostname }}/assets/opencloud/themes"
     dest: "assets/themes"
@@ -28,21 +13,15 @@ opencloud_extra_dirs:
     dest: "assets/apps"
     mount: "/var/lib/opencloud/web/assets/custom-apps"
 
-# Environment
 opencloud_domain: "https://opencloud.nixpi.de"
 opencloud_csp_oidc_origin: "https://login.nixpi.de"
-opencloud_log_level: "info"
 
-# Optional companion services
 opencloud_radicale_enabled: true
 
 opencloud_collabora_enabled: true
 opencloud_collabora_url: "https://collabora.nixpi.de"
 opencloud_collabora_admin_password: "{{ opencloud_admin_password }}"
-opencloud_collabora_ssl_enable: true
-opencloud_collabora_ssl_verification: true
-opencloud_collabora_ssl_termination: true
-opencloud_collabora_home_mode: false
+opencloud_collabora_home_mode: true
 
 opencloud_environment_vars:
   IDM_ADMIN_PASSWORD: "{{ opencloud_admin_password }}"
@@ -71,22 +50,12 @@ opencloud_environment_vars:
 ######################################
 ### giftpilz0.container.navidrome
 
-# Network
-navidrome_network_enabled: true
-navidrome_network_name: "navidrome-internal"
-
-# Versions
 # renovate: datasource=docker depName=deluan/navidrome
 navidrome_version: "0.64.2"
 
-# Autoupdate
-navidrome_autoupdate: true
-
-# Music library management WebUI.
 navidrome_webui_enabled: true
 # renovate: datasource=docker depName=ghcr.io/giftpilz0/musiclibrary
 navidrome_webui_version: "edge"
-navidrome_webui_autoupdate: true
 navidrome_webui_environment_vars:
   MUSIC_LIBRARY_ROOT: "/music"
   MUSIC_LIBRARY_NAVIDROME_LIBRARY_PATH: "/music/transcoded"
@@ -100,55 +69,14 @@ navidrome_webui_environment_vars:
 ######################################
 ### giftpilz0.container.suwayomi
 
-# Network
-suwayomi_network_enabled: true
-suwayomi_network_name: "suwayomi-internal"
-
-# Versions
 # renovate: datasource=docker depName=ghcr.io/suwayomi/suwayomi-server
 suwayomi_version: "v2.4.2422"
 # renovate: datasource=docker depName=ghcr.io/thephaseless/byparr
 suwayomi_flaresolverr_version: "3.0.4"
 
-# Autoupdate
-suwayomi_autoupdate: true
-suwayomi_flaresolverr_autoupdate: true
-
-# Environment
-suwayomi_environment_vars:
-  TZ: "Europe/Berlin"
-  BIND_IP: "0.0.0.0"
-  BIND_PORT: "4567"
-  AUTH_MODE: "none"
-  WEB_UI_UPDATE_INTERVAL: "0"
-  DOWNLOAD_AS_CBZ: "true"
-  FLARESOLVERR_ENABLED: "true"
-  FLARESOLVERR_URL: "http://127.0.0.1:8191"
-
 ######################################
 ### giftpilz0.container.traefik
 
-# Version
-# renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.14"
-
-# Rootless ports
-traefik_unprivileged_port_start: 80
-
-# Autoupdate
-traefik_autoupdate: true
-
-# ACME
-traefik_acme_enabled: true
-traefik_acme_ca_server: "https://acme-v02.api.letsencrypt.org/directory"
-traefik_acme_challenge_type: dns
-traefik_acme_dns_provider: "cloudflare"
-traefik_acme_eab_enabled: false
-
-# Logging
-traefik_log_level: "INFO"
-
-# Podman networks traefik should join to reach backends directly
 traefik_networks:
   - opencloud
   - navidrome
@@ -195,13 +123,8 @@ traefik_custom_middlewares:
         ValidPostLogoutRedirectUris:
           - "https://music.nixpi.de/"
 
-# Transport
 traefik_transport_timeouts_enabled: true
-traefik_transport_read_timeout: "12h"
-traefik_transport_write_timeout: "12h"
-traefik_transport_idle_timeout: "3m"
 
-# HTTP services
 traefik_http_services:
   - name: opencloud
     domain: opencloud.nixpi.de

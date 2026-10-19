@@ -1,21 +1,9 @@
 ---
-podman_user: "container"
-
 ######################################
 ### giftpilz0.container.misc
 
-# Network
-misc_network_enabled: true
-
-# Network to join even when _network_enabled: false
-misc_network_name: "misc-internal"
-
-# Versions
 misc_version: "latest"
 misc_commit: "db16ab7ca40f6e1e98e6e7a3947fb9e2aa04f527"
-
-# Autoupdate
-misc_autoupdate: true
 
 ######################################
 ### giftpilz0.misc.cfdyndns

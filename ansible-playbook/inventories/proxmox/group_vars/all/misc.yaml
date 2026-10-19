@@ -9,7 +9,6 @@ timezone_timezone: Europe/Berlin
 
 packages_rpmfusion_package_state: skip
 packages_python_package_state: skip
-packages_flatpak_repo_state: skip
 
 packages_additional_package:
   - whois
