@@ -1,0 +1,6 @@
+# {{ ansible_managed }}
+[containers]
+env = [{% for name, value in quadlet_proxy_env.items() %}"{{ name }}={{ value }}"{{ ", " if not loop.last }}{% endfor %}]
+
+[engine]
+env = [{% for name, value in quadlet_proxy_env.items() %}"{{ name }}={{ value }}"{{ ", " if not loop.last }}{% endfor %}]

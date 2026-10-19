@@ -1,9 +1,10 @@
+{% if opencloud_collabora_enabled %}
 [Unit]
 Description=Generate Collabora WOPI Proof Key
 
 [Container]
 ContainerName=collabora-proof-key
-Image=docker.io/alpine/openssl:3.5.9
+Image={{ opencloud_collabora_proof_key_image }}:{{ opencloud_collabora_proof_key_version }}
 {% if opencloud_collabora_proof_key_entrypoint %}
 Entrypoint={{ opencloud_collabora_proof_key_entrypoint }}
 {% else %}
@@ -15,3 +16,4 @@ Volume=collabora-proof-key.volume:/proof
 [Service]
 Type=oneshot
 RemainAfterExit=yes
+{% endif %}

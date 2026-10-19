@@ -1,105 +1,30 @@
 ---
 ## Primary
-# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
-# Network
-# Network to join even when _network_enabled: false
+# Image
+opencloud_image: "docker.io/opencloudeu/opencloud-rolling"
+# renovate: datasource=docker depName=opencloudeu/opencloud-rolling
+opencloud_version: "8.1.0"
+# Applies to all OpenCloud pods
+opencloud_autoupdate: true
+
+# Network (always joined, created only when enabled)
 opencloud_network_enabled: true
 opencloud_network_name: "opencloud-internal"
+opencloud_network_driver: "bridge"
 
-# Optional: expose this service directly on the host, bypassing Traefik.
-# Not required for Traefik to reach it -- Traefik connects directly over the
-# shared Podman network using the container name and container port.
-# _bind_ip and _port_map are independent: override _bind_ip alone to change
-# where it's exposed, or _port_map alone ("host_port:container_port") to
-# change which ports -- no need to redefine both together.
-opencloud_bind_ip: "127.0.0.1"
+# Host ports (not needed behind Traefik)
 opencloud_port_map_enabled: true
+opencloud_bind_ip: "127.0.0.1"
 opencloud_port_map:
   - "9200:9200"
 
-# Versions
-# renovate: datasource=docker depName=opencloudeu/opencloud-rolling
-opencloud_version: "8.1.0"
-
-# Autoupdate
-opencloud_autoupdate: true
-
-# Environment
+## Service
 opencloud_domain: ""
 opencloud_admin_password: ""
 opencloud_log_level: "info"
 opencloud_csp_oidc_origin: ""
-
-# Collabora Online
-opencloud_collabora_enabled: false
-
-# Versions
-# renovate: datasource=docker depName=collabora/code
-opencloud_collabora_version: "26.04.5.1.1"
-
-opencloud_collabora_url: ""
-opencloud_collabora_admin_username: "admin"
-opencloud_collabora_admin_password: ""
-
-# Radicale CalDAV/CardDAV
-opencloud_radicale_enabled: false
-
-# Versions
-# renovate: datasource=docker depName=opencloudeu/radicale
-opencloud_radicale_version: "v3.8.1"
-
-# Custom web assets and plugins are supplied by each inventory via
-# opencloud_extra_dirs (staged into opencloud-pod/assets/...), not bundled
-# with the role.
-
-# Copy arbitrary extra files/directories from the inventory into this role's
-# quadlet directory (relative to the <role>-pod dir).
-# Each entry supports src (controller path) or source (target path), dest,
-# optional mount, mode, and template (files only).
-# Theming/plugins env vars and the web-config.json mount are enabled
-# automatically when an entry mounts to the matching OpenCloud asset path.
-# Example:
-#   opencloud_extra_files:
-#     - src: "assets/example/config.yaml"
-#       dest: "config/example.yaml"
-#       mode: "0640"
-#       template: true
-#       mount: "/etc/example/config.yaml"
-#     - source: "/srv/example/license.key"
-#       dest: "host-license.key"
-#       mount: "/run/secrets/license.key"
-#   opencloud_extra_dirs:
-#     - src: "assets/example/plugins/"
-#       dest: "plugins"
-#       mount: "/usr/local/share/example/plugins"
-#     - source: "/srv/example/plugins"
-#       dest: "host-plugins"
-#       mount: "/usr/local/share/example/host-plugins"
-opencloud_extra_files: []
-opencloud_extra_dirs: []
-
-# Optional container entrypoint overrides.
-opencloud_entrypoint: ""
-opencloud_collabora_entrypoint: ""
-opencloud_collabora_proof_key_entrypoint: ""
-opencloud_radicale_entrypoint: ""
-
-# Merge OIDC clients (only used when external OIDC is disabled)
-opencloud_oidc_clients: "{{ opencloud_standard_clients + opencloud_custom_clients }}"
-
-## Advanced
-# Proxy
-opencloud_proxy_enabled: false
-opencloud_proxy_http: ""
-opencloud_proxy_https: ""
-opencloud_proxy_no_proxy: ""
-opencloud_proxy_env: "{{ (['https_proxy=' ~ opencloud_proxy_https] + (['http_proxy=' ~ opencloud_proxy_http] if opencloud_proxy_http else []) + (['no_proxy=' ~ opencloud_proxy_no_proxy]
-  if opencloud_proxy_no_proxy else [])) if opencloud_proxy_enabled else [] }}"
-
-# Network driver
-opencloud_network_driver: "bridge"
 
 # Environment
 opencloud_environment_vars:
@@ -112,25 +37,8 @@ opencloud_environment_vars:
   THUMBNAILS_MAX_CONCURRENT_REQUESTS: 64
   FRONTEND_CHECK_FOR_UPDATES: false
 
-# Collabora advanced
-opencloud_collabora_ssl_enable: true
-opencloud_collabora_ssl_verification: true
-opencloud_collabora_ssl_termination: true
-opencloud_collabora_home_mode: false
-# opencloud_collabora_url is the browser-facing editor URL. The role does not
-# publish a host port or configure a reverse proxy; route this URL as desired.
-# Route opencloud_collabora_url through Traefik to http://collabora:9980 on
-# the shared OpenCloud network, for example:
-# traefik_http_services:
-#   - name: collabora
-#     domain: office.example.com
-#     rule: "Host(`office.example.com`)"
-#     servers:
-#       - url: "http://collabora:9980"
-#     tls_enabled: true
-#     acme_enabled: true
-
-# OIDC Clients Configuration
+# Clients of the built-in IDP (unused with external OIDC)
+opencloud_oidc_clients: "{{ opencloud_standard_clients + opencloud_custom_clients }}"
 opencloud_standard_clients:
   - id: web
     name: "OpenCloud Web App"
@@ -178,16 +86,53 @@ opencloud_standard_clients:
     origins: []
     application_type: "native"
 
-# Custom OIDC Clients
+# Example:
+#   opencloud_custom_clients:
+#     - id: forgejo
+#       name: "forgejo"
+#       trusted: false
+#       secret: "{{ forgejo_oauth_client_secret }}"
+#       redirect_uris:
+#         - "https://{{ forgejo_domain }}/user/oauth2/opencloud/callback"
+#       post_logout_redirect_uris: []
+#       origins:
+#         - "https://{{ forgejo_domain }}"
+#       application_type: "web"
 opencloud_custom_clients: []
-  # opencloud_custom_clients:
-  # - id: forgejo
-  #   name: "forgejo"
-  #   trusted: false
-  #   secret: "{{ forgejo_oauth_client_secret }}"
-  #   redirect_uris:
-  #     - "https://{{ forgejo_domain }}/user/oauth2/opencloud/callback"
-  #   post_logout_redirect_uris: []
-  #   origins:
-  #     - "https://{{ forgejo_domain }}"
-  #   application_type: "web"
+
+## Collabora Online (collabora-pod)
+opencloud_collabora_enabled: false
+opencloud_collabora_image: "docker.io/collabora/code"
+# renovate: datasource=docker depName=collabora/code
+opencloud_collabora_version: "26.04.5.1.1"
+opencloud_collabora_proof_key_image: "docker.io/alpine/openssl"
+# renovate: datasource=docker depName=alpine/openssl
+opencloud_collabora_proof_key_version: "3.5.9"
+# Public editor URL, routed by Traefik to collabora-pod:9980
+opencloud_collabora_url: ""
+opencloud_collabora_admin_username: "admin"
+opencloud_collabora_admin_password: ""
+opencloud_collabora_ssl_enable: true
+opencloud_collabora_ssl_verification: true
+opencloud_collabora_ssl_termination: true
+# Disables welcome and feedback popups, limits to 20 connections / 10 documents
+opencloud_collabora_home_mode: false
+# "New version available" notice in the editor
+opencloud_collabora_update_popup: false
+
+## Radicale CalDAV/CardDAV (radicale-pod)
+opencloud_radicale_enabled: false
+opencloud_radicale_image: "docker.io/opencloudeu/radicale"
+# renovate: datasource=docker depName=opencloudeu/radicale
+opencloud_radicale_version: "v3.8.1"
+
+## Advanced
+opencloud_entrypoint: ""
+opencloud_collabora_entrypoint: ""
+opencloud_collabora_proof_key_entrypoint: ""
+opencloud_radicale_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+# Mounts to /var/lib/opencloud/web/assets/custom-{themes,apps} enable theming/plugins
+opencloud_extra_files: []
+opencloud_extra_dirs: []

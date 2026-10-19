@@ -6,129 +6,82 @@ argument_specs:
       podman_user:
         type: str
         required: false
-        default: "{{ ansible_user }}"
-        description: system user for rootless podman operations.
+        description: System user for rootless podman operations.
 
-      bumper_proxy_enabled:
+      bumper_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      bumper_version:
+        type: str
+        required: false
+        description: Container image version.
+
+      bumper_git_repo:
+        type: str
+        required: false
+        description: Git repository the bumper image is built from.
+
+      bumper_commit:
+        type: str
+        required: false
+        description: Git commit to build from.
+
+      bumper_autoupdate:
         type: bool
         required: false
-        default: false
-        description: enable HTTP proxy for image pulls.
-
-      bumper_proxy_http:
-        type: str
-        required: false
-        default: ""
-        description: HTTP proxy URL.
-
-      bumper_proxy_https:
-        type: str
-        required: false
-        default: ""
-        description: HTTPS proxy URL.
-
-      bumper_proxy_no_proxy:
-        type: str
-        required: false
-        default: ""
-        description: comma-separated list of proxy exclusions.
-
-      bumper_proxy_env:
-        type: list
-        elements: str
-        required: false
-        default: []
-        description: generated proxy environment entries.
+        description: Enable podman auto-update for this container.
 
       bumper_network_enabled:
         type: bool
         required: false
-        default: true
-        description: create and manage the podman network.
-
-      bumper_network_driver:
-        type: str
-        required: false
-        default: bridge
-        description: podman network driver.
+        description: Create and manage the podman network.
 
       bumper_network_name:
         type: str
         required: false
-        default: bumper-internal
-        description: podman network name.
+        description: Podman network name.
 
-      bumper_bind_ip:
+      bumper_network_driver:
         type: str
         required: false
-        default: "{{ ansible_facts['default_ipv4']['address'] }}"
-        description: host IP to bind exposed ports to.
+        description: Podman network driver.
 
       bumper_port_map_enabled:
         type: bool
         required: false
-        default: true
-        description: expose container ports on the host.
+        description: Expose container ports on the host.
+
+      bumper_bind_ip:
+        type: str
+        required: false
+        description: Host IP to bind exposed ports to.
 
       bumper_port_map:
         type: list
         elements: str
         required: false
-        default:
-          - "443:443"
-          - "1883:1883"
-          - "5223:5223"
-          - "8007:8007"
-          - "8443:8443"
-        description: host:container port mappings.
-
-      bumper_version:
-        type: str
-        required: false
-        default: latest
-        description: container image version.
-
-      bumper_commit:
-        type: str
-        required: false
-        default: "4438eb5e9ffa31b60385052102da68a3a18bf4b7"
-        description: git commit to build from.
-
-      bumper_autoupdate:
-        type: bool
-        required: false
-        default: true
-        description: enable podman auto-update for this container.
+        description: Host:container port mappings.
 
       bumper_environment_vars:
         type: dict
         required: false
-        default:
-          WEB_SERVER_HTTPS_PORT: 8443
-          WEB_SERVER_LISTEN_PORT: 8007
-          MQTT_LISTEN_PORT_TLS: 443
-          MQTT_LISTEN_PORT: 1883
-          XMPP_LISTEN_PORT_TLS: 5223
-          DEBUG_BUMPER_VERBOSE: 2
-          DEBUG_BUMPER_LEVEL: INFO
-        description: extra environment variables injected into the container.
+        description: Extra environment variables injected into the container.
+
+      bumper_entrypoint:
+        type: str
+        required: false
+        description: Optional container entrypoint override.
 
       bumper_extra_files:
         type: list
         elements: dict
         required: false
-        default: []
-        description: arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+        description: Arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
 
       bumper_extra_dirs:
         type: list
         elements: dict
         required: false
-        default: []
-        description: arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.
-
-      bumper_entrypoint:
-        type: str
-        required: false
-        default: ""
-        description: optional container entrypoint override.
+        description: Arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.

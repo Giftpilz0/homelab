@@ -1,43 +1,35 @@
 ---
 ## Primary
-# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
-# Network
-# Network to join even when _network_enabled: false
-mariadb_network_enabled: true
-mariadb_network_name: "mariadb-internal"
-
-# Optional: expose this service directly on the host, bypassing Traefik.
-# Not required for Traefik to reach it -- Traefik connects directly over the
-# shared Podman network using the container name and container port.
-# _bind_ip and _port_map are independent: override _bind_ip alone to change
-# where it's exposed, or _port_map alone ("host_port:container_port") to
-# change which ports -- no need to redefine both together.
-mariadb_bind_ip: "127.0.0.1"
-mariadb_port_map_enabled: true
-mariadb_port_map:
-  - "3306:3306"
-
-# Versions
+# Image
+mariadb_image: "docker.io/library/mariadb"
 # renovate: datasource=docker depName=mariadb
 mariadb_version: "13.0"
-
-# Autoupdate
 mariadb_autoupdate: true
 mariadb_backup_autoupdate: true
 
-# Database administrator
-# The MariaDB image creates this user and database during first startup.
+# Network (always joined, created only when enabled)
+mariadb_network_enabled: true
+mariadb_network_name: "mariadb-internal"
+mariadb_network_driver: "bridge"
+
+# Host ports
+mariadb_port_map_enabled: true
+mariadb_bind_ip: "127.0.0.1"
+mariadb_port_map:
+  - "3306:3306"
+
+## Service
+# Administrator, created on first start
 mariadb_admin_database: "mariadb"
 mariadb_admin_user: "mariadb"
 mariadb_admin_password: ""
-# For an existing volume, set these to credentials that already work there;
-# MARIADB_ROOT_PASSWORD is only applied when the data directory is initialized.
+# Root login for backups; only applied when the volume is initialized
 mariadb_backup_user: "root"
 mariadb_backup_password: "{{ mariadb_admin_password }}"
-# Secondary databases/users are created by the role after the administrator
-# database is available.
+
+# Additional databases: [{name, user, password}]
 mariadb_databases: []
 
 # Backup
@@ -45,49 +37,17 @@ mariadb_backup_schedule_times: "03:00"
 mariadb_backup_retention_days: 7
 mariadb_backup_compression: 6
 
-# Copy arbitrary extra files/directories from the inventory into this role's
-# quadlet directory (relative to the <role>-pod dir).
-# Each entry supports src (controller path) or source (target path), dest,
-# optional mount, mode, and template (files only).
-# Example:
-#   mariadb_extra_files:
-#     - src: "assets/example/config.yaml"
-#       dest: "config/example.yaml"
-#       mode: "0640"
-#       template: true
-#       mount: "/etc/example/config.yaml"
-#     - source: "/srv/example/license.key"
-#       dest: "host-license.key"
-#       mount: "/run/secrets/license.key"
-#   mariadb_extra_dirs:
-#     - src: "assets/example/plugins/"
-#       dest: "plugins"
-#       mount: "/usr/local/share/example/plugins"
-#     - source: "/srv/example/plugins"
-#       dest: "host-plugins"
-#       mount: "/usr/local/share/example/host-plugins"
-mariadb_extra_files: []
-mariadb_extra_dirs: []
-
-# Optional container entrypoint overrides.
-mariadb_entrypoint: ""
-mariadb_backup_entrypoint: ""
-
-## Advanced
-# Proxy
-mariadb_proxy_enabled: false
-mariadb_proxy_http: ""
-mariadb_proxy_https: ""
-mariadb_proxy_no_proxy: ""
-mariadb_proxy_env: "{{ (['https_proxy=' ~ mariadb_proxy_https] + (['http_proxy=' ~ mariadb_proxy_http] if mariadb_proxy_http else []) + (['no_proxy=' ~ mariadb_proxy_no_proxy]
-  if mariadb_proxy_no_proxy else [])) if mariadb_proxy_enabled else [] }}"
-
-# Network driver
-mariadb_network_driver: "bridge"
-
 # Environment
 mariadb_environment_vars:
   MARIADB_DATABASE: "{{ mariadb_admin_database }}"
   MARIADB_USER: "{{ mariadb_admin_user }}"
   MARIADB_PASSWORD: "{{ mariadb_admin_password }}"
   MARIADB_ROOT_PASSWORD: "{{ mariadb_backup_password }}"
+
+## Advanced
+mariadb_entrypoint: ""
+mariadb_backup_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+mariadb_extra_files: []
+mariadb_extra_dirs: []

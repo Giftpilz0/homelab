@@ -1,5 +1,4 @@
-# Grafana Loki – single-node / monolithic mode
-# Docs: https://grafana.com/docs/loki/latest/configure/
+# Grafana Loki, monolithic mode: https://grafana.com/docs/loki/latest/configure/
 
 auth_enabled: false
 
@@ -20,8 +19,8 @@ common:
     s3:
       endpoint: "127.0.0.1:{{ monitoring_stack_garage_s3_api_port }}"
       region: "{{ monitoring_stack_garage_region }}"
-      access_key_id: "{{ monitoring_stack_loki_access_key_id | default('') }}"
-      secret_access_key: "{{ monitoring_stack_loki_secret_access_key | default('') }}"
+      access_key_id: "{{ monitoring_stack_loki_access_key_id }}"
+      secret_access_key: "{{ monitoring_stack_loki_secret_access_key }}"
       bucketnames: "{{ monitoring_stack_garage_loki_bucket }}"
       s3forcepathstyle: true
       insecure: true

@@ -1,0 +1,111 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy the quadlet files of a service role and (re)start its units.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: System user for rootless Podman operations.
+
+      podman_unprivileged_port_start:
+        type: int
+        required: false
+        description: Lowest host port rootless containers may bind.
+
+      podman_proxy_enabled:
+        type: bool
+        required: false
+        description: Configure an HTTP proxy for image pulls and all containers on the host.
+
+      podman_proxy_http:
+        type: str
+        required: false
+        description: HTTP proxy URL.
+
+      podman_proxy_https:
+        type: str
+        required: false
+        description: HTTPS proxy URL.
+
+      podman_proxy_no_proxy:
+        type: str
+        required: false
+        description: Comma-separated list of proxy exclusions.
+
+      quadlet_role:
+        type: str
+        required: true
+        description: Service role (in this collection) whose templates/ and files/ trees are deployed.
+
+      quadlet_dir:
+        type: str
+        required: false
+        description: Main quadlet directory of the service; extra files and dirs are placed here.
+
+      quadlet_dir_modes:
+        type: dict
+        required: false
+        description: Directory modes that differ from the role source tree, keyed by path relative to the quadlet base dir.
+
+      quadlet_units:
+        type: list
+        elements: str
+        required: true
+        description: systemd user units to start in order; restarted when deployed files changed.
+
+      quadlet_force_restart:
+        type: bool
+        required: false
+        description: Restart the units even if no file changed.
+
+      quadlet_images_changed:
+        type: bool
+        required: false
+        description: Set by tasks_from build when an image was rebuilt.
+
+      quadlet_extra_files:
+        type: list
+        elements: dict
+        required: false
+        description: Extra file entries with src (controller path) or source (host path), dest, optional mount, mode, template and relabel (SELinux :Z).
+
+      quadlet_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        description: Extra directory entries with src (controller path) or source (host path), dest, optional mount, mode and relabel (SELinux :Z).
+
+      quadlet_extra_file_defaults:
+        type: dict
+        required: false
+        description: Values for keys missing in quadlet_extra_files entries.
+
+      quadlet_extra_dir_defaults:
+        type: dict
+        required: false
+        description: Values for keys missing in quadlet_extra_dirs entries.
+
+  build:
+    short_description: Build local images for a service role.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: System user for rootless Podman operations.
+
+      quadlet_role:
+        type: str
+        required: true
+        description: Service role whose directories are used for src build contexts.
+
+      quadlet_builds:
+        type: list
+        elements: dict
+        required: true
+        description: Images to build, each with name and either git_repo/git_version or src.
+
+      quadlet_build_defaults:
+        type: dict
+        required: false
+        description: Values for keys missing in quadlet_builds entries.

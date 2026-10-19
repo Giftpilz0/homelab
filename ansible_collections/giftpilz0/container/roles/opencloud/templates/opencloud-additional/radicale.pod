@@ -1,3 +1,4 @@
+{% if opencloud_radicale_enabled %}
 [Unit]
 Description=Radicale CalDAV/CardDAV Pod
 
@@ -11,3 +12,4 @@ Restart=always
 
 [Install]
 WantedBy=default.target
+{% endif %}

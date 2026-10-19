@@ -1,6 +1,4 @@
-# =============================================================================
-# TLS CONFIGURATION
-# =============================================================================
+# TLS
 tls:
   options:
     default:
@@ -9,9 +7,7 @@ tls:
   stores:
     default: {}
 
-# =============================================================================
-# MIDDLEWARE
-# =============================================================================
+# Middlewares
 http:
   middlewares:
     security-headers:
@@ -21,68 +17,45 @@ http:
         customResponseHeaders:
           X-Robots-Tag: "noindex,nofollow,nosnippet"
 
-{% if traefik_middlewares_redirect %}
 {% for name, config in traefik_middlewares_redirect.items() %}
     {{ name }}:
       redirectRegex:
-{% if config.regex is defined %}
-        regex: "{{ config.regex }}"
-        replacement: "{{ config.replacement }}"
-{% else %}
-        regex: "{{ config.from }}"
-        replacement: "{{ config.to }}"
-{% endif %}
-        permanent: {{ config.permanent | default(false) | bool | lower }}
+        regex: "{{ config.regex if config.regex is defined else config.from }}"
+        replacement: "{{ config.replacement if config.replacement is defined else config.to }}"
+        permanent: {{ (config.permanent is defined and config.permanent) | lower }}
 
 {% endfor %}
-{% endif %}
-{% if traefik_http_services is defined %}
-{% for service in traefik_http_services %}
-{% if service.redirect is defined %}
+{% for service in _traefik_http_services if service.redirect is defined %}
     {{ service.name }}-redirect:
       redirectRegex:
-{% if service.redirect.regex is defined %}
-        regex: "{{ service.redirect.regex }}"
-        replacement: "{{ service.redirect.replacement }}"
-{% else %}
-        regex: "{{ service.redirect.from }}"
-        replacement: "{{ service.redirect.to }}"
-{% endif %}
-        permanent: {{ service.redirect.permanent | default(false) | bool | lower }}
+        regex: "{{ service.redirect.regex if service.redirect.regex is defined else service.redirect.from }}"
+        replacement: "{{ service.redirect.replacement if service.redirect.replacement is defined else service.redirect.to }}"
+        permanent: {{ (service.redirect.permanent is defined and service.redirect.permanent) | lower }}
 
-{% endif %}
 {% endfor %}
-{% endif %}
-{% if traefik_custom_middlewares %}
 {% for middleware_name, middleware_config in traefik_custom_middlewares.items() %}
     {{ middleware_name }}:
 {{ middleware_config | to_nice_yaml(indent=2) | indent(6, True) }}
 {% endfor %}
-{% endif %}
 
-  # =============================================================================
-  # HTTP ROUTERS
-  # =============================================================================
+  # HTTP routers
   routers:
-{% if traefik_http_services is defined %}
-{% for service in traefik_http_services %}
+{% for service in _traefik_http_services %}
     {{ service.name }}-router:
       rule: "{{ service.rule }}"
       entryPoints:
-{% for entrypoint in service.entrypoints | default(['websecure']) %}
+{% for entrypoint in service.entrypoints %}
         - {{ entrypoint }}
 {% endfor %}
       service: {{ service.name }}-service
-{% set auto_middlewares = [] %}
-{% if service.redirect is defined %}{% set _ = auto_middlewares.append(service.name ~ '-redirect') %}{% endif %}
-{% set all_middlewares = auto_middlewares + (service.middlewares | default([])) %}
-{% if all_middlewares %}
+{% set middlewares = ([service.name ~ '-redirect'] if service.redirect is defined else []) + service.middlewares %}
+{% if middlewares %}
       middlewares:
-{% for middleware in all_middlewares %}
+{% for middleware in middlewares %}
         - {{ middleware }}
 {% endfor %}
 {% endif %}
-{% if service.acme_enabled | default(traefik_acme_enabled) %}
+{% if service.acme_enabled %}
       tls:
         certResolver: default
 {% if service.sans is defined %}
@@ -93,22 +66,18 @@ http:
               - "{{ san }}"
 {% endfor %}
 {% endif %}
-{% elif service.tls_enabled | default(false) %}
+{% elif service.tls_enabled %}
       tls: {}
 {% endif %}
 
 {% endfor %}
-{% endif %}
 
-  # =============================================================================
-  # HTTP SERVICES
-  # =============================================================================
+  # HTTP services
   services:
-{% if traefik_http_services is defined %}
-{% for service in traefik_http_services %}
+{% for service in _traefik_http_services %}
     {{ service.name }}-service:
       loadBalancer:
-{% if service.large_downloads | default(false) or service.insecure_skip_verify | default(false) %}
+{% if service.large_downloads or service.insecure_skip_verify %}
         serversTransport: {{ service.name }}-transport
 {% endif %}
         servers:
@@ -117,38 +86,22 @@ http:
 {% endfor %}
 {% if service.health_check is defined %}
         healthCheck:
-          path: "{{ service.health_check.path }}"
-          interval: "{{ service.health_check.interval | default('30s') }}"
-          timeout: "{{ service.health_check.timeout | default('5s') }}"
-          scheme: "{{ service.health_check.scheme | default('http') }}"
-          method: "{{ service.health_check.method | default('GET') }}"
-{% if service.health_check.port is defined %}
-          port: {{ service.health_check.port }}
-{% endif %}
+{{ service.health_check | to_nice_yaml(indent=2) | indent(10, True) }}
 {% endif %}
 
 {% endfor %}
-{% endif %}
 
-  # =============================================================================
-  # SERVERS TRANSPORTS
-  # =============================================================================
-{% if traefik_http_services is defined %}
-{% set has_servers_transport_service = namespace(found=false) %}
-{% for service in traefik_http_services %}
-{% if service.large_downloads | default(false) or service.insecure_skip_verify | default(false) %}
-{% set has_servers_transport_service.found = true %}
-{% endif %}
-{% endfor %}
-{% if has_servers_transport_service.found %}
+  # Servers transports
+{% set transport_services = _traefik_http_services | selectattr('large_downloads') | list
+                            + _traefik_http_services | selectattr('insecure_skip_verify') | rejectattr('large_downloads') | list %}
+{% if transport_services %}
   serversTransports:
-{% for service in traefik_http_services %}
-{% if service.large_downloads | default(false) or service.insecure_skip_verify | default(false) %}
+{% for service in transport_services %}
     {{ service.name }}-transport:
-{% if service.insecure_skip_verify | default(false) %}
+{% if service.insecure_skip_verify %}
       insecureSkipVerify: true
 {% endif %}
-{% if service.large_downloads | default(false) %}
+{% if service.large_downloads %}
       forwardingTimeouts:
         dialTimeout: "30s"
         responseHeaderTimeout: "0s"
@@ -156,21 +109,15 @@ http:
         readIdleTimeout: "12h"
         pingTimeout: "15s"
 {% endif %}
-{% endif %}
 {% endfor %}
 {% endif %}
-{% endif %}
 
-{% if traefik_tcp_services | default([]) | length > 0 %}
-# =============================================================================
-# TCP CONFIGURATION
-# =============================================================================
+{% if _traefik_tcp_services %}
+# TCP
 tcp:
-  # =============================================================================
-  # TCP ROUTERS
-  # =============================================================================
+  # TCP routers
   routers:
-{% for service in traefik_tcp_services %}
+{% for service in _traefik_tcp_services %}
     {{ service.name }}-tcp-router:
       rule: "{{ service.rule }}"
       entryPoints:
@@ -178,9 +125,9 @@ tcp:
         - {{ entrypoint }}
 {% endfor %}
       service: {{ service.name }}-tcp-service
-{% if service.tls_enabled | default(false) %}
+{% if service.tls_enabled %}
       tls:
-{% if service.acme_enabled | default(false) %}
+{% if service.acme_enabled %}
         certResolver: default
 {% if service.sans is defined %}
         domains:
@@ -191,17 +138,15 @@ tcp:
 {% endfor %}
 {% endif %}
 {% else %}
-        passthrough: {{ service.tls_passthrough | default(false) }}
+        passthrough: {{ service.tls_passthrough | lower }}
 {% endif %}
 {% endif %}
 
 {% endfor %}
 
-  # =============================================================================
-  # TCP SERVICES
-  # =============================================================================
+  # TCP services
   services:
-{% for service in traefik_tcp_services %}
+{% for service in _traefik_tcp_services %}
     {{ service.name }}-tcp-service:
       loadBalancer:
         servers:

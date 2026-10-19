@@ -3,8 +3,7 @@ Description=Perses
 
 [Container]
 ContainerName=perses
-Image=docker.io/persesdev/perses:{{ monitoring_stack_perses_version }}
-
+Image={{ monitoring_stack_perses_image }}:{{ monitoring_stack_perses_version }}
 Pod=monitoring-stack.pod
 
 Exec=--config=/etc/perses/config.yaml
@@ -20,20 +19,13 @@ Volume=perses-data.volume:/var/perses/data
 Volume=%h/.config/containers/systemd/monitoring-stack-pod/config/perses.yaml:/etc/perses/config.yaml:Z
 Volume=%h/.config/containers/systemd/monitoring-stack-pod/config/provisioning:/etc/perses/provisioning:Z
 
-{% if monitoring_stack_perses_environment_vars is defined %}
 {% for env_name, env_value in monitoring_stack_perses_environment_vars.items() %}
 Environment={{ env_name }}={{ env_value }}
 {% endfor %}
-{% endif %}
 
-{% if monitoring_stack_proxy_enabled %}
-{% for env_var in monitoring_stack_proxy_env %}
-Environment={{ env_var }}
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
 {% endfor %}
-{% endif %}
 
-{% for item in (monitoring_stack_extra_files | default([]) + monitoring_stack_extra_dirs | default([])) if item.mount is defined and item.mount %}
-Volume={{ item.source | default('%h/.config/containers/systemd/monitoring-stack-pod/' ~ item.dest) }}:{{ item.mount }}:Z
-{% endfor %}
 [Service]
 Restart=always

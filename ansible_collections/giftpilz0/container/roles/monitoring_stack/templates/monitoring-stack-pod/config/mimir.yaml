@@ -1,5 +1,4 @@
-# Grafana Mimir – single-node / monolithic mode.
-# Docs: https://grafana.com/docs/mimir/latest/configure/configuration-parameters/
+# Grafana Mimir, monolithic mode: https://grafana.com/docs/mimir/latest/configure/configuration-parameters/
 
 multitenancy_enabled: false
 
@@ -19,8 +18,8 @@ common:
     s3:
       endpoint: "127.0.0.1:{{ monitoring_stack_garage_s3_api_port }}"
       region: "{{ monitoring_stack_garage_region }}"
-      access_key_id: "{{ monitoring_stack_mimir_access_key_id | default('') }}"
-      secret_access_key: "{{ monitoring_stack_mimir_secret_access_key | default('') }}"
+      access_key_id: "{{ monitoring_stack_mimir_access_key_id }}"
+      secret_access_key: "{{ monitoring_stack_mimir_secret_access_key }}"
       insecure: true
       http:
         idle_conn_timeout: 90s

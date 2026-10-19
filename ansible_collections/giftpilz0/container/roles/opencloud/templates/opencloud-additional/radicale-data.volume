@@ -1,4 +1,6 @@
+{% if opencloud_radicale_enabled %}
 [Unit]
 Description=Radicale Data Volume
 
 [Volume]
+{% endif %}

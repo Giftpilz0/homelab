@@ -1,0 +1,26 @@
+---
+# Derived values, not meant to be overridden.
+_quadlet_base: "/home/{{ podman_user }}/.config/containers/systemd"
+_quadlet_role_path: "{{ role_path | dirname }}/{{ quadlet_role }}"
+
+_quadlet_extra_files: "{{ [quadlet_extra_file_defaults] | product(quadlet_extra_files) | map('combine') | list }}"
+_quadlet_extra_dirs: "{{ [quadlet_extra_dir_defaults] | product(quadlet_extra_dirs) | map('combine') | list }}"
+_quadlet_builds: "{{ [quadlet_build_defaults] | product(quadlet_builds) | map('combine') | list }}"
+
+# Volume= values for the mounted extra files/dirs, used by the service templates.
+quadlet_extra_volumes: >-
+  {%- set volumes = [] -%}
+  {%- for item in _quadlet_extra_files + _quadlet_extra_dirs if item.mount -%}
+  {%- set _ = volumes.append((item.source or '%h/.config/containers/systemd/' ~ quadlet_dir ~ '/' ~ item.dest) ~ ':' ~ item.mount ~ (':Z' if item.relabel else '')) -%}
+  {%- endfor -%}
+  {{ volumes }}
+
+quadlet_proxy_env: >-
+  {{ {'https_proxy': podman_proxy_https, 'http_proxy': podman_proxy_http, 'no_proxy': podman_proxy_no_proxy}
+     | dict2items | selectattr('value') | items2dict if podman_proxy_enabled else {} }}
+
+_quadlet_changed: >-
+  {{ quadlet_force_restart or quadlet_images_changed
+     or _quadlet_templates is changed or _quadlet_files is changed
+     or _quadlet_extra_copied is changed or _quadlet_extra_templated is changed
+     or _quadlet_extra_dirs_copied is changed or _quadlet_stale is changed }}

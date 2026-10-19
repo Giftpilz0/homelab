@@ -3,8 +3,7 @@ Description=MariaDB Backup Daemon
 
 [Container]
 ContainerName=mariadb-backup
-Image=docker.io/library/mariadb:{{ mariadb_version }}
-
+Image={{ mariadb_image }}:{{ mariadb_version }}
 Pod=mariadb.pod
 
 {% if mariadb_backup_entrypoint %}

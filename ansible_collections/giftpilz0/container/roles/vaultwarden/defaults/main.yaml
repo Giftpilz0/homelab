@@ -1,74 +1,37 @@
 ---
 ## Primary
-# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
-# Network
-# Network to join even when _network_enabled: false
+# Image
+vaultwarden_image: "docker.io/vaultwarden/server"
+# renovate: datasource=docker depName=vaultwarden/server
+vaultwarden_version: "1.37.4-alpine"
+vaultwarden_autoupdate: true
+
+# Network (always joined, created only when enabled)
 vaultwarden_network_enabled: true
 vaultwarden_network_name: "vaultwarden-internal"
+vaultwarden_network_driver: "bridge"
 
-# Optional: expose this service directly on the host, bypassing Traefik.
-# Not required for Traefik to reach it -- Traefik connects directly over the
-# shared Podman network using the container name and container port.
-# _bind_ip and _port_map are independent: override _bind_ip alone to change
-# where it's exposed, or _port_map alone ("host_port:container_port") to
-# change which ports -- no need to redefine both together.
-vaultwarden_bind_ip: "127.0.0.1"
+# Host ports (not needed behind Traefik)
 vaultwarden_port_map_enabled: true
+vaultwarden_bind_ip: "127.0.0.1"
 vaultwarden_port_map:
   - "80:80"
 
-# Versions
-# renovate: datasource=docker depName=vaultwarden/server
-vaultwarden_version: "1.37.4-alpine"
-
-# Autoupdate
-vaultwarden_autoupdate: true
-
-# Environment
+## Service
 vaultwarden_domain: ""
 vaultwarden_admin_token: ""
 
+# Environment
 vaultwarden_environment_vars:
   DOMAIN: "{{ vaultwarden_domain }}"
   ADMIN_TOKEN: "{{ vaultwarden_admin_token }}"
   ROCKET_PORT: "80"
 
-# Copy arbitrary extra files/directories from the inventory into this role's
-# quadlet directory (relative to the <role>-pod dir).
-# Each entry supports src (controller path) or source (target path), dest,
-# optional mount, mode, and template (files only).
-# Example:
-#   vaultwarden_extra_files:
-#     - src: "assets/example/config.yaml"
-#       dest: "config/example.yaml"
-#       mode: "0640"
-#       template: true
-#       mount: "/etc/example/config.yaml"
-#     - source: "/srv/example/license.key"
-#       dest: "host-license.key"
-#       mount: "/run/secrets/license.key"
-#   vaultwarden_extra_dirs:
-#     - src: "assets/example/plugins/"
-#       dest: "plugins"
-#       mount: "/usr/local/share/example/plugins"
-#     - source: "/srv/example/plugins"
-#       dest: "host-plugins"
-#       mount: "/usr/local/share/example/host-plugins"
-vaultwarden_extra_files: []
-vaultwarden_extra_dirs: []
-
+## Advanced
 vaultwarden_entrypoint: ""
 
-## Advanced
-# Proxy
-vaultwarden_proxy_enabled: false
-vaultwarden_proxy_http: ""
-vaultwarden_proxy_https: ""
-vaultwarden_proxy_no_proxy: ""
-vaultwarden_proxy_env: "{{ (['https_proxy=' ~ vaultwarden_proxy_https] + (['http_proxy=' ~ vaultwarden_proxy_http] if vaultwarden_proxy_http else []) + (['no_proxy='
-  ~ vaultwarden_proxy_no_proxy] if vaultwarden_proxy_no_proxy else [])) if vaultwarden_proxy_enabled else [] }}"
-
-# Network driver
-vaultwarden_network_driver: "bridge"
+# Extra inventory files/dirs, format: see quadlet defaults
+vaultwarden_extra_files: []
+vaultwarden_extra_dirs: []

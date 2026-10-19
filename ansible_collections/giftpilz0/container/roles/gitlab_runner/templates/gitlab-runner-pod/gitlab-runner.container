@@ -3,8 +3,7 @@ Description=Gitlab-runner Container
 
 [Container]
 ContainerName=gitlab-runner
-Image=docker.io/gitlab/gitlab-runner:{{ gitlab_runner_version }}
-
+Image={{ gitlab_runner_image }}:{{ gitlab_runner_version }}
 Pod=gitlab-runner.pod
 
 {% if gitlab_runner_autoupdate %}
@@ -14,23 +13,16 @@ AutoUpdate=registry
 Entrypoint={{ gitlab_runner_entrypoint }}
 {% endif %}
 
-{% if gitlab_runner_environment_vars is defined %}
 {% for env_name, env_value in gitlab_runner_environment_vars.items() %}
 Environment={{ env_name }}={{ env_value }}
 {% endfor %}
-{% endif %}
-
-{% if gitlab_runner_proxy_enabled %}
-{% for env_var in gitlab_runner_proxy_env %}
-Environment={{ env_var }}
-{% endfor %}
-{% endif %}
 
 Volume=%h/.config/containers/systemd/gitlab-runner-pod/config/config.toml:/etc/gitlab-runner/config.toml:Z
 Volume=/run/user/%U/podman/podman.sock:/var/run/docker.sock:Z
 
-{% for item in (gitlab_runner_extra_files | default([]) + gitlab_runner_extra_dirs | default([])) if item.mount is defined and item.mount %}
-Volume={{ item.source | default('%h/.config/containers/systemd/gitlab-runner-pod/' ~ item.dest) }}:{{ item.mount }}:Z
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
 {% endfor %}
+
 [Service]
 Restart=always

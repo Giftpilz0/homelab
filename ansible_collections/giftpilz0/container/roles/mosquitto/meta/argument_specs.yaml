@@ -6,174 +6,114 @@ argument_specs:
       podman_user:
         type: str
         required: false
-        default: "{{ ansible_user }}"
-        description: system user for rootless podman operations.
+        description: System user for rootless podman operations.
 
-      mosquitto_proxy_enabled:
+      mosquitto_image:
+        type: str
+        required: false
+        description: Custom image name and tag.
+
+      mosquitto_version:
+        type: str
+        required: false
+        description: mosquitto release built from source (e.g. 2.1.2); the go-auth plugin is built against it.
+
+      mosquitto_go_auth_version:
+        type: str
+        required: false
+        description: Mosquitto-go-auth release used to build the image.
+
+      mosquitto_autoupdate:
         type: bool
         required: false
-        default: false
-        description: enable HTTP proxy for image pulls.
-
-      mosquitto_proxy_http:
-        type: str
-        required: false
-        default: ""
-        description: HTTP proxy URL.
-
-      mosquitto_proxy_https:
-        type: str
-        required: false
-        default: ""
-        description: HTTPS proxy URL.
-
-      mosquitto_proxy_no_proxy:
-        type: str
-        required: false
-        default: ""
-        description: comma-separated list of proxy exclusions.
-
-      mosquitto_proxy_env:
-        type: list
-        elements: str
-        required: false
-        default: []
-        description: generated proxy environment entries.
+        description: Enable podman auto-update for this container.
 
       mosquitto_network_enabled:
         type: bool
         required: false
-        default: true
-        description: create and manage the podman network.
-
-      mosquitto_network_driver:
-        type: str
-        required: false
-        default: bridge
-        description: podman network driver.
+        description: Create and manage the podman network.
 
       mosquitto_network_name:
         type: str
         required: false
-        default: mosquitto-internal
-        description: podman network name.
+        description: Podman network name.
 
-      mosquitto_bind_ip:
+      mosquitto_network_driver:
         type: str
         required: false
-        default: "127.0.0.1"
-        description: host IP to bind exposed ports to.
+        description: Podman network driver.
 
       mosquitto_port_map_enabled:
         type: bool
         required: false
-        default: true
-        description: expose container ports on the host.
+        description: Expose container ports on the host.
+
+      mosquitto_bind_ip:
+        type: str
+        required: false
+        description: Host IP to bind exposed ports to.
 
       mosquitto_port_map:
         type: list
         elements: str
         required: false
-        default:
-          - "1883:1883"
-          - "9001:9001"
-        description: host:container port mappings.
-
-      mosquitto_version:
-        type: str
-        required: false
-        default: "2.1-alpine"
-        description: Mosquitto version identifier used in the custom image tag.
-
-      mosquitto_go_auth_version:
-        type: str
-        required: false
-        default: "3.5.0"
-        description: mosquitto-go-auth release used to build the image.
-
-      mosquitto_image:
-        type: str
-        required: false
-        description: custom image name and tag.
-
-      mosquitto_image_name:
-        type: str
-        required: false
-        default: "localhost/mosquitto-custom"
-        description: custom image name.
-
-      mosquitto_image_tag:
-        type: str
-        required: false
-        description: custom image tag.
-
-      mosquitto_autoupdate:
-        type: bool
-        required: false
-        default: true
-        description: enable podman auto-update for this container.
-
-      mosquitto_environment_vars:
-        type: dict
-        required: false
-        default: {}
-        description: extra environment variables injected into the container.
-
-      mosquitto_pwfile_users:
-        type: dict
-        required: false
-        default: {}
-        description: map of username to password_hash for the password file.
+        description: Host:container port mappings.
 
       mosquitto_users:
         type: dict
         required: false
-        default: {}
-        description: map of username to clear-text password; hashes are generated during deployment.
+        description: Map of username to clear-text password; hashes are generated during deployment.
+
+      mosquitto_rehash_passwords:
+        type: bool
+        required: false
+        description: Regenerate all password hashes instead of keeping deployed ones.
+
+      mosquitto_pwfile_users:
+        type: dict
+        required: false
+        description: Map of username to password_hash for the password file.
 
       mosquitto_acl_users:
         type: dict
         required: false
-        default: {}
-        description: map of usernames to ACL rule objects or raw topic rules.
+        description: Map of usernames to ACL rule objects or raw topic rules.
 
       mosquitto_acl_patterns:
         type: list
         elements: dict
         required: false
-        default:
-          - access: readwrite
-            topic: "%u/#"
         description: ACL pattern rules using %u and %c substitutions.
 
       mosquitto_acl_rules:
         type: list
         elements: str
         required: false
-        default: []
-        description: raw Mosquitto ACL lines for advanced rules.
+        description: Raw Mosquitto ACL lines for advanced rules.
 
       mosquitto_go_auth_options:
         type: dict
         required: false
-        description: map passed through as auth_opt_* go-auth settings.
+        description: Map passed through as auth_opt_* go-auth settings.
+
+      mosquitto_environment_vars:
+        type: dict
+        required: false
+        description: Extra environment variables injected into the container.
+
+      mosquitto_entrypoint:
+        type: str
+        required: false
+        description: Optional container entrypoint override.
 
       mosquitto_extra_files:
         type: list
         elements: dict
         required: false
-        default: []
-        description: arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+        description: Arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
 
       mosquitto_extra_dirs:
         type: list
         elements: dict
         required: false
-        default: []
-        description: arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.
-
-      mosquitto_entrypoint:
-        type: str
-        required: false
-        default: ""
-        description: optional container entrypoint override.
+        description: Arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.

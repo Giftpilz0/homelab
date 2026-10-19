@@ -3,13 +3,12 @@ Description=OpenCloud Container
 
 [Container]
 ContainerName=opencloud
-Image=docker.io/opencloudeu/opencloud-rolling:{{ opencloud_version }}
-
+Image={{ opencloud_image }}:{{ opencloud_version }}
 Pod=opencloud.pod
 
-{% set _extra_assets = opencloud_extra_files | default([]) + opencloud_extra_dirs | default([]) %}
-{% set _theming = _extra_assets | selectattr('mount', 'defined') | selectattr('mount', 'search', '/var/lib/opencloud/web/assets/custom-themes') | list | length > 0 %}
-{% set _plugins = _extra_assets | selectattr('mount', 'defined') | selectattr('mount', 'search', '/var/lib/opencloud/web/assets/custom-apps') | list | length > 0 %}
+{% set _mounts = (opencloud_extra_files + opencloud_extra_dirs) | selectattr('mount', 'defined') | map(attribute='mount') %}
+{% set _theming = _mounts | select('search', '/var/lib/opencloud/web/assets/custom-themes') | list | length > 0 %}
+{% set _plugins = _mounts | select('search', '/var/lib/opencloud/web/assets/custom-apps') | list | length > 0 %}
 
 {% if opencloud_autoupdate %}
 AutoUpdate=registry
@@ -18,11 +17,9 @@ AutoUpdate=registry
 Entrypoint={{ opencloud_entrypoint }}
 {% endif %}
 
-{% if opencloud_environment_vars is defined %}
 {% for env_name, env_value in opencloud_environment_vars.items() %}
 Environment={{ env_name }}={{ env_value }}
 {% endfor %}
-{% endif %}
 
 {% if opencloud_collabora_enabled %}
 Environment=OC_ADD_RUN_SERVICES={{ opencloud_environment_vars.get('OC_ADD_RUN_SERVICES', '') }}{{ ',' if opencloud_environment_vars.get('OC_ADD_RUN_SERVICES', '') else '' }}collaboration
@@ -48,12 +45,6 @@ Environment=WEB_UI_CONFIG_FILE=/etc/opencloud/web-config.json
 Environment=WEB_ASSET_APPS_PATH=/var/lib/opencloud/web/assets/custom-apps
 {% endif %}
 
-{% if opencloud_proxy_enabled %}
-{% for env_var in opencloud_proxy_env %}
-Environment={{ env_var }}
-{% endfor %}
-{% endif %}
-
 Volume=opencloud-config.volume:/etc/opencloud/
 Volume=opencloud-data.volume:/var/lib/opencloud/
 Volume=%h/.config/containers/systemd/opencloud-pod/config/idp.yaml:/etc/opencloud/idp.yaml:Z
@@ -61,8 +52,8 @@ Volume=%h/.config/containers/systemd/opencloud-pod/config/csp.yaml:/etc/openclou
 {% if opencloud_radicale_enabled %}
 Volume=%h/.config/containers/systemd/opencloud-pod/config/proxy.yaml:/etc/opencloud/proxy.yaml:Z
 {% endif %}
-{% for item in _extra_assets if item.mount is defined and item.mount %}
-Volume={{ item.source | default('%h/.config/containers/systemd/opencloud-pod/' ~ item.dest) }}:{{ item.mount }}:Z
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
 {% endfor %}
 {% if _theming %}
 Volume=%h/.config/containers/systemd/opencloud-pod/config/web-config.json:/etc/opencloud/web-config.json:Z

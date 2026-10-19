@@ -1,125 +1,77 @@
 ---
 ## Primary
-# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
-# Network
-# Network to join even when _network_enabled: false
-forgejo_network_enabled: true
-forgejo_network_name: "forgejo-internal"
-
-# Optional: expose this service directly on the host, bypassing Traefik.
-# Not required for Traefik to reach it -- Traefik connects directly over the
-# shared Podman network using the container name and container port.
-# _bind_ip and _port_map are independent: override _bind_ip alone to change
-# where it's exposed, or _port_map alone ("host_port:container_port") to
-# change which ports -- no need to redefine both together.
-forgejo_bind_ip: "127.0.0.1"
-forgejo_port_map_enabled: true
-forgejo_port_map:
-  - "3000:3000"
-  - "2222:2222"
-
-# Version
+# Image
+forgejo_image: "codeberg.org/forgejo/forgejo"
 # renovate: datasource=docker depName=codeberg.org/forgejo/forgejo
 forgejo_version: "16.0.6"
-
-# Autoupdate
 forgejo_autoupdate: true
 
-# Database: forgejo uses the shared giftpilz0.container.postgresql role as its
-# database backend (a separate pod on the same Podman network) rather than an
-# embedded postgres container. Point forgejo_db_host at that pod/container name.
+# Network (always joined, created only when enabled)
+forgejo_network_enabled: true
+forgejo_network_name: "forgejo-internal"
+forgejo_network_driver: "bridge"
+
+# Host ports (not needed behind Traefik)
+forgejo_port_map_enabled: true
+forgejo_bind_ip: "127.0.0.1"
+forgejo_port_map:
+  - "3000:3000"
+  - "{{ forgejo_ssh_port }}:22"
+
+## Service
+forgejo_domain: ""
+# Host port of the git SSH server (22 belongs to the host sshd), shown in clone URLs
+forgejo_ssh_port: 2222
+forgejo_log_level: "Info"
+
+# Database (giftpilz0.container.postgresql pod on the forgejo network)
 forgejo_db_host: "postgresql-pod"
 forgejo_db_name: "forgejo"
 forgejo_db_user: "forgejo"
 forgejo_db_password: ""
-forgejo_domain: ""
+
+# OAuth source, managed by the forgejo-oauth-init container
+forgejo_oauth_name: ""
+forgejo_oauth_domain: ""
 forgejo_oauth_client_id: ""
 forgejo_oauth_client_secret: ""
-forgejo_oauth_domain: ""
-forgejo_oauth_name: ""
 forgejo_oauth_admin_group: "forgejo-admin"
-
-# Copy arbitrary extra files/directories from the inventory into this role's
-# quadlet directory (relative to the <role>-pod dir).
-# Each entry supports src (controller path) or source (target path), dest,
-# optional mount, mode, and template (files only).
-# Example:
-#   forgejo_extra_files:
-#     - src: "assets/example/config.yaml"
-#       dest: "config/example.yaml"
-#       mode: "0640"
-#       template: true
-#       mount: "/etc/example/config.yaml"
-#     - source: "/srv/example/license.key"
-#       dest: "host-license.key"
-#       mount: "/run/secrets/license.key"
-#   forgejo_extra_dirs:
-#     - src: "assets/example/plugins/"
-#       dest: "plugins"
-#       mount: "/usr/local/share/example/plugins"
-#     - source: "/srv/example/plugins"
-#       dest: "host-plugins"
-#       mount: "/usr/local/share/example/host-plugins"
-forgejo_extra_files: []
-forgejo_extra_dirs: []
-
-# Optional container entrypoint overrides.
-forgejo_entrypoint: ""
-forgejo_oauth_init_entrypoint: ""
-
-## Advanced
-# Proxy
-forgejo_proxy_enabled: false
-forgejo_proxy_http: ""
-forgejo_proxy_https: ""
-forgejo_proxy_no_proxy: ""
-forgejo_proxy_env: "{{ (['https_proxy=' ~ forgejo_proxy_https] + (['http_proxy=' ~ forgejo_proxy_http] if forgejo_proxy_http else []) + (['no_proxy=' ~ forgejo_proxy_no_proxy]
-  if forgejo_proxy_no_proxy else [])) if forgejo_proxy_enabled else [] }}"
-
-# Network driver
-forgejo_network_driver: "bridge"
 
 # Environment
 forgejo_environment_vars:
   USER_UID: "1000"
   USER_GID: "1000"
 
-  # DEFAULT section
   APP_NAME: "Forgejo"
   APP_SLOGAN: ""
 
-  # Server section
   FORGEJO__server__DOMAIN: "{{ forgejo_domain }}"
   FORGEJO__server__ROOT_URL: "https://{{ forgejo_domain }}/"
   FORGEJO__server__PROTOCOL: "http"
   FORGEJO__server__HTTP_PORT: 3000
-  FORGEJO__server__SSH_PORT: 2222
-
+  FORGEJO__server__SSH_PORT: "{{ forgejo_ssh_port }}"
+  # OpenSSH inside the container
+  SSH_LISTEN_PORT: 22
   FORGEJO__server__OFFLINE_MODE: false
 
-  # Log section
-  FORGEJO__log__LEVEL: "{{ forgejo_log_level | default('Info') }}"
+  FORGEJO__log__LEVEL: "{{ forgejo_log_level }}"
 
-  # Database section
   FORGEJO__database__DB_TYPE: "postgres"
   FORGEJO__database__HOST: "{{ forgejo_db_host }}:5432"
   FORGEJO__database__NAME: "{{ forgejo_db_name }}"
   FORGEJO__database__USER: "{{ forgejo_db_user }}"
   FORGEJO__database__PASSWD: "{{ forgejo_db_password }}"
 
-  # Security section
   FORGEJO__security__LOGIN_REMEMBER_DAYS: "14"
   FORGEJO__security__INSTALL_LOCK: true
 
-  # Service Configuration
   FORGEJO__service__DISABLE_REGISTRATION: true
   FORGEJO__service__ALLOW_ONLY_EXTERNAL_REGISTRATION: true
   FORGEJO__service__SHOW_REGISTRATION_BUTTON: false
   FORGEJO__service__ENABLE_INTERNAL_SIGNIN: true
 
-  # OAuth2 Client section
   FORGEJO__oauth2_client__ENABLE_AUTO_REGISTRATION: true
   FORGEJO__oauth2_client__USERNAME: "preferred_username"
   FORGEJO__oauth2_client__UPDATE_AVATAR: true
@@ -127,14 +79,21 @@ forgejo_environment_vars:
   FORGEJO__oauth2_client__OPENID_CONNECT_SCOPES: '"profile email"'
   FORGEJO__oauth2_client__ADMIN_GROUP: "{{ forgejo_oauth_admin_group }}"
 
-  # OpenID section
   FORGEJO__openid__ENABLE_OPENID_SIGNIN: false
   FORGEJO__openid__ENABLE_OPENID_SIGNUP: false
 
-  # OAuth Source Configuration
+  # Read by forgejo-oauth-init
   OAUTH_NAME: "{{ forgejo_oauth_name }}"
   OAUTH_CLIENT_ID: "{{ forgejo_oauth_client_id }}"
   OAUTH_CLIENT_SECRET: "{{ forgejo_oauth_client_secret }}"
   OAUTH_DISCOVERY_URL: "https://{{ forgejo_oauth_domain }}/.well-known/openid-configuration"
   OAUTH_SCOPES: "openid profile email groups"
   OAUTH_ADMIN_GROUP: "{{ forgejo_oauth_admin_group }}"
+
+## Advanced
+forgejo_entrypoint: ""
+forgejo_oauth_init_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+forgejo_extra_files: []
+forgejo_extra_dirs: []

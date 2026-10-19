@@ -1,4 +1,0 @@
-[Unit]
-Description=Authentik PostgreSQL Volume
-
-[Volume]

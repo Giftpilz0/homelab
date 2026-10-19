@@ -1,3 +1,4 @@
+{% if opencloud_collabora_enabled %}
 [Unit]
 Description=Collabora Online for OpenCloud
 After=collabora-proof-key.service
@@ -5,8 +6,7 @@ Requires=collabora-proof-key.service
 
 [Container]
 ContainerName=collabora
-Image=docker.io/collabora/code:{{ opencloud_collabora_version }}
-
+Image={{ opencloud_collabora_image }}:{{ opencloud_collabora_version }}
 Pod=collabora.pod
 
 {% if opencloud_collabora_entrypoint %}
@@ -22,9 +22,10 @@ AutoUpdate=registry
 {% endif %}
 
 Environment=aliasgroup1={{ opencloud_domain }}
-Environment=extra_params=--o:ssl.enable={{ opencloud_collabora_ssl_enable | bool | lower }} --o:ssl.ssl_verification={{ opencloud_collabora_ssl_verification | bool | lower }} --o:ssl.termination={{ opencloud_collabora_ssl_termination | bool | lower }} --o:welcome.enable=false --o:net.frame_ancestors={{ opencloud_domain | regex_replace('^https?://', '') }} --o:net.lok_allow.host[14]=****** opencloud_domain | regex_replace('^https?://', '') }} --o:home_mode.enable={{ opencloud_collabora_home_mode | bool | lower }}
+Environment=extra_params=--o:ssl.enable={{ opencloud_collabora_ssl_enable | bool | lower }} --o:ssl.ssl_verification={{ opencloud_collabora_ssl_verification | bool | lower }} --o:ssl.termination={{ opencloud_collabora_ssl_termination | bool | lower }} --o:allow_update_popup={{ opencloud_collabora_update_popup | bool | lower }} --o:net.frame_ancestors={{ opencloud_domain | regex_replace('^https?://', '') }} --o:net.lok_allow.host[14]={{ opencloud_domain | regex_replace('^https?://', '') }} --o:home_mode.enable={{ opencloud_collabora_home_mode | bool | lower }}
 Environment=username={{ opencloud_collabora_admin_username }}
 Environment=password={{ opencloud_collabora_admin_password }}
 
 [Service]
 Restart=always
+{% endif %}

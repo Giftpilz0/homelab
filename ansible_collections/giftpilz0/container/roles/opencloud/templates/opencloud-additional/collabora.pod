@@ -1,3 +1,4 @@
+{% if opencloud_collabora_enabled %}
 [Unit]
 Description=Collabora Online Pod
 
@@ -11,3 +12,4 @@ Restart=always
 
 [Install]
 WantedBy=default.target
+{% endif %}

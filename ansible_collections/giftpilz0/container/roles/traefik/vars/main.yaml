@@ -1,0 +1,4 @@
+---
+# Service entries merged with their per-entry defaults.
+_traefik_http_services: "{{ [traefik_http_service_defaults] | product(traefik_http_services) | map('combine') | list }}"
+_traefik_tcp_services: "{{ [traefik_tcp_service_defaults] | product(traefik_tcp_services) | map('combine') | list }}"

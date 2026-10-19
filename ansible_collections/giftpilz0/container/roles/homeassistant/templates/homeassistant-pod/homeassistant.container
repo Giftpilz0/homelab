@@ -3,8 +3,7 @@ Description=Homeassistant Container
 
 [Container]
 ContainerName=homeassistant
-Image=ghcr.io/home-assistant/home-assistant:{{ homeassistant_version }}
-
+Image={{ homeassistant_image }}:{{ homeassistant_version }}
 Pod=homeassistant.pod
 
 {% if homeassistant_autoupdate %}
@@ -14,31 +13,19 @@ AutoUpdate=registry
 Entrypoint={{ homeassistant_entrypoint }}
 {% endif %}
 
-{% if homeassistant_environment_vars is defined %}
 {% for env_name, env_value in homeassistant_environment_vars.items() %}
 Environment={{ env_name }}={{ env_value }}
 {% endfor %}
-{% endif %}
 
-{% if homeassistant_proxy_enabled %}
-{% for env_var in homeassistant_proxy_env %}
-Environment={{ env_var }}
-{% endfor %}
-{% endif %}
-
-{% if homeassistant_device %}
-Volume={{ homeassistant_device }}
+{% if homeassistant_device_access %}
 Annotation=run.oci.keep_original_groups=1
 SecurityLabelType=spc_t
 {% endif %}
-
-{% if homeassistant_deebot_module %}
-Volume=%h/.config/containers/systemd/homeassistant-pod/config/8n0t5d.py:/usr/local/lib/python3.14/site-packages/deebot_client/hardware/8n0t5d.py:Z
-{% endif %}
 Volume=homeassistant-data.volume:/config
 
-{% for item in (homeassistant_extra_files | default([]) + homeassistant_extra_dirs | default([])) if item.mount is defined and item.mount %}
-Volume={{ item.source | default('%h/.config/containers/systemd/homeassistant-pod/' ~ item.dest) }}:{{ item.mount }}:Z
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
 {% endfor %}
+
 [Service]
 Restart=always

@@ -1,14 +1,10 @@
-# =============================================================================
-# GLOBAL CONFIGURATION
-# =============================================================================
+# Global
 global:
   checkNewVersion: false
   sendAnonymousUsage: false
 
-{% if traefik_plugins | default({}) %}
-# =============================================================================
-# EXPERIMENTAL PLUGINS
-# =============================================================================
+{% if traefik_plugins %}
+# Experimental plugins
 experimental:
   plugins:
 {% for plugin_name, plugin_config in traefik_plugins.items() %}
@@ -19,14 +15,12 @@ experimental:
 {% endfor %}
 {% endif %}
 
-# =============================================================================
-# ENTRYPOINTS
-# =============================================================================
+# Entrypoints
 entryPoints:
-{% if traefik_http_services | default([]) | length > 0 %}
+{% if traefik_http_services | length > 0 %}
   web:
     address: ":{{ traefik_http_internal_port }}"
-{% if traefik_http_redirect_https | default(true) %}
+{% if traefik_http_redirect_https %}
     http:
       redirections:
         entryPoint:
@@ -37,11 +31,11 @@ entryPoints:
 
   websecure:
     address: ":{{ traefik_https_internal_port }}"
-{% if traefik_http3_enabled | default(false) %}
+{% if traefik_http3_enabled %}
     http3:
-      advertisedPort: {{ traefik_http3_advertised_port | default(443) }}
+      advertisedPort: {{ traefik_http3_advertised_port }}
 {% endif %}
-{% if traefik_transport_timeouts_enabled | default(false) %}
+{% if traefik_transport_timeouts_enabled %}
     transport:
       respondingTimeouts:
         readTimeout: "{{ traefik_transport_read_timeout }}"
@@ -58,17 +52,13 @@ entryPoints:
     address: ":{{ traefik_metrics_internal_port }}"
 {% endif %}
 
-{% if traefik_tcp_entrypoints is defined %}
 {% for entrypoint in traefik_tcp_entrypoints %}
   {{ entrypoint.name }}:
-    address: ":{{ entrypoint.internal_port | default(entrypoint.port) }}"
+    address: ":{{ entrypoint.get('internal_port', entrypoint.port) }}"
 {% endfor %}
-{% endif %}
 
 {% if traefik_acme_enabled %}
-# =============================================================================
-# CERTIFICATES RESOLVERS
-# =============================================================================
+# Certificate resolvers
 certificatesResolvers:
   default:
     acme:
@@ -92,7 +82,7 @@ certificatesResolvers:
         propagation:
             delayBeforeChecks: 60
 {% elif traefik_acme_challenge_type == 'http' %}
-{% if traefik_http_services | default([]) | length > 0 %}
+{% if traefik_http_services | length > 0 %}
       httpChallenge:
         entryPoint: web
 {% endif %}
@@ -101,17 +91,13 @@ certificatesResolvers:
 {% endif %}
 {% endif %}
 
-# =============================================================================
-# PROVIDERS
-# =============================================================================
+# Providers
 providers:
   file:
     directory: /etc/traefik/dynamic
     watch: true
 
-# =============================================================================
-# LOGGING
-# =============================================================================
+# Logging
 log:
   level: {{ traefik_log_level }}
   format: {{ traefik_log_format }}

@@ -1,0 +1,68 @@
+---
+## Host-wide
+podman_user: "{{ ansible_user }}"
+podman_unprivileged_port_start: 80
+
+# Proxy for image pulls, builds and containers
+podman_proxy_enabled: false
+podman_proxy_http: ""
+podman_proxy_https: ""
+podman_proxy_no_proxy: ""
+
+## Set by the calling role
+# Role whose templates/ and files/ are deployed to ~/.config/containers/systemd
+quadlet_role: ""
+quadlet_dir: "{{ quadlet_role | replace('_', '-') }}-pod"
+# Directory modes differing from the role tree, e.g. {"monitoring-stack-pod/config": "0700"}
+quadlet_dir_modes: {}
+
+# Units to start in order; restarted when a deployed file changed
+quadlet_units: []
+quadlet_force_restart: false
+# Set by tasks_from: build
+quadlet_images_changed: false
+
+# Extra files/dirs below quadlet_dir: src (controller) or source (host path), dest,
+# optional mount, mode, template (files only) and relabel (false for device nodes)
+# Example:
+#   <role>_extra_files:
+#     - src: "{{ inventory_dir }}/../host_vars/{{ inventory_hostname }}/assets/app.yaml"
+#       dest: "config/app.yaml"
+#       template: true
+#       mount: "/etc/app/app.yaml"
+#     - source: "/srv/app/license.key"
+#       dest: "license.key"
+#       mount: "/run/secrets/license.key"
+#     - source: "/dev/serial/by-id/usb-dongle"
+#       mount: "/dev/ttyACM0"
+#       relabel: false
+#   <role>_extra_dirs:
+#     - src: "assets/plugins/"
+#       dest: "plugins"
+#       mount: "/usr/share/app/plugins"
+quadlet_extra_files: []
+quadlet_extra_dirs: []
+quadlet_extra_file_defaults:
+  mode: "0640"
+  template: false
+  mount: ""
+  source: ""
+  src: ""
+  relabel: true
+quadlet_extra_dir_defaults:
+  mode: "0755"
+  mount: ""
+  source: ""
+  src: ""
+  relabel: true
+
+# Images for tasks_from: build: name plus git_repo/git_version or src (role dir)
+quadlet_builds: []
+quadlet_build_defaults:
+  tag: "latest"
+  git_repo: ""
+  git_version: "HEAD"
+  src: ""
+  dockerfile: "Dockerfile"
+  cache: true
+  build_args: {}

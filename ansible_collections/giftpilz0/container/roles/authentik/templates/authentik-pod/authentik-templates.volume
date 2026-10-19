@@ -1,4 +1,0 @@
-[Unit]
-Description=Authentik Templates Volume
-
-[Volume]

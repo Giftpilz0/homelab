@@ -6,113 +6,77 @@ argument_specs:
       podman_user:
         type: str
         required: false
-        default: "{{ ansible_user }}"
-        description: system user for rootless podman operations.
+        description: System user for rootless podman operations.
 
-      homeassistant_proxy_enabled:
+      homeassistant_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      homeassistant_version:
+        type: str
+        required: false
+        description: Container image version.
+
+      homeassistant_autoupdate:
         type: bool
         required: false
-        default: false
-        description: enable HTTP proxy for image pulls.
-
-      homeassistant_proxy_http:
-        type: str
-        required: false
-        default: ""
-        description: HTTP proxy URL.
-
-      homeassistant_proxy_https:
-        type: str
-        required: false
-        default: ""
-        description: HTTPS proxy URL.
-
-      homeassistant_proxy_no_proxy:
-        type: str
-        required: false
-        default: ""
-        description: comma-separated list of proxy exclusions.
-
-      homeassistant_proxy_env:
-        type: list
-        elements: str
-        required: false
-        default: []
-        description: generated proxy environment entries.
+        description: Enable podman auto-update for this container.
 
       homeassistant_network_enabled:
         type: bool
         required: false
-        default: true
-        description: create and manage the podman network.
-
-      homeassistant_network_driver:
-        type: str
-        required: false
-        default: bridge
-        description: podman network driver.
+        description: Create and manage the podman network.
 
       homeassistant_network_name:
         type: str
         required: false
-        default: homeassistant-internal
-        description: podman network name.
+        description: Podman network name.
 
-      homeassistant_bind_ip:
+      homeassistant_network_driver:
         type: str
         required: false
-        default: "127.0.0.1"
-        description: host IP to bind exposed ports to.
+        description: Podman network driver.
 
       homeassistant_port_map_enabled:
         type: bool
         required: false
-        default: true
-        description: expose container ports on the host.
+        description: Expose container ports on the host.
+
+      homeassistant_bind_ip:
+        type: str
+        required: false
+        description: Host IP to bind exposed ports to.
 
       homeassistant_port_map:
         type: list
         elements: str
         required: false
-        default:
-          - "8123:8123"
-        description: host:container port mappings.
+        description: Host:container port mappings.
 
-      homeassistant_version:
-        type: str
-        required: false
-        default: "2026.8.3"
-        description: container image version.
-
-      homeassistant_autoupdate:
+      homeassistant_device_access:
         type: bool
         required: false
-        default: true
-        description: enable podman auto-update for this container.
+        description: Grant access to devices mounted via extra files (dialout group, original groups, SELinux spc_t).
 
       homeassistant_environment_vars:
         type: dict
         required: false
-        default:
-          TZ: Europe/Berlin
-        description: extra environment variables injected into the container.
+        description: Extra environment variables injected into the container.
+
+      homeassistant_entrypoint:
+        type: str
+        required: false
+        description: Optional container entrypoint override.
 
       homeassistant_extra_files:
         type: list
         elements: dict
         required: false
-        default: []
-        description: arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+        description: Arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
 
       homeassistant_extra_dirs:
         type: list
         elements: dict
         required: false
-        default: []
-        description: arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.
-
-      homeassistant_entrypoint:
-        type: str
-        required: false
-        default: ""
-        description: optional container entrypoint override.
+        description: Arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.

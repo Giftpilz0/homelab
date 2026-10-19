@@ -11,18 +11,12 @@ url = "{{ gitlab_runner_url }}"
 token = "{{ gitlab_runner_token }}"
 executor = "docker"
 
-{% if gitlab_runner_proxy_enabled %}
 environment = [
-{% for env_var in gitlab_runner_proxy_env %}
-    "{{ env_var }}",
+{% for name, value in quadlet_proxy_env.items() %}
+    "{{ name }}={{ value }}",
 {% endfor %}
     "FF_NETWORK_PER_BUILD=1",
 ]
-{% else %}
-environment = [
-    "FF_NETWORK_PER_BUILD=1",
-]
-{% endif %}
 
 [runners.docker]
 image = "quay.io/podman/stable"

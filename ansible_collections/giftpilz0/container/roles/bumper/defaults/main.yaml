@@ -1,32 +1,28 @@
 ---
 ## Primary
-# The system user under which Podman containers are managed.
 podman_user: "{{ ansible_user }}"
 
-# Network
-# Network to join even when _network_enabled: false
+# Image (built locally)
+bumper_image: "localhost/bumper-custom"
+bumper_version: "latest"
+bumper_git_repo: "https://github.com/MVladislav/bumper.git"
+bumper_commit: "4438eb5e9ffa31b60385052102da68a3a18bf4b7"
+bumper_autoupdate: true
+
+# Network (always joined, created only when enabled)
 bumper_network_enabled: true
 bumper_network_name: "bumper-internal"
+bumper_network_driver: "bridge"
 
-# Bind to primary interface so bumper ports are externally reachable (no traefik).
-# _bind_ip and _port_map are independent: override _bind_ip alone to change
-# where it's exposed, or _port_map alone ("host_port:container_port") to
-# change which ports -- no need to redefine both together.
-bumper_bind_ip: "{{ ansible_facts['default_ipv4']['address'] }}"
+# Host ports: robots connect directly
 bumper_port_map_enabled: true
+bumper_bind_ip: "{{ ansible_facts['default_ipv4']['address'] }}"
 bumper_port_map:
   - "443:443"
   - "1883:1883"
   - "5223:5223"
   - "8007:8007"
   - "8443:8443"
-
-# Build
-bumper_version: "latest"
-bumper_commit: "4438eb5e9ffa31b60385052102da68a3a18bf4b7"
-
-# Autoupdate
-bumper_autoupdate: true
 
 # Environment
 bumper_environment_vars:
@@ -39,40 +35,9 @@ bumper_environment_vars:
   DEBUG_BUMPER_VERBOSE: 2
   DEBUG_BUMPER_LEVEL: "INFO"
 
-# Copy arbitrary extra files/directories from the inventory into this role's
-# quadlet directory (relative to the <role>-pod dir).
-# Each entry supports src (controller path) or source (target path), dest,
-# optional mount, mode, and template (files only).
-# Example:
-#   bumper_extra_files:
-#     - src: "assets/example/config.yaml"
-#       dest: "config/example.yaml"
-#       mode: "0640"
-#       template: true
-#       mount: "/etc/example/config.yaml"
-#     - source: "/srv/example/license.key"
-#       dest: "host-license.key"
-#       mount: "/run/secrets/license.key"
-#   bumper_extra_dirs:
-#     - src: "assets/example/plugins/"
-#       dest: "plugins"
-#       mount: "/usr/local/share/example/plugins"
-#     - source: "/srv/example/plugins"
-#       dest: "host-plugins"
-#       mount: "/usr/local/share/example/host-plugins"
-bumper_extra_files: []
-bumper_extra_dirs: []
-
+## Advanced
 bumper_entrypoint: ""
 
-## Advanced
-# Proxy
-bumper_proxy_enabled: false
-bumper_proxy_http: ""
-bumper_proxy_https: ""
-bumper_proxy_no_proxy: ""
-bumper_proxy_env: "{{ (['https_proxy=' ~ bumper_proxy_https] + (['http_proxy=' ~ bumper_proxy_http] if bumper_proxy_http else []) + (['no_proxy=' ~ bumper_proxy_no_proxy]
-  if bumper_proxy_no_proxy else [])) if bumper_proxy_enabled else [] }}"
-
-# Network driver
-bumper_network_driver: "bridge"
+# Extra inventory files/dirs, format: see quadlet defaults
+bumper_extra_files: []
+bumper_extra_dirs: []

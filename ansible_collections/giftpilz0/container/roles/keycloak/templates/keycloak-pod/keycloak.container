@@ -3,8 +3,7 @@ Description=Keycloak Container
 
 [Container]
 ContainerName=keycloak
-Image=quay.io/keycloak/keycloak:{{ keycloak_version }}
-
+Image={{ keycloak_image }}:{{ keycloak_version }}
 Pod=keycloak.pod
 
 Exec=start
@@ -16,21 +15,13 @@ Entrypoint={{ keycloak_entrypoint }}
 AutoUpdate=registry
 {% endif %}
 
-{% if keycloak_environment_vars is defined %}
 {% for env_name, env_value in keycloak_environment_vars.items() %}
 Environment={{ env_name }}={{ env_value }}
 {% endfor %}
-{% endif %}
-
-{% if keycloak_proxy_enabled %}
-{% for env_var in keycloak_proxy_env %}
-Environment={{ env_var }}
-{% endfor %}
-{% endif %}
 
 Volume=keycloak-data.volume:/opt/keycloak/data
-{% for item in (keycloak_extra_files | default([]) + keycloak_extra_dirs | default([])) if item.mount is defined and item.mount %}
-Volume={{ item.source | default('%h/.config/containers/systemd/keycloak-pod/' ~ item.dest) }}:{{ item.mount }}:Z
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
 {% endfor %}
 
 [Service]

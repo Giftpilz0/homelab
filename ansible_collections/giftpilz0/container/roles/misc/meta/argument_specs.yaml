@@ -6,121 +6,87 @@ argument_specs:
       podman_user:
         type: str
         required: false
-        default: "{{ ansible_user }}"
-        description: system user for rootless podman operations.
+        description: System user for rootless podman operations.
 
-      misc_proxy_enabled:
+      misc_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      misc_version:
+        type: str
+        required: false
+        description: Container image version.
+
+      misc_git_repo:
+        type: str
+        required: false
+        description: Git repository the misc image is built from.
+
+      misc_commit:
+        type: str
+        required: false
+        description: Git commit to build from.
+
+      misc_dockerfile:
+        type: str
+        required: false
+        description: Dockerfile path inside the misc repository.
+
+      misc_autoupdate:
         type: bool
         required: false
-        default: false
-        description: enable HTTP proxy for image pulls.
-
-      misc_proxy_http:
-        type: str
-        required: false
-        default: ""
-        description: HTTP proxy URL.
-
-      misc_proxy_https:
-        type: str
-        required: false
-        default: ""
-        description: HTTPS proxy URL.
-
-      misc_proxy_no_proxy:
-        type: str
-        required: false
-        default: ""
-        description: comma-separated list of proxy exclusions.
-
-      misc_proxy_env:
-        type: list
-        elements: str
-        required: false
-        default: []
-        description: generated proxy environment entries.
+        description: Enable podman auto-update for this container.
 
       misc_network_enabled:
         type: bool
         required: false
-        default: true
-        description: create and manage the podman network.
-
-      misc_network_driver:
-        type: str
-        required: false
-        default: bridge
-        description: podman network driver.
+        description: Create and manage the podman network.
 
       misc_network_name:
         type: str
         required: false
-        default: misc-internal
-        description: podman network name.
+        description: Podman network name.
 
-      misc_bind_ip:
+      misc_network_driver:
         type: str
         required: false
-        default: "{{ ansible_facts['default_ipv4']['address'] }}"
-        description: host IP to bind exposed ports to.
+        description: Podman network driver.
 
       misc_port_map_enabled:
         type: bool
         required: false
-        default: true
-        description: expose container ports on the host.
+        description: Expose container ports on the host.
+
+      misc_bind_ip:
+        type: str
+        required: false
+        description: Host IP to bind exposed ports to.
 
       misc_port_map:
         type: list
         elements: str
         required: false
-        default:
-          - "8080:8080"
-        description: host:container port mappings.
-
-      misc_version:
-        type: str
-        required: false
-        default: latest
-        description: container image version.
-
-      misc_commit:
-        type: str
-        required: false
-        default: "db16ab7ca40f6e1e98e6e7a3947fb9e2aa04f527"
-        description: git commit to build from.
-
-      misc_autoupdate:
-        type: bool
-        required: false
-        default: true
-        description: enable podman auto-update for this container.
+        description: Host:container port mappings.
 
       misc_environment_vars:
         type: dict
         required: false
-        default:
-          TZ: Europe/Berlin
-          LOGLEVEL: INFO
-          PORT: 8080
-        description: extra environment variables injected into the container.
+        description: Extra environment variables injected into the container.
+
+      misc_entrypoint:
+        type: str
+        required: false
+        description: Optional container entrypoint override.
 
       misc_extra_files:
         type: list
         elements: dict
         required: false
-        default: []
-        description: arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+        description: Arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
 
       misc_extra_dirs:
         type: list
         elements: dict
         required: false
-        default: []
-        description: arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.
-
-      misc_entrypoint:
-        type: str
-        required: false
-        default: ""
-        description: optional container entrypoint override.
+        description: Arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.

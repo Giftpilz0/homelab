@@ -3,36 +3,28 @@ Description=Mosquitto Container
 
 [Container]
 ContainerName=mosquitto
-Image={{ mosquitto_image }}
-
+Image={{ mosquitto_image }}:{{ mosquitto_version }}-{{ mosquitto_go_auth_version }}
 Pod=mosquitto.pod
 
 {% if mosquitto_autoupdate %}
-AutoUpdate=registry
+AutoUpdate=local
 {% endif %}
 {% if mosquitto_entrypoint %}
 Entrypoint={{ mosquitto_entrypoint }}
 {% endif %}
 
-{% if mosquitto_environment_vars is defined %}
 {% for env_name, env_value in mosquitto_environment_vars.items() %}
 Environment={{ env_name }}={{ env_value }}
 {% endfor %}
-{% endif %}
-
-{% if mosquitto_proxy_enabled %}
-{% for env_var in mosquitto_proxy_env %}
-Environment={{ env_var }}
-{% endfor %}
-{% endif %}
 
 Volume=%h/.config/containers/systemd/mosquitto-pod/config/passwd:/mosquitto/config/passwd:Z
 Volume=%h/.config/containers/systemd/mosquitto-pod/config/acl:/mosquitto/config/acl:Z
 Volume=%h/.config/containers/systemd/mosquitto-pod/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:Z
 Volume=mosquitto-data.volume:/mosquitto/data
 
-{% for item in (mosquitto_extra_files | default([]) + mosquitto_extra_dirs | default([])) if item.mount is defined and item.mount %}
-Volume={{ item.source | default('%h/.config/containers/systemd/mosquitto-pod/' ~ item.dest) }}:{{ item.mount }}:Z
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
 {% endfor %}
+
 [Service]
 Restart=always

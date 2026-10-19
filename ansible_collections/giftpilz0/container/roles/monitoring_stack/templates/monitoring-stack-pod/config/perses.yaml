@@ -1,5 +1,4 @@
-# Perses – dashboarding server
-# Docs: https://perses.dev/perses/docs/configuration/configuration/
+# Perses: https://perses.dev/perses/docs/configuration/configuration/
 
 database:
   file:
@@ -7,8 +6,7 @@ database:
 
 security:
   enable_auth: {{ monitoring_stack_perses_oidc_enabled | bool | lower }}
-  # The monitoring instance is provisioned from Git; authenticated users can
-  # view every provisioned resource but cannot modify it through the UI or API.
+  # Provisioned from git, read-only for users
   readonly: true
   cookie:
     secure: true
