@@ -6,6 +6,6 @@ This packer project automates the creation of Proxmox virtual machine templates.
 
 ```bash
 cd almalinux10/
-sops edit secrets.yaml
-sops exec-env secrets.yaml 'packer build almalinux.pkr.hcl'
+sops edit secrets.sops.yaml
+sops exec-env secrets.sops.yaml 'packer build almalinux.pkr.hcl'
 ```
