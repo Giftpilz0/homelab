@@ -1,7 +1,7 @@
 ---
 # Derived values, not meant to be overridden.
 _quadlet_base: "/home/{{ podman_user }}/.config/containers/systemd"
-_quadlet_role_path: "{{ role_path | dirname }}/{{ quadlet_role }}"
+_quadlet_role_path: "{{ quadlet_role_path }}"
 
 _quadlet_extra_files: "{{ [quadlet_extra_file_defaults] | product(quadlet_extra_files) | map('combine') | list }}"
 _quadlet_extra_dirs: "{{ [quadlet_extra_dir_defaults] | product(quadlet_extra_dirs) | map('combine') | list }}"

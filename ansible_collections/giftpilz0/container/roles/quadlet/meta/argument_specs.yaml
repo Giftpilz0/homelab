@@ -36,7 +36,12 @@ argument_specs:
       quadlet_role:
         type: str
         required: true
-        description: Service role (in this collection) whose templates/ and files/ trees are deployed.
+        description: Service role whose templates/ and files/ trees are deployed.
+
+      quadlet_role_path:
+        type: path
+        required: false
+        description: Path of the service role, needed for roles outside this collection.
 
       quadlet_dir:
         type: str

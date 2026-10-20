@@ -13,6 +13,8 @@ podman_proxy_no_proxy: ""
 # Role whose templates/ and files/ are deployed to ~/.config/containers/systemd
 quadlet_role: ""
 quadlet_dir: "{{ quadlet_role | replace('_', '-') }}-pod"
+# Path of that role; roles of other collections pass "{{ ansible_parent_role_paths[0] }}"
+quadlet_role_path: "{{ role_path | dirname }}/{{ quadlet_role }}"
 # Directory modes differing from the role tree, e.g. {"monitoring-stack-pod/config": "0700"}
 quadlet_dir_modes: {}
 
