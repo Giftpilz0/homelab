@@ -35,7 +35,7 @@ done
 
 # Recursive/bulk reads that reach tofu/ (plain state while decrypted, .terraform/), e.g. `grep -r x .`
 # from the repo root. Paths are resolved against the cwd, following `cd` within the command.
-python3 - "$command" "${cwd:-$PWD}" "${CLAUDE_PROJECT_DIR:-$PWD}" <<'EOF' || block "recursive read reaching tofu/ (plain state). Search tracked files with 'git grep' or name the files explicitly"
+python3 -I - "$command" "${cwd:-$PWD}" "${CLAUDE_PROJECT_DIR:-$PWD}" <<'EOF' || block "recursive read reaching tofu/ (plain state). Search tracked files with 'git grep' or name the files explicitly"
 import os, re, shlex, sys
 
 command, cwd, root = sys.argv[1:4]
