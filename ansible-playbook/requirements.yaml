@@ -17,6 +17,6 @@ collections:
   - name: community.windows
     version: "3.3.0"
   - name: containers.podman
-    version: "1.21.1"
+    version: "1.21.2"
   - name: kubernetes.core
     version: "6.6.0"
