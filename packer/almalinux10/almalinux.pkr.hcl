@@ -88,6 +88,7 @@ source "proxmox-iso" "almalinux10" {
 build {
   sources = ["source.proxmox-iso.almalinux10"]
   provisioner "shell" {
-    inline = ["passwd -d root", "passwd -l root", "rm -f /etc/ssh/ssh_config.d/allow-root-ssh.conf"]
+    # Clones generate their own machine-id
+    inline = ["passwd -d root", "passwd -l root", "rm -f /etc/ssh/sshd_config.d/allow-root-ssh.conf", "truncate -s 0 /etc/machine-id"]
   }
 }
