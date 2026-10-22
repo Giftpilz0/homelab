@@ -70,7 +70,7 @@ navidrome_webui_environment_vars:
 ### giftpilz0.container.suwayomi
 
 # renovate: datasource=docker depName=ghcr.io/suwayomi/suwayomi-server
-suwayomi_version: "v2.4.2422"
+suwayomi_version: "v2.4.2435"
 # renovate: datasource=docker depName=ghcr.io/thephaseless/byparr
 suwayomi_flaresolverr_version: "3.0.4"
 

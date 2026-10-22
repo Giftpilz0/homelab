@@ -9,15 +9,15 @@ monitoring_stack_garage_version: "v2.4.1"
 monitoring_stack_garage_autoupdate: true
 monitoring_stack_mimir_image: "docker.io/grafana/mimir"
 # renovate: datasource=docker depName=grafana/mimir
-monitoring_stack_mimir_version: "3.2.2"
+monitoring_stack_mimir_version: "3.2.3"
 monitoring_stack_mimir_autoupdate: true
 monitoring_stack_loki_image: "docker.io/grafana/loki"
 # renovate: datasource=docker depName=grafana/loki
-monitoring_stack_loki_version: "3.7.8"
+monitoring_stack_loki_version: "3.7.9"
 monitoring_stack_loki_autoupdate: true
 monitoring_stack_perses_image: "docker.io/persesdev/perses"
 # renovate: datasource=docker depName=persesdev/perses
-monitoring_stack_perses_version: "v0.54.0-rc.1"
+monitoring_stack_perses_version: "v0.55.0"
 monitoring_stack_perses_autoupdate: true
 
 # Network (always joined, created only when enabled)

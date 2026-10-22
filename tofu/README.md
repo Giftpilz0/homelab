@@ -1,9 +1,9 @@
 # OpenTofu
 
-| Project     | Manages                                      |
-|-------------|----------------------------------------------|
+| Project     | Manages                                       |
+| ----------- | --------------------------------------------- |
 | `keycloak/` | Realm, auth flows, roles/groups, OIDC clients |
-| `proxmox/`  | Uplink bridge, SDN VLAN zone + VNets, VMs    |
+| `proxmox/`  | Uplink bridge, SDN VLAN zone + VNets, VMs     |
 
 Each project reads its credentials from `secrets.sops.yaml` (sops provider) and keeps
 its local state encrypted in git as `state.tfstate.enc`.

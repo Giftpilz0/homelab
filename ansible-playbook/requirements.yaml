@@ -7,7 +7,7 @@ collections:
   - name: ansible.utils
     version: "6.1.1"
   - name: ansible.windows
-    version: "3.8.0"
+    version: "3.9.1"
   - name: community.crypto
     version: "3.5.1"
   - name: community.general
@@ -17,6 +17,6 @@ collections:
   - name: community.windows
     version: "3.3.0"
   - name: containers.podman
-    version: "1.21.1"
+    version: "1.21.2"
   - name: kubernetes.core
     version: "6.6.0"

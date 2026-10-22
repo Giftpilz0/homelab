@@ -3,7 +3,7 @@
 ### giftpilz0.container.homeassistant
 
 # renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant
-homeassistant_version: "2026.10.1"
+homeassistant_version: "2026.10.2"
 
 homeassistant_device_access: true
 homeassistant_extra_files:

@@ -18,7 +18,7 @@ postgresql_version: "18.6-alpine"
 ### giftpilz0.container.forgejo
 
 # renovate: datasource=docker depName=codeberg.org/forgejo/forgejo
-forgejo_version: "16.0.6"
+forgejo_version: "17.0.0"
 
 forgejo_domain: "forgejo.nixpi.de"
 # Web traffic goes through Traefik, only git SSH is published
