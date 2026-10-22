@@ -5,7 +5,7 @@ podman_user: "{{ ansible_user }}"
 # Image
 traefik_image: "docker.io/library/traefik"
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.14"
+traefik_version: "v3.7.16"
 traefik_autoupdate: true
 
 # Network (always joined, created only when enabled)
@@ -52,6 +52,9 @@ traefik_access_log_buffer_size: 10
 traefik_metrics_enabled: true
 traefik_metrics_internal_port: 8082
 traefik_metrics_bind_ip: "127.0.0.1"
+
+# Health check
+traefik_ping_internal_port: 8081
 
 # Transport
 traefik_transport_timeouts_enabled: false

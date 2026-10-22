@@ -52,6 +52,10 @@ entryPoints:
     address: ":{{ traefik_metrics_internal_port }}"
 {% endif %}
 
+  # Health check, only reachable inside the pod
+  ping:
+    address: "127.0.0.1:{{ traefik_ping_internal_port }}"
+
 {% for entrypoint in traefik_tcp_entrypoints %}
   {{ entrypoint.name }}:
     address: ":{{ entrypoint.get('internal_port', entrypoint.port) }}"
@@ -111,3 +115,6 @@ metrics:
   prometheus:
     entryPoint: metrics
 {% endif %}
+
+ping:
+  entryPoint: ping

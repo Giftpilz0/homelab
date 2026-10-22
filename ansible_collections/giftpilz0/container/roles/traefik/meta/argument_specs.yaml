@@ -161,6 +161,11 @@ argument_specs:
         required: false
         description: Bind IP for metrics endpoint.
 
+      traefik_ping_internal_port:
+        type: int
+        required: false
+        description: Port of the ping endpoint used by the health check, bound to 127.0.0.1.
+
       traefik_transport_timeouts_enabled:
         type: bool
         required: false

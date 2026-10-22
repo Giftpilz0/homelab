@@ -26,6 +26,10 @@ Volume=%h/.config/containers/systemd/postgresql-pod/config/init-databases.sql:/d
 {% for volume in quadlet_extra_volumes %}
 Volume={{ volume }}
 {% endfor %}
+# Not killed when unhealthy, crash recovery may take a while
+HealthCmd=["pg_isready", "-q", "-h", "127.0.0.1"]
+HealthInterval=30s
+HealthStartPeriod=60s
 
 [Service]
 Restart=always

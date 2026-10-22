@@ -23,6 +23,10 @@ Volume=%h/.config/containers/systemd/acme_dns-pod/config/config.cfg:/etc/acme-dn
 {% for volume in quadlet_extra_volumes %}
 Volume={{ volume }}
 {% endfor %}
+HealthCmd=["wget", "-q", "-O", "/dev/null", "http://127.0.0.1:{{ acme_dns_api_port }}/health"]
+HealthInterval=30s
+HealthStartPeriod=10s
+HealthOnFailure=kill
 
 [Service]
 Restart=always

@@ -26,6 +26,10 @@ Volume=homeassistant-data.volume:/config
 {% for volume in quadlet_extra_volumes %}
 Volume={{ volume }}
 {% endfor %}
+HealthCmd=["curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8123/manifest.json"]
+HealthInterval=30s
+HealthStartPeriod=120s
+HealthOnFailure=kill
 
 [Service]
 Restart=always

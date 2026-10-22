@@ -27,6 +27,10 @@ Volume=bumper-data.volume:/bumper/data
 {% for volume in quadlet_extra_volumes %}
 Volume={{ volume }}
 {% endfor %}
+HealthCmd=["python3", "-c", "import socket; socket.create_connection((socket.gethostname(), 8007), 5)"]
+HealthInterval=30s
+HealthStartPeriod=30s
+HealthOnFailure=kill
 
 [Service]
 Restart=always

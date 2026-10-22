@@ -16,6 +16,10 @@ Entrypoint={{ suwayomi_flaresolverr_entrypoint }}
 {% for env_name, env_value in suwayomi_flaresolverr_environment_vars.items() %}
 Environment={{ env_name }}={{ env_value }}
 {% endfor %}
+HealthCmd=["curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8191/"]
+HealthInterval=30s
+HealthStartPeriod=60s
+HealthOnFailure=kill
 
 [Service]
 Restart=always

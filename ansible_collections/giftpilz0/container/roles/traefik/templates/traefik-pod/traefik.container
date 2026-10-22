@@ -25,6 +25,10 @@ Volume=%h/.config/containers/systemd/traefik-pod/config/traefik.yaml:/etc/traefi
 {% for volume in quadlet_extra_volumes %}
 Volume={{ volume }}
 {% endfor %}
+HealthCmd=["traefik", "healthcheck"]
+HealthInterval=30s
+HealthStartPeriod=10s
+HealthOnFailure=kill
 
 [Service]
 Restart=always

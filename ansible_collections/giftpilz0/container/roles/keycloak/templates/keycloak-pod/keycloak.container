@@ -23,6 +23,11 @@ Volume=keycloak-data.volume:/opt/keycloak/data
 {% for volume in quadlet_extra_volumes %}
 Volume={{ volume }}
 {% endfor %}
+# Image has no curl or wget
+HealthCmd=["bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+HealthInterval=30s
+HealthStartPeriod=120s
+HealthOnFailure=kill
 
 [Service]
 Restart=always

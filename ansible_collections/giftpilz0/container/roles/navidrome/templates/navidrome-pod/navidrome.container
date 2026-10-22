@@ -25,6 +25,10 @@ Volume=navidrome-music.volume:/music:ro
 {% for volume in quadlet_extra_volumes %}
 Volume={{ volume }}
 {% endfor %}
+HealthCmd=["wget", "-q", "-O", "/dev/null", "http://127.0.0.1:4533/ping"]
+HealthInterval=30s
+HealthStartPeriod=30s
+HealthOnFailure=kill
 
 [Service]
 Restart=always

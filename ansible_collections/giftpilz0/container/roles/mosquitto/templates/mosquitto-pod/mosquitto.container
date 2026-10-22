@@ -25,6 +25,10 @@ Volume=mosquitto-data.volume:/mosquitto/data
 {% for volume in quadlet_extra_volumes %}
 Volume={{ volume }}
 {% endfor %}
+HealthCmd=["bash", "-c", "</dev/tcp/127.0.0.1/1883"]
+HealthInterval=30s
+HealthStartPeriod=10s
+HealthOnFailure=kill
 
 [Service]
 Restart=always

@@ -19,6 +19,10 @@ AutoUpdate=registry
 
 Volume=radicale-data.volume:/var/lib/radicale
 Volume=%h/.config/containers/systemd/opencloud-additional/config/radicale.conf:/etc/radicale/config:ro,Z
+HealthCmd=["wget", "-q", "-O", "/dev/null", "http://127.0.0.1:5232/.web/"]
+HealthInterval=30s
+HealthStartPeriod=10s
+HealthOnFailure=kill
 
 [Service]
 Restart=always

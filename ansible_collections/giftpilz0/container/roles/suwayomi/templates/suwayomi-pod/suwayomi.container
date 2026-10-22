@@ -21,6 +21,10 @@ Volume=suwayomi-data.volume:/home/suwayomi/.local/share/Tachidesk
 {% for volume in quadlet_extra_volumes %}
 Volume={{ volume }}
 {% endfor %}
+HealthCmd=["curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:4567/"]
+HealthInterval=30s
+HealthStartPeriod=120s
+HealthOnFailure=kill
 
 [Service]
 Restart=always
