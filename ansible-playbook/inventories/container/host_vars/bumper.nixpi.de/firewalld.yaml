@@ -2,63 +2,38 @@
 ######################################
 ### giftpilz0.general.firewalld
 
-firewalld_zones_define:
-  - zone: server
-    source: 192.168.60.0/24
-  - zone: server-kubernetes
-    source: 192.168.65.0/24
-  - zone: server-lb
-    source: 192.168.70.0/24
-  - zone: clients
-    source: 192.168.10.0/24
-  - zone: clients
-    source: 192.168.15.0/24
+firewalld_zones_define_host:
   - zone: iot-untrusted
     source: 192.168.20.0/24
 
-firewalld_rules_services:
-  - service: ssh
-    zone: clients
-    state: enabled
-
-firewalld_rules_ports:
-  - port: 8443 # https
+firewalld_rules_ports_host:
+  - port: 8443
     protocol: tcp
     zone: clients
-    state: enabled
-  - port: 8007 # http
+  - port: 8007
     protocol: tcp
     zone: clients
-    state: enabled
-  - port: 8443 # https
+  - port: 8443
     protocol: tcp
     zone: server
-    state: enabled
-  - port: 8007 # http
+  - port: 8007
     protocol: tcp
     zone: server
-    state: enabled
-  - port: 443 # mqtts
+  - port: 443
     protocol: tcp
     zone: server
-    state: enabled
-  - port: 1883 # mqtt
+  - port: 1883
     protocol: tcp
     zone: server
-    state: enabled
-  - port: 8443 # https
+  - port: 8443
     protocol: tcp
     zone: iot-untrusted
-    state: enabled
-  - port: 8007 # http
+  - port: 8007
     protocol: tcp
     zone: iot-untrusted
-    state: enabled
-  - port: 443 # mqtts
+  - port: 443
     protocol: tcp
     zone: iot-untrusted
-    state: enabled
-  - port: 1883 # mqtt
+  - port: 1883
     protocol: tcp
     zone: iot-untrusted
-    state: enabled

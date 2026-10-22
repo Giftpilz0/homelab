@@ -37,6 +37,16 @@ server:
       hosts:
         acme.nixpi.de:
           ansible_host: 192.168.55.10
+    # Serve web traffic through Traefik
+    web:
+      children:
+        acme:
+        forgejo:
+        homeassistant:
+        keycloak:
+        monitoring:
+        opencloud:
+        vaultwarden:
   vars:
     ansible_port: 22
     ansible_user: root

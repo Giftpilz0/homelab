@@ -58,6 +58,21 @@ argument_specs:
         required: false
         description: default firewall zone.
 
+      firewalld_require_ssh:
+        type: bool
+        required: false
+        description: fail when no enabled ssh rule exists for a defined zone.
+
+      firewalld_remove_unmanaged:
+        type: bool
+        required: false
+        description: remove sources, services and ports that are not in the inventory.
+
+      firewalld_rule_defaults:
+        type: dict
+        required: false
+        description: values for keys missing in icmp, service and port rules.
+
       firewalld_zones_define:
         type: list
         elements: dict

@@ -43,6 +43,8 @@ user:
 ######################################
 ### giftpilz0.general.firewalld
 
+firewalld_remove_unmanaged: true
+
 firewalld_zones_define:
   - zone: server
     source: 192.168.60.0/24
