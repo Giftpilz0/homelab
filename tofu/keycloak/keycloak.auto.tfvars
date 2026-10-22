@@ -37,15 +37,26 @@ clients = {
     allowed_users                   = ["moritz"]
   }
 
-  "perses" = {
-    name                            = "Perses"
-    description                     = "Perses monitoring dashboards"
-    secret_key                      = "perses_client_secret"
-    valid_redirect_uris             = ["https://monitoring.nixpi.de/api/auth/providers/oidc/keycloak/callback"]
+  "beszel" = {
+    name                            = "Beszel"
+    description                     = "Beszel server monitoring"
+    secret_key                      = "beszel_client_secret"
+    valid_redirect_uris             = ["https://monitoring.nixpi.de/api/oauth2-redirect"]
     valid_post_logout_redirect_uris = ["https://monitoring.nixpi.de"]
     web_origins                     = ["https://monitoring.nixpi.de"]
     default_scopes                  = ["profile", "email"]
-    browser_1fa                     = true
+    allowed_users                   = ["moritz"]
+  }
+
+  "gatus" = {
+    name                            = "Gatus"
+    description                     = "Gatus status page"
+    secret_key                      = "gatus_client_secret"
+    valid_redirect_uris             = ["https://status.nixpi.de/authorization-code/callback"]
+    valid_post_logout_redirect_uris = ["https://status.nixpi.de"]
+    web_origins                     = ["https://status.nixpi.de"]
+    default_scopes                  = ["profile", "email"]
+    allowed_users                   = ["moritz"]
   }
 
   "vaultwarden" = {
