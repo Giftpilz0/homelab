@@ -1,0 +1,31 @@
+---
+_gatus_traefik_endpoints: >-
+  {%- set endpoints = [] -%}
+  {%- for host in gatus_traefik_hosts if 'traefik_http_services' in hostvars[host] -%}
+  {%- for service in hostvars[host]['traefik_http_services'] if service.name not in gatus_traefik_exclude -%}
+  {%- set _ = endpoints.append({
+        'name': service.name,
+        'group': host.split('.')[0],
+        'url': 'https://' ~ service.domain ~ (service.health_check.path if service.health_check is defined else '/'),
+      } | combine(gatus_traefik_overrides.get(service.name, {}))) -%}
+  {%- endfor -%}
+  {%- endfor -%}
+  {{ endpoints }}
+
+_gatus_endpoints: "{{ [gatus_endpoint_defaults] | product(_gatus_traefik_endpoints + gatus_endpoints) | map('combine') | list }}"
+
+_gatus_oidc:
+  issuer-url: "{{ gatus_oidc_issuer_url }}"
+  redirect-url: "{{ gatus_url | regex_replace('/$', '') }}/authorization-code/callback"
+  client-id: "{{ gatus_oidc_client_id }}"
+  client-secret: "{{ gatus_oidc_client_secret }}"
+  scopes:
+    - openid
+
+_gatus_config: >-
+  {{ {'storage': {'type': 'sqlite', 'path': '/data/data.db'},
+      'ui': {'title': gatus_title, 'header': gatus_title},
+      'endpoints': _gatus_endpoints}
+     | combine({'security': {'oidc': _gatus_oidc}} if gatus_oidc_enabled else {})
+     | combine({'alerting': gatus_alerting} if gatus_alerting else {})
+     | combine(gatus_extra_config, recursive=True) }}

@@ -1,15 +1,15 @@
 ---
 ######################################
-### giftpilz0.container.monitoring_stack
+### giftpilz0.container.monitoring_stack (retired)
 
 # renovate: datasource=docker depName=dxflrs/garage
 monitoring_stack_garage_version: "v2.4.1"
 # renovate: datasource=docker depName=grafana/mimir
-monitoring_stack_mimir_version: "3.2.2"
+monitoring_stack_mimir_version: "3.2.3"
 # renovate: datasource=docker depName=grafana/loki
-monitoring_stack_loki_version: "3.7.8"
+monitoring_stack_loki_version: "3.7.9"
 # renovate: datasource=docker depName=persesdev/perses
-monitoring_stack_perses_version: "v0.54.0-rc.1"
+monitoring_stack_perses_version: "v0.55.0"
 
 monitoring_stack_mimir_environment_vars: {}
 
@@ -21,44 +21,69 @@ monitoring_stack_extra_dirs:
     mount: "/etc/perses/provisioning"
 
 ######################################
+### giftpilz0.container.beszel
+
+# renovate: datasource=docker depName=henrygd/beszel
+beszel_version: "0.21.1"
+
+beszel_app_url: "https://monitoring.nixpi.de"
+beszel_environment_vars:
+  APP_URL: "{{ beszel_app_url }}"
+  DISABLE_SSH: "true"
+  # Accounts for Keycloak users
+  USER_CREATION: "true"
+
+######################################
+### giftpilz0.container.gatus
+
+# renovate: datasource=docker depName=twinproduction/gatus
+gatus_version: "v5.37.0"
+
+gatus_url: "https://status.nixpi.de"
+gatus_oidc_enabled: true
+gatus_oidc_issuer_url: "https://login.nixpi.de/realms/nixpi"
+
+# Websocket listener, checked below via plain MQTT
+gatus_traefik_exclude:
+  - mqtt-websocket
+
+# traefik-oidc-auth answers non-browser requests with 401
+gatus_traefik_overrides:
+  music-webui:
+    conditions:
+      - "[STATUS] == 401"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  suwayomi:
+    conditions:
+      - "[STATUS] == 401"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+
+gatus_endpoints:
+  - name: mqtt
+    group: homeassistant
+    url: "tcp://mqtt.nixpi.de:1883"
+    conditions:
+      - "[CONNECTED] == true"
+
+######################################
 ### giftpilz0.container.traefik
 
 traefik_networks:
-  - monitoring-stack
+  - beszel
+  - gatus
 
 traefik_http_services:
-  - name: perses
+  - name: beszel
     domain: monitoring.nixpi.de
     rule: "Host(`monitoring.nixpi.de`)"
     servers:
-      - url: "http://monitoring-stack-pod:8080"
+      - url: "http://beszel-pod:8090"
     tls_enabled: true
     acme_enabled: true
-  - name: mimir-write
-    domain: mimir.nixpi.de
-    rule: "Host(`mimir.nixpi.de`) && Path(`/api/v1/push`)"
+  - name: gatus
+    domain: status.nixpi.de
+    rule: "Host(`status.nixpi.de`)"
     servers:
-      - url: "http://monitoring-stack-pod:9009"
+      - url: "http://gatus-pod:8080"
     tls_enabled: true
     acme_enabled: true
-    middlewares:
-      - monitoring-mimir-write-auth
-  - name: loki-write
-    domain: loki.nixpi.de
-    rule: "Host(`loki.nixpi.de`) && Path(`/loki/api/v1/push`)"
-    servers:
-      - url: "http://monitoring-stack-pod:3100"
-    tls_enabled: true
-    acme_enabled: true
-    middlewares:
-      - monitoring-loki-write-auth
-
-traefik_custom_middlewares:
-  monitoring-mimir-write-auth:
-    basicAuth:
-      users:
-        - "{{ monitoring_stack_mimir_basic_auth_user }}:{{ monitoring_stack_mimir_basic_auth_hash }}"
-  monitoring-loki-write-auth:
-    basicAuth:
-      users:
-        - "{{ monitoring_stack_loki_basic_auth_user }}:{{ monitoring_stack_loki_basic_auth_hash }}"

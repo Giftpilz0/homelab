@@ -1,0 +1,29 @@
+[Unit]
+Description=Gatus Container
+
+[Container]
+ContainerName=gatus
+Image={{ gatus_image }}:{{ gatus_version }}
+Pod=gatus.pod
+
+{% if gatus_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+{% if gatus_entrypoint %}
+Entrypoint={{ gatus_entrypoint }}
+{% endif %}
+
+Environment=GATUS_CONFIG_PATH=/config/config.yaml
+{% for env_name, env_value in gatus_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+Volume=gatus-data.volume:/data
+Volume=%h/.config/containers/systemd/gatus-pod/config/config.yaml:/config/config.yaml:Z
+
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
+{% endfor %}
+
+[Service]
+Restart=always

@@ -29,6 +29,16 @@ argument_specs:
         required: false
         description: list of packages to install.
 
+      monitoring_agent_package_name:
+        type: str
+        required: false
+        description: name of the installed alloy package, used for removal.
+
+      monitoring_agent_data_path:
+        type: str
+        required: false
+        description: alloy data directory, removed with the package.
+
       monitoring_agent_config_path:
         type: str
         required: false

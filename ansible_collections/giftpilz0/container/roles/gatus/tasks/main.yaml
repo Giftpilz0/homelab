@@ -1,0 +1,20 @@
+---
+- name: "Gatus: Validate parameters"
+  ansible.builtin.assert:
+    that:
+      - not gatus_oidc_enabled or gatus_url | length > 0
+      - not gatus_oidc_enabled or gatus_oidc_issuer_url | length > 0
+      - not gatus_oidc_enabled or gatus_oidc_client_secret | length > 0
+    fail_msg: "OIDC needs gatus_url, gatus_oidc_issuer_url and gatus_oidc_client_secret (encrypted host vars)."
+    quiet: true
+
+- name: "Gatus: Deploy pod"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: gatus
+    quadlet_dir_modes:
+      gatus-pod/config: "0700"
+    quadlet_extra_files: "{{ gatus_extra_files }}"
+    quadlet_extra_dirs: "{{ gatus_extra_dirs }}"
+    quadlet_units: "{{ (['gatus-network.service'] if gatus_network_enabled else []) + ['gatus-pod.service'] }}"

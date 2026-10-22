@@ -1,0 +1,2 @@
+{# Round trip drops YAML anchors for the shared default lists #}
+{{ _gatus_config | to_json | from_json | to_nice_yaml(indent=2, sort_keys=false) }}

@@ -1,0 +1,19 @@
+[Unit]
+Description=Gatus Pod
+
+[Pod]
+PodName=gatus-pod
+
+Network={{ gatus_network_name }}
+
+{% if gatus_port_map_enabled %}
+{% for port_mapping in gatus_port_map %}
+PublishPort={{ gatus_bind_ip }}:{{ port_mapping }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

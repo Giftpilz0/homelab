@@ -1,6 +1,6 @@
 ---
 ######################################
-### giftpilz0.general.monitoring
+### giftpilz0.general.beszel_agent
 
-monitoring_agent_config_remoteserver_loki: https://loki.nixpi.de/loki/api/v1/push
-monitoring_agent_config_remoteserver_prometheus: https://mimir.nixpi.de/api/v1/push
+beszel_agent_hub_url: https://monitoring.nixpi.de
+beszel_agent_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKcE6gsG0Vud5kQdbd1q4dvatItZ05mwxk8ohUmTH7TC"

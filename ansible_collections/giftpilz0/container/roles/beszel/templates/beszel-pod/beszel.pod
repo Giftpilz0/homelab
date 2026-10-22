@@ -1,0 +1,19 @@
+[Unit]
+Description=Beszel Pod
+
+[Pod]
+PodName=beszel-pod
+
+Network={{ beszel_network_name }}
+
+{% if beszel_port_map_enabled %}
+{% for port_mapping in beszel_port_map %}
+PublishPort={{ beszel_bind_ip }}:{{ port_mapping }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

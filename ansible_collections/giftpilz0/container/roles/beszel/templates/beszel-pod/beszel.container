@@ -1,0 +1,32 @@
+[Unit]
+Description=Beszel Hub Container
+
+[Container]
+ContainerName=beszel
+Image={{ beszel_image }}:{{ beszel_version }}
+Pod=beszel.pod
+
+{% if beszel_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+{% if beszel_entrypoint %}
+Entrypoint={{ beszel_entrypoint }}
+{% endif %}
+
+{% for env_name, env_value in beszel_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+Volume=beszel-data.volume:/beszel_data
+
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
+{% endfor %}
+
+HealthCmd=["/beszel", "health", "--url", "http://localhost:8090"]
+HealthInterval=30s
+HealthStartPeriod=10s
+HealthOnFailure=kill
+
+[Service]
+Restart=always

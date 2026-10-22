@@ -1,14 +1,17 @@
 ---
 monitoring_agent_arch: amd64
 # renovate: datasource=github-releases depName=grafana/alloy extractVersion=^v(?<version>.*)$
-monitoring_agent_tag: 1.20.1
+monitoring_agent_tag: 1.21.1
+# absent also removes config and data
 monitoring_agent_package_state: present
+monitoring_agent_package_name: alloy
 monitoring_agent_package:
   - >-
     https://github.com/grafana/alloy/releases/download/v{{
     monitoring_agent_tag }}/alloy-{{ monitoring_agent_tag }}-1.{{
     monitoring_agent_arch }}.rpm
 monitoring_agent_config_path: /etc/alloy/config.alloy
+monitoring_agent_data_path: /var/lib/alloy
 monitoring_agent_service_name: alloy.service
 monitoring_agent_service_state: started
 monitoring_agent_service_enabled: true

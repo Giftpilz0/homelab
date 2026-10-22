@@ -1,0 +1,82 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy the Beszel monitoring hub as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: System user for rootless podman operations.
+
+      beszel_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      beszel_version:
+        type: str
+        required: false
+        description: Container image version.
+
+      beszel_autoupdate:
+        type: bool
+        required: false
+        description: Enable podman auto-update for this container.
+
+      beszel_network_enabled:
+        type: bool
+        required: false
+        description: Create and manage the podman network.
+
+      beszel_network_name:
+        type: str
+        required: false
+        description: Podman network name.
+
+      beszel_network_driver:
+        type: str
+        required: false
+        description: Podman network driver.
+
+      beszel_port_map_enabled:
+        type: bool
+        required: false
+        description: Expose container ports on the host.
+
+      beszel_bind_ip:
+        type: str
+        required: false
+        description: Host IP to bind exposed ports to.
+
+      beszel_port_map:
+        type: list
+        elements: str
+        required: false
+        description: Host:container port mappings.
+
+      beszel_app_url:
+        type: str
+        required: false
+        description: External URL of the hub.
+
+      beszel_environment_vars:
+        type: dict
+        required: false
+        description: Environment variables injected into the hub container.
+
+      beszel_entrypoint:
+        type: str
+        required: false
+        description: Optional container entrypoint override.
+
+      beszel_extra_files:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      beszel_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.

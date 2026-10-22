@@ -6,4 +6,5 @@
     - role: giftpilz0.general.autoupgrade
     - role: giftpilz0.general.packages
     - role: giftpilz0.general.timezone
+    - role: giftpilz0.general.beszel_agent
     - role: giftpilz0.misc.profile

@@ -1,0 +1,4 @@
+[Unit]
+Description=Gatus Data Volume
+
+[Volume]

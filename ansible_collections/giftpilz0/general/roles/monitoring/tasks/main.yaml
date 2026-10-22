@@ -8,9 +8,29 @@
       - monitoring_alloy_mimir_basic_auth_password | length > 0
     fail_msg: "Define the remote write URLs and basic auth passwords (encrypted group vars)."
     quiet: true
+  when: monitoring_agent_package_state not in ['absent', 'skip']
+
+- name: "Monitoring: Remove Alloy"
+  when: monitoring_agent_package_state == 'absent'
+  block:
+    - name: "Monitoring: Uninstall alloy"
+      become: true
+      ansible.builtin.package:
+        name: "{{ monitoring_agent_package_name }}"
+        state: absent
+
+    # Left behind by the package
+    - name: "Monitoring: Remove alloy files"
+      become: true
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ monitoring_agent_config_path | dirname }}"
+        - "{{ monitoring_agent_data_path }}"
 
 - name: "Monitoring: Configure Alloy"
-  when: monitoring_agent_package_state != 'skip'
+  when: monitoring_agent_package_state not in ['absent', 'skip']
   block:
     - name: "Monitoring: Install alloy"
       become: true
@@ -32,9 +52,7 @@
         name: alloy
         groups: "{{ monitoring_alloy_extra_groups }}"
         append: true
-      when:
-        - monitoring_alloy_permissions_setup
-        - monitoring_agent_package_state != 'absent'
+      when: monitoring_alloy_permissions_setup
       notify: "Monitoring: Restart Agent"
 
     - name: "Monitoring: Manage alloy config"
@@ -45,7 +63,6 @@
         owner: root
         group: alloy
         mode: "0640"
-      when: monitoring_agent_package_state != 'absent'
       notify: "Monitoring: Restart Agent"
 
     - name: "Monitoring: Manage service"
@@ -54,4 +71,3 @@
         name: "{{ monitoring_agent_service_name }}"
         state: "{{ monitoring_agent_service_state }}"
         enabled: "{{ monitoring_agent_service_enabled }}"
-      when: monitoring_agent_package_state != 'absent'

@@ -5,7 +5,7 @@
     - role: giftpilz0.general.user
     - role: giftpilz0.general.update
     - role: giftpilz0.general.autoupgrade
-    - role: giftpilz0.general.monitoring
+    - role: giftpilz0.general.beszel_agent
     - role: giftpilz0.general.firewalld
     - role: giftpilz0.general.packages
     - role: giftpilz0.general.timezone
@@ -54,7 +54,10 @@
 - name: Configure hosts - monitoring
   hosts: monitoring
   roles:
-    - role: giftpilz0.container.monitoring_stack
+    # Retired in favor of Beszel and Gatus
+    # - role: giftpilz0.container.monitoring_stack
+    - role: giftpilz0.container.beszel
+    - role: giftpilz0.container.gatus
 
 - name: Configure hosts - acme
   hosts: acme

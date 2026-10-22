@@ -1,0 +1,111 @@
+---
+- name: "Beszel agent: Validate parameters"
+  ansible.builtin.assert:
+    that:
+      - beszel_agent_hub_url | length > 0
+      - beszel_agent_key | length > 0
+      - beszel_agent_token | length > 0
+    fail_msg: "Define beszel_agent_hub_url, beszel_agent_key and beszel_agent_token (encrypted group vars)."
+    quiet: true
+
+- name: "Beszel agent: Create release directory"
+  become: true
+  ansible.builtin.file:
+    path: "{{ _beszel_agent_release_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: "Beszel agent: Download agent"
+  become: true
+  ansible.builtin.unarchive:
+    src: "https://github.com/henrygd/beszel/releases/download/v{{ beszel_agent_version }}/beszel-agent_linux_{{ _beszel_agent_arch }}.tar.gz"
+    dest: "{{ _beszel_agent_release_dir }}"
+    remote_src: true
+    include:
+      - beszel-agent
+    creates: "{{ _beszel_agent_release_dir }}/beszel-agent"
+
+- name: "Beszel agent: Install agent"
+  become: true
+  ansible.builtin.copy:
+    src: "{{ _beszel_agent_release_dir }}/beszel-agent"
+    dest: /usr/local/bin/beszel-agent
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0755"
+  notify: "Beszel agent: Restart"
+
+- name: "Beszel agent: Look up users"
+  ansible.builtin.getent:
+    database: passwd
+
+- name: "Beszel agent: Create user"
+  become: true
+  ansible.builtin.user:
+    name: "{{ beszel_agent_user }}"
+    system: true
+    create_home: false
+    shell: /usr/sbin/nologin
+  when: beszel_agent_user not in ansible_facts['getent_passwd']
+
+- name: "Beszel agent: Enable Podman socket"
+  when: beszel_agent_podman_socket
+  block:
+    - name: "Beszel agent: Look up agent uid"
+      ansible.builtin.getent:
+        database: passwd
+        key: "{{ beszel_agent_user }}"
+
+    - name: "Beszel agent: Enable lingering"
+      become: true
+      ansible.builtin.command:
+        cmd: "loginctl enable-linger {{ beszel_agent_user }}"
+        creates: "/var/lib/systemd/linger/{{ beszel_agent_user }}"
+
+    - name: "Beszel agent: Start Podman socket"
+      become: true
+      become_user: "{{ beszel_agent_user }}"
+      ansible.builtin.systemd:
+        name: podman.socket
+        enabled: true
+        state: started
+        scope: user
+
+- name: "Beszel agent: Create config directory"
+  become: true
+  ansible.builtin.file:
+    path: /etc/beszel-agent
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: "Beszel agent: Manage environment"
+  become: true
+  ansible.builtin.template:
+    src: env.j2
+    dest: /etc/beszel-agent/env
+    owner: root
+    group: root
+    mode: "0600"
+  diff: false
+  notify: "Beszel agent: Restart"
+
+- name: "Beszel agent: Manage service unit"
+  become: true
+  ansible.builtin.template:
+    src: beszel-agent.service.j2
+    dest: /etc/systemd/system/beszel-agent.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: "Beszel agent: Restart"
+
+- name: "Beszel agent: Start service"
+  become: true
+  ansible.builtin.systemd:
+    name: beszel-agent.service
+    enabled: true
+    state: started
+    daemon_reload: true
