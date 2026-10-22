@@ -6,7 +6,7 @@ podman_user: "{{ ansible_user }}"
 bumper_image: "localhost/bumper-custom"
 bumper_version: "latest"
 bumper_git_repo: "https://github.com/MVladislav/bumper.git"
-bumper_commit: "4438eb5e9ffa31b60385052102da68a3a18bf4b7"
+bumper_commit: "3d1b908ec70e3c3ceaf71d3dbb5773daee572de3"
 bumper_autoupdate: true
 
 # Network (always joined, created only when enabled)
