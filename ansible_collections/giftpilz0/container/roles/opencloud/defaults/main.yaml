@@ -124,7 +124,7 @@ opencloud_collabora_update_popup: false
 opencloud_radicale_enabled: false
 opencloud_radicale_image: "docker.io/opencloudeu/radicale"
 # renovate: datasource=docker depName=opencloudeu/radicale
-opencloud_radicale_version: "v3.8.1"
+opencloud_radicale_version: "v3.8.3"
 
 ## Advanced
 opencloud_entrypoint: ""

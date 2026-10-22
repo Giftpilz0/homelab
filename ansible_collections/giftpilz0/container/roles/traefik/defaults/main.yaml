@@ -5,7 +5,7 @@ podman_user: "{{ ansible_user }}"
 # Image
 traefik_image: "docker.io/library/traefik"
 # renovate: datasource=docker depName=traefik
-traefik_version: "v3.7.14"
+traefik_version: "v3.7.16"
 traefik_autoupdate: true
 
 # Network (always joined, created only when enabled)

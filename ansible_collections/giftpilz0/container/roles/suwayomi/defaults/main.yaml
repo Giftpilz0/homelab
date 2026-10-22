@@ -5,7 +5,7 @@ podman_user: "{{ ansible_user }}"
 # Image
 suwayomi_image: "ghcr.io/suwayomi/suwayomi-server"
 # renovate: datasource=docker depName=ghcr.io/suwayomi/suwayomi-server
-suwayomi_version: "v2.4.2422"
+suwayomi_version: "v2.4.2435"
 suwayomi_autoupdate: true
 
 # Network (always joined, created only when enabled)
