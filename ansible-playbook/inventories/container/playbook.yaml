@@ -44,6 +44,7 @@
   hosts: misc
   roles:
     - role: giftpilz0.container.misc
+    - role: giftpilz0.container.market_brief
     - role: giftpilz0.misc.cfdyndns
 
 - name: Configure hosts - keycloak

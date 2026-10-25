@@ -1,0 +1,29 @@
+[Unit]
+Description=Market Brief Pipeline Run
+
+[Container]
+ContainerName=market-brief
+Image={{ market_brief_image }}:{{ market_brief_version }}
+
+{% if market_brief_entrypoint %}
+Entrypoint={{ market_brief_entrypoint }}
+{% endif %}
+
+Environment=DATA_REPO={{ market_brief_data_repo }}
+Environment=DATA_BRANCH={{ market_brief_data_branch }}
+{% for env_name, env_value in market_brief_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+Volume=market-brief-data.volume:/data
+Volume=market-brief-cache.volume:/cache
+Volume=%h/.config/containers/systemd/market-brief/secrets:/secrets:ro,Z
+
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
+{% endfor %}
+
+# Started by market-brief.timer
+[Service]
+RuntimeMaxSec={{ market_brief_timeout }}
+CPUWeight=20

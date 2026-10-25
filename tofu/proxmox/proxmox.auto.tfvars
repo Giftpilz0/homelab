@@ -90,7 +90,7 @@ vms = {
     tags        = ["container", "docker", "production"]
 
     cpu             = { cores = 2 }
-    memory          = { dedicated = 2048 }
+    memory          = { dedicated = 4096 }
     disks           = [{ size = 20 }]
     network_devices = [{ bridge = "misc" }]
 

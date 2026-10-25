@@ -1,0 +1,86 @@
+---
+argument_specs:
+  main:
+    short_description: Run the market brief pipeline (built from its git repository) on a systemd timer as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: System user for rootless podman operations.
+
+      market_brief_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      market_brief_version:
+        type: str
+        required: false
+        description: Image tag.
+
+      market_brief_git_repo:
+        type: str
+        required: false
+        description: Git repository the image is built from.
+
+      market_brief_git_version:
+        type: str
+        required: false
+        description: Branch, tag or commit to build from.
+
+      market_brief_dockerfile:
+        type: str
+        required: false
+        description: Dockerfile path inside the repository.
+
+      market_brief_schedule:
+        type: str
+        required: false
+        description: systemd OnCalendar expression for the pipeline runs.
+
+      market_brief_timer_enabled:
+        type: bool
+        required: false
+        description: Run the pipeline on the schedule; when false it only runs when started by hand.
+
+      market_brief_timeout:
+        type: str
+        required: false
+        description: Maximum runtime of one run (systemd time span).
+
+      market_brief_data_repo:
+        type: str
+        required: false
+        description: ssh URL of the data repository holding the watchlist and the results.
+
+      market_brief_data_branch:
+        type: str
+        required: false
+        description: Branch of the data repository.
+
+      market_brief_deploy_key:
+        type: str
+        required: false
+        description: Private ssh key with write access to the data repository.
+
+      market_brief_environment_vars:
+        type: dict
+        required: false
+        description: Pipeline settings passed as environment variables.
+
+      market_brief_entrypoint:
+        type: str
+        required: false
+        description: Optional container entrypoint override.
+
+      market_brief_extra_files:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      market_brief_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.

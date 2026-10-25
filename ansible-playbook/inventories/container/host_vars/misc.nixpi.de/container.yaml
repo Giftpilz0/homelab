@@ -6,6 +6,11 @@ misc_version: "latest"
 misc_commit: "db16ab7ca40f6e1e98e6e7a3947fb9e2aa04f527"
 
 ######################################
+### giftpilz0.container.market_brief
+
+market_brief_data_repo: "git@github.com:giftpilz0/market-brief-data.git"
+
+######################################
 ### giftpilz0.misc.cfdyndns
 
 cfdyndns_update_hostnames:

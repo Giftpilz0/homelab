@@ -1,0 +1,37 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image
+market_brief_image: "localhost/market-brief"
+market_brief_version: "latest"
+market_brief_git_repo: "https://forgejo.nixpi.de/moritz/market-brief.git"
+market_brief_git_version: "main"
+market_brief_dockerfile: "Dockerfile"
+
+## Service
+# After the Hong Kong close, before the Claude morning task (16:55 HKT)
+market_brief_schedule: "Mon..Fri 16:35 Asia/Hong_Kong"
+market_brief_timer_enabled: true
+market_brief_timeout: "1h"
+
+market_brief_data_repo: ""
+market_brief_data_branch: "main"
+market_brief_deploy_key: ""
+
+# Environment
+market_brief_environment_vars:
+  TZ: "Europe/Berlin"
+  DEVICE: "cpu"
+  HORIZON_DAYS: 5
+  BACKTEST_ORIGINS: 12
+  USE_TIMESTRAL: true
+  BACKFILL: true
+  FM_CUTOFF: "2025-11-01"
+
+## Advanced
+market_brief_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+market_brief_extra_files: []
+market_brief_extra_dirs: []
