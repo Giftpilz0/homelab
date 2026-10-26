@@ -5,7 +5,7 @@ podman_user: "{{ ansible_user }}"
 # Image
 homeassistant_image: "ghcr.io/home-assistant/home-assistant"
 # renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant
-homeassistant_version: "2026.10.2"
+homeassistant_version: "2026.10.4"
 homeassistant_autoupdate: true
 
 # Network (always joined, created only when enabled)

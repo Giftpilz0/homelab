@@ -5,7 +5,7 @@ podman_user: "{{ ansible_user }}"
 # Images
 monitoring_stack_garage_image: "docker.io/dxflrs/garage"
 # renovate: datasource=docker depName=dxflrs/garage
-monitoring_stack_garage_version: "v2.4.1"
+monitoring_stack_garage_version: "v2.5.0"
 monitoring_stack_garage_autoupdate: true
 monitoring_stack_mimir_image: "docker.io/grafana/mimir"
 # renovate: datasource=docker depName=grafana/mimir

@@ -8,7 +8,7 @@ FROM docker.io/library/golang:${GO_VERSION}-${DEBIAN_VERSION} AS builder
 # renovate: datasource=github-tags depName=eclipse-mosquitto/mosquitto extractVersion=^v(?<version>.+)$
 ARG MOSQUITTO_VERSION=2.1.2
 # renovate: datasource=github-tags depName=lhns/mosquitto-go-auth
-ARG GO_AUTH_VERSION=3.5.0
+ARG GO_AUTH_VERSION=3.5.1
 
 RUN set -eux; \
     apt-get update; \

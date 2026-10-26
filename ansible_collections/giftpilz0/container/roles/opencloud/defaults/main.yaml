@@ -104,7 +104,7 @@ opencloud_custom_clients: []
 opencloud_collabora_enabled: false
 opencloud_collabora_image: "docker.io/collabora/code"
 # renovate: datasource=docker depName=collabora/code
-opencloud_collabora_version: "26.04.5.1.1"
+opencloud_collabora_version: "26.04.5.2.1"
 opencloud_collabora_proof_key_image: "docker.io/alpine/openssl"
 # renovate: datasource=docker depName=alpine/openssl
 opencloud_collabora_proof_key_version: "3.5.9"
@@ -124,7 +124,7 @@ opencloud_collabora_update_popup: false
 opencloud_radicale_enabled: false
 opencloud_radicale_image: "docker.io/opencloudeu/radicale"
 # renovate: datasource=docker depName=opencloudeu/radicale
-opencloud_radicale_version: "v3.8.3"
+opencloud_radicale_version: "v3.9.0"
 
 ## Advanced
 opencloud_entrypoint: ""

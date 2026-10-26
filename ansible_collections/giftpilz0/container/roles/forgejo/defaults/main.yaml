@@ -5,7 +5,7 @@ podman_user: "{{ ansible_user }}"
 # Image
 forgejo_image: "codeberg.org/forgejo/forgejo"
 # renovate: datasource=docker depName=codeberg.org/forgejo/forgejo
-forgejo_version: "17.0.0"
+forgejo_version: "17.0.1"
 forgejo_autoupdate: true
 
 # Network (always joined, created only when enabled)
