@@ -3,7 +3,7 @@
 ### giftpilz0.container.opencloud
 
 # renovate: datasource=docker depName=opencloudeu/opencloud-rolling
-opencloud_version: "8.1.0"
+opencloud_version: "9.0.0"
 
 opencloud_extra_dirs:
   - src: "{{ inventory_dir | dirname }}/host_vars/{{ inventory_hostname }}/assets/opencloud/themes"
