@@ -63,17 +63,24 @@ status() {
 action=$1
 shift
 case "$action" in
-    decrypt | encrypt) command -v sops >/dev/null || { echo "❌ sops not found" >&2; exit 1; } ;;
+    decrypt | encrypt) command -v sops >/dev/null || {
+        echo "❌ sops not found" >&2
+        exit 1
+    } ;;
     status) ;;
     *) usage ;;
 esac
 
 if [ $# -eq 0 ]; then
+    # shellcheck disable=SC2046 # word splitting intended: one argument per project dir
     set -- $(for f in "$TOFU_DIR"/*/versions.tf; do basename "$(dirname "$f")"; done)
 fi
 
 for project in "$@"; do
-    [ -f "$TOFU_DIR/$project/versions.tf" ] || { echo "❌ unknown project: $project" >&2; exit 1; }
+    [ -f "$TOFU_DIR/$project/versions.tf" ] || {
+        echo "❌ unknown project: $project" >&2
+        exit 1
+    }
     echo "$project:"
     (cd "$TOFU_DIR/$project" && "$action")
 done

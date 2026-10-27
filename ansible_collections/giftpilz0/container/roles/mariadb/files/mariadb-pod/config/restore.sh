@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck disable=SC3043 # local works in dash and busybox sh
 set -eu
 
 BACKUP_DIR="${BACKUP_DIR:-/backups}"

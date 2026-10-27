@@ -7,7 +7,6 @@ ansible_collections/giftpilz0/{container,general,server,misc,kubernetes}   roles
 ansible-playbook/   run.sh wrapper, inventories/<name>/{playbook.yaml,hosts,group_vars,host_vars}
 tofu/{keycloak,proxmox}   OpenTofu projects, tofu/state-utils.sh
 packer/almalinux10        VM template
-scripts/clean-history.sh  linearize main without bot/merge commits (user runs it, then force-pushes)
 ```
 
 ## Secrets — hard rules

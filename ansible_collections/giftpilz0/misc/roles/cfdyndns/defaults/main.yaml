@@ -1,5 +1,5 @@
 ---
-# Basic auth for the update worker (https://github.com/willswire/unifi-ddns)
+# Basic auth for the update worker (https://github.com/Giftpilz0/unifi-ddns)
 cfdyndns_api_email: ""
 cfdyndns_api_token: ""
 # %i is replaced with the IP, %h with the hostnames

@@ -14,7 +14,7 @@ until mariadb-admin --host="${DB_HOST:-127.0.0.1}" --port="${DB_PORT:-3306}" \
     sleep 2
 done
 mariadb --host="${DB_HOST:-127.0.0.1}" --port="${DB_PORT:-3306}" \
-    --user="${DB_USER:-root}" < /usr/local/bin/init-databases.sql
+    --user="${DB_USER:-root}" </usr/local/bin/init-databases.sql
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Backup daemon started (at ${BACKUP_SCHEDULE_TIMES})"
 

@@ -28,8 +28,8 @@ for database in $DB_NAMES; do
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting backup: $backup_file"
 
     mariadb-dump --host="$DB_HOST" --port="$DB_PORT" --user="$DB_USER" \
-        --single-transaction --routines --triggers --events --databases "$database" | \
-        gzip -c -"$BACKUP_COMPRESSION_LEVEL" > "${BACKUP_DIR}/${backup_file}"
+        --single-transaction --routines --triggers --events --databases "$database" |
+        gzip -c -"$BACKUP_COMPRESSION_LEVEL" >"${BACKUP_DIR}/${backup_file}"
 
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] Backup complete: $(du -h "${BACKUP_DIR}/${backup_file}" | cut -f1)"
 done

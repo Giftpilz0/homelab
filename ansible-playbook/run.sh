@@ -12,10 +12,13 @@ set -euo pipefail
 cd "$(dirname "$(readlink -f "$0")")"
 
 info() { echo -e "[\033[0;34mℹ\033[0m] $*"; }
-fail() { echo -e "[\033[0;31m✘\033[0m] $*" >&2; exit 1; }
+fail() {
+    echo -e "[\033[0;31m✘\033[0m] $*" >&2
+    exit 1
+}
 
 skip_collections=false
-if [[ "${1:-}" == "--skip-collections" ]]; then
+if [[ ${1:-} == "--skip-collections" ]]; then
     skip_collections=true
     shift
 fi
@@ -27,7 +30,7 @@ fi
 
 mapfile -t inventories < <(find inventories -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort)
 
-if [[ -n "${1:-}" && "$1" != -* ]]; then
+if [[ -n ${1:-} && $1 != -* ]]; then
     inventory="$1"
     shift
 elif command -v gum >/dev/null; then
@@ -56,7 +59,7 @@ galaxy_install() {
 # without that file changing; galaxy reinstalls those on every run.
 collections_dir=.ansible/collections
 stamp="$collections_dir/.requirements.sha256"
-if [[ "$skip_collections" == false && -f requirements.yaml ]]; then
+if [[ $skip_collections == false && -f requirements.yaml ]]; then
     if ! sha256sum --check --status "$stamp" 2>/dev/null; then
         info "Installing Ansible collections..."
         rm -rf "$collections_dir"

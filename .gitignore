@@ -1,10 +1,22 @@
+# Editors, OS, local settings
+.DS_Store
+*.swp
+.idea/
+.vscode/
+.claude/settings.local.json
+.env
+.env.*
+!.env.example
+
 # OpenTofu: plain state is never committed, see tofu/README.md
 *.tfstate
 *.tfstate.backup
 *.tfstate.*.backup
 .terraform/
 
-# Ansible / uv
+# Ansible
 .ansible/
+
+# Python
 .venv/
 __pycache__/

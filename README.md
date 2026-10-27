@@ -1,19 +1,27 @@
-# Homelab Configuration
+# homelab
 
-This project serves as a configuration repository for my homelab setup. It includes infrastructure as code tools such as Ansible, Packer and OpenTofu to define and manage the components of my homelab environment.
+[![ci](https://github.com/Giftpilz0/homelab/actions/workflows/ci.yml/badge.svg)](https://github.com/Giftpilz0/homelab/actions/workflows/ci.yml)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## Project Structure
+My homelab as code: Proxmox VMs built with Packer and OpenTofu, configured with Ansible.
 
-The project directory structure is as follows:
+## Usage
 
+```sh
+just deploy                       # pick an inventory interactively
+just deploy container --check     # dry run of one inventory
 ```
-├── ansible_collections
-├── ansible-playbook
-├── packer
-└── tofu
-```
 
-- **ansible_collections**: Directory containing Ansible collections.
-- **ansible-playbook**: Directory containing Ansible playbooks and related files for configuring and managing virtual machines.
-- **packer**: Directory containing packer configurations for building virtual machine templates used in the homelab environment.
-- **tofu**: Directory containing OpenTofu configurations used to deploy and manage the Homelab infrastructure.
+- `ansible_collections/giftpilz0/`: roles (container, general, kubernetes, misc, server), also used by my dotfiles
+- `ansible-playbook/`: inventories and `run.sh` (behind `just deploy`)
+- `packer/`: AlmaLinux 10 VM template
+- `tofu/`: OpenTofu for the Proxmox VMs
+- [RESTORE.md](RESTORE.md): restoring from the restic backups
+
+## Development
+
+Run `just` for all recipes and `just check` before committing. Conventions: [Giftpilz0/shared](https://github.com/Giftpilz0/shared).
+
+## License
+
+[MIT](LICENSE)
