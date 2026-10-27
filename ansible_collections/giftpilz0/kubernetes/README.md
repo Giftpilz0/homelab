@@ -3,7 +3,7 @@
 Ansible Collection to configure and install a k3s cluster on multiple Linux systems.
 
 Complete documentation:
-<https://giftpilz0.github.io/docs/projects/ansible/kubernetes/>
+<https://giftpilz0.github.io/projects/ansible/kubernetes/>
 
 ______________________________________________________________________
 
