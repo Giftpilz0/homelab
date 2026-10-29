@@ -3,7 +3,7 @@
 ### giftpilz0.container.monitoring_stack (retired)
 
 # renovate: datasource=docker depName=dxflrs/garage
-monitoring_stack_garage_version: "v2.4.1"
+monitoring_stack_garage_version: "v2.5.0"
 # renovate: datasource=docker depName=grafana/mimir
 monitoring_stack_mimir_version: "3.2.3"
 # renovate: datasource=docker depName=grafana/loki
@@ -37,7 +37,7 @@ beszel_environment_vars:
 ### giftpilz0.container.gatus
 
 # renovate: datasource=docker depName=twinproduction/gatus
-gatus_version: "v5.37.0"
+gatus_version: "v5.38.0"
 
 gatus_url: "https://status.nixpi.de"
 gatus_oidc_enabled: true

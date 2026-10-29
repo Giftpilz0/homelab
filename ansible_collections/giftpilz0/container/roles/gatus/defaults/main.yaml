@@ -5,7 +5,7 @@ podman_user: "{{ ansible_user }}"
 # Image
 gatus_image: "docker.io/twinproduction/gatus"
 # renovate: datasource=docker depName=twinproduction/gatus
-gatus_version: "v5.37.0"
+gatus_version: "v5.38.0"
 gatus_autoupdate: true
 
 # Network (always joined, created only when enabled)

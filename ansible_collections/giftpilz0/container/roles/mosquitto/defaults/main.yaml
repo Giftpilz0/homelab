@@ -7,7 +7,7 @@ mosquitto_image: "localhost/mosquitto-custom"
 # renovate: datasource=github-tags depName=eclipse-mosquitto/mosquitto extractVersion=^v(?<version>.+)$
 mosquitto_version: "2.1.2"
 # renovate: datasource=github-tags depName=lhns/mosquitto-go-auth
-mosquitto_go_auth_version: "3.5.0"
+mosquitto_go_auth_version: "3.5.1"
 mosquitto_autoupdate: true
 
 # Network (always joined, created only when enabled)
