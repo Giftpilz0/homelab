@@ -1,0 +1,8 @@
+{% if kartei_network_enabled %}
+[Unit]
+Description=kartei Internal Network
+
+[Network]
+NetworkName={{ kartei_network_name }}
+Driver={{ kartei_network_driver }}
+{% endif %}

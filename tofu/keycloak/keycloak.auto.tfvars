@@ -37,6 +37,17 @@ clients = {
     allowed_users                   = ["moritz"]
   }
 
+  "kartei" = {
+    name                            = "kartei"
+    description                     = "kartei flashcards"
+    secret_key                      = "kartei_client_secret"
+    pkce                            = true
+    valid_redirect_uris             = ["https://kartei.nixpi.de/auth/callback"]
+    valid_post_logout_redirect_uris = ["https://kartei.nixpi.de/"]
+    web_origins                     = ["https://kartei.nixpi.de"]
+    default_scopes                  = ["profile", "email"]
+  }
+
   "beszel" = {
     name                            = "Beszel"
     description                     = "Beszel server monitoring"
