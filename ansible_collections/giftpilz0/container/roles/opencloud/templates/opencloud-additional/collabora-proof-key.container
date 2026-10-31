@@ -1,0 +1,19 @@
+{% if opencloud_collabora_enabled %}
+[Unit]
+Description=Generate Collabora WOPI Proof Key
+
+[Container]
+ContainerName=collabora-proof-key
+Image={{ opencloud_collabora_proof_key_image }}:{{ opencloud_collabora_proof_key_version }}
+{% if opencloud_collabora_proof_key_entrypoint %}
+Entrypoint={{ opencloud_collabora_proof_key_entrypoint }}
+{% else %}
+Entrypoint=/bin/sh
+{% endif %}
+Exec=-ec 'if [ ! -s /proof/proof_key ]; then openssl genrsa -traditional -out /proof/proof_key.tmp 4096; chown 1001:1001 /proof/proof_key.tmp; chmod 400 /proof/proof_key.tmp; mv /proof/proof_key.tmp /proof/proof_key; fi'
+Volume=collabora-proof-key.volume:/proof
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+{% endif %}

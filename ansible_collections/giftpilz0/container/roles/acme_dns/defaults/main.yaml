@@ -1,0 +1,44 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image
+acme_dns_image: "docker.io/joohoi/acme-dns"
+# renovate: datasource=docker depName=joohoi/acme-dns
+acme_dns_version: "v2.0.2"
+acme_dns_autoupdate: true
+
+# Network (always joined, created only when enabled)
+acme_dns_network_enabled: true
+acme_dns_network_name: "acme_dns-internal"
+acme_dns_network_driver: "bridge"
+acme_dns_network_internal: false
+
+# Host ports: DNS must be public, the API is reached by Traefik
+acme_dns_port_map_enabled: true
+acme_dns_bind_ip: "{{ ansible_facts['default_ipv4']['address'] }}"
+acme_dns_port_map:
+  - "53:53"
+  - "53:53/udp"
+
+## Service
+# Delegate <domain> with an NS record pointing to <nsname>
+acme_dns_domain: "auth.example.org"
+acme_dns_nsname: "ns1.example.org"
+acme_dns_nsadmin: "admin.example.org"
+acme_dns_records:
+  - "{{ acme_dns_domain }}. NS {{ acme_dns_nsname }}."
+acme_dns_disable_registration: false
+acme_dns_api_port: "80"
+acme_dns_loglevel: "info"
+acme_dns_logformat: "json"
+
+# Environment
+acme_dns_environment_vars: {}
+
+## Advanced
+acme_dns_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+acme_dns_extra_files: []
+acme_dns_extra_dirs: []

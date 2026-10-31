@@ -1,0 +1,15 @@
+---
+exclude_paths:
+  - "**/*.sops.yaml"
+  - .ansible/
+  - ansible-playbook/.ansible/
+  - ansible-playbook/.venv/
+  - ansible-playbook/requirements.yaml
+  - tofu/
+  - packer/
+
+skip_list:
+  - ignore-errors
+  - yaml[comments]
+  - yaml[line-length]
+  - var-naming[no-role-prefix]

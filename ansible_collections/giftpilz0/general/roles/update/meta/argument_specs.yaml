@@ -1,0 +1,20 @@
+---
+argument_specs:
+  main:
+    short_description: Apply system package updates with an optional automatic reboot.
+    options:
+      update_package_names:
+        type: list
+        elements: str
+        required: false
+        description: list of packages to update (empty for all).
+
+      update_package_security_only:
+        type: bool
+        required: false
+        description: only apply security updates.
+
+      update_package_bugfix_only:
+        type: bool
+        required: false
+        description: only apply bugfix updates.

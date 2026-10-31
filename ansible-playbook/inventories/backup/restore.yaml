@@ -1,0 +1,10 @@
+---
+# Usage: see RESTORE.md
+- name: Restore from restic
+  hosts: restic_clients
+  gather_facts: false
+  tasks:
+    - name: "Restore: Run restic"
+      ansible.builtin.include_role:
+        name: giftpilz0.misc.restic
+        tasks_from: restore

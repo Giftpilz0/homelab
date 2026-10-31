@@ -1,0 +1,9 @@
+# {{ ansible_managed }}
+[commands]
+apply_updates = {{ autoupgrade_auto_apply | bool }}
+download_updates = True
+
+upgrade_type = {{ autoupgrade_upgrade_type }}
+reboot = {{ 'when-needed' if autoupgrade_reboot else 'never' }}
+
+reboot_command = "shutdown -r +5 'Rebooting after applying package updates'"

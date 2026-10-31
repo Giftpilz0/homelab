@@ -1,0 +1,30 @@
+[Unit]
+Description=Suwayomi Server Container
+
+[Container]
+ContainerName=suwayomi
+Image={{ suwayomi_image }}:{{ suwayomi_version }}
+Pod=suwayomi.pod
+
+{% if suwayomi_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+{% if suwayomi_entrypoint %}
+Entrypoint={{ suwayomi_entrypoint }}
+{% endif %}
+
+{% for env_name, env_value in suwayomi_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+Volume=suwayomi-data.volume:/home/suwayomi/.local/share/Tachidesk
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
+{% endfor %}
+HealthCmd=["curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:4567/"]
+HealthInterval=30s
+HealthStartPeriod=120s
+HealthOnFailure=kill
+
+[Service]
+Restart=always

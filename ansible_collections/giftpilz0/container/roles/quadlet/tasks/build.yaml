@@ -1,0 +1,71 @@
+---
+- name: "Quadlet: Create build directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.cache/quadlet-builds/{{ item.name | basename }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ _quadlet_builds }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: "Quadlet: Clone build context"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.git:
+    repo: "{{ item.git_repo }}"
+    dest: "/home/{{ podman_user }}/.cache/quadlet-builds/{{ item.name | basename }}"
+    version: "{{ item.git_version }}"
+    force: true
+    depth: 1
+    key_file: "{{ item.git_key_file or omit }}"
+  loop: "{{ _quadlet_builds | selectattr('git_repo') }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: _quadlet_build_git
+
+- name: "Quadlet: Copy build context"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    src: "{{ _quadlet_role_path }}/{{ item.src }}/"
+    dest: "/home/{{ podman_user }}/.cache/quadlet-builds/{{ item.name | basename }}/"
+    mode: preserve
+  loop: "{{ _quadlet_builds | selectattr('src') }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: _quadlet_build_copy
+
+- name: "Quadlet: Build images"
+  become: true
+  become_user: "{{ podman_user }}"
+  containers.podman.podman_image:
+    name: "{{ item.name }}"
+    tag: "{{ item.tag }}"
+    path: "/home/{{ podman_user }}/.cache/quadlet-builds/{{ item.name | basename }}"
+    build:
+      file: "/home/{{ podman_user }}/.cache/quadlet-builds/{{ item.name | basename }}/{{ item.dockerfile }}"
+      format: oci
+      cache: "{{ item.cache }}"
+      force_rm: true
+      # Label keeps the image from the podman image prune timer (server.podman)
+      extra_args: >-
+        --label quadlet.build=true
+        {{ item.build_args.items() | map('join', '=') | map('regex_replace', '^', '--build-arg ') | join(' ') }}
+    # Rebuild only when the build context changed; a missing image is always built.
+    force: "{{ _quadlet_changed_contexts | select('eq', item.name) | length > 0 }}"
+  environment: "{{ quadlet_proxy_env }}"
+  loop: "{{ _quadlet_builds }}"
+  loop_control:
+    label: "{{ item.name }}"
+  vars:
+    _quadlet_changed_contexts: >-
+      {{ (_quadlet_build_git.results + _quadlet_build_copy.results)
+         | selectattr('changed') | map(attribute='item.name') | list }}
+  register: _quadlet_build_images
+
+# Picked up by tasks/main.yaml so pods restart on new images.
+- name: "Quadlet: Remember image rebuilds"
+  ansible.builtin.set_fact:
+    quadlet_images_changed: "{{ _quadlet_build_images is changed }}"

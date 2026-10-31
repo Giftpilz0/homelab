@@ -1,0 +1,58 @@
+---
+server:
+  children:
+    smarthome:
+      hosts:
+        smarthome.nixpi.de:
+          ansible_host: 192.168.60.10
+    vault:
+      hosts:
+        vault.nixpi.de:
+          ansible_host: 192.168.60.11
+    apps:
+      hosts:
+        apps.nixpi.de:
+          ansible_host: 192.168.60.12
+    git:
+      hosts:
+        git.nixpi.de:
+          ansible_host: 192.168.60.13
+    cloud:
+      hosts:
+        cloud.nixpi.de:
+          ansible_host: 192.168.60.14
+    vacuum:
+      hosts:
+        vacuum.nixpi.de:
+          ansible_host: 192.168.60.15
+    login:
+      hosts:
+        login.nixpi.de:
+          ansible_host: 192.168.60.16
+    monitoring:
+      hosts:
+        monitoring.nixpi.de:
+          ansible_host: 192.168.60.17
+    media:
+      hosts:
+        media.nixpi.de:
+          ansible_host: 192.168.60.18
+    acme:
+      hosts:
+        acme.nixpi.de:
+          ansible_host: 192.168.55.10
+    # Serve web traffic through Traefik
+    web:
+      children:
+        acme:
+        git:
+        smarthome:
+        login:
+        apps:
+        monitoring:
+        cloud:
+        media:
+        vault:
+  vars:
+    ansible_port: 22
+    ansible_user: root

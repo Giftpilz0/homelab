@@ -1,0 +1,36 @@
+[Unit]
+Description=Bumper Container
+
+[Container]
+ContainerName=bumper
+Image={{ bumper_image }}:{{ bumper_version }}
+Pod=bumper.pod
+
+{% if bumper_autoupdate %}
+AutoUpdate=local
+{% endif %}
+{% if bumper_entrypoint %}
+Entrypoint={{ bumper_entrypoint }}
+{% endif %}
+
+{% for env_name, env_value in bumper_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+Volume=%h/.config/containers/systemd/bumper-pod/config/bumper.key:/bumper/certs/bumper.key:Z
+Volume=%h/.config/containers/systemd/bumper-pod/config/bumper.crt:/bumper/certs/bumper.crt:Z
+Volume=%h/.config/containers/systemd/bumper-pod/config/ca.key:/bumper/certs/ca.key:Z
+Volume=%h/.config/containers/systemd/bumper-pod/config/ca.crt:/bumper/certs/ca.crt:Z
+Volume=%h/.config/containers/systemd/bumper-pod/config/ca.pem:/bumper/certs/ca.pem:Z
+Volume=bumper-data.volume:/bumper/data
+
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
+{% endfor %}
+HealthCmd=["python3", "-c", "import socket; socket.create_connection((socket.gethostname(), 8007), 5)"]
+HealthInterval=30s
+HealthStartPeriod=30s
+HealthOnFailure=kill
+
+[Service]
+Restart=always

@@ -1,0 +1,8 @@
+---
+timezone_package_state: present
+timezone_package:
+  - tzdata
+
+timezone_timezone: Etc/UTC
+# Empty leaves the hardware clock setting alone
+timezone_hwclock: ""

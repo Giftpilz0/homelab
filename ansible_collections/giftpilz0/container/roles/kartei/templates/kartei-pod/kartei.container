@@ -1,0 +1,35 @@
+[Unit]
+Description=kartei Container
+
+[Container]
+ContainerName=kartei
+Image={{ kartei_image }}:{{ kartei_version }}
+Pod=kartei.pod
+ReadOnly=true
+NoNewPrivileges=true
+DropCapability=ALL
+
+{% if kartei_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+{% if kartei_entrypoint %}
+Entrypoint={{ kartei_entrypoint }}
+{% endif %}
+
+{% for env_name, env_value in kartei_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+# Database, media and import/export temp files
+Volume=kartei-data.volume:/data
+
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
+{% endfor %}
+HealthCmd=/usr/local/bin/kartei healthcheck
+HealthInterval=30s
+HealthStartPeriod=10s
+HealthOnFailure=kill
+
+[Service]
+Restart=always

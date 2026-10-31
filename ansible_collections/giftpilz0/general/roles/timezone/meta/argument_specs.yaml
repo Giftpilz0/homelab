@@ -1,0 +1,33 @@
+---
+argument_specs:
+  main:
+    short_description: Set the system timezone.
+    options:
+      timezone_package_state:
+        type: str
+        required: false
+        choices:
+          - present
+          - absent
+          - latest
+        description: desired state of timezone packages.
+
+      timezone_package:
+        type: list
+        elements: str
+        required: false
+        description: list of packages to install.
+
+      timezone_timezone:
+        type: str
+        required: false
+        description: system timezone (e.g. Europe/Berlin).
+
+      timezone_hwclock:
+        type: str
+        required: false
+        choices:
+          - ""
+          - UTC
+          - local
+        description: what the hardware clock is kept in, empty leaves it alone.

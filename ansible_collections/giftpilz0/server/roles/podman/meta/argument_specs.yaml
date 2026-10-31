@@ -1,0 +1,76 @@
+---
+argument_specs:
+  main:
+    short_description: Install Podman and configure the rootless port forwarder.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: system user for rootless podman operations.
+
+      podman_service_name:
+        type: str
+        required: false
+        description: systemd service unit name.
+
+      podman_service_state:
+        type: str
+        required: false
+        choices:
+          - reloaded
+          - restarted
+          - started
+          - stopped
+        description: desired state of the podman service.
+
+      podman_service_enabled:
+        type: bool
+        required: false
+        description: whether the podman service is enabled at boot.
+
+      podman_package_state:
+        type: str
+        required: false
+        choices:
+          - present
+          - absent
+          - latest
+        description: desired state of podman packages.
+
+      podman_package:
+        type: list
+        elements: str
+        required: false
+        description: list of packages to install.
+
+      podman_rootless_port_forwarder:
+        type: str
+        required: false
+        description: rootless port forwarder backend (e.g. pasta, slirp4netns).
+
+      podman_log_driver:
+        type: str
+        required: false
+        choices:
+          - ""
+          - k8s-file
+          - journald
+          - json-file
+          - passthrough
+          - none
+        description: default log driver for rootless containers.
+
+      podman_image_prune_enabled:
+        type: bool
+        required: false
+        description: remove unused images on a timer (images labelled quadlet.build are kept).
+
+      podman_image_prune_schedule:
+        type: str
+        required: false
+        description: systemd OnCalendar expression for the prune timer.
+
+      podman_image_prune_until:
+        type: str
+        required: false
+        description: only prune images created longer ago than this duration (e.g. 168h).

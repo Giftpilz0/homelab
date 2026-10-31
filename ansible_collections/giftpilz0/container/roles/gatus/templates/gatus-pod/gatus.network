@@ -1,0 +1,8 @@
+{% if gatus_network_enabled %}
+[Unit]
+Description=Gatus Internal Network
+
+[Network]
+NetworkName={{ gatus_network_name }}
+Driver={{ gatus_network_driver }}
+{% endif %}

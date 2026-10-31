@@ -1,0 +1,40 @@
+---
+server:
+  children:
+    restic_server:
+      hosts:
+        pve.nixpi.de:
+          ansible_host: 192.168.50.10
+          ansible_user: root
+    restic_clients:
+      hosts:
+        smarthome.nixpi.de:
+          ansible_host: 192.168.60.10
+          ansible_user: serveradmin
+        vault.nixpi.de:
+          ansible_host: 192.168.60.11
+          ansible_user: serveradmin
+        apps.nixpi.de:
+          ansible_host: 192.168.60.12
+          ansible_user: serveradmin
+        git.nixpi.de:
+          ansible_host: 192.168.60.13
+          ansible_user: serveradmin
+        cloud.nixpi.de:
+          ansible_host: 192.168.60.14
+          ansible_user: serveradmin
+        vacuum.nixpi.de:
+          ansible_host: 192.168.60.15
+          ansible_user: serveradmin
+        login.nixpi.de:
+          ansible_host: 192.168.60.16
+          ansible_user: serveradmin
+        monitoring.nixpi.de:
+          ansible_host: 192.168.60.17
+          ansible_user: serveradmin
+        media.nixpi.de:
+          ansible_host: 192.168.60.18
+          ansible_user: serveradmin
+        acme.nixpi.de:
+          ansible_host: 192.168.55.10
+          ansible_user: serveradmin

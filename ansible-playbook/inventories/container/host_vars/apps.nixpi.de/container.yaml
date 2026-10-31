@@ -1,0 +1,47 @@
+---
+######################################
+### giftpilz0.container.misc
+
+misc_version: "latest"
+misc_commit: "db16ab7ca40f6e1e98e6e7a3947fb9e2aa04f527"
+
+######################################
+### giftpilz0.container.market_brief
+
+market_brief_data_repo: "ssh://git@ssh.github.com:443/Giftpilz0/market-watch-data.git"
+
+######################################
+### giftpilz0.container.kartei
+
+# renovate: datasource=docker depName=ghcr.io/giftpilz0/kartei
+kartei_version: "edge"
+
+kartei_base_url: "https://kartei.nixpi.de"
+kartei_oidc_issuer_url: "https://login.nixpi.de/realms/nixpi"
+
+######################################
+### giftpilz0.container.traefik
+
+traefik_networks:
+  - kartei
+
+traefik_http_services:
+  - name: kartei
+    domain: kartei.nixpi.de
+    rule: "Host(`kartei.nixpi.de`)"
+    servers:
+      - url: "http://kartei-pod:8080"
+    tls_enabled: true
+    acme_enabled: true
+    # Package imports and exports can be large
+    large_downloads: true
+    health_check:
+      path: "/healthz"
+      interval: "30s"
+
+######################################
+### giftpilz0.misc.cfdyndns
+
+cfdyndns_update_hostnames:
+  - acme.nixpi.de
+  - nixpi.de

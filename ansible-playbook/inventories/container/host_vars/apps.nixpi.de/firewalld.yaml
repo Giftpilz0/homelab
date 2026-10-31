@@ -1,0 +1,12 @@
+---
+######################################
+### giftpilz0.general.firewalld
+
+firewalld_zones_define_host:
+  - zone: clients
+    source: 192.168.45.0/24
+
+firewalld_rules_ports_host:
+  - port: 8080
+    protocol: tcp
+    zone: clients

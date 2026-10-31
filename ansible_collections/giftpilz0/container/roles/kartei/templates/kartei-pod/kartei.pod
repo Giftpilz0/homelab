@@ -1,0 +1,19 @@
+[Unit]
+Description=kartei Pod
+
+[Pod]
+PodName=kartei-pod
+
+Network={{ kartei_network_name }}
+
+{% if kartei_port_map_enabled %}
+{% for port_mapping in kartei_port_map %}
+PublishPort={{ kartei_bind_ip }}:{{ port_mapping }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

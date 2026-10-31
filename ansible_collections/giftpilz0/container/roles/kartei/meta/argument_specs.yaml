@@ -1,0 +1,97 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy kartei (spaced-repetition flashcards) as a Podman Quadlet pod.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: System user for rootless Podman operations.
+
+      kartei_image:
+        type: str
+        required: false
+        description: kartei image without tag.
+
+      kartei_version:
+        type: str
+        required: false
+        description: kartei image tag.
+
+      kartei_autoupdate:
+        type: bool
+        required: false
+        description: Enable Podman registry auto-update for kartei.
+
+      kartei_network_enabled:
+        type: bool
+        required: false
+        description: Create and manage the Podman network.
+
+      kartei_network_name:
+        type: str
+        required: false
+        description: Podman network name.
+
+      kartei_network_driver:
+        type: str
+        required: false
+        description: Podman network driver.
+
+      kartei_port_map_enabled:
+        type: bool
+        required: false
+        description: Publish the kartei port directly on the host.
+
+      kartei_bind_ip:
+        type: str
+        required: false
+        description: Host IP for optional direct port publishing.
+
+      kartei_port_map:
+        type: list
+        elements: str
+        required: false
+        description: Host-to-container port mappings.
+
+      kartei_base_url:
+        type: str
+        required: false
+        description: Public URL of kartei, e.g. https://kartei.example.com.
+
+      kartei_oidc_issuer_url:
+        type: str
+        required: false
+        description: OIDC issuer (Keycloak realm URL).
+
+      kartei_oidc_client_id:
+        type: str
+        required: false
+        description: OIDC client ID.
+
+      kartei_oidc_client_secret:
+        type: str
+        required: false
+        description: OIDC client secret.
+
+      kartei_environment_vars:
+        type: dict
+        required: false
+        description: Environment variables passed to kartei.
+
+      kartei_entrypoint:
+        type: str
+        required: false
+        description: Optional container entrypoint override.
+
+      kartei_extra_files:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      kartei_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.

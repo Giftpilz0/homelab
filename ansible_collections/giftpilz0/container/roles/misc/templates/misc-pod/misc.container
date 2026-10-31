@@ -1,0 +1,29 @@
+[Unit]
+Description=Misc Container
+
+[Container]
+ContainerName=misc
+Image={{ misc_image }}:{{ misc_version }}
+Pod=misc.pod
+
+{% if misc_autoupdate %}
+AutoUpdate=local
+{% endif %}
+{% if misc_entrypoint %}
+Entrypoint={{ misc_entrypoint }}
+{% endif %}
+
+{% for env_name, env_value in misc_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
+{% endfor %}
+HealthCmd=["python3", "-c", "import socket; socket.create_connection(('127.0.0.1', 8080), 5)"]
+HealthInterval=30s
+HealthStartPeriod=30s
+HealthOnFailure=kill
+
+[Service]
+Restart=always

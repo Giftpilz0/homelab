@@ -1,0 +1,11 @@
+---
+# Keys besides name/path are written as KEY="value", booleans as yes/no
+- name: "Snapper: Configure {{ snapper_config.name }}"
+  become: true
+  ansible.builtin.lineinfile:
+    path: "/etc/snapper/configs/{{ snapper_config.name }}"
+    regexp: "^{{ item.key | upper }}="
+    line: '{{ item.key | upper }}="{{ (item.value | ternary("yes", "no")) if item.value is boolean else item.value }}"'
+  loop: "{{ snapper_config | dict2items | rejectattr('key', 'in', ['name', 'path']) }}"
+  loop_control:
+    label: "{{ item.key | upper }}"

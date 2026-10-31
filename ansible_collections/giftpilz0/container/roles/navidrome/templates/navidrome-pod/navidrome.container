@@ -1,0 +1,34 @@
+[Unit]
+Description=Navidrome Container
+
+[Container]
+ContainerName=navidrome
+Image={{ navidrome_image }}:{{ navidrome_version }}
+Pod=navidrome.pod
+User=1001:1001
+
+{% if navidrome_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+{% if navidrome_entrypoint %}
+Entrypoint={{ navidrome_entrypoint }}
+{% endif %}
+
+{% for env_name, env_value in navidrome_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+Volume=navidrome-data.volume:/data
+Volume=navidrome-cache.volume:/cache
+Volume=navidrome-music.volume:/music:ro
+
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
+{% endfor %}
+HealthCmd=["wget", "-q", "-O", "/dev/null", "http://127.0.0.1:4533/ping"]
+HealthInterval=30s
+HealthStartPeriod=30s
+HealthOnFailure=kill
+
+[Service]
+Restart=always

@@ -1,0 +1,22 @@
+---
+# Users that also receive the keys of entries with user_install_key_to_targets
+user_key_target_users:
+  - root
+
+user_retired_ssh_keys: []
+
+user: []
+
+user_defaults:
+  user_state: present
+  user_password: "!"
+  user_sudo_pwless: false
+  user_groups: []
+  user_home: true
+  user_remove_home: false
+  user_shell: /bin/bash
+  user_comment: ""
+  user_pub: []
+  user_install_key_to_targets: false
+
+user_mkpasswd_package: "{{ 'mkpasswd' if ansible_facts['os_family'] == 'RedHat' else 'whois' }}"

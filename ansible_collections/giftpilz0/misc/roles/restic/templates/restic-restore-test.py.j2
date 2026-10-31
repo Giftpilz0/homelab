@@ -1,0 +1,62 @@
+#!/usr/bin/python3
+"""Restore a random sample of files from the latest snapshot of every repository."""
+import datetime
+import json
+import os
+import random
+import re
+import subprocess
+import sys
+import tempfile
+
+REPOSITORIES = {{ _restic_repositories | map(attribute='name') | list | to_json }}
+MAX_AGE = datetime.timedelta(hours={{ restic_restore_test_max_age_hours }})
+FILES = {{ restic_restore_test_files }}
+MAX_FILE_SIZE = {{ restic_restore_test_max_file_size }}
+
+
+def restic(repository, *args):
+    return subprocess.run(["/usr/local/bin/restic-repo", repository, *args],
+                          check=True, capture_output=True, text=True).stdout
+
+
+def test(repository):
+    snapshots = json.loads(restic(repository, "snapshots", "--json"))
+    if not snapshots:
+        raise RuntimeError("no snapshots")
+    snapshot = max(snapshots, key=lambda s: s["time"])
+    # restic writes nanoseconds, Python parses at most microseconds
+    taken = datetime.datetime.fromisoformat(re.sub(r"(\.\d{6})\d+", r"\1", snapshot["time"]))
+    age = datetime.datetime.now(datetime.timezone.utc) - taken
+    if age > MAX_AGE:
+        raise RuntimeError(f"latest snapshot {snapshot['short_id']} is {age} old")
+
+    nodes = (json.loads(line) for line in restic(repository, "ls", "--json", snapshot["id"]).splitlines())
+    files = [n for n in nodes if n.get("struct_type") == "node" and n["type"] == "file" and n["size"] <= MAX_FILE_SIZE]
+    sample = random.sample(files, min(FILES, len(files)))
+
+    with tempfile.TemporaryDirectory(dir="/var/tmp", prefix="restic-restore-test-") as target:
+        includes = os.path.join(target, "includes")
+        with open(includes, "w") as f:
+            # Paths are patterns for restic
+            f.writelines(re.sub(r"([*?\[\\])", r"\\\1", n["path"]) + "\n" for n in sample)
+        restic(repository, "restore", snapshot["id"], "--target", os.path.join(target, "data"),
+               "--include-file", includes, "--verify")
+        for node in sample:
+            path = os.path.join(target, "data", node["path"].lstrip("/"))
+            if os.path.getsize(path) != node["size"]:
+                raise RuntimeError(f"size mismatch: {node['path']}")
+
+    return f"snapshot {snapshot['short_id']} ({age} old), {len(sample)} of {len(files)} files restored"
+
+
+failed = False
+for repository in REPOSITORIES:
+    try:
+        print(f"{repository}: OK, {test(repository)}")
+    except (RuntimeError, OSError, subprocess.CalledProcessError) as e:
+        detail = e.stderr.strip() if isinstance(e, subprocess.CalledProcessError) else e
+        print(f"{repository}: FAILED, {detail}")
+        failed = True
+
+sys.exit(1 if failed else 0)

@@ -1,0 +1,131 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image
+traefik_image: "docker.io/library/traefik"
+# renovate: datasource=docker depName=traefik
+traefik_version: "v3.7.16"
+traefik_autoupdate: true
+
+# Network (always joined, created only when enabled)
+traefik_network_enabled: true
+traefik_network_name: "traefik-internal"
+traefik_network_driver: "bridge"
+
+# Role names whose <role>.network is joined to reach the backends,
+# e.g. [forgejo]; servers then use "http://forgejo-pod:3000"
+traefik_networks: []
+
+# Host ports (primary interface, keeps 127.0.0.1 free for the service pods)
+traefik_bind_ip: "{{ ansible_facts['default_ipv4']['address'] }}"
+
+## Service
+# ACME
+traefik_acme_enabled: true
+traefik_acme_email: ""
+traefik_acme_ca_server: "https://acme-v02.api.letsencrypt.org/directory"
+traefik_acme_challenge_type: http # dns, http or tls
+traefik_acme_dns_provider: "cloudflare"
+traefik_acme_dns_resolvers: []
+traefik_acme_eab_enabled: false
+traefik_acme_eab_kid: ""
+traefik_acme_eab_hmac: ""
+
+# Entrypoints
+traefik_http_internal_port: 80
+traefik_https_internal_port: 443
+traefik_http_redirect_https: true
+# HTTP/3 also publishes 443/udp; the advertised port is the host-side one
+traefik_http3_enabled: true
+traefik_http3_advertised_port: 443
+# Example: [{name: postgres, port: 5432, internal_port: 5432}]
+traefik_tcp_entrypoints: []
+
+# Logging
+traefik_log_level: "WARN"
+traefik_log_format: "json"
+traefik_access_log_format: "json"
+traefik_access_log_buffer_size: 10
+
+# Health check
+traefik_ping_internal_port: 8081
+
+# Transport
+traefik_transport_timeouts_enabled: false
+traefik_transport_read_timeout: "12h"
+traefik_transport_write_timeout: "12h"
+traefik_transport_idle_timeout: "3m"
+
+# Plugins, e.g. {traefik-oidc-auth: {moduleName: ..., version: ...}}
+traefik_plugins: {}
+
+# redirectRegex middlewares by name, {from, to} or {regex, replacement}
+# Example:
+#   traefik_middlewares_redirect:
+#     root-to-ui:
+#       from: "^/$"
+#       to: "/ui"
+#       permanent: false
+traefik_middlewares_redirect: {}
+
+# Raw middleware definitions by name
+# Example:
+#   traefik_custom_middlewares:
+#     auth-basic:
+#       basicAuth:
+#         users:
+#           - "admin:<bcrypt hash>"
+traefik_custom_middlewares: {}
+
+# HTTP services
+# Example:
+#   traefik_http_services:
+#     - name: webapp
+#       domain: app.example.com
+#       rule: "Host(`app.example.com`)"
+#       servers:
+#         - url: "http://webapp-pod:8080"
+#       tls_enabled: true
+#       middlewares: ["auth-basic@file"]
+#       redirect: {from: "^/$", to: "/ui", permanent: false}
+#       sans: ["app2.example.com"]
+#       health_check: {path: "/health", interval: "30s"} # Traefik healthCheck
+#       large_downloads: true # long forwarding timeouts
+#       insecure_skip_verify: true # self-signed backend
+traefik_http_services: []
+traefik_http_service_defaults:
+  entrypoints:
+    - websecure
+  middlewares: []
+  tls_enabled: false
+  acme_enabled: "{{ traefik_acme_enabled }}"
+  large_downloads: false
+  insecure_skip_verify: false
+
+# TCP services
+# Example:
+#   traefik_tcp_services:
+#     - name: postgres
+#       domain: "db.example.com"
+#       rule: "HostSNI(`db.example.com`)"
+#       entrypoints: [postgres]
+#       servers:
+#         - address: "postgresql-pod:5432"
+#       tls_enabled: true
+#       acme_enabled: true
+traefik_tcp_services: []
+traefik_tcp_service_defaults:
+  tls_enabled: false
+  acme_enabled: false
+  tls_passthrough: false
+
+# Environment, e.g. DNS provider credentials
+traefik_environment_vars: {}
+
+## Advanced
+traefik_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+traefik_extra_files: []
+traefik_extra_dirs: []

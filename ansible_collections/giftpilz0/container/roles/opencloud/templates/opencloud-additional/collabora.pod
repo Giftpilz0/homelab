@@ -1,0 +1,15 @@
+{% if opencloud_collabora_enabled %}
+[Unit]
+Description=Collabora Online Pod
+
+[Pod]
+PodName=collabora-pod
+
+Network=opencloud.network
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
+{% endif %}

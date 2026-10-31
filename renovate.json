@@ -1,0 +1,20 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["github>Giftpilz0/shared"],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "description": "Hub image and agent binary must stay on the same version",
+      "matchPackageNames": ["henrygd/beszel"],
+      "groupName": "beszel"
+    },
+    {
+      "description": "Database majors need a dump and restore",
+      "matchPackageNames": ["postgres", "mariadb"],
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    }
+  ]
+}

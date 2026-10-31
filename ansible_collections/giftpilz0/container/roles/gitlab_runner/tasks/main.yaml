@@ -1,0 +1,18 @@
+---
+- name: "GitLab Runner: Enable Podman socket"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: podman.socket
+    enabled: true
+    state: started
+    scope: user
+
+- name: "GitLab Runner: Deploy pod"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: gitlab_runner
+    quadlet_extra_files: "{{ gitlab_runner_extra_files }}"
+    quadlet_extra_dirs: "{{ gitlab_runner_extra_dirs }}"
+    quadlet_units: "{{ (['gitlab-runner-network.service'] if gitlab_runner_network_enabled else []) + ['gitlab-runner-pod.service'] }}"

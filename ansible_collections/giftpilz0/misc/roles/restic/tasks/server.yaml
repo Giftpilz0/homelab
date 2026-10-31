@@ -1,0 +1,85 @@
+---
+- name: "Restic: Validate client credentials"
+  ansible.builtin.assert:
+    that: hostvars[item]['restic_server_password'] | length > 0
+    fail_msg: "Set restic_server_password for {{ item }}."
+    quiet: true
+  loop: "{{ groups.get('restic_clients', []) }}"
+
+- name: "Restic: Create repository directories"
+  become: true
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ restic_user }}"
+    group: "{{ restic_user }}"
+    mode: "0750"
+  loop: "{{ [restic_server_repo_base] + groups.get('restic_clients', []) | map('regex_replace', '^', restic_server_repo_base ~ '/') }}"
+
+- name: "Restic: Install htpasswd dependencies"
+  become: true
+  ansible.builtin.package:
+    name:
+      - python3-passlib
+      - python3-bcrypt
+    state: present
+
+- name: "Restic: Manage client logins"
+  become: true
+  community.general.htpasswd:
+    path: "{{ restic_server_repo_base }}/.htpasswd"
+    name: "{{ item }}"
+    password: "{{ hostvars[item]['restic_server_password'] }}"
+    crypt_scheme: bcrypt
+    owner: "{{ restic_user }}"
+    group: "{{ restic_user }}"
+    mode: "0600"
+  loop: "{{ groups.get('restic_clients', []) }}"
+  no_log: true
+  notify: "Restic: Restart rest-server"
+
+- name: "Restic: Create rest-server release directory"
+  become: true
+  ansible.builtin.file:
+    path: /usr/local/lib/rest-server-{{ rest_server_version }}
+    state: directory
+    mode: "0755"
+
+- name: "Restic: Download rest-server"
+  become: true
+  ansible.builtin.unarchive:
+    src: "https://github.com/restic/rest-server/releases/download/v{{ rest_server_version }}/rest-server_{{ rest_server_version }}_linux_{{ _restic_arch }}.tar.gz"
+    dest: /usr/local/lib/rest-server-{{ rest_server_version }}
+    remote_src: true
+    extra_opts:
+      - --strip-components=1
+    creates: /usr/local/lib/rest-server-{{ rest_server_version }}/rest-server
+
+- name: "Restic: Install rest-server"
+  become: true
+  ansible.builtin.copy:
+    src: /usr/local/lib/rest-server-{{ rest_server_version }}/rest-server
+    dest: /usr/local/bin/rest-server
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0755"
+  notify: "Restic: Restart rest-server"
+
+- name: "Restic: Create rest-server service"
+  become: true
+  ansible.builtin.template:
+    src: rest-server.service.j2
+    dest: /etc/systemd/system/rest-server.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: "Restic: Restart rest-server"
+
+- name: "Restic: Enable and start rest-server"
+  become: true
+  ansible.builtin.systemd:
+    name: rest-server
+    enabled: true
+    state: started
+    daemon_reload: true

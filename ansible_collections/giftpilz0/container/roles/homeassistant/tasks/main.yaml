@@ -1,0 +1,17 @@
+---
+- name: "Home Assistant: Add Podman user to dialout group"
+  become: true
+  ansible.builtin.user:
+    name: "{{ podman_user }}"
+    groups: dialout
+    append: true
+  when: homeassistant_device_access
+
+- name: "Home Assistant: Deploy pod"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: homeassistant
+    quadlet_extra_files: "{{ homeassistant_extra_files }}"
+    quadlet_extra_dirs: "{{ homeassistant_extra_dirs }}"
+    quadlet_units: "{{ (['homeassistant-network.service'] if homeassistant_network_enabled else []) + ['homeassistant-pod.service'] }}"

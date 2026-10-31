@@ -1,0 +1,6 @@
+---
+# Hashes already deployed for users still in mosquitto_users (none when rehashing).
+_mosquitto_existing_hashes: >-
+  {{ {} if mosquitto_rehash_passwords or _mosquitto_passwd.content is not defined else
+     dict((_mosquitto_passwd.content | b64decode).splitlines() | select | map('split', ':'))
+     | dict2items | selectattr('key', 'in', mosquitto_users) | items2dict }}

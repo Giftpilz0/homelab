@@ -1,0 +1,41 @@
+---
+- name: "Cfdyndns: Install python requests"
+  become: true
+  ansible.builtin.package:
+    name: "{{ cfdyndns_python_requests_package }}"
+    state: present
+
+- name: "Cfdyndns: Create state directory"
+  become: true
+  ansible.builtin.file:
+    path: "{{ cfdyndns_state_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: "Cfdyndns: Deploy updater script"
+  become: true
+  ansible.builtin.template:
+    src: ip_updater.py
+    dest: "{{ cfdyndns_script_path }}"
+    mode: "0700"
+
+- name: "Cfdyndns: Deploy systemd units"
+  become: true
+  ansible.builtin.template:
+    src: "ip_updater.{{ item }}"
+    dest: "/etc/systemd/system/cfdyndns.{{ item }}"
+    mode: "0644"
+  loop:
+    - service
+    - timer
+  notify: "Cfdyndns: Reload systemd"
+
+- name: "Cfdyndns: Apply systemd changes"
+  ansible.builtin.meta: flush_handlers
+
+- name: "Cfdyndns: Enable and start timer"
+  become: true
+  ansible.builtin.systemd:
+    name: cfdyndns.timer
+    enabled: true
+    state: started

@@ -1,0 +1,84 @@
+---
+######################################
+### giftpilz0.container.homeassistant
+
+# renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant
+homeassistant_version: "2026.10.4"
+
+homeassistant_device_access: true
+homeassistant_extra_files:
+  # Zigbee dongle
+  - source: "/dev/serial/by-id/usb-ITEAD_SONOFF_Zigbee_3.0_USB_Dongle_Plus_V2_20230804114425-if00"
+    mount: "/dev/ttyACM0"
+    relabel: false
+  # Patched deebot_client hardware module
+  - src: "{{ inventory_dir | dirname }}/host_vars/{{ inventory_hostname }}/assets/homeassistant/8n0t5d.py"
+    dest: "config/8n0t5d.py"
+    mount: "/usr/local/lib/python3.14/site-packages/deebot_client/hardware/8n0t5d.py"
+
+######################################
+### giftpilz0.container.mosquitto
+
+# renovate: datasource=github-tags depName=eclipse-mosquitto/mosquitto extractVersion=^v(?<version>.+)$
+mosquitto_version: "2.1.2"
+
+mosquitto_acl_patterns: []
+mosquitto_acl_users:
+  homeassistant:
+    - access: readwrite
+      topic: "#"
+
+######################################
+### giftpilz0.container.traefik
+
+traefik_networks:
+  - homeassistant
+  - mosquitto
+
+traefik_tcp_entrypoints:
+  - name: mqtt-tls
+    port: 8883
+    internal_port: 8883
+  - name: mqtt
+    port: 1883
+    internal_port: 1883
+
+traefik_http_services:
+  - name: homeassistant
+    domain: homeassistant.nixpi.de
+    rule: "Host(`homeassistant.nixpi.de`)"
+    servers:
+      - url: "http://homeassistant-pod:8123"
+    tls_enabled: true
+    acme_enabled: true
+
+  - name: mqtt-websocket
+    domain: mqtt.nixpi.de
+    rule: "Host(`mqtt.nixpi.de`)"
+    servers:
+      - url: "http://mosquitto-pod:9001"
+    tls_enabled: true
+    acme_enabled: true
+
+traefik_tcp_services:
+  - name: mqtt
+    domain: "mqtt.nixpi.de"
+    rule: "HostSNI(`*`)"
+    entrypoints:
+      - mqtt
+    servers:
+      - address: "mosquitto-pod:1883"
+    tls_enabled: false
+    acme_enabled: false
+    tls_passthrough: false
+
+  - name: mqtt-tls
+    domain: "mqtt.nixpi.de"
+    rule: "HostSNI(`mqtt.nixpi.de`)"
+    entrypoints:
+      - mqtt-tls
+    servers:
+      - address: "mosquitto-pod:1883"
+    tls_enabled: true
+    acme_enabled: true
+    tls_passthrough: false

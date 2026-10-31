@@ -1,0 +1,59 @@
+---
+_firewalld_zones_define: "{{ query('ansible.builtin.vars', *(query('ansible.builtin.varnames', '^firewalld_zones_define(_.+)?$') | sort)) | flatten }}"
+_firewalld_rules_icmp: >-
+  {{ [firewalld_rule_defaults] | product(query('ansible.builtin.vars', *(query('ansible.builtin.varnames', '^firewalld_rules_icmp(_.+)?$') | sort))
+     | flatten) | map('combine') | list }}
+_firewalld_rules_services: >-
+  {{ [firewalld_rule_defaults] | product(query('ansible.builtin.vars', *(query('ansible.builtin.varnames', '^firewalld_rules_services(_.+)?$') | sort))
+     | flatten) | map('combine') | list }}
+_firewalld_rules_ports: >-
+  {{ [firewalld_rule_defaults] | product(query('ansible.builtin.vars', *(query('ansible.builtin.varnames', '^firewalld_rules_ports(_.+)?$') | sort))
+     | flatten) | map('combine') | list }}
+
+# Permanent config of all zones from firewall-cmd --info-zone, by zone
+_firewalld_current: >-
+  {%- set zones = {} -%}
+  {%- for result in _firewalld_zone_info.results -%}
+  {%- set info = {} -%}
+  {%- for key in ['sources', 'services', 'ports'] -%}
+  {%- set _ = info.update({key: result.stdout | regex_search('(?m)^\\s*' ~ key ~ ':(.*)$', '\\1') | first | split}) -%}
+  {%- endfor -%}
+  {%- set _ = zones.update({result.item: info}) -%}
+  {%- endfor -%}
+  {{ zones }}
+
+_firewalld_managed_zones: "{{ (_firewalld_zones_define | map(attribute='zone') + [firewalld_default_zone]) | unique }}"
+
+_firewalld_unmanaged_sources: >-
+  {%- set stale = [] -%}
+  {%- for zone, info in _firewalld_current.items() -%}
+  {%- for source in info.sources
+        if source not in (_firewalld_zones_define | selectattr('zone', 'eq', zone) | map(attribute='source')) -%}
+  {%- set _ = stale.append({'zone': zone, 'source': source}) -%}
+  {%- endfor -%}
+  {%- endfor -%}
+  {{ stale }}
+
+_firewalld_unmanaged_services: >-
+  {%- set stale = [] -%}
+  {%- for zone in _firewalld_managed_zones if zone in _firewalld_current -%}
+  {%- for service in _firewalld_current[zone].services
+        if service not in (_firewalld_rules_services | selectattr('zone', 'eq', zone)
+                           | selectattr('state', 'eq', 'enabled') | map(attribute='service')) -%}
+  {%- set _ = stale.append({'zone': zone, 'service': service}) -%}
+  {%- endfor -%}
+  {%- endfor -%}
+  {{ stale }}
+
+_firewalld_unmanaged_ports: >-
+  {%- set stale = [] -%}
+  {%- for zone in _firewalld_managed_zones if zone in _firewalld_current -%}
+  {%- set managed = [] -%}
+  {%- for rule in _firewalld_rules_ports | selectattr('zone', 'eq', zone) | selectattr('state', 'eq', 'enabled') -%}
+  {%- set _ = managed.append(rule.port ~ '/' ~ rule.protocol) -%}
+  {%- endfor -%}
+  {%- for port in _firewalld_current[zone].ports if port not in managed -%}
+  {%- set _ = stale.append({'zone': zone, 'port': port}) -%}
+  {%- endfor -%}
+  {%- endfor -%}
+  {{ stale }}

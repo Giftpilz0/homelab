@@ -1,0 +1,174 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy PostgreSQL as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: System user for rootless podman operations.
+
+      postgresql_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      postgresql_version:
+        type: str
+        required: false
+        description: Container image version.
+
+      postgresql_autoupdate:
+        type: bool
+        required: false
+        description: Enable podman auto-update for PostgreSQL.
+
+      postgresql_backup_autoupdate:
+        type: bool
+        required: false
+        description: Enable podman auto-update for the backup container.
+
+      postgresql_network_enabled:
+        type: bool
+        required: false
+        description: Create and manage the podman network.
+
+      postgresql_network_name:
+        type: str
+        required: false
+        description: Podman network name.
+
+      postgresql_network_driver:
+        type: str
+        required: false
+        description: Podman network driver.
+
+      postgresql_port_map_enabled:
+        type: bool
+        required: false
+        description: Expose container ports on the host.
+
+      postgresql_bind_ip:
+        type: str
+        required: false
+        description: Host IP to bind exposed ports to.
+
+      postgresql_port_map:
+        type: list
+        elements: str
+        required: false
+        description: Host:container port mappings.
+
+      postgresql_log_destination:
+        type: str
+        required: false
+        description: PostgreSQL log destination.
+
+      postgresql_log_statement:
+        type: str
+        required: false
+        choices:
+          - none
+          - ddl
+          - mod
+          - all
+        description: SQL statement logging level.
+
+      postgresql_log_min_duration_statement:
+        type: int
+        required: false
+        description: Log statements running at least this many milliseconds.
+
+      postgresql_log_connections:
+        type: bool
+        required: false
+        description: Log successful connection attempts.
+
+      postgresql_log_disconnections:
+        type: bool
+        required: false
+        description: Log session disconnections.
+
+      postgresql_log_checkpoints:
+        type: bool
+        required: false
+        description: Log checkpoint activity.
+
+      postgresql_log_lock_waits:
+        type: bool
+        required: false
+        description: Log waits exceeding deadlock timeout.
+
+      postgresql_log_line_prefix:
+        type: str
+        required: false
+        description: Context prefix for each PostgreSQL log line.
+
+      postgresql_admin_database:
+        type: str
+        required: false
+        description: Administrator database created by the PostgreSQL image.
+
+      postgresql_admin_user:
+        type: str
+        required: false
+        description: Administrator user created by the PostgreSQL image.
+
+      postgresql_admin_password:
+        type: str
+        required: false
+        description: Password for the PostgreSQL administrator user.
+
+      postgresql_users:
+        type: list
+        elements: dict
+        required: false
+        description: Users to provision; each entry has name and password.
+
+      postgresql_databases:
+        type: list
+        elements: dict
+        required: false
+        description: Secondary databases to provision and include in backups; each entry has name and owner.
+
+      postgresql_backup_schedule_times:
+        type: str
+        required: false
+        description: Time of day to run backup (HH:MM format).
+
+      postgresql_backup_retention_days:
+        type: int
+        required: false
+        description: Number of days to keep backups.
+
+      postgresql_backup_compression:
+        type: int
+        required: false
+        description: Gzip compression level (1-9).
+
+      postgresql_environment_vars:
+        type: dict
+        required: false
+        description: Extra environment variables for the container.
+
+      postgresql_entrypoint:
+        type: str
+        required: false
+        description: Optional PostgreSQL container entrypoint override.
+
+      postgresql_backup_entrypoint:
+        type: str
+        required: false
+        description: Optional PostgreSQL backup container entrypoint override.
+
+      postgresql_extra_files:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      postgresql_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.

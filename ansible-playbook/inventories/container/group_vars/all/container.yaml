@@ -1,0 +1,20 @@
+---
+# Shared by all giftpilz0.container roles.
+podman_user: "container"
+
+######################################
+### giftpilz0.container.traefik
+
+# renovate: datasource=docker depName=traefik
+traefik_version: "v3.7.16"
+
+traefik_acme_challenge_type: dns
+traefik_acme_dns_provider: "cloudflare"
+
+traefik_log_level: "INFO"
+
+######################################
+### giftpilz0.container.postgresql
+
+# Before the restic backup at 02:00 (backup inventory)
+postgresql_backup_schedule_times: "01:30"

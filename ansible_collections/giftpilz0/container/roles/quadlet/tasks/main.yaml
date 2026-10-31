@@ -1,0 +1,199 @@
+---
+- name: "Quadlet: Validate parameters"
+  ansible.builtin.assert:
+    that:
+      - quadlet_role | length > 0
+      - quadlet_units | length > 0
+    fail_msg: "quadlet_role and quadlet_units must be set by the calling service role."
+    quiet: true
+
+######################################
+### host
+
+- name: "Quadlet: Create Podman config directory"
+  become: true
+  ansible.builtin.file:
+    path: /etc/containers/containers.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "Quadlet: Manage Podman proxy configuration"
+  become: true
+  ansible.builtin.template:
+    src: proxy.conf.j2
+    dest: /etc/containers/containers.conf.d/proxy.conf
+    owner: root
+    group: root
+    mode: "0644"
+  when: podman_proxy_enabled
+
+- name: "Quadlet: Remove Podman proxy configuration"
+  become: true
+  ansible.builtin.file:
+    path: /etc/containers/containers.conf.d/proxy.conf
+    state: absent
+  when: not podman_proxy_enabled
+
+- name: "Quadlet: Enable lingering"
+  become: true
+  ansible.builtin.command:
+    cmd: "loginctl enable-linger {{ podman_user }}"
+    creates: "/var/lib/systemd/linger/{{ podman_user }}"
+
+- name: "Quadlet: Configure unprivileged port range"
+  become: true
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_unprivileged_port_start
+    value: "{{ podman_unprivileged_port_start }}"
+    sysctl_set: true
+    sysctl_file: /etc/sysctl.d/99-rootless-ports.conf
+    reload: true
+
+######################################
+### files
+
+- name: "Quadlet: Create quadlet directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "{{ _quadlet_base }}"
+    state: directory
+    mode: "0755"
+
+- name: "Quadlet: Create directory structure"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "{{ _quadlet_base }}/{{ item.path }}"
+    state: directory
+    mode: "{{ quadlet_dir_modes.get(item.path, item.mode) }}"
+  loop: "{{ query('community.general.filetree', _quadlet_role_path ~ '/templates', _quadlet_role_path ~ '/files') | selectattr('state', 'eq', 'directory') }}"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: "Quadlet: Create extra file directories"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "{{ _quadlet_base }}/{{ quadlet_dir }}/{{ item }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ _quadlet_extra_files | selectattr('src') | map(attribute='dest') | map('dirname') | select | unique }}"
+
+- name: "Quadlet: Template quadlet files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ _quadlet_base }}/{{ item.path }}"
+    mode: "{{ item.mode }}"
+  loop: "{{ query('community.general.filetree', _quadlet_role_path ~ '/templates') | selectattr('state', 'eq', 'file') }}"
+  loop_control:
+    label: "{{ item.path }}"
+  register: _quadlet_templates
+
+- name: "Quadlet: Copy static files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ _quadlet_base }}/{{ item.path }}"
+    mode: "{{ item.mode }}"
+  loop: "{{ query('community.general.filetree', _quadlet_role_path ~ '/files') | selectattr('state', 'eq', 'file') }}"
+  loop_control:
+    label: "{{ item.path }}"
+  register: _quadlet_files
+
+- name: "Quadlet: Copy extra files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ _quadlet_base }}/{{ quadlet_dir }}/{{ item.dest }}"
+    mode: "{{ item.mode }}"
+  loop: "{{ _quadlet_extra_files | selectattr('src') | rejectattr('template') }}"
+  loop_control:
+    label: "{{ item.dest }}"
+  register: _quadlet_extra_copied
+
+- name: "Quadlet: Template extra files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ _quadlet_base }}/{{ quadlet_dir }}/{{ item.dest }}"
+    mode: "{{ item.mode }}"
+  loop: "{{ _quadlet_extra_files | selectattr('src') | selectattr('template') }}"
+  loop_control:
+    label: "{{ item.dest }}"
+  register: _quadlet_extra_templated
+
+- name: "Quadlet: Copy extra directories"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    src: "{{ item.src }}/"
+    dest: "{{ _quadlet_base }}/{{ quadlet_dir }}/{{ item.dest }}"
+    mode: "{{ item.mode }}"
+  loop: "{{ _quadlet_extra_dirs | selectattr('src') }}"
+  loop_control:
+    label: "{{ item.dest }}"
+  register: _quadlet_extra_dirs_copied
+
+# Unit files that are no longer rendered would otherwise keep generating units.
+- name: "Quadlet: Find deployed unit files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.find:
+    paths: "{{ query('community.general.filetree', _quadlet_role_path ~ '/templates') | selectattr('state', 'eq', 'directory')
+               | map(attribute='path') | reject('search', '/') | map('regex_replace', '^', _quadlet_base ~ '/') }}"
+    patterns: "*.container,*.pod,*.volume,*.network,*.build,*.image,*.kube"
+  register: _quadlet_deployed_units
+
+- name: "Quadlet: Remove stale unit files"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop: >-
+    {{ _quadlet_deployed_units.files | map(attribute='path')
+       | difference(query('community.general.filetree', _quadlet_role_path ~ '/templates') | selectattr('state', 'eq', 'file')
+                    | map(attribute='path') | map('regex_replace', '^', _quadlet_base ~ '/')) }}
+  register: _quadlet_stale
+
+######################################
+### services
+
+- name: "Quadlet: Reload user systemd"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    daemon_reload: true
+    scope: user
+  when: _quadlet_changed
+
+- name: "Quadlet: Start units"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: "{{ 'restarted' if _quadlet_changed else 'started' }}"
+    scope: user
+  loop: "{{ quadlet_units }}"
+
+- name: "Quadlet: Enable Podman auto-update timer"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: podman-auto-update.timer
+    enabled: true
+    state: started
+    scope: user
+
+- name: "Quadlet: Reset image rebuild flag"
+  ansible.builtin.set_fact:
+    quadlet_images_changed: false

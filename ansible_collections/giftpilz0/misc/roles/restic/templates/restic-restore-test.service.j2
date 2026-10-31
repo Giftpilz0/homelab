@@ -1,0 +1,10 @@
+[Unit]
+Description=Restic restore test
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/restic-restore-test
+Nice=19
+IOSchedulingClass=idle

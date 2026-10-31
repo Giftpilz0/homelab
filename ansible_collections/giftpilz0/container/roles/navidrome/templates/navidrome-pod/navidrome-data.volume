@@ -1,0 +1,4 @@
+[Unit]
+Description=Navidrome Data Volume
+
+[Volume]

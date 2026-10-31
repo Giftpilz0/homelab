@@ -1,0 +1,18 @@
+---
+- name: "Kartei: Validate parameters"
+  ansible.builtin.assert:
+    that:
+      - kartei_base_url | length > 0
+      - kartei_oidc_issuer_url | length > 0
+      - kartei_oidc_client_secret | length > 0
+    fail_msg: "Needs kartei_base_url, kartei_oidc_issuer_url and kartei_oidc_client_secret (encrypted host vars)."
+    quiet: true
+
+- name: "Kartei: Deploy pod"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: kartei
+    quadlet_extra_files: "{{ kartei_extra_files }}"
+    quadlet_extra_dirs: "{{ kartei_extra_dirs }}"
+    quadlet_units: "{{ (['kartei-network.service'] if kartei_network_enabled else []) + ['kartei-pod.service'] }}"

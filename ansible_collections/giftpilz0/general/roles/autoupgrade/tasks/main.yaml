@@ -1,0 +1,60 @@
+---
+######################################
+### packages
+
+- name: "Autoupgrade: Replace libcurl-minimal"
+  become: true
+  ansible.builtin.dnf:
+    name: libcurl
+    state: present
+    allowerasing: true
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
+    - autoupgrade_package_state != 'absent'
+
+- name: "Autoupgrade: Manage packages"
+  become: true
+  ansible.builtin.package:
+    name: "{{ autoupgrade_package_list }}"
+    state: "{{ autoupgrade_package_state }}"
+  notify: "Autoupgrade: Restart"
+
+######################################
+### config
+
+- name: "Autoupgrade: Configure dnf-automatic"
+  become: true
+  ansible.builtin.template:
+    src: automatic.conf.j2
+    dest: "{{ autoupgrade_config_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
+    - autoupgrade_package_state != 'absent'
+  notify: "Autoupgrade: Restart"
+
+- name: "Autoupgrade: Configure unattended-upgrades"
+  become: true
+  ansible.builtin.template:
+    src: apt-autoupgrade.conf.j2
+    dest: "{{ autoupgrade_config_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when:
+    - ansible_facts['os_family'] == 'Debian'
+    - autoupgrade_package_state != 'absent'
+  notify: "Autoupgrade: Restart"
+
+######################################
+### services
+
+- name: "Autoupgrade: Manage services"
+  become: true
+  ansible.builtin.service:
+    name: "{{ autoupgrade_service_name }}"
+    state: "{{ autoupgrade_service_state }}"
+    enabled: "{{ autoupgrade_service_enabled }}"
+  when: autoupgrade_package_state != 'absent'

@@ -1,0 +1,123 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy the acme-dns ACME challenge server as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: System user for rootless podman operations.
+
+      acme_dns_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      acme_dns_version:
+        type: str
+        required: false
+        description: Acme-dns container image version.
+
+      acme_dns_autoupdate:
+        type: bool
+        required: false
+        description: Enable Podman auto-update for this container.
+
+      acme_dns_network_enabled:
+        type: bool
+        required: false
+        description: Create and manage the Podman network.
+
+      acme_dns_network_name:
+        type: str
+        required: false
+        description: Podman network name.
+
+      acme_dns_network_driver:
+        type: str
+        required: false
+        description: Podman network driver.
+
+      acme_dns_network_internal:
+        type: bool
+        required: false
+        description: Create an internal-only Podman network.
+
+      acme_dns_port_map_enabled:
+        type: bool
+        required: false
+        description: Expose DNS ports on the host.
+
+      acme_dns_bind_ip:
+        type: str
+        required: false
+        description: Host IP to bind the public DNS ports to.
+
+      acme_dns_port_map:
+        type: list
+        elements: str
+        required: false
+        description: Host:container port mappings.
+
+      acme_dns_domain:
+        type: str
+        required: false
+        description: Delegated zone served by acme-dns.
+
+      acme_dns_nsname:
+        type: str
+        required: false
+        description: Authoritative nameserver name advertised for the delegated zone.
+
+      acme_dns_nsadmin:
+        type: str
+        required: false
+        description: Administrative email with the @ represented as a dot.
+
+      acme_dns_records:
+        type: list
+        elements: str
+        required: false
+        description: Additional records served by acme-dns.
+
+      acme_dns_disable_registration:
+        type: bool
+        required: false
+        description: Disable the registration endpoint.
+
+      acme_dns_api_port:
+        type: str
+        required: false
+        description: REST API listen port.
+
+      acme_dns_loglevel:
+        type: str
+        required: false
+        description: Logging level.
+
+      acme_dns_logformat:
+        type: str
+        required: false
+        description: Logging format.
+
+      acme_dns_environment_vars:
+        type: dict
+        required: false
+        description: Extra environment variables injected into the container.
+
+      acme_dns_entrypoint:
+        type: str
+        required: false
+        description: Optional container entrypoint override.
+
+      acme_dns_extra_files:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary file entries with src or source, dest, optional mount, mode, and template.
+
+      acme_dns_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary directory entries with src or source, dest, optional mount and mode.

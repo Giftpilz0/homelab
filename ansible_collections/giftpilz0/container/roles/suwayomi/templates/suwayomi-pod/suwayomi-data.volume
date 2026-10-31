@@ -1,0 +1,5 @@
+[Unit]
+Description=Suwayomi Server Data Volume
+
+[Volume]
+VolumeName=suwayomi-data

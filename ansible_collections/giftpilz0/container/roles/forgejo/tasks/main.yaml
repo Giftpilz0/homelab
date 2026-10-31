@@ -1,0 +1,18 @@
+---
+- name: "Forgejo: Deploy PostgreSQL"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.postgresql
+  vars:
+    postgresql_network_name: "{{ forgejo_network_name }}"
+    postgresql_admin_database: "{{ forgejo_db_name }}"
+    postgresql_admin_user: "{{ forgejo_db_user }}"
+    postgresql_admin_password: "{{ forgejo_db_password }}"
+
+- name: "Forgejo: Deploy pod"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: forgejo
+    quadlet_extra_files: "{{ forgejo_extra_files }}"
+    quadlet_extra_dirs: "{{ forgejo_extra_dirs }}"
+    quadlet_units: "{{ (['forgejo-network.service'] if forgejo_network_enabled else []) + ['forgejo-pod.service'] }}"

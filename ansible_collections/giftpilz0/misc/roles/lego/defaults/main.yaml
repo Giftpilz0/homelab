@@ -1,0 +1,71 @@
+---
+# Private: holds ACME account keys and provider credentials
+lego_state_path: "{{ 'C:\\ProgramData\\lego' if ansible_facts['os_family'] == 'Windows' else '/var/lib/lego' }}"
+lego_service_user: lego
+lego_service_group: lego
+
+# Binary
+# renovate: datasource=github-releases depName=go-acme/lego extractVersion=^v(?<version>.*)$
+lego_tag: 5.6.0
+lego_arch: amd64
+lego_path: "{{ 'C:\\ProgramData\\lego\\bin' if ansible_facts['os_family'] == 'Windows' else '/usr/local/bin' }}"
+lego_binary: "{{ lego_path }}/lego"
+lego_bin_state: present
+lego_url: "https://github.com/go-acme/lego/releases/download/v{{ lego_tag }}/lego_v{{ lego_tag }}_linux_{{ lego_arch }}.tar.gz"
+lego_windows_url: "https://github.com/go-acme/lego/releases/download/v{{ lego_tag }}/lego_v{{ lego_tag }}_windows_{{ lego_arch }}.zip"
+
+# Issuance and renewal
+lego_issue_on_deploy: false
+lego_renewal_threshold: 30
+lego_acme_email: ""
+lego_acme_server: "https://acme-v02.api.letsencrypt.org/directory"
+lego_acme_dns_resolvers: []
+
+# [{name, domains, challenge: {type, provider, environment}, deploy: {pem|pfx|windows_store}, hooks}]
+# challenge.type: dns-01, http-01 or tls-alpn-01; credentials in challenge.environment
+# hooks.changed: [{command}] on Linux, [{script}] on Windows
+lego_certificates: []
+lego_certificate_defaults:
+  key_type: EC256
+  account_id: "{{ lego_acme_email }}"
+  extra_args: []
+  renewal:
+    threshold: "{{ lego_renewal_threshold }}"
+  challenge:
+    environment: {}
+  hooks:
+    changed: []
+  deploy: {}
+
+# Deployment defaults, merged into deploy.pem/pfx/windows_store
+lego_default_deploy_directory_mode: "0750"
+lego_default_deploy_file_mode: "0640"
+lego_default_deploy_private_key_mode: "0640"
+lego_deploy_pem_defaults:
+  owner: root
+  group: root
+  directory_mode: "{{ lego_default_deploy_directory_mode }}"
+  certificate_mode: "{{ lego_default_deploy_file_mode }}"
+  private_key_mode: "{{ lego_default_deploy_private_key_mode }}"
+lego_deploy_pfx_defaults:
+  owner: root
+  group: root
+  directory_mode: "0700"
+  mode: "0600"
+lego_deploy_windows_store_defaults:
+  store_location: LocalMachine
+  store_name: My
+
+# Windows: identities with access to the state directory
+lego_windows_state_acl:
+  - user: SYSTEM
+    rights: FullControl
+  - user: Administrators
+    rights: FullControl
+
+lego_windows_task_username: SYSTEM
+lego_windows_task_logon_type: service_account
+lego_windows_task_password: ""
+
+# Passed to every lego run
+lego_extra_args: []

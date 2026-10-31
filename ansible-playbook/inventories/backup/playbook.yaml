@@ -1,0 +1,15 @@
+---
+- name: Configure hosts - common
+  hosts: all
+  roles:
+    - role: giftpilz0.general.user
+
+- name: Configure hosts - restic_server
+  hosts: restic_server
+  roles:
+    - role: giftpilz0.misc.snapper
+
+- name: Configure hosts - all
+  hosts: all
+  roles:
+    - role: giftpilz0.misc.restic

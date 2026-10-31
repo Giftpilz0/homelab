@@ -1,0 +1,133 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy MariaDB as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: System user for rootless podman operations.
+
+      mariadb_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      mariadb_version:
+        type: str
+        required: false
+        description: Container image version.
+
+      mariadb_autoupdate:
+        type: bool
+        required: false
+        description: Enable podman auto-update for this container.
+
+      mariadb_backup_autoupdate:
+        type: bool
+        required: false
+        description: Enable podman auto-update for the backup container.
+
+      mariadb_network_enabled:
+        type: bool
+        required: false
+        description: Create and manage the podman network.
+
+      mariadb_network_name:
+        type: str
+        required: false
+        description: Podman network name.
+
+      mariadb_network_driver:
+        type: str
+        required: false
+        description: Podman network driver.
+
+      mariadb_port_map_enabled:
+        type: bool
+        required: false
+        description: Expose container ports on the host.
+
+      mariadb_bind_ip:
+        type: str
+        required: false
+        description: Host IP to bind exposed ports to.
+
+      mariadb_port_map:
+        type: list
+        elements: str
+        required: false
+        description: Host:container port mappings.
+
+      mariadb_admin_database:
+        type: str
+        required: false
+        description: Administrator database created by the MariaDB image.
+
+      mariadb_admin_user:
+        type: str
+        required: false
+        description: Administrator user created by the MariaDB image.
+
+      mariadb_admin_password:
+        type: str
+        required: false
+        description: Password for the MariaDB administrator user.
+
+      mariadb_backup_user:
+        type: str
+        required: false
+        description: Database user used by the backup and restore container; set this to an existing user's credentials when migrating an initialized volume.
+
+      mariadb_backup_password:
+        type: str
+        required: false
+        description: Password for the backup and restore database user; MARIADB_ROOT_PASSWORD does not change an initialized volume.
+
+      mariadb_databases:
+        type: list
+        elements: dict
+        required: false
+        description: Secondary databases and users to provision and include in backups; each entry has name, user, and password.
+
+      mariadb_backup_schedule_times:
+        type: str
+        required: false
+        description: Backup schedule in HH:MM format.
+
+      mariadb_backup_retention_days:
+        type: int
+        required: false
+        description: Number of days to keep backups.
+
+      mariadb_backup_compression:
+        type: int
+        required: false
+        description: Zlib compression level (0-9).
+
+      mariadb_environment_vars:
+        type: dict
+        required: false
+        description: Extra environment variables injected into the container.
+
+      mariadb_entrypoint:
+        type: str
+        required: false
+        description: Optional MariaDB container entrypoint override.
+
+      mariadb_backup_entrypoint:
+        type: str
+        required: false
+        description: Optional MariaDB backup container entrypoint override.
+
+      mariadb_extra_files:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      mariadb_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.

@@ -1,0 +1,91 @@
+---
+argument_specs:
+  main:
+    short_description: Install and manage RPM, Flatpak, and Python packages and repositories.
+    options:
+      packages_package_state:
+        type: str
+        required: false
+        choices:
+          - present
+          - absent
+          - latest
+          - skip
+        description: desired state of system packages.
+
+      packages_rpmfusion_package_state:
+        type: str
+        required: false
+        choices:
+          - present
+          - latest
+          - skip
+        description: desired state of RPM Fusion packages.
+
+      packages_additional_package_state:
+        type: str
+        required: false
+        choices:
+          - present
+          - absent
+          - latest
+          - skip
+        description: desired state of additional packages.
+
+      packages_python_package_state:
+        type: str
+        required: false
+        choices:
+          - present
+          - absent
+          - latest
+          - skip
+        description: desired state of Python packages.
+
+      packages_package:
+        type: list
+        elements: str
+        required: false
+        description: list of system packages to manage.
+
+      packages_rpmfusion_package:
+        type: list
+        elements: str
+        required: false
+        description: list of RPM Fusion packages to manage.
+
+      packages_additional_package:
+        type: list
+        elements: str
+        required: false
+        description: list of additional packages to manage.
+
+      packages_flatpak_package:
+        type: list
+        elements: dict
+        required: false
+        description: list of Flatpak packages to manage.
+
+      packages_python_package:
+        type: list
+        elements: str
+        required: false
+        description: list of Python packages to manage.
+
+      packages_flatpak_repos:
+        type: list
+        elements: dict
+        required: false
+        description: Flatpak remotes to add.
+
+      packages_flatpak_repos_remove:
+        type: list
+        elements: str
+        required: false
+        description: Flatpak remotes to remove.
+
+      packages_copr_repos:
+        type: list
+        elements: dict
+        required: false
+        description: COPR repositories to enable.

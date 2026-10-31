@@ -1,0 +1,36 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image
+beszel_image: "docker.io/henrygd/beszel"
+# renovate: datasource=docker depName=henrygd/beszel
+beszel_version: "0.21.1"
+beszel_autoupdate: true
+
+# Network (always joined, created only when enabled)
+beszel_network_enabled: true
+beszel_network_name: "beszel-internal"
+beszel_network_driver: "bridge"
+
+# Host ports (not needed behind Traefik)
+beszel_port_map_enabled: false
+beszel_bind_ip: "127.0.0.1"
+beszel_port_map:
+  - "8090:8090"
+
+## Service
+beszel_app_url: ""
+
+# Environment, see https://beszel.dev/guide/environment-variables#hub
+beszel_environment_vars:
+  APP_URL: "{{ beszel_app_url }}"
+  # Agents connect via WebSocket
+  DISABLE_SSH: "true"
+
+## Advanced
+beszel_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+beszel_extra_files: []
+beszel_extra_dirs: []

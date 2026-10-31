@@ -1,0 +1,9 @@
+---
+- name: "MariaDB: Deploy pod"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: mariadb
+    quadlet_extra_files: "{{ mariadb_extra_files }}"
+    quadlet_extra_dirs: "{{ mariadb_extra_dirs }}"
+    quadlet_units: "{{ (['mariadb-network.service'] if mariadb_network_enabled else []) + ['mariadb-pod.service'] }}"

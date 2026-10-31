@@ -1,0 +1,111 @@
+---
+######################################
+### packages
+
+- name: "Podman: Manage packages"
+  become: true
+  ansible.builtin.package:
+    name: "{{ podman_package }}"
+    state: "{{ podman_package_state }}"
+
+######################################
+### config
+
+- name: "Podman: Enable lingering"
+  become: true
+  ansible.builtin.command: loginctl enable-linger {{ podman_user }}
+  args:
+    creates: /var/lib/systemd/linger/{{ podman_user }}
+
+- name: "Podman: Create user directories"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0755"
+  loop:
+    - /home/{{ podman_user }}/.config/systemd/user
+    - /home/{{ podman_user }}/.config/containers/containers.conf.d
+
+- name: "Podman: Configure rootless port forwarder"
+  become: true
+  ansible.builtin.template:
+    src: containers.conf.d/networking.conf.j2
+    dest: /home/{{ podman_user }}/.config/containers/containers.conf.d/networking.conf
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0644"
+  when: podman_rootless_port_forwarder | length > 0
+
+- name: "Podman: Configure rootless log driver"
+  become: true
+  ansible.builtin.template:
+    src: containers.conf.d/logging.conf.j2
+    dest: /home/{{ podman_user }}/.config/containers/containers.conf.d/logging.conf
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0644"
+  when: podman_log_driver | length > 0
+
+- name: "Podman: Remove rootless log driver override"
+  become: true
+  ansible.builtin.file:
+    path: /home/{{ podman_user }}/.config/containers/containers.conf.d/logging.conf
+    state: absent
+  when: podman_log_driver | length == 0
+
+######################################
+### services
+
+- name: "Podman: Manage services"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: "{{ podman_service_name }}"
+    state: "{{ podman_service_state }}"
+    enabled: "{{ podman_service_enabled }}"
+    scope: user
+  when: podman_package_state != 'absent'
+
+- name: "Podman: Deploy image prune units"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: /home/{{ podman_user }}/.config/systemd/user/{{ item }}
+    mode: "0644"
+  loop:
+    - podman-image-prune.service
+    - podman-image-prune.timer
+  register: _podman_prune_units
+  when: podman_image_prune_enabled
+
+- name: "Podman: Check image prune timer"
+  become: true
+  ansible.builtin.stat:
+    path: /home/{{ podman_user }}/.config/systemd/user/podman-image-prune.timer
+  register: _podman_prune_timer
+
+- name: "Podman: Manage image prune timer"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: podman-image-prune.timer
+    state: "{{ 'started' if podman_image_prune_enabled else 'stopped' }}"
+    enabled: "{{ podman_image_prune_enabled }}"
+    daemon_reload: "{{ _podman_prune_units is changed }}"
+    scope: user
+  when: _podman_prune_timer.stat.exists
+
+- name: "Podman: Remove image prune units"
+  become: true
+  ansible.builtin.file:
+    path: /home/{{ podman_user }}/.config/systemd/user/{{ item }}
+    state: absent
+  loop:
+    - podman-image-prune.service
+    - podman-image-prune.timer
+  when: not podman_image_prune_enabled

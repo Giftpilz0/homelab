@@ -1,0 +1,72 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image
+gatus_image: "docker.io/twinproduction/gatus"
+# renovate: datasource=docker depName=twinproduction/gatus
+gatus_version: "v5.38.0"
+gatus_autoupdate: true
+
+# Network (always joined, created only when enabled)
+gatus_network_enabled: true
+gatus_network_name: "gatus-internal"
+gatus_network_driver: "bridge"
+
+# Host ports (not needed behind Traefik)
+gatus_port_map_enabled: false
+gatus_bind_ip: "127.0.0.1"
+gatus_port_map:
+  - "8080:8080"
+
+## Service
+gatus_url: ""
+gatus_title: "Homelab"
+
+# Hosts whose traefik_http_services become endpoints
+gatus_traefik_hosts: "{{ groups['all'] }}"
+# traefik_http_services names not to monitor
+gatus_traefik_exclude: []
+# Endpoint keys by service name
+# Example:
+#   gatus_traefik_overrides:
+#     suwayomi:
+#       conditions: ["[STATUS] == 401"]
+gatus_traefik_overrides: {}
+
+# Additional endpoints, format: https://github.com/TwiN/gatus#endpoints
+# Example:
+#   gatus_endpoints:
+#     - name: proxmox
+#       group: infrastructure
+#       url: "https://pve.nixpi.de:8006"
+#       client: {insecure: true}
+gatus_endpoints: []
+gatus_endpoint_defaults:
+  interval: 1m
+  conditions:
+    - "[STATUS] < 400"
+    - "[CERTIFICATE_EXPIRATION] > 336h"
+  alerts: []
+
+# OIDC login
+gatus_oidc_enabled: false
+gatus_oidc_issuer_url: ""
+gatus_oidc_client_id: "gatus"
+gatus_oidc_client_secret: ""
+
+# Alert providers, format: https://github.com/TwiN/gatus#alerting
+gatus_alerting: {}
+
+# Merged recursively into the generated config.yaml
+gatus_extra_config: {}
+
+# Environment
+gatus_environment_vars: {}
+
+## Advanced
+gatus_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+gatus_extra_files: []
+gatus_extra_dirs: []

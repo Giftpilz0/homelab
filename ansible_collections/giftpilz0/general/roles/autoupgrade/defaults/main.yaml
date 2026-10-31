@@ -1,0 +1,16 @@
+---
+autoupgrade_package_state: present
+autoupgrade_package_list: "{{ ['unattended-upgrades'] if ansible_facts['os_family'] == 'Debian' else ['dnf-automatic'] }}"
+autoupgrade_service_name: "{{ 'apt-daily-upgrade.timer' if ansible_facts['os_family'] == 'Debian' else 'dnf-automatic.timer' }}"
+autoupgrade_service_state: started
+autoupgrade_service_enabled: true
+autoupgrade_config_path: "{{ '/etc/apt/apt.conf.d/20auto-upgrades' if ansible_facts['os_family'] == 'Debian' else '/etc/dnf/automatic.conf' }}"
+
+autoupgrade_auto_apply: true
+# default or security (dnf only)
+autoupgrade_upgrade_type: default
+# Reboot when an upgrade requires it
+autoupgrade_reboot: false
+autoupgrade_blacklist: []
+autoupgrade_mail_report: ""
+autoupgrade_mail: ""

@@ -1,0 +1,35 @@
+[Unit]
+Description=PostgreSQL Container
+
+[Container]
+ContainerName=postgresql
+Image={{ postgresql_image }}:{{ postgresql_version }}
+Pod=postgresql.pod
+
+{% if postgresql_entrypoint %}
+Entrypoint={{ postgresql_entrypoint }}
+{% endif %}
+
+Exec=postgres -c log_destination={{ postgresql_log_destination }} -c log_statement={{ postgresql_log_statement }} -c log_min_duration_statement={{ postgresql_log_min_duration_statement }} -c log_connections={{ postgresql_log_connections | ternary('on', 'off') }} -c log_disconnections={{ postgresql_log_disconnections | ternary('on', 'off') }} -c log_checkpoints={{ postgresql_log_checkpoints | ternary('on', 'off') }} -c log_lock_waits={{ postgresql_log_lock_waits | ternary('on', 'off') }} -c log_line_prefix="{{ postgresql_log_line_prefix | replace('%', '%%') }}"
+
+{% if postgresql_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+{% for env_name, env_value in postgresql_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+Volume=postgresql-data.volume:/var/lib/postgresql
+Volume=%h/.config/containers/systemd/postgresql-pod/config/init-databases.sql:/docker-entrypoint-initdb.d/10-databases.sql:ro,Z
+
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
+{% endfor %}
+# Not killed when unhealthy, crash recovery may take a while
+HealthCmd=["pg_isready", "-q", "-h", "127.0.0.1"]
+HealthInterval=30s
+HealthStartPeriod=60s
+
+[Service]
+Restart=always

@@ -1,0 +1,109 @@
+# Global
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+{% if traefik_plugins %}
+# Experimental plugins
+experimental:
+  plugins:
+{% for plugin_name, plugin_config in traefik_plugins.items() %}
+    {{ plugin_name }}:
+{% for key, value in plugin_config.items() %}
+      {{ key }}: "{{ value }}"
+{% endfor %}
+{% endfor %}
+{% endif %}
+
+# Entrypoints
+entryPoints:
+{% if traefik_http_services | length > 0 %}
+  web:
+    address: ":{{ traefik_http_internal_port }}"
+{% if traefik_http_redirect_https %}
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+{% endif %}
+
+  websecure:
+    address: ":{{ traefik_https_internal_port }}"
+{% if traefik_http3_enabled %}
+    http3:
+      advertisedPort: {{ traefik_http3_advertised_port }}
+{% endif %}
+{% if traefik_transport_timeouts_enabled %}
+    transport:
+      respondingTimeouts:
+        readTimeout: "{{ traefik_transport_read_timeout }}"
+        writeTimeout: "{{ traefik_transport_write_timeout }}"
+        idleTimeout: "{{ traefik_transport_idle_timeout }}"
+{% endif %}
+    http:
+      middlewares:
+        - security-headers@file
+{% endif %}
+
+  # Health check, only reachable inside the pod
+  ping:
+    address: "127.0.0.1:{{ traefik_ping_internal_port }}"
+
+{% for entrypoint in traefik_tcp_entrypoints %}
+  {{ entrypoint.name }}:
+    address: ":{{ entrypoint.get('internal_port', entrypoint.port) }}"
+{% endfor %}
+
+{% if traefik_acme_enabled %}
+# Certificate resolvers
+certificatesResolvers:
+  default:
+    acme:
+      email: "{{ traefik_acme_email }}"
+      storage: "/acme/acme.json"
+      caServer: "{{ traefik_acme_ca_server }}"
+{% if traefik_acme_eab_enabled %}
+      eab:
+        kid: "{{ traefik_acme_eab_kid }}"
+        hmacEncoded: "{{ traefik_acme_eab_hmac }}"
+{% endif %}
+{% if traefik_acme_challenge_type == 'dns' %}
+      dnsChallenge:
+        provider: {{ traefik_acme_dns_provider }}
+{% if traefik_acme_dns_resolvers | length > 0 %}
+        resolvers:
+{% for resolver in traefik_acme_dns_resolvers %}
+          - "{{ resolver }}"
+{% endfor %}
+{% endif %}
+        propagation:
+            delayBeforeChecks: 60
+{% elif traefik_acme_challenge_type == 'http' %}
+{% if traefik_http_services | length > 0 %}
+      httpChallenge:
+        entryPoint: web
+{% endif %}
+{% elif traefik_acme_challenge_type == 'tls' %}
+      tlsChallenge: {}
+{% endif %}
+{% endif %}
+
+# Providers
+providers:
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+# Logging
+log:
+  level: {{ traefik_log_level }}
+  format: {{ traefik_log_format }}
+
+accessLog:
+  format: {{ traefik_access_log_format }}
+  bufferingSize: {{ traefik_access_log_buffer_size }}
+
+ping:
+  entryPoint: ping

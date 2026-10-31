@@ -1,0 +1,28 @@
+[Unit]
+Description=Gitlab-runner Container
+
+[Container]
+ContainerName=gitlab-runner
+Image={{ gitlab_runner_image }}:{{ gitlab_runner_version }}
+Pod=gitlab-runner.pod
+
+{% if gitlab_runner_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+{% if gitlab_runner_entrypoint %}
+Entrypoint={{ gitlab_runner_entrypoint }}
+{% endif %}
+
+{% for env_name, env_value in gitlab_runner_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+Volume=%h/.config/containers/systemd/gitlab-runner-pod/config/config.toml:/etc/gitlab-runner/config.toml:Z
+Volume=/run/user/%U/podman/podman.sock:/var/run/docker.sock:Z
+
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
+{% endfor %}
+
+[Service]
+Restart=always

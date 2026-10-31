@@ -1,0 +1,40 @@
+---
+argument_specs:
+  main:
+    short_description: Install the Beszel monitoring agent as a systemd service.
+    options:
+      beszel_agent_version:
+        type: str
+        required: false
+        description: Beszel release version.
+
+      beszel_agent_user:
+        type: str
+        required: false
+        description: User the agent runs as; created as a system user if missing.
+
+      beszel_agent_podman_socket:
+        type: bool
+        required: false
+        description: Enable the Podman API socket of beszel_agent_user and point the agent at it.
+
+      beszel_agent_hub_url:
+        type: str
+        required: false
+        description: URL of the Beszel hub the agent connects to.
+
+      beszel_agent_key:
+        type: str
+        required: false
+        description: Public key of the hub.
+
+      beszel_agent_token:
+        type: str
+        required: false
+        no_log: true
+        description: Universal or per-system registration token of the hub.
+
+      beszel_agent_environment_vars:
+        type: dict
+        required: false
+        description: Extra agent environment variables.

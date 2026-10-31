@@ -1,0 +1,5 @@
+RESTIC_REPOSITORY=rest:http://{{ restic_server_host }}:{{ restic_server_port }}/{{ inventory_hostname }}/{{ item.name }}
+RESTIC_PASSWORD_FILE={{ restic_password_dir }}/{{ item.name }}.txt
+RESTIC_CACHE_DIR={{ restic_cache_dir }}/{{ item.name }}
+RESTIC_REST_USERNAME={{ inventory_hostname }}
+RESTIC_REST_PASSWORD={{ restic_server_password }}

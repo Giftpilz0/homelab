@@ -1,0 +1,16 @@
+---
+######################################
+### giftpilz0.general.firewalld
+
+# Beszel agents of pve and acme
+firewalld_zones_define_host:
+  - zone: management
+    source: 192.168.50.0/24
+  - zone: server-dmz
+    source: 192.168.55.0/24
+
+firewalld_rules_services_host:
+  - service: https
+    zone: management
+  - service: https
+    zone: server-dmz

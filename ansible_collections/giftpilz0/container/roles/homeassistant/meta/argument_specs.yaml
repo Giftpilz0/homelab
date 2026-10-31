@@ -1,0 +1,82 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy Home Assistant as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: System user for rootless podman operations.
+
+      homeassistant_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      homeassistant_version:
+        type: str
+        required: false
+        description: Container image version.
+
+      homeassistant_autoupdate:
+        type: bool
+        required: false
+        description: Enable podman auto-update for this container.
+
+      homeassistant_network_enabled:
+        type: bool
+        required: false
+        description: Create and manage the podman network.
+
+      homeassistant_network_name:
+        type: str
+        required: false
+        description: Podman network name.
+
+      homeassistant_network_driver:
+        type: str
+        required: false
+        description: Podman network driver.
+
+      homeassistant_port_map_enabled:
+        type: bool
+        required: false
+        description: Expose container ports on the host.
+
+      homeassistant_bind_ip:
+        type: str
+        required: false
+        description: Host IP to bind exposed ports to.
+
+      homeassistant_port_map:
+        type: list
+        elements: str
+        required: false
+        description: Host:container port mappings.
+
+      homeassistant_device_access:
+        type: bool
+        required: false
+        description: Grant access to devices mounted via extra files (dialout group, original groups, SELinux spc_t).
+
+      homeassistant_environment_vars:
+        type: dict
+        required: false
+        description: Extra environment variables injected into the container.
+
+      homeassistant_entrypoint:
+        type: str
+        required: false
+        description: Optional container entrypoint override.
+
+      homeassistant_extra_files:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      homeassistant_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.

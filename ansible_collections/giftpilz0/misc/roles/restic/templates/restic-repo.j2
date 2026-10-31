@@ -1,0 +1,15 @@
+#!/bin/sh
+# Runs restic against a configured repository, e.g. restic-repo {{ (_restic_repositories | first).name }} snapshots
+set -eu
+
+if [ $# -lt 1 ] || [ ! -r "{{ restic_env_dir }}/$1.conf" ]; then
+    echo "Usage: $0 <repository> <restic arguments>" >&2
+    echo "Repositories: {{ _restic_repositories | map(attribute='name') | join(' ') }}" >&2
+    exit 2
+fi
+
+set -a
+. "{{ restic_env_dir }}/$1.conf"
+set +a
+shift
+exec restic "$@"

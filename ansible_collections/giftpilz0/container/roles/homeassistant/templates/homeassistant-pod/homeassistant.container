@@ -1,0 +1,35 @@
+[Unit]
+Description=Homeassistant Container
+
+[Container]
+ContainerName=homeassistant
+Image={{ homeassistant_image }}:{{ homeassistant_version }}
+Pod=homeassistant.pod
+
+{% if homeassistant_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+{% if homeassistant_entrypoint %}
+Entrypoint={{ homeassistant_entrypoint }}
+{% endif %}
+
+{% for env_name, env_value in homeassistant_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+{% if homeassistant_device_access %}
+Annotation=run.oci.keep_original_groups=1
+SecurityLabelType=spc_t
+{% endif %}
+Volume=homeassistant-data.volume:/config
+
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
+{% endfor %}
+HealthCmd=["curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8123/manifest.json"]
+HealthInterval=30s
+HealthStartPeriod=120s
+HealthOnFailure=kill
+
+[Service]
+Restart=always

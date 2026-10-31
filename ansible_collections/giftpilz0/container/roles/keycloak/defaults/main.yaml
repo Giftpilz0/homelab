@@ -1,0 +1,69 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image
+keycloak_image: "quay.io/keycloak/keycloak"
+# renovate: datasource=docker depName=quay.io/keycloak/keycloak
+keycloak_version: "26.8.1"
+keycloak_autoupdate: true
+
+# Network (always joined, created only when enabled)
+keycloak_network_enabled: true
+keycloak_network_name: "keycloak-internal"
+keycloak_network_driver: "bridge"
+
+# Host ports (not needed behind Traefik)
+keycloak_port_map_enabled: true
+keycloak_bind_ip: "127.0.0.1"
+keycloak_port_map:
+  - "8080:8080"
+
+## Service
+keycloak_domain: "login.nixpi.de"
+keycloak_admin_password: ""
+
+# Database (giftpilz0.container.postgresql pod on the keycloak network)
+keycloak_db_host: "postgresql-pod"
+keycloak_db_name: "keycloak"
+keycloak_db_user: "keycloak"
+keycloak_db_password: ""
+
+# Environment
+keycloak_environment_vars:
+  KC_HTTPS_PORT: "8443"
+  KC_HTTP_PORT: "8080"
+  KC_HTTP_ENABLED: "true"
+  KC_HEALTH_ENABLED: "true"
+  KC_HTTP_MANAGEMENT_SCHEME: "http"
+  KC_METRICS_ENABLED: "true"
+
+  KC_PROXY: "edge"
+  KC_PROXY_HEADERS: "xforwarded"
+  KC_PROXY_TRUSTED_ADDRESSES: "127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+  KC_HOSTNAME: "{{ keycloak_domain }}"
+
+  KC_DB: "postgres"
+  KC_DB_URL: "jdbc:postgresql://{{ keycloak_db_host }}:5432/{{ keycloak_db_name }}"
+  KC_DB_USERNAME: "{{ keycloak_db_user }}"
+  KC_DB_PASSWORD: "{{ keycloak_db_password }}"
+
+  KC_BOOTSTRAP_ADMIN_USERNAME: admin
+  KC_BOOTSTRAP_ADMIN_PASSWORD: "{{ keycloak_admin_password }}"
+
+  KC_CACHE: "ispn"
+  KC_CACHE_CONFIG_FILE: "cache-ispn.xml"
+  KC_CACHE_STACK: "jdbc-ping"
+
+  KC_LOG: "console"
+  KC_LOG_LEVEL: "WARN"
+  KC_LOG_CONSOLE_COLOR: "true"
+
+  KC_FEATURES: "scripts"
+
+## Advanced
+keycloak_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+keycloak_extra_files: []
+keycloak_extra_dirs: []

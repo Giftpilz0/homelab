@@ -1,0 +1,34 @@
+[Unit]
+Description=Mosquitto Container
+
+[Container]
+ContainerName=mosquitto
+Image={{ mosquitto_image }}:{{ mosquitto_version }}-{{ mosquitto_go_auth_version }}
+Pod=mosquitto.pod
+
+{% if mosquitto_autoupdate %}
+AutoUpdate=local
+{% endif %}
+{% if mosquitto_entrypoint %}
+Entrypoint={{ mosquitto_entrypoint }}
+{% endif %}
+
+{% for env_name, env_value in mosquitto_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+Volume=%h/.config/containers/systemd/mosquitto-pod/config/passwd:/mosquitto/config/passwd:Z
+Volume=%h/.config/containers/systemd/mosquitto-pod/config/acl:/mosquitto/config/acl:Z
+Volume=%h/.config/containers/systemd/mosquitto-pod/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:Z
+Volume=mosquitto-data.volume:/mosquitto/data
+
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
+{% endfor %}
+HealthCmd=["bash", "-c", "</dev/tcp/127.0.0.1/1883"]
+HealthInterval=30s
+HealthStartPeriod=10s
+HealthOnFailure=kill
+
+[Service]
+Restart=always

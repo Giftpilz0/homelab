@@ -1,0 +1,15 @@
+{% if opencloud_radicale_enabled %}
+[Unit]
+Description=Radicale CalDAV/CardDAV Pod
+
+[Pod]
+PodName=radicale-pod
+
+Network=opencloud.network
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
+{% endif %}

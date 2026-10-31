@@ -1,0 +1,18 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Beszel Agent
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User={{ beszel_agent_user }}
+# Service logs in the hub
+SupplementaryGroups=systemd-journal
+EnvironmentFile=/etc/beszel-agent/env
+ExecStart=/usr/local/bin/beszel-agent
+StateDirectory=beszel-agent
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

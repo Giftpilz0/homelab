@@ -1,0 +1,99 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image
+forgejo_image: "codeberg.org/forgejo/forgejo"
+# renovate: datasource=docker depName=codeberg.org/forgejo/forgejo
+forgejo_version: "17.0.0"
+forgejo_autoupdate: true
+
+# Network (always joined, created only when enabled)
+forgejo_network_enabled: true
+forgejo_network_name: "forgejo-internal"
+forgejo_network_driver: "bridge"
+
+# Host ports (not needed behind Traefik)
+forgejo_port_map_enabled: true
+forgejo_bind_ip: "127.0.0.1"
+forgejo_port_map:
+  - "3000:3000"
+  - "{{ forgejo_ssh_port }}:22"
+
+## Service
+forgejo_domain: ""
+# Host port of the git SSH server (22 belongs to the host sshd), shown in clone URLs
+forgejo_ssh_port: 2222
+forgejo_log_level: "Info"
+
+# Database (giftpilz0.container.postgresql pod on the forgejo network)
+forgejo_db_host: "postgresql-pod"
+forgejo_db_name: "forgejo"
+forgejo_db_user: "forgejo"
+forgejo_db_password: ""
+
+# OAuth source, managed by the forgejo-oauth-init container
+forgejo_oauth_name: ""
+forgejo_oauth_domain: ""
+forgejo_oauth_client_id: ""
+forgejo_oauth_client_secret: ""
+forgejo_oauth_admin_group: "forgejo-admin"
+
+# Environment
+forgejo_environment_vars:
+  USER_UID: "1000"
+  USER_GID: "1000"
+
+  APP_NAME: "Forgejo"
+  APP_SLOGAN: ""
+
+  FORGEJO__server__DOMAIN: "{{ forgejo_domain }}"
+  FORGEJO__server__ROOT_URL: "https://{{ forgejo_domain }}/"
+  FORGEJO__server__PROTOCOL: "http"
+  FORGEJO__server__HTTP_PORT: 3000
+  FORGEJO__server__SSH_PORT: "{{ forgejo_ssh_port }}"
+  # OpenSSH inside the container
+  SSH_LISTEN_PORT: 22
+  FORGEJO__server__OFFLINE_MODE: false
+
+  FORGEJO__log__LEVEL: "{{ forgejo_log_level }}"
+
+  FORGEJO__database__DB_TYPE: "postgres"
+  FORGEJO__database__HOST: "{{ forgejo_db_host }}:5432"
+  FORGEJO__database__NAME: "{{ forgejo_db_name }}"
+  FORGEJO__database__USER: "{{ forgejo_db_user }}"
+  FORGEJO__database__PASSWD: "{{ forgejo_db_password }}"
+
+  FORGEJO__security__LOGIN_REMEMBER_DAYS: "14"
+  FORGEJO__security__INSTALL_LOCK: true
+
+  FORGEJO__service__DISABLE_REGISTRATION: true
+  FORGEJO__service__ALLOW_ONLY_EXTERNAL_REGISTRATION: true
+  FORGEJO__service__SHOW_REGISTRATION_BUTTON: false
+  FORGEJO__service__ENABLE_INTERNAL_SIGNIN: true
+
+  FORGEJO__oauth2_client__ENABLE_AUTO_REGISTRATION: true
+  FORGEJO__oauth2_client__USERNAME: "preferred_username"
+  FORGEJO__oauth2_client__UPDATE_AVATAR: true
+  FORGEJO__oauth2_client__ACCOUNT_LINKING: "auto"
+  FORGEJO__oauth2_client__OPENID_CONNECT_SCOPES: '"profile email"'
+  FORGEJO__oauth2_client__ADMIN_GROUP: "{{ forgejo_oauth_admin_group }}"
+
+  FORGEJO__openid__ENABLE_OPENID_SIGNIN: false
+  FORGEJO__openid__ENABLE_OPENID_SIGNUP: false
+
+  # Read by forgejo-oauth-init
+  OAUTH_NAME: "{{ forgejo_oauth_name }}"
+  OAUTH_CLIENT_ID: "{{ forgejo_oauth_client_id }}"
+  OAUTH_CLIENT_SECRET: "{{ forgejo_oauth_client_secret }}"
+  OAUTH_DISCOVERY_URL: "https://{{ forgejo_oauth_domain }}/.well-known/openid-configuration"
+  OAUTH_SCOPES: "openid profile email groups"
+  OAUTH_ADMIN_GROUP: "{{ forgejo_oauth_admin_group }}"
+
+## Advanced
+forgejo_entrypoint: ""
+forgejo_oauth_init_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+forgejo_extra_files: []
+forgejo_extra_dirs: []

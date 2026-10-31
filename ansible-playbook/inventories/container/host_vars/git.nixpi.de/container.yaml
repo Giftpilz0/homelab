@@ -1,0 +1,45 @@
+---
+######################################
+### giftpilz0.container.postgresql (provisioned by giftpilz0.container.forgejo)
+
+postgresql_port_map_enabled: true
+# Legacy: the app user is the superuser
+postgresql_admin_database: "forgejo"
+postgresql_admin_user: "forgejo"
+postgresql_admin_password: "{{ forgejo_db_password }}"
+postgresql_databases:
+  - name: "forgejo"
+    owner: "forgejo"
+
+# renovate: datasource=docker depName=postgres
+postgresql_version: "18.6-alpine"
+
+######################################
+### giftpilz0.container.forgejo
+
+# renovate: datasource=docker depName=codeberg.org/forgejo/forgejo
+forgejo_version: "17.0.0"
+
+forgejo_domain: "forgejo.nixpi.de"
+# Web traffic goes through Traefik, only git SSH is published
+forgejo_bind_ip: "{{ ansible_facts['default_ipv4']['address'] }}"
+forgejo_port_map:
+  - "{{ forgejo_ssh_port }}:22"
+forgejo_oauth_client_id: "forgejo"
+forgejo_oauth_domain: "login.nixpi.de/realms/nixpi"
+forgejo_oauth_name: "keycloak"
+
+######################################
+### giftpilz0.container.traefik
+
+traefik_networks:
+  - forgejo
+
+traefik_http_services:
+  - name: forgejo
+    domain: forgejo.nixpi.de
+    rule: "Host(`forgejo.nixpi.de`)"
+    servers:
+      - url: "http://forgejo-pod:3000"
+    tls_enabled: true
+    acme_enabled: true

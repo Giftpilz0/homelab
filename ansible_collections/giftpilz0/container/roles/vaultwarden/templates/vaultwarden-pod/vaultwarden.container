@@ -1,0 +1,31 @@
+[Unit]
+Description=Vaultwarden Container
+
+[Container]
+ContainerName=vaultwarden
+Image={{ vaultwarden_image }}:{{ vaultwarden_version }}
+Pod=vaultwarden.pod
+
+{% if vaultwarden_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+{% if vaultwarden_entrypoint %}
+Entrypoint={{ vaultwarden_entrypoint }}
+{% endif %}
+
+{% for env_name, env_value in vaultwarden_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+Volume=vaultwarden-data.volume:/data
+
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
+{% endfor %}
+HealthCmd=/healthcheck.sh
+HealthInterval=30s
+HealthStartPeriod=30s
+HealthOnFailure=kill
+
+[Service]
+Restart=always

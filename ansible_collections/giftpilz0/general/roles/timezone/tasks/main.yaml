@@ -1,0 +1,18 @@
+---
+######################################
+### packages
+
+- name: "Timezone: Manage packages"
+  become: true
+  ansible.builtin.package:
+    name: "{{ timezone_package }}"
+    state: "{{ timezone_package_state }}"
+
+######################################
+### config
+
+- name: "Timezone: Set timezone"
+  become: true
+  community.general.timezone:
+    name: "{{ timezone_timezone }}"
+    hwclock: "{{ timezone_hwclock if timezone_hwclock else omit }}"

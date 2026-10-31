@@ -1,0 +1,31 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image
+market_brief_image: "localhost/market-brief"
+market_brief_version: "latest"
+market_brief_git_repo: "ssh://git@ssh.github.com:443/Giftpilz0/market-watch-data.git"
+market_brief_git_version: "app"
+market_brief_git_host_key: "[ssh.github.com]:443 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
+market_brief_containerfile: "Containerfile"
+
+## Service
+market_brief_schedule: "*:0/15"
+market_brief_timer_enabled: true
+market_brief_timeout: "15min"
+
+market_brief_data_repo: ""
+market_brief_deploy_key: ""
+market_brief_openfigi_api_key: ""
+
+# Environment
+market_brief_environment_vars:
+  TZ: "Europe/Berlin"
+
+## Advanced
+market_brief_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+market_brief_extra_files: []
+market_brief_extra_dirs: []

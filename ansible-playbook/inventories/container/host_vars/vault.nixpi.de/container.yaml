@@ -1,0 +1,36 @@
+---
+######################################
+### giftpilz0.container.vaultwarden
+
+# renovate: datasource=docker depName=vaultwarden/server
+vaultwarden_version: "1.37.4-alpine"
+
+vaultwarden_domain: "https://vaultwarden.nixpi.de/"
+
+vaultwarden_environment_vars:
+  DOMAIN: "{{ vaultwarden_domain }}"
+  ADMIN_TOKEN: "{{ vaultwarden_admin_token }}"
+  ROCKET_PORT: "80"
+  # SSO via Keycloak
+  SSO_ENABLED: "true"
+  SSO_AUTHORITY: "https://login.nixpi.de/realms/nixpi"
+  SSO_CLIENT_ID: "vaultwarden"
+  SSO_CLIENT_SECRET: "{{ vaultwarden_client_secret }}"
+
+######################################
+### giftpilz0.container.traefik
+
+traefik_networks:
+  - vaultwarden
+
+traefik_http_services:
+  - name: vaultwarden
+    domain: vaultwarden.nixpi.de
+    rule: "Host(`vaultwarden.nixpi.de`)"
+    servers:
+      - url: "http://vaultwarden-pod:80"
+    tls_enabled: true
+    acme_enabled: true
+    health_check:
+      path: "/alive"
+      interval: "30s"

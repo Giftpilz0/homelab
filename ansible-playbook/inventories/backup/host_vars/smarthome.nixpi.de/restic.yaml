@@ -1,0 +1,6 @@
+---
+######################################
+### giftpilz0.misc.restic
+
+backup_stop_units:
+  - homeassistant-pod.service

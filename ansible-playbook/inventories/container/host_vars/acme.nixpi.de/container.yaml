@@ -1,0 +1,38 @@
+---
+podman_unprivileged_port_start: 53
+
+######################################
+### giftpilz0.container.acme_dns
+
+# renovate: datasource=docker depName=joohoi/acme-dns
+acme_dns_version: "v2.0.2"
+
+acme_dns_domain: "auth.acme.nixpi.de"
+acme_dns_nsname: "acme.nixpi.de"
+acme_dns_nsadmin: "admin.nixpi.de"
+acme_dns_records:
+  - "auth.acme.nixpi.de. NS acme.nixpi.de."
+
+######################################
+### giftpilz0.container.traefik
+
+traefik_acme_dns_provider: "acme-dns"
+
+traefik_environment_vars:
+  ACME_DNS_API_BASE: "http://acme_dns-pod:80"
+  ACME_DNS_STORAGE_PATH: "/acme/acme-dns-accounts.json"
+
+traefik_networks:
+  - acme_dns
+
+traefik_http_services:
+  - name: acme_dns
+    domain: acme.nixpi.de
+    rule: "Host(`acme.nixpi.de`)"
+    servers:
+      - url: "http://acme_dns-pod:80"
+    tls_enabled: true
+    acme_enabled: true
+    health_check:
+      path: "/health"
+      interval: "30s"

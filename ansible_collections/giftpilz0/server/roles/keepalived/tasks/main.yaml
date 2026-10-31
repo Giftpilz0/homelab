@@ -1,0 +1,25 @@
+---
+- name: "Keepalived: Manage packages"
+  become: true
+  ansible.builtin.package:
+    name: "{{ keepalived_package }}"
+    state: "{{ keepalived_package_state }}"
+
+- name: "Keepalived: Manage keepalived config"
+  become: true
+  ansible.builtin.template:
+    src: keepalived.conf.j2
+    dest: "{{ keepalived_config_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: keepalived_package_state != 'absent'
+  notify: "Keepalived: Restart"
+
+- name: "Keepalived: Manage services"
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ keepalived_service_name }}"
+    state: "{{ keepalived_service_state }}"
+    enabled: "{{ keepalived_service_enabled }}"
+  when: keepalived_package_state != 'absent'

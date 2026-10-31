@@ -1,0 +1,68 @@
+---
+- name: "Mosquitto: Validate go-auth configuration"
+  ansible.builtin.assert:
+    that:
+      - mosquitto_go_auth_options.backends is defined
+    fail_msg: "mosquitto_go_auth_options.backends must define at least one go-auth backend."
+    quiet: true
+
+- name: "Mosquitto: Build image"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+    tasks_from: build
+  vars:
+    quadlet_role: mosquitto
+    quadlet_builds:
+      - name: "{{ mosquitto_image }}"
+        tag: "{{ mosquitto_version }}-{{ mosquitto_go_auth_version }}"
+        src: build
+        build_args:
+          MOSQUITTO_VERSION: "{{ mosquitto_version }}"
+          GO_AUTH_VERSION: "{{ mosquitto_go_auth_version }}"
+
+# Hashes are salted: reuse deployed ones to stay idempotent
+- name: "Mosquitto: Read existing password file"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.slurp:
+    src: "/home/{{ podman_user }}/.config/containers/systemd/mosquitto-pod/config/passwd"
+  register: _mosquitto_passwd
+  failed_when: false
+  no_log: true
+
+- name: "Mosquitto: Generate password hashes"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.command:
+    argv:
+      - podman
+      - run
+      - --rm
+      - --entrypoint
+      - /usr/bin/mosquitto-go-auth-pw
+      - "{{ mosquitto_image }}:{{ mosquitto_version }}-{{ mosquitto_go_auth_version }}"
+      - -p
+      - "{{ item.value }}"
+  loop: "{{ mosquitto_users | dict2items | rejectattr('key', 'in', _mosquitto_existing_hashes) }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: _mosquitto_generated
+  changed_when: false
+  no_log: true
+
+- name: "Mosquitto: Collect password hashes"
+  ansible.builtin.set_fact:
+    _mosquitto_hashes: >-
+      {{ _mosquitto_existing_hashes | combine(dict(
+           _mosquitto_generated.results | map(attribute='item.key')
+           | zip(_mosquitto_generated.results | map(attribute='stdout') | map('trim')))) }}
+  no_log: true
+
+- name: "Mosquitto: Deploy pod"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: mosquitto
+    quadlet_extra_files: "{{ mosquitto_extra_files }}"
+    quadlet_extra_dirs: "{{ mosquitto_extra_dirs }}"
+    quadlet_units: "{{ (['mosquitto-network.service'] if mosquitto_network_enabled else []) + ['mosquitto-pod.service'] }}"

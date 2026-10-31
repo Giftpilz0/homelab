@@ -1,0 +1,9 @@
+---
+######################################
+### giftpilz0.general.firewalld
+
+firewalld_rules_ports_host:
+  # Git SSH
+  - port: 2222
+    protocol: tcp
+    zone: clients

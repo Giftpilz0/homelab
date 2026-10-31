@@ -1,0 +1,64 @@
+# yaml-language-server: $schema=https://creativeprojects.github.io/resticprofile/jsonschema/config-2.json
+
+version: "2"
+
+global:
+  default-command: snapshots
+  priority: low
+
+profiles:
+{% for repo in _restic_repositories %}
+  {{ repo.name }}:
+    repository: "rest:http://{{ restic_server_host }}:{{ restic_server_port }}/{{ inventory_hostname }}/{{ repo.name }}"
+    password-file: "{{ restic_password_dir }}/{{ repo.name }}.txt"
+    initialize: true
+    # Cache and rest-server login, shared with restic-repo
+    env-file: "{{ restic_env_dir }}/{{ repo.name }}.conf"
+
+    backup:
+      source:
+{% for path in repo.backup_paths %}
+        - "{{ path }}"
+{% endfor %}
+{% if repo.exclude_patterns | length > 0 %}
+      exclude:
+{% for pattern in repo.exclude_patterns %}
+        - "{{ pattern }}"
+{% endfor %}
+{% endif %}
+      exclude-caches: true
+      one-file-system: true
+      schedule:
+        permission: system
+        at: "{{ repo.schedule }}"
+        log: "{{ restic_log_dir }}/{{ repo.name }}-backup.log"
+      tag:
+        - "{{ inventory_hostname }}"
+        - "{{ repo.name }}"
+{% if repo.stop_units %}
+      run-before:
+        - "{{ _restic_systemctl_user }} stop {{ repo.stop_units | join(' ') }}"
+      run-finally:
+{% for unit in repo.stop_units | reverse %}
+        - "{{ _restic_systemctl_user }} start {{ unit }}"
+{% endfor %}
+{% endif %}
+
+    retention:
+      after-backup: true
+      keep-daily: {{ repo.retention.keep_daily }}
+      keep-weekly: {{ repo.retention.keep_weekly }}
+      keep-monthly: {{ repo.retention.keep_monthly }}
+      keep-yearly: {{ repo.retention.keep_yearly }}
+      prune: true
+      host: true
+      tag: true
+
+    check:
+      read-data-subset: "10%"
+      schedule:
+        permission: system
+        at: "Sun 03:00"
+        log: "{{ restic_log_dir }}/{{ repo.name }}-check.log"
+
+{% endfor %}

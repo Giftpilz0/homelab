@@ -1,0 +1,29 @@
+{% if navidrome_webui_enabled %}
+[Unit]
+Description=Navidrome Music Library WebUI Container
+
+[Container]
+ContainerName=navidrome-webui
+Image={{ navidrome_webui_image }}:{{ navidrome_webui_version }}
+Pod=navidrome.pod
+User={{ navidrome_webui_user }}
+
+{% if navidrome_webui_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+{% for env_name, env_value in navidrome_webui_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+# Library root: config.yaml, beets_library.db, original/, transcoded/, app/.
+Volume=navidrome-music.volume:/music
+
+HealthCmd=/app/.venv/bin/music-library healthcheck
+HealthInterval=30s
+HealthStartPeriod=10s
+HealthOnFailure=kill
+
+[Service]
+Restart=always
+{% endif %}

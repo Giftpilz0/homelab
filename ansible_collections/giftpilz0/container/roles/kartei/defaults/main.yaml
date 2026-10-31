@@ -1,0 +1,42 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image
+kartei_image: "ghcr.io/giftpilz0/kartei"
+# renovate: datasource=docker depName=ghcr.io/giftpilz0/kartei
+kartei_version: "edge"
+kartei_autoupdate: true
+
+# Network (always joined, created only when enabled)
+kartei_network_enabled: true
+kartei_network_name: "kartei-internal"
+kartei_network_driver: "bridge"
+
+# Host ports (not needed behind Traefik)
+kartei_port_map_enabled: false
+kartei_bind_ip: "127.0.0.1"
+kartei_port_map:
+  - "8080:8080"
+
+## Service
+# Public URL; the OIDC redirect URI is <base url>/auth/callback
+kartei_base_url: ""
+kartei_oidc_issuer_url: ""
+kartei_oidc_client_id: "kartei"
+kartei_oidc_client_secret: ""
+
+# Environment
+kartei_environment_vars:
+  BASE_URL: "{{ kartei_base_url }}"
+  OIDC_ISSUER_URL: "{{ kartei_oidc_issuer_url }}"
+  OIDC_CLIENT_ID: "{{ kartei_oidc_client_id }}"
+  OIDC_CLIENT_SECRET: "{{ kartei_oidc_client_secret }}"
+  LOG_LEVEL: "info"
+
+## Advanced
+kartei_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+kartei_extra_files: []
+kartei_extra_dirs: []

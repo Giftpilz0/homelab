@@ -1,0 +1,38 @@
+---
+- name: "Snapper: Create configurations"
+  become: true
+  ansible.builtin.command:
+    cmd: "snapper -c {{ item.name }} create-config {{ item.path }}"
+    creates: "/etc/snapper/configs/{{ item.name }}"
+  loop: "{{ snapper_configs }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: "Snapper: Wait for .snapshots subvolumes"
+  ansible.builtin.wait_for:
+    path: "{{ item.path }}/.snapshots"
+    timeout: 10
+  loop: "{{ snapper_configs }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: "Snapper: Configure settings"
+  ansible.builtin.include_tasks: settings.yaml
+  loop: "{{ snapper_configs }}"
+  loop_control:
+    loop_var: snapper_config
+    label: "{{ snapper_config.name }}"
+
+- name: "Snapper: Manage timeline timer"
+  become: true
+  ansible.builtin.systemd:
+    name: snapper-timeline.timer
+    enabled: "{{ snapper_enable_timeline_timer }}"
+    state: "{{ snapper_enable_timeline_timer | ternary('started', 'stopped') }}"
+
+- name: "Snapper: Manage cleanup timer"
+  become: true
+  ansible.builtin.systemd:
+    name: snapper-cleanup.timer
+    enabled: "{{ snapper_enable_cleanup_timer }}"
+    state: "{{ snapper_enable_cleanup_timer | ternary('started', 'stopped') }}"

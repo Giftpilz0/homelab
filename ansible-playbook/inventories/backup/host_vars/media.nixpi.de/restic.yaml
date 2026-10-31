@@ -1,0 +1,7 @@
+---
+######################################
+### giftpilz0.misc.restic
+
+backup_stop_units:
+  - navidrome-pod.service
+  - suwayomi-pod.service

@@ -1,0 +1,31 @@
+[Unit]
+Description=Market Watch Price Fetcher
+
+[Container]
+ContainerName=market-brief
+Image={{ market_brief_image }}:{{ market_brief_version }}
+
+{% if market_brief_entrypoint %}
+Entrypoint={{ market_brief_entrypoint }}
+{% endif %}
+
+Environment=DATA_REPO={{ market_brief_data_repo }}
+Environment=DEPLOY_KEY={{ market_brief_deploy_key | trim | b64encode }}
+{% if market_brief_openfigi_api_key %}
+Environment=OPENFIGI_API_KEY={{ market_brief_openfigi_api_key }}
+{% endif %}
+{% for env_name, env_value in market_brief_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+Volume=market-brief-data.volume:/data
+Volume=market-brief-cache.volume:/cache
+
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
+{% endfor %}
+
+# Started by market-brief.timer
+[Service]
+RuntimeMaxSec={{ market_brief_timeout }}
+CPUWeight=20

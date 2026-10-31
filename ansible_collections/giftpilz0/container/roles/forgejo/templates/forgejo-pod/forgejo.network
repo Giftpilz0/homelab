@@ -1,0 +1,8 @@
+{% if forgejo_network_enabled %}
+[Unit]
+Description=Forgejo Internal Network
+
+[Network]
+NetworkName={{ forgejo_network_name }}
+Driver={{ forgejo_network_driver }}
+{% endif %}

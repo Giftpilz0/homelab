@@ -1,0 +1,193 @@
+---
+- name: "Firewalld: Validate ssh access"
+  ansible.builtin.assert:
+    that:
+      - >-
+        (_firewalld_rules_services | selectattr('service', 'eq', 'ssh')
+         + _firewalld_rules_ports | selectattr('port', 'in', [22, '22']))
+        | selectattr('state', 'eq', 'enabled') | map(attribute='zone')
+        | intersect(_firewalld_zones_define | map(attribute='zone')) | length > 0
+    fail_msg: "No enabled ssh rule for a defined zone, applying this could lock out Ansible."
+    quiet: true
+  when:
+    - firewalld_require_ssh
+    - firewalld_package_state != 'absent'
+
+######################################
+### packages
+
+- name: "Firewalld: Manage packages"
+  become: true
+  ansible.builtin.package:
+    name: "{{ firewalld_package }}"
+    state: "{{ firewalld_package_state }}"
+  notify: "Firewalld: Restart"
+
+######################################
+### services
+
+- name: "Firewalld: Manage services"
+  become: true
+  ansible.builtin.service:
+    name: "{{ firewalld_service_name }}"
+    state: "{{ firewalld_service_state }}"
+    enabled: "{{ firewalld_service_enabled }}"
+  when: firewalld_package_state != 'absent'
+
+######################################
+### zones
+
+- name: "Firewalld: Configure zones and rules"
+  when: firewalld_package_state != 'absent'
+  block:
+    - name: "Firewalld: Create zones"
+      become: true
+      ansible.posix.firewalld:
+        zone: "{{ item.zone }}"
+        permanent: true
+        state: present
+      loop: "{{ _firewalld_zones_define }}"
+      notify: "Firewalld: Reload"
+
+    - name: "Firewalld: Set zone targets"
+      become: true
+      ansible.posix.firewalld:
+        zone: "{{ item.zone }}"
+        target: "{{ item.target }}"
+        permanent: true
+        state: present
+      loop: "{{ _firewalld_zones_define | selectattr('target', 'defined') }}"
+      notify: "Firewalld: Reload"
+
+    - name: "Firewalld: Manage LogDenied"
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/firewalld/firewalld.conf
+        regexp: "^LogDenied="
+        line: "LogDenied={{ firewalld_logging }}"
+        backrefs: true
+      notify: "Firewalld: Reload"
+
+    # New zones must be loaded before runtime rules can use them
+    - name: "Firewalld: Apply pending reload"
+      ansible.builtin.meta: flush_handlers
+
+    - name: "Firewalld: Bind zone sources"
+      become: true
+      ansible.posix.firewalld:
+        zone: "{{ item.zone }}"
+        source: "{{ item.source }}"
+        permanent: "{{ firewalld_permanent }}"
+        immediate: "{{ firewalld_immediate }}"
+        state: enabled
+      loop: "{{ _firewalld_zones_define }}"
+
+    - name: "Firewalld: Get default zone"
+      become: true
+      ansible.builtin.command: firewall-cmd --get-default-zone
+      register: _firewalld_default_zone
+      changed_when: false
+
+    - name: "Firewalld: Set default zone"
+      become: true
+      ansible.builtin.command: firewall-cmd --set-default-zone={{ firewalld_default_zone }}
+      changed_when: true
+      when: _firewalld_default_zone.stdout != firewalld_default_zone
+
+    - name: "Firewalld: Rule ICMP"
+      become: true
+      ansible.posix.firewalld:
+        icmp_block: "{{ item.icmp_type }}"
+        zone: "{{ item.zone }}"
+        permanent: "{{ firewalld_permanent }}"
+        immediate: "{{ firewalld_immediate }}"
+        state: "{{ item.state }}"
+      loop: "{{ _firewalld_rules_icmp }}"
+
+    - name: "Firewalld: Rule services"
+      become: true
+      ansible.posix.firewalld:
+        service: "{{ item.service }}"
+        zone: "{{ item.zone }}"
+        permanent: "{{ firewalld_permanent }}"
+        immediate: "{{ firewalld_immediate }}"
+        state: "{{ item.state }}"
+      loop: "{{ _firewalld_rules_services }}"
+
+    - name: "Firewalld: Rule ports"
+      become: true
+      ansible.posix.firewalld:
+        port: "{{ item.port }}/{{ item.protocol }}"
+        zone: "{{ item.zone }}"
+        permanent: "{{ firewalld_permanent }}"
+        immediate: "{{ firewalld_immediate }}"
+        state: "{{ item.state }}"
+      loop: "{{ _firewalld_rules_ports }}"
+
+    - name: "Firewalld: Richrule ports"
+      become: true
+      ansible.posix.firewalld:
+        rich_rule: rule family=ipv4 source address={{ item.allowip }} port port={{ item.port }} protocol={{ item.protocol }} {{ item.action }}
+        zone: "{{ item.zone }}"
+        permanent: "{{ firewalld_permanent }}"
+        immediate: "{{ firewalld_immediate }}"
+        state: enabled
+      loop: "{{ firewalld_richrules_ports }}"
+
+    - name: "Firewalld: Richrule services"
+      become: true
+      ansible.posix.firewalld:
+        rich_rule: rule family=ipv4 source address={{ item.allowip }} service name={{ item.service }} {{ item.action }}
+        zone: "{{ item.zone }}"
+        permanent: "{{ firewalld_permanent }}"
+        immediate: "{{ firewalld_immediate }}"
+        state: enabled
+      loop: "{{ firewalld_richrules_services }}"
+
+    - name: "Firewalld: Remove unmanaged config"
+      when: firewalld_remove_unmanaged
+      block:
+        - name: "Firewalld: Get zones"
+          become: true
+          ansible.builtin.command: firewall-cmd --permanent --get-zones
+          register: _firewalld_zones
+          changed_when: false
+          check_mode: false
+
+        - name: "Firewalld: Get zone config"
+          become: true
+          ansible.builtin.command: firewall-cmd --permanent --info-zone={{ item }}
+          loop: "{{ _firewalld_zones.stdout | split }}"
+          register: _firewalld_zone_info
+          changed_when: false
+          check_mode: false
+
+        - name: "Firewalld: Remove unmanaged sources"
+          become: true
+          ansible.posix.firewalld:
+            zone: "{{ item.zone }}"
+            source: "{{ item.source }}"
+            permanent: "{{ firewalld_permanent }}"
+            immediate: "{{ firewalld_immediate }}"
+            state: disabled
+          loop: "{{ _firewalld_unmanaged_sources }}"
+
+        - name: "Firewalld: Remove unmanaged services"
+          become: true
+          ansible.posix.firewalld:
+            zone: "{{ item.zone }}"
+            service: "{{ item.service }}"
+            permanent: "{{ firewalld_permanent }}"
+            immediate: "{{ firewalld_immediate }}"
+            state: disabled
+          loop: "{{ _firewalld_unmanaged_services }}"
+
+        - name: "Firewalld: Remove unmanaged ports"
+          become: true
+          ansible.posix.firewalld:
+            zone: "{{ item.zone }}"
+            port: "{{ item.port }}"
+            permanent: "{{ firewalld_permanent }}"
+            immediate: "{{ firewalld_immediate }}"
+            state: disabled
+          loop: "{{ _firewalld_unmanaged_ports }}"

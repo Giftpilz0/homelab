@@ -1,0 +1,137 @@
+---
+- name: "Restic: Validate configuration"
+  ansible.builtin.assert:
+    that:
+      - restic_server_host | length > 0
+      - restic_server_password | length > 0
+      - restic_stop_units_user | length > 0 or _restic_repositories | map(attribute='stop_units') | flatten | length == 0
+    fail_msg: "Set restic_server_host, restic_server_password and, when stop_units are used, restic_stop_units_user."
+    quiet: true
+
+- name: "Restic: Create configuration directory"
+  become: true
+  ansible.builtin.file:
+    path: "{{ restic_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "Restic: Create logs directory"
+  become: true
+  ansible.builtin.file:
+    path: "{{ restic_log_dir }}"
+    state: directory
+    owner: "{{ restic_user }}"
+    group: "{{ restic_user }}"
+    mode: "0755"
+
+- name: "Restic: Create password and environment directories"
+  become: true
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  loop:
+    - "{{ restic_password_dir }}"
+    - "{{ restic_env_dir }}"
+
+- name: "Restic: Create repository password files"
+  become: true
+  ansible.builtin.copy:
+    content: "{{ item.password }}"
+    dest: "{{ restic_password_dir }}/{{ item.name }}.txt"
+    owner: root
+    group: root
+    mode: "0600"
+  loop: "{{ _restic_repositories }}"
+  loop_control:
+    label: "{{ item.name }}"
+  no_log: true
+
+- name: "Restic: Create repository environment files"
+  become: true
+  ansible.builtin.template:
+    src: restic-repo.conf.j2
+    dest: "{{ restic_env_dir }}/{{ item.name }}.conf"
+    owner: root
+    group: root
+    mode: "0600"
+  loop: "{{ _restic_repositories }}"
+  loop_control:
+    label: "{{ item.name }}"
+  no_log: true
+
+- name: "Restic: Create cache directories"
+  become: true
+  ansible.builtin.file:
+    path: "{{ restic_cache_dir }}/{{ item.name }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  loop: "{{ _restic_repositories }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: "Restic: Install restic-repo wrapper"
+  become: true
+  ansible.builtin.template:
+    src: restic-repo.j2
+    dest: /usr/local/bin/restic-repo
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "Restic: Create resticprofile configuration"
+  become: true
+  ansible.builtin.template:
+    src: profiles.yaml.j2
+    dest: "{{ restic_config_dir }}/profiles.yaml"
+    owner: root
+    group: root
+    mode: "0644"
+  when: restic_repositories | length > 0
+
+- name: "Restic: Schedule backup jobs"
+  become: true
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/resticprofile
+      - --config
+      - "{{ restic_config_dir }}/profiles.yaml"
+      - --name
+      - "{{ item.name }}"
+      - schedule
+    chdir: "{{ restic_config_dir }}"
+  loop: "{{ _restic_repositories }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: _restic_schedule
+  changed_when: "'schedule created' in _restic_schedule.stdout or 'schedule updated' in _restic_schedule.stdout"
+
+- name: "Restic: Install restore test"
+  become: true
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - { src: restic-restore-test.py.j2, dest: /usr/local/bin/restic-restore-test, mode: "0755" }
+    - { src: restic-restore-test.service.j2, dest: /etc/systemd/system/restic-restore-test.service, mode: "0644" }
+    - { src: restic-restore-test.timer.j2, dest: /etc/systemd/system/restic-restore-test.timer, mode: "0644" }
+  loop_control:
+    label: "{{ item.dest }}"
+  register: _restic_restore_test
+
+- name: "Restic: Manage restore test timer"
+  become: true
+  ansible.builtin.systemd:
+    name: restic-restore-test.timer
+    state: "{{ 'started' if restic_restore_test_enabled else 'stopped' }}"
+    enabled: "{{ restic_restore_test_enabled }}"
+    daemon_reload: "{{ _restic_restore_test is changed }}"

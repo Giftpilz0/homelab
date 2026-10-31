@@ -1,0 +1,7 @@
+---
+- name: "Restic: Restart rest-server"
+  become: true
+  ansible.builtin.systemd:
+    name: rest-server
+    state: restarted
+    daemon_reload: true

@@ -1,0 +1,2 @@
+---
+_user: "{{ [user_defaults] | product(user) | map('combine') }}"

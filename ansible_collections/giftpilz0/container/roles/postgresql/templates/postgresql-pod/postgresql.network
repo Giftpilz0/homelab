@@ -1,0 +1,8 @@
+{% if postgresql_network_enabled %}
+[Unit]
+Description=PostgreSQL Internal Network
+
+[Network]
+NetworkName={{ postgresql_network_name }}
+Driver={{ postgresql_network_driver }}
+{% endif %}

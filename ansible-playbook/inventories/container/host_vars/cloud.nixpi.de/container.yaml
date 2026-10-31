@@ -1,0 +1,74 @@
+---
+######################################
+### giftpilz0.container.opencloud
+
+# renovate: datasource=docker depName=opencloudeu/opencloud-rolling
+opencloud_version: "9.0.0"
+
+opencloud_extra_dirs:
+  - src: "{{ inventory_dir | dirname }}/host_vars/{{ inventory_hostname }}/assets/opencloud/themes"
+    dest: "assets/themes"
+    mount: "/var/lib/opencloud/web/assets/custom-themes"
+  - src: "{{ inventory_dir | dirname }}/host_vars/{{ inventory_hostname }}/assets/opencloud/plugins"
+    dest: "assets/apps"
+    mount: "/var/lib/opencloud/web/assets/custom-apps"
+
+opencloud_domain: "https://opencloud.nixpi.de"
+opencloud_csp_oidc_origin: "https://login.nixpi.de"
+
+opencloud_radicale_enabled: true
+
+opencloud_collabora_enabled: true
+opencloud_collabora_url: "https://collabora.nixpi.de"
+opencloud_collabora_admin_password: "{{ opencloud_admin_password }}"
+opencloud_collabora_home_mode: true
+
+opencloud_environment_vars:
+  IDM_ADMIN_PASSWORD: "{{ opencloud_admin_password }}"
+  OPEN_CLOUD_LOG_LEVEL: "{{ opencloud_log_level }}"
+  OC_URL: "{{ opencloud_domain }}"
+  OC_CORS_ALLOW_ORIGINS: "{{ opencloud_domain }}"
+  PROXY_TLS: false
+  PROXY_CSP_CONFIG_FILE_LOCATION: "/etc/opencloud/csp.yaml"
+  FRONTEND_ARCHIVER_MAX_SIZE: 68719476736
+  THUMBNAILS_MAX_CONCURRENT_REQUESTS: 64
+  FRONTEND_CHECK_FOR_UPDATES: false
+  # External OIDC (Keycloak)
+  OC_EXCLUDE_RUN_SERVICES: "idp"
+  OC_OIDC_CLIENT_ID: "OpenCloudWeb"
+  OC_OIDC_ISSUER: "https://login.nixpi.de/realms/nixpi"
+  PROXY_AUTOPROVISION_ACCOUNTS: "true"
+  PROXY_OIDC_REWRITE_WELLKNOWN: "true"
+  PROXY_USER_CS3_CLAIM: "username"
+  PROXY_USER_OIDC_CLAIM: "preferred_username"
+  PROXY_ROLE_ASSIGNMENT_DRIVER: "oidc"
+  GRAPH_ASSIGN_DEFAULT_USER_ROLE: "false"
+  GRAPH_USERNAME_MATCH: "none"
+  WEB_OPTION_ACCOUNT_EDIT_LINK_HREF: "https://login.nixpi.de/realms/nixpi/account"
+  SETTINGS_SETUP_DEFAULT_ASSIGNMENTS: "false"
+
+######################################
+### giftpilz0.container.traefik
+
+traefik_networks:
+  - opencloud
+
+traefik_transport_timeouts_enabled: true
+
+traefik_http_services:
+  - name: opencloud
+    domain: opencloud.nixpi.de
+    rule: "Host(`opencloud.nixpi.de`)"
+    servers:
+      - url: "http://opencloud-pod:9200"
+    tls_enabled: true
+    acme_enabled: true
+    large_downloads: true
+  - name: collabora
+    domain: collabora.nixpi.de
+    rule: "Host(`collabora.nixpi.de`)"
+    servers:
+      - url: "https://collabora-pod:9980"
+    tls_enabled: true
+    acme_enabled: true
+    insecure_skip_verify: true

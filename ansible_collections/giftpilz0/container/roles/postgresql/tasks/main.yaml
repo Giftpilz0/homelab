@@ -1,0 +1,9 @@
+---
+- name: "PostgreSQL: Deploy pod"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: postgresql
+    quadlet_extra_files: "{{ postgresql_extra_files }}"
+    quadlet_extra_dirs: "{{ postgresql_extra_dirs }}"
+    quadlet_units: "{{ (['postgresql-network.service'] if postgresql_network_enabled else []) + ['postgresql-pod.service'] }}"

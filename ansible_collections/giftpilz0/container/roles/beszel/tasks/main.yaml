@@ -1,0 +1,9 @@
+---
+- name: "Beszel: Deploy pod"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: beszel
+    quadlet_extra_files: "{{ beszel_extra_files }}"
+    quadlet_extra_dirs: "{{ beszel_extra_dirs }}"
+    quadlet_units: "{{ (['beszel-network.service'] if beszel_network_enabled else []) + ['beszel-pod.service'] }}"

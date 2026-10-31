@@ -1,0 +1,7 @@
+{
+  "name": "web-app-unzip",
+  "version": "2.1.0",
+  "description": "OpenCloud Web unzip",
+  "license": "AGPL-3.0",
+  "entrypoint": "js/remoteEntry-C4NpJ_vY.mjs"
+}

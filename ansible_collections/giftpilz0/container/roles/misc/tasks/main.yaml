@@ -1,0 +1,23 @@
+---
+- name: "Misc: Build image"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+    tasks_from: build
+  vars:
+    quadlet_role: misc
+    quadlet_builds:
+      - name: "{{ misc_image }}"
+        tag: "{{ misc_version }}"
+        git_repo: "{{ misc_git_repo }}"
+        git_version: "{{ misc_commit }}"
+        dockerfile: "{{ misc_dockerfile }}"
+        cache: false
+
+- name: "Misc: Deploy pod"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: misc
+    quadlet_extra_files: "{{ misc_extra_files }}"
+    quadlet_extra_dirs: "{{ misc_extra_dirs }}"
+    quadlet_units: "{{ (['misc-network.service'] if misc_network_enabled else []) + ['misc-pod.service'] }}"

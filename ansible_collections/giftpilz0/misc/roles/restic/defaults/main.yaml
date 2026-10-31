@@ -1,0 +1,70 @@
+---
+# renovate: datasource=github-releases depName=creativeprojects/resticprofile extractVersion=^v(?<version>.*)$
+resticprofile_version: "0.33.1"
+# renovate: datasource=github-releases depName=restic/rest-server extractVersion=^v(?<version>.*)$
+rest_server_version: "0.14.0"
+
+# client, server or both
+restic_mode: client
+
+restic_user: backup
+restic_user_home: "/home/{{ restic_user }}"
+
+# Paths
+restic_config_dir: "/etc/resticprofile"
+restic_cache_dir: "/var/cache/restic"
+restic_log_dir: "{{ restic_config_dir }}/logs"
+restic_password_dir: "{{ restic_config_dir }}/passwords"
+restic_env_dir: "{{ restic_config_dir }}/env"
+
+# Server
+restic_server_repo_base: "/var/lib/restic"
+restic_server_host: ""
+restic_server_port: 8000
+
+# rest-server login of the client, the username is the inventory hostname
+restic_server_password: ""
+
+# Owner of the user units in stop_units of a repository
+restic_stop_units_user: ""
+
+# Example:
+#   restic_repositories:
+#     - name: podman-volumes
+#       password: "{{ restic_repo_password }}"
+#       backup_paths:
+#         - /home/container/.local/share/containers/storage/volumes
+#       schedule: "*-*-* 02:00:00"
+#       # Stopped in this order during the backup, started in reverse
+#       stop_units:
+#         - vaultwarden-pod.service
+restic_repositories: []
+
+restic_repository_defaults:
+  exclude_patterns: []
+  stop_units: []
+  retention:
+    keep_daily: 14
+    keep_weekly: 8
+    keep_monthly: 12
+    keep_yearly: 3
+
+# Restores a random sample of files of the latest snapshots and fails when one is older
+# than the maximum age
+restic_restore_test_enabled: true
+restic_restore_test_schedule: "Sat 04:00"
+restic_restore_test_max_age_hours: 36
+restic_restore_test_files: 20
+restic_restore_test_max_file_size: 52428800
+
+# Restore (tasks_from: restore)
+# snapshots: list snapshots
+# ls:        list restic_restore_paths (default /) of the snapshot
+# files:     restore restic_restore_paths below restic_restore_target
+# inplace:   stop units, move the current restic_restore_paths aside, restore, start units
+restic_restore_action: snapshots
+restic_restore_repository: "{{ restic_repositories[0].name }}"
+restic_restore_snapshot: latest
+restic_restore_paths: []
+restic_restore_target: /var/tmp/restic-restore
+restic_restore_stop_units: "{{ _restic_restore_repository.stop_units }}"

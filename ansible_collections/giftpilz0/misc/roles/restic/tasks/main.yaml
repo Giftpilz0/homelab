@@ -1,0 +1,14 @@
+---
+- name: "Restic: Include installation tasks"
+  ansible.builtin.include_tasks: install.yaml
+  tags: [restic, install]
+
+- name: "Restic: Include server tasks"
+  ansible.builtin.include_tasks: server.yaml
+  when: restic_mode in ['server', 'both']
+  tags: [restic, server]
+
+- name: "Restic: Include client tasks"
+  ansible.builtin.include_tasks: client.yaml
+  when: restic_mode in ['client', 'both']
+  tags: [restic, client]

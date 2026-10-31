@@ -1,0 +1,50 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image
+navidrome_image: "docker.io/deluan/navidrome"
+# renovate: datasource=docker depName=deluan/navidrome
+navidrome_version: "0.64.2"
+navidrome_autoupdate: true
+
+# Network (always joined, created only when enabled)
+navidrome_network_enabled: true
+navidrome_network_name: "navidrome-internal"
+navidrome_network_driver: "bridge"
+
+# Host ports (not needed behind Traefik)
+navidrome_port_map_enabled: false
+navidrome_bind_ip: "127.0.0.1"
+navidrome_port_map:
+  - "4533:4533"
+
+# Environment
+navidrome_environment_vars:
+  ND_MUSICFOLDER: "/music/transcoded/shared"
+  ND_DATAFOLDER: "/data"
+  ND_CACHEFOLDER: "/cache"
+  ND_SCANSCHEDULE: "1h"
+  ND_SCANNER_PURGEMISSING: "always"
+  ND_LOGLEVEL: "info"
+  ND_TRANSCODINGCACHESIZE: "1GB"
+  ND_DEFAULTPLAYLISTPUBLICVISIBILITY: true
+
+## Music library WebUI (https://github.com/giftpilz0/musiclibrary)
+# Writes original/ and transcoded/ of the shared music volume.
+navidrome_webui_enabled: false
+navidrome_webui_image: "ghcr.io/giftpilz0/musiclibrary"
+# renovate: datasource=docker depName=ghcr.io/giftpilz0/musiclibrary
+navidrome_webui_version: "edge"
+navidrome_webui_autoupdate: true
+# Same UID/GID as Navidrome
+navidrome_webui_user: "1001:1001"
+navidrome_webui_environment_vars:
+  MUSIC_LIBRARY_ROOT: "/music"
+
+## Advanced
+navidrome_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+navidrome_extra_files: []
+navidrome_extra_dirs: []

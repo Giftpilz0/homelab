@@ -1,0 +1,9 @@
+---
+- name: "Navidrome: Deploy pod"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: navidrome
+    quadlet_extra_files: "{{ navidrome_extra_files }}"
+    quadlet_extra_dirs: "{{ navidrome_extra_dirs }}"
+    quadlet_units: "{{ (['navidrome-network.service'] if navidrome_network_enabled else []) + ['navidrome-pod.service'] }}"

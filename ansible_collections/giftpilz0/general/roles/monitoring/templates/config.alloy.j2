@@ -1,0 +1,99 @@
+// Managed by Ansible - giftpilz0.general.monitoring
+
+prometheus.exporter.unix "node" {
+  filesystem {
+    fs_types_exclude = "^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tmpfs|tracefs)$$"
+  }
+  netdev {
+    device_exclude = "^(veth.*|cali.*|flannel.*|docker.*|cni.*)$$"
+  }
+}
+
+prometheus.scrape "node" {
+  targets         = prometheus.exporter.unix.node.targets
+  forward_to      = [prometheus.remote_write.mimir.receiver]
+  scrape_interval = "{{ monitoring_alloy_node_exporter_scrape_interval }}"
+}
+
+loki.relabel "journal" {
+  forward_to = []
+
+  rule {
+    source_labels = ["__journal__systemd_unit"]
+    target_label  = "unit"
+  }
+  rule {
+    source_labels = ["__journal_container_name"]
+    target_label  = "container"
+  }
+  rule {
+    source_labels = ["__journal_syslog_identifier"]
+    target_label  = "application"
+  }
+  rule {
+    source_labels = ["__journal_priority_keyword"]
+    target_label  = "level"
+  }
+}
+
+loki.source.journal "system" {
+  relabel_rules = loki.relabel.journal.rules
+  labels = {
+    host = "{{ inventory_hostname }}",
+    source = "journal",
+  }
+  forward_to = [loki.process.journal.receiver]
+  max_age    = "{{ monitoring_alloy_loki_journal_max_age }}"
+}
+
+loki.process "journal" {
+  forward_to = [loki.write.loki.receiver]
+
+  stage.match {
+    selector = `{container="postgresql"}`
+
+    stage.regex {
+      expression = `.*db=(?P<database>[^,]+),user=.*`
+    }
+    stage.labels {
+      values = {
+        database = "",
+      }
+    }
+  }
+}
+
+loki.write "loki" {
+  endpoint {
+    url = "{{ monitoring_agent_config_remoteserver_loki }}"
+    basic_auth {
+      username = "{{ monitoring_alloy_loki_basic_auth_username }}"
+      password = "{{ monitoring_alloy_loki_basic_auth_password }}"
+    }
+  }
+  external_labels = {
+{% for key, value in monitoring_agent_external_labels.items() | sort %}
+    {{ key }} = "{{ value }}",
+{% endfor %}
+  }
+}
+
+prometheus.remote_write "mimir" {
+  endpoint {
+    url = "{{ monitoring_agent_config_remoteserver_prometheus }}"
+    basic_auth {
+      username = "{{ monitoring_alloy_mimir_basic_auth_username }}"
+      password = "{{ monitoring_alloy_mimir_basic_auth_password }}"
+    }
+  }
+  external_labels = {
+{% for key, value in monitoring_agent_external_labels.items() | sort %}
+    {{ key }} = "{{ value }}",
+{% endfor %}
+  }
+}
+
+{% if monitoring_alloy_extra_config | trim %}
+// Host-specific Alloy configuration supplied through monitoring_alloy_extra_config.
+{{ monitoring_alloy_extra_config | trim }}
+{% endif %}

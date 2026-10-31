@@ -1,0 +1,21 @@
+---
+######################################
+### giftpilz0.general.firewalld
+
+firewalld_zones_define_host:
+  - zone: internet
+    source: 0.0.0.0/0
+
+firewalld_rules_services_host:
+  - service: dns
+    zone: clients
+  - service: dns
+    zone: server
+  - service: dns
+    zone: internet
+  - service: http
+    zone: internet
+  - service: https
+    zone: internet
+  - service: http3
+    zone: internet

@@ -1,0 +1,102 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy Suwayomi Server and its FlareSolverr companion as a Podman Quadlet pod.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: System user for rootless Podman operations.
+
+      suwayomi_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      suwayomi_version:
+        type: str
+        required: false
+        description: Suwayomi Server image tag.
+
+      suwayomi_autoupdate:
+        type: bool
+        required: false
+        description: Enable Podman registry auto-update for Suwayomi.
+
+      suwayomi_network_enabled:
+        type: bool
+        required: false
+        description: Create and manage the Podman network.
+
+      suwayomi_network_name:
+        type: str
+        required: false
+        description: Podman network name.
+
+      suwayomi_network_driver:
+        type: str
+        required: false
+        description: Podman network driver.
+
+      suwayomi_port_map_enabled:
+        type: bool
+        required: false
+        description: Publish Suwayomi ports directly on the host.
+
+      suwayomi_bind_ip:
+        type: str
+        required: false
+        description: Host IP for optional direct port publishing.
+
+      suwayomi_port_map:
+        type: list
+        elements: str
+        required: false
+        description: Host-to-container port mappings.
+
+      suwayomi_environment_vars:
+        type: dict
+        required: false
+        description: Environment variables passed to Suwayomi. Set WebUI update interval to 0 for manual updates.
+
+      suwayomi_flaresolverr_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      suwayomi_flaresolverr_version:
+        type: str
+        required: false
+        description: Byparr image tag used for the FlareSolverr-compatible companion.
+
+      suwayomi_flaresolverr_autoupdate:
+        type: bool
+        required: false
+        description: Enable Podman registry auto-update for FlareSolverr.
+
+      suwayomi_flaresolverr_environment_vars:
+        type: dict
+        required: false
+        description: Environment variables passed to FlareSolverr.
+
+      suwayomi_entrypoint:
+        type: str
+        required: false
+        description: Optional Suwayomi container entrypoint override.
+
+      suwayomi_flaresolverr_entrypoint:
+        type: str
+        required: false
+        description: Optional FlareSolverr container entrypoint override.
+
+      suwayomi_extra_files:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary file entries with src or source, dest, optional mount, mode, and template.
+
+      suwayomi_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary directory entries with src or source, dest, optional mount and mode.

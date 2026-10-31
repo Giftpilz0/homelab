@@ -1,0 +1,18 @@
+---
+- name: "Keycloak: Deploy PostgreSQL"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.postgresql
+  vars:
+    postgresql_network_name: "{{ keycloak_network_name }}"
+    postgresql_admin_database: "{{ keycloak_db_name }}"
+    postgresql_admin_user: "{{ keycloak_db_user }}"
+    postgresql_admin_password: "{{ keycloak_db_password }}"
+
+- name: "Keycloak: Deploy pod"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: keycloak
+    quadlet_extra_files: "{{ keycloak_extra_files }}"
+    quadlet_extra_dirs: "{{ keycloak_extra_dirs }}"
+    quadlet_units: "{{ (['keycloak-network.service'] if keycloak_network_enabled else []) + ['keycloak-pod.service'] }}"

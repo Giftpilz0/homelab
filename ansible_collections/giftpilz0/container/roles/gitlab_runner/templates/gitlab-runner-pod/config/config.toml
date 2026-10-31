@@ -1,0 +1,24 @@
+concurrent = {{ gitlab_runner_concurrent }}
+check_interval = 0
+shutdown_timeout = 0
+
+[session_server]
+session_timeout = 1800
+
+[[runners]]
+name = "{{ gitlab_runner_name }}"
+url = "{{ gitlab_runner_url }}"
+token = "{{ gitlab_runner_token }}"
+executor = "docker"
+
+environment = [
+{% for name, value in quadlet_proxy_env.items() %}
+    "{{ name }}={{ value }}",
+{% endfor %}
+    "FF_NETWORK_PER_BUILD=1",
+]
+
+[runners.docker]
+image = "quay.io/podman/stable"
+privileged = true
+volumes = ["/cache"]

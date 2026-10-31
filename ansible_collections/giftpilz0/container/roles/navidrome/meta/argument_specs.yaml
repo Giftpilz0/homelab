@@ -1,0 +1,107 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy Navidrome as a Podman Quadlet pod.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: System user for rootless Podman operations.
+
+      navidrome_image:
+        type: str
+        required: false
+        description: Navidrome image without tag.
+
+      navidrome_version:
+        type: str
+        required: false
+        description: Navidrome image tag.
+
+      navidrome_autoupdate:
+        type: bool
+        required: false
+        description: Enable Podman registry auto-update for Navidrome.
+
+      navidrome_network_enabled:
+        type: bool
+        required: false
+        description: Create and manage the Podman network.
+
+      navidrome_network_name:
+        type: str
+        required: false
+        description: Podman network name.
+
+      navidrome_network_driver:
+        type: str
+        required: false
+        description: Podman network driver.
+
+      navidrome_port_map_enabled:
+        type: bool
+        required: false
+        description: Publish Navidrome ports directly on the host.
+
+      navidrome_bind_ip:
+        type: str
+        required: false
+        description: Host IP for optional direct port publishing.
+
+      navidrome_port_map:
+        type: list
+        elements: str
+        required: false
+        description: Host-to-container port mappings.
+
+      navidrome_environment_vars:
+        type: dict
+        required: false
+        description: Environment variables passed to Navidrome.
+
+      navidrome_webui_enabled:
+        type: bool
+        required: false
+        description: Deploy the music library management WebUI in the Navidrome pod.
+
+      navidrome_webui_image:
+        type: str
+        required: false
+        description: Music library WebUI image without tag.
+
+      navidrome_webui_version:
+        type: str
+        required: false
+        description: Image tag for the music library WebUI.
+
+      navidrome_webui_autoupdate:
+        type: bool
+        required: false
+        description: Enable Podman registry auto-update for the music library WebUI.
+
+      navidrome_webui_user:
+        type: str
+        required: false
+        description: UID and GID used by the WebUI container for shared-volume writes (match Navidrome).
+
+      navidrome_webui_environment_vars:
+        type: dict
+        required: false
+        description: Environment variables passed to the music library WebUI.
+
+      navidrome_entrypoint:
+        type: str
+        required: false
+        description: Optional container entrypoint override.
+
+      navidrome_extra_files:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      navidrome_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.

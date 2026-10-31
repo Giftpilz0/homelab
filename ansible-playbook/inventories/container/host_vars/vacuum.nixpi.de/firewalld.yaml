@@ -1,0 +1,39 @@
+---
+######################################
+### giftpilz0.general.firewalld
+
+firewalld_zones_define_host:
+  - zone: iot-untrusted
+    source: 192.168.20.0/24
+
+firewalld_rules_ports_host:
+  - port: 8443
+    protocol: tcp
+    zone: clients
+  - port: 8007
+    protocol: tcp
+    zone: clients
+  - port: 8443
+    protocol: tcp
+    zone: server
+  - port: 8007
+    protocol: tcp
+    zone: server
+  - port: 443
+    protocol: tcp
+    zone: server
+  - port: 1883
+    protocol: tcp
+    zone: server
+  - port: 8443
+    protocol: tcp
+    zone: iot-untrusted
+  - port: 8007
+    protocol: tcp
+    zone: iot-untrusted
+  - port: 443
+    protocol: tcp
+    zone: iot-untrusted
+  - port: 1883
+    protocol: tcp
+    zone: iot-untrusted

@@ -1,0 +1,10 @@
+---
+- name: "ACME DNS: Deploy pod"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: acme_dns
+    quadlet_dir: acme_dns-pod
+    quadlet_extra_files: "{{ acme_dns_extra_files }}"
+    quadlet_extra_dirs: "{{ acme_dns_extra_dirs }}"
+    quadlet_units: "{{ (['acme_dns-network.service'] if acme_dns_network_enabled else []) + ['acme_dns-pod.service'] }}"

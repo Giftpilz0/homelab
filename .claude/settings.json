@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(just check:*)",
+      "Bash(just lint:*)",
+      "Bash(uv run ansible-lint:*)",
+      "Bash(uv run ansible-playbook --syntax-check:*)",
+      "Bash(tofu fmt:*)"
+    ],
+    "deny": [
+      "Bash(sops:*)",
+      "Bash(just dns:*)",
+      "Bash(tofu/state-utils.sh decrypt:*)",
+      "Bash(gpg --decrypt:*)",
+      "Bash(gpg -d:*)",
+      "Bash(gpg --export-secret-keys:*)",
+      "Bash(ansible-inventory:*)",
+      "Bash(uv run ansible-inventory:*)",
+      "Bash(tofu apply:*)",
+      "Bash(tofu destroy:*)",
+      "Bash(tofu import:*)",
+      "Bash(tofu state:*)",
+      "Bash(tofu show:*)",
+      "Bash(tofu output:*)",
+      "Bash(tofu console:*)",
+      "Bash(git push:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean:*)",
+      "Bash(git filter-branch:*)",
+      "Bash(ssh * qm destroy *)",
+      "Read(**/*.tfstate)",
+      "Read(**/*.tfstate.*backup)",
+      "Read(**/.terraform/**)",
+      "Read(**/.env)"
+    ]
+  }
+}

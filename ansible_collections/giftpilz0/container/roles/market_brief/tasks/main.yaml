@@ -1,0 +1,89 @@
+---
+- name: "Market brief: Validate parameters"
+  ansible.builtin.assert:
+    that:
+      - market_brief_data_repo | length > 0
+      - market_brief_deploy_key | length > 0
+    fail_msg: "Needs market_brief_data_repo and market_brief_deploy_key (encrypted host vars)."
+    quiet: true
+
+- name: "Market brief: Create ssh directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.ssh"
+    state: directory
+    mode: "0700"
+
+- name: "Market brief: Pin git host key"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.known_hosts:
+    path: "/home/{{ podman_user }}/.ssh/known_hosts"
+    name: "{{ market_brief_git_host_key.split()[0] }}"
+    key: "{{ market_brief_git_host_key }}"
+
+- name: "Market brief: Deploy key for the image build"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    dest: "/home/{{ podman_user }}/.ssh/market_brief_deploy_key"
+    content: "{{ market_brief_deploy_key | trim }}\n"
+    mode: "0600"
+  no_log: true
+
+- name: "Market brief: Build image"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+    tasks_from: build
+  vars:
+    quadlet_role: market_brief
+    quadlet_builds:
+      - name: "{{ market_brief_image }}"
+        tag: "{{ market_brief_version }}"
+        git_repo: "{{ market_brief_git_repo }}"
+        git_version: "{{ market_brief_git_version }}"
+        dockerfile: "{{ market_brief_containerfile }}"
+        git_key_file: "/home/{{ podman_user }}/.ssh/market_brief_deploy_key"
+
+# No pod: starting it would start a run
+- name: "Market brief: Deploy quadlets"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: market_brief
+    quadlet_dir: market-brief
+    quadlet_extra_files: "{{ market_brief_extra_files }}"
+    quadlet_extra_dirs: "{{ market_brief_extra_dirs }}"
+    quadlet_units:
+      - market-brief-data-volume.service
+      - market-brief-cache-volume.service
+
+# Inline: templates/ is deployed to the quadlet directory
+- name: "Market brief: Deploy timer"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    dest: "/home/{{ podman_user }}/.config/systemd/user/market-brief.timer"
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Start the market watch price fetcher
+
+      [Timer]
+      OnCalendar={{ market_brief_schedule }}
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+  register: _market_brief_timer
+
+- name: "Market brief: Manage timer"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: market-brief.timer
+    enabled: "{{ market_brief_timer_enabled }}"
+    state: "{{ 'started' if market_brief_timer_enabled else 'stopped' }}"
+    daemon_reload: "{{ _market_brief_timer is changed }}"
+    scope: user

@@ -1,0 +1,105 @@
+---
+######################################
+### giftpilz0.container.navidrome
+
+# renovate: datasource=docker depName=deluan/navidrome
+navidrome_version: "0.64.2"
+
+navidrome_webui_enabled: true
+# renovate: datasource=docker depName=ghcr.io/giftpilz0/musiclibrary
+navidrome_webui_version: "edge"
+navidrome_webui_environment_vars:
+  MUSIC_LIBRARY_ROOT: "/music"
+  MUSIC_LIBRARY_NAVIDROME_LIBRARY_PATH: "/music/transcoded"
+  BASE_URL: "https://music.nixpi.de"
+  # Enables "Scan" (AcoustID fingerprints)
+  MUSIC_LIBRARY_ACOUSTID_API_KEY: "{{ navidrome_webui_acoustid_api_key }}"
+  MUSIC_LIBRARY_NAVIDROME_USERNAME: navidrome
+  MUSIC_LIBRARY_NAVIDROME_PASSWORD: "{{ navidrome_admin_password }}"
+  MUSIC_LIBRARY_NAVIDROME_URL: "http://127.0.0.1:4533"
+
+######################################
+### giftpilz0.container.suwayomi
+
+# renovate: datasource=docker depName=ghcr.io/suwayomi/suwayomi-server
+suwayomi_version: "v2.4.2435"
+# renovate: datasource=docker depName=ghcr.io/thephaseless/byparr
+suwayomi_flaresolverr_version: "3.0.4"
+
+######################################
+### giftpilz0.container.traefik
+
+traefik_networks:
+  - navidrome
+  - suwayomi
+
+traefik_plugins:
+  traefik-oidc-auth:
+    moduleName: "github.com/sevensolutions/traefik-oidc-auth"
+    version: "v0.21.0"
+
+traefik_custom_middlewares:
+  suwayomi-oidc:
+    plugin:
+      traefik-oidc-auth:
+        Secret: "{{ suwayomi_oidc_session_secret }}"
+        Provider:
+          Url: "https://login.nixpi.de/realms/nixpi"
+          ClientId: "suwayomi"
+          ClientSecret: "{{ suwayomi_oidc_client_secret }}"
+          UsePkce: true
+        Scopes:
+          - "openid"
+          - "profile"
+          - "email"
+        ValidPostLoginRedirectUris:
+          - "https://suwayomi.nixpi.de/"
+        ValidPostLogoutRedirectUris:
+          - "https://suwayomi.nixpi.de/"
+  music-webui-oidc:
+    plugin:
+      traefik-oidc-auth:
+        Secret: "{{ music_webui_oidc_session_secret }}"
+        Provider:
+          Url: "https://login.nixpi.de/realms/nixpi"
+          ClientId: "music-webui"
+          ClientSecret: "{{ music_webui_oidc_client_secret }}"
+          UsePkce: true
+        Scopes:
+          - "openid"
+          - "profile"
+          - "email"
+        ValidPostLoginRedirectUris:
+          - "https://music.nixpi.de/"
+        ValidPostLogoutRedirectUris:
+          - "https://music.nixpi.de/"
+
+traefik_transport_timeouts_enabled: true
+
+traefik_http_services:
+  - name: navidrome
+    domain: navidrome.nixpi.de
+    rule: "Host(`navidrome.nixpi.de`)"
+    servers:
+      - url: "http://navidrome-pod:4533"
+    tls_enabled: true
+    acme_enabled: true
+  - name: music-webui
+    domain: music.nixpi.de
+    rule: "Host(`music.nixpi.de`)"
+    servers:
+      - url: "http://navidrome-pod:8080"
+    tls_enabled: true
+    acme_enabled: true
+    middlewares:
+      - "music-webui-oidc@file"
+  - name: suwayomi
+    domain: suwayomi.nixpi.de
+    rule: "Host(`suwayomi.nixpi.de`)"
+    servers:
+      - url: "http://suwayomi-pod:4567"
+    tls_enabled: true
+    acme_enabled: true
+    large_downloads: true
+    middlewares:
+      - "suwayomi-oidc@file"

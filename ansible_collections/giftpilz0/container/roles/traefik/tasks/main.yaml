@@ -1,0 +1,9 @@
+---
+- name: "Traefik: Deploy pod"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: traefik
+    quadlet_extra_files: "{{ traefik_extra_files }}"
+    quadlet_extra_dirs: "{{ traefik_extra_dirs }}"
+    quadlet_units: "{{ (['traefik-network.service'] if traefik_network_enabled else []) + ['traefik-pod.service'] }}"

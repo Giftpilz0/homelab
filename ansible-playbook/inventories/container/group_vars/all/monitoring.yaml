@@ -1,0 +1,10 @@
+---
+######################################
+### giftpilz0.general.beszel_agent
+
+beszel_agent_hub_url: https://monitoring.nixpi.de
+beszel_agent_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKcE6gsG0Vud5kQdbd1q4dvatItZ05mwxk8ohUmTH7TC"
+
+# Sees the containers of the Podman user
+beszel_agent_user: "{{ podman_user }}"
+beszel_agent_podman_socket: true

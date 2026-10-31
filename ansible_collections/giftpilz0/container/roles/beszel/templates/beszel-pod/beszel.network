@@ -1,0 +1,8 @@
+{% if beszel_network_enabled %}
+[Unit]
+Description=Beszel Internal Network
+
+[Network]
+NetworkName={{ beszel_network_name }}
+Driver={{ beszel_network_driver }}
+{% endif %}

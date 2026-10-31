@@ -1,0 +1,62 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image
+postgresql_image: "docker.io/library/postgres"
+# renovate: datasource=docker depName=postgres
+postgresql_version: "18.6-alpine"
+postgresql_autoupdate: true
+postgresql_backup_autoupdate: true
+
+# Network (always joined, created only when enabled)
+postgresql_network_enabled: true
+postgresql_network_name: "postgresql-internal"
+postgresql_network_driver: "bridge"
+
+# Host ports
+postgresql_port_map_enabled: false
+postgresql_bind_ip: "127.0.0.1"
+postgresql_port_map:
+  - "5432:5432"
+
+## Service
+# Logging
+postgresql_log_destination: "stderr"
+postgresql_log_statement: "none"
+postgresql_log_min_duration_statement: 1000
+postgresql_log_connections: true
+postgresql_log_disconnections: true
+postgresql_log_checkpoints: true
+postgresql_log_lock_waits: true
+postgresql_log_line_prefix: "%m [%p] db=%d,user=%u,app=%a,client=%h "
+
+# Administrator, created on first start and used for backups/provisioning
+postgresql_admin_database: "postgres"
+postgresql_admin_user: "postgres"
+postgresql_admin_password: ""
+
+# Additional users: [{name, password}]
+postgresql_users: []
+
+# Additional databases: [{name, owner}]
+postgresql_databases: []
+
+# Backup
+postgresql_backup_schedule_times: "03:00"
+postgresql_backup_retention_days: 7
+postgresql_backup_compression: 6
+
+# Environment
+postgresql_environment_vars:
+  POSTGRES_DB: "{{ postgresql_admin_database }}"
+  POSTGRES_USER: "{{ postgresql_admin_user }}"
+  POSTGRES_PASSWORD: "{{ postgresql_admin_password }}"
+
+## Advanced
+postgresql_entrypoint: ""
+postgresql_backup_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+postgresql_extra_files: []
+postgresql_extra_dirs: []

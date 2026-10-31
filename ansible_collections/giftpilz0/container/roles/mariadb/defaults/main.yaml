@@ -1,0 +1,53 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image
+mariadb_image: "docker.io/library/mariadb"
+# renovate: datasource=docker depName=mariadb
+mariadb_version: "13.0"
+mariadb_autoupdate: true
+mariadb_backup_autoupdate: true
+
+# Network (always joined, created only when enabled)
+mariadb_network_enabled: true
+mariadb_network_name: "mariadb-internal"
+mariadb_network_driver: "bridge"
+
+# Host ports
+mariadb_port_map_enabled: true
+mariadb_bind_ip: "127.0.0.1"
+mariadb_port_map:
+  - "3306:3306"
+
+## Service
+# Administrator, created on first start
+mariadb_admin_database: "mariadb"
+mariadb_admin_user: "mariadb"
+mariadb_admin_password: ""
+# Root login for backups; only applied when the volume is initialized
+mariadb_backup_user: "root"
+mariadb_backup_password: "{{ mariadb_admin_password }}"
+
+# Additional databases: [{name, user, password}]
+mariadb_databases: []
+
+# Backup
+mariadb_backup_schedule_times: "03:00"
+mariadb_backup_retention_days: 7
+mariadb_backup_compression: 6
+
+# Environment
+mariadb_environment_vars:
+  MARIADB_DATABASE: "{{ mariadb_admin_database }}"
+  MARIADB_USER: "{{ mariadb_admin_user }}"
+  MARIADB_PASSWORD: "{{ mariadb_admin_password }}"
+  MARIADB_ROOT_PASSWORD: "{{ mariadb_backup_password }}"
+
+## Advanced
+mariadb_entrypoint: ""
+mariadb_backup_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+mariadb_extra_files: []
+mariadb_extra_dirs: []

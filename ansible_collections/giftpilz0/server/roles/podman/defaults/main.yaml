@@ -1,0 +1,22 @@
+---
+podman_user: "{{ ansible_user }}"
+
+podman_service_name: podman.service
+podman_service_state: started
+podman_service_enabled: true
+podman_package_state: present
+podman_package:
+  - podman
+
+# pasta keeps client source IPs (podman >= 6, ignored before)
+podman_rootless_port_forwarder: "pasta"
+
+# journald or k8s-file, empty keeps the podman default
+podman_log_driver: ""
+
+# Remove unused images on a timer; local quadlet builds (label quadlet.build) are kept
+podman_image_prune_enabled: true
+# systemd OnCalendar
+podman_image_prune_schedule: "weekly"
+# Only images created longer ago
+podman_image_prune_until: "168h"

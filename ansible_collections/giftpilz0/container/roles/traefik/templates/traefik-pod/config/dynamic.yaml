@@ -1,0 +1,158 @@
+# TLS
+tls:
+  options:
+    default:
+      sniStrict: false
+
+  stores:
+    default: {}
+
+# Middlewares
+http:
+  middlewares:
+    security-headers:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Proto: "https"
+        customResponseHeaders:
+          X-Robots-Tag: "noindex,nofollow,nosnippet"
+
+{% for name, config in traefik_middlewares_redirect.items() %}
+    {{ name }}:
+      redirectRegex:
+        regex: "{{ config.regex if config.regex is defined else config.from }}"
+        replacement: "{{ config.replacement if config.replacement is defined else config.to }}"
+        permanent: {{ (config.permanent is defined and config.permanent) | lower }}
+
+{% endfor %}
+{% for service in _traefik_http_services if service.redirect is defined %}
+    {{ service.name }}-redirect:
+      redirectRegex:
+        regex: "{{ service.redirect.regex if service.redirect.regex is defined else service.redirect.from }}"
+        replacement: "{{ service.redirect.replacement if service.redirect.replacement is defined else service.redirect.to }}"
+        permanent: {{ (service.redirect.permanent is defined and service.redirect.permanent) | lower }}
+
+{% endfor %}
+{% for middleware_name, middleware_config in traefik_custom_middlewares.items() %}
+    {{ middleware_name }}:
+{{ middleware_config | to_nice_yaml(indent=2) | indent(6, True) }}
+{% endfor %}
+
+  # HTTP routers
+  routers:
+{% for service in _traefik_http_services %}
+    {{ service.name }}-router:
+      rule: "{{ service.rule }}"
+      entryPoints:
+{% for entrypoint in service.entrypoints %}
+        - {{ entrypoint }}
+{% endfor %}
+      service: {{ service.name }}-service
+{% set middlewares = ([service.name ~ '-redirect'] if service.redirect is defined else []) + service.middlewares %}
+{% if middlewares %}
+      middlewares:
+{% for middleware in middlewares %}
+        - {{ middleware }}
+{% endfor %}
+{% endif %}
+{% if service.acme_enabled %}
+      tls:
+        certResolver: default
+{% if service.sans is defined %}
+        domains:
+          - main: "{{ service.domain }}"
+            sans:
+{% for san in service.sans %}
+              - "{{ san }}"
+{% endfor %}
+{% endif %}
+{% elif service.tls_enabled %}
+      tls: {}
+{% endif %}
+
+{% endfor %}
+
+  # HTTP services
+  services:
+{% for service in _traefik_http_services %}
+    {{ service.name }}-service:
+      loadBalancer:
+{% if service.large_downloads or service.insecure_skip_verify %}
+        serversTransport: {{ service.name }}-transport
+{% endif %}
+        servers:
+{% for server in service.servers %}
+          - url: "{{ server.url }}"
+{% endfor %}
+{% if service.health_check is defined %}
+        healthCheck:
+{{ service.health_check | to_nice_yaml(indent=2) | indent(10, True) }}
+{% endif %}
+
+{% endfor %}
+
+  # Servers transports
+{% set transport_services = _traefik_http_services | selectattr('large_downloads') | list
+                            + _traefik_http_services | selectattr('insecure_skip_verify') | rejectattr('large_downloads') | list %}
+{% if transport_services %}
+  serversTransports:
+{% for service in transport_services %}
+    {{ service.name }}-transport:
+{% if service.insecure_skip_verify %}
+      insecureSkipVerify: true
+{% endif %}
+{% if service.large_downloads %}
+      forwardingTimeouts:
+        dialTimeout: "30s"
+        responseHeaderTimeout: "0s"
+        idleConnTimeout: "90s"
+        readIdleTimeout: "12h"
+        pingTimeout: "15s"
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if _traefik_tcp_services %}
+# TCP
+tcp:
+  # TCP routers
+  routers:
+{% for service in _traefik_tcp_services %}
+    {{ service.name }}-tcp-router:
+      rule: "{{ service.rule }}"
+      entryPoints:
+{% for entrypoint in service.entrypoints %}
+        - {{ entrypoint }}
+{% endfor %}
+      service: {{ service.name }}-tcp-service
+{% if service.tls_enabled %}
+      tls:
+{% if service.acme_enabled %}
+        certResolver: default
+{% if service.sans is defined %}
+        domains:
+          - main: "{{ service.domain }}"
+            sans:
+{% for san in service.sans %}
+              - "{{ san }}"
+{% endfor %}
+{% endif %}
+{% else %}
+        passthrough: {{ service.tls_passthrough | lower }}
+{% endif %}
+{% endif %}
+
+{% endfor %}
+
+  # TCP services
+  services:
+{% for service in _traefik_tcp_services %}
+    {{ service.name }}-tcp-service:
+      loadBalancer:
+        servers:
+{% for server in service.servers %}
+          - address: "{{ server.address }}"
+{% endfor %}
+
+{% endfor %}
+{% endif %}

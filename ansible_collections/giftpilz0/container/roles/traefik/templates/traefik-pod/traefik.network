@@ -1,0 +1,8 @@
+{% if traefik_network_enabled %}
+[Unit]
+Description=Traefik Internal Network
+
+[Network]
+NetworkName={{ traefik_network_name }}
+Driver={{ traefik_network_driver }}
+{% endif %}

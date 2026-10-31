@@ -1,0 +1,34 @@
+[Unit]
+Description=Traefik Container
+
+[Container]
+ContainerName=traefik
+Image={{ traefik_image }}:{{ traefik_version }}
+Pod=traefik.pod
+
+{% if traefik_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+{% if traefik_entrypoint %}
+Entrypoint={{ traefik_entrypoint }}
+{% endif %}
+
+{% for env_name, env_value in traefik_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+Volume=traefik-acme.volume:/acme/
+Volume=traefik-plugins.volume:/plugins-storage
+Volume=%h/.config/containers/systemd/traefik-pod/config/dynamic.yaml:/etc/traefik/dynamic/dynamic.yaml:Z
+Volume=%h/.config/containers/systemd/traefik-pod/config/traefik.yaml:/etc/traefik/traefik.yaml:Z
+
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
+{% endfor %}
+HealthCmd=["traefik", "healthcheck"]
+HealthInterval=30s
+HealthStartPeriod=10s
+HealthOnFailure=kill
+
+[Service]
+Restart=always

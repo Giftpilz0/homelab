@@ -1,0 +1,36 @@
+---
+- name: "Lego: Validate certificate definitions"
+  ansible.builtin.assert:
+    that:
+      - lego_certificates | map(attribute='name') | list | unique | length == lego_certificates | length
+      - item.name is match('^[A-Za-z0-9_-]+$')
+      - item.domains is defined
+      - item.domains | length > 0
+      - item.challenge is defined
+      - item.challenge.type in ['dns-01', 'http-01', 'tls-alpn-01']
+      - item.challenge.type != 'dns-01' or item.challenge.provider is defined
+      - item.deploy is not defined or item.deploy.pem is defined or item.deploy.pfx is defined
+      - item.deploy is not defined or item.deploy.windows_store is not defined or item.deploy.pfx is defined
+      - item.deploy is not defined or item.deploy.pfx is not defined or item.deploy.pfx.password is defined
+      - item.deploy is not defined or item.deploy.pem is not defined or ansible_facts['system'] == 'Linux'
+      - item.deploy is not defined or item.deploy.windows_store is not defined or ansible_facts['os_family'] == 'Windows'
+      - lego_acme_email | length > 0
+    fail_msg: "Invalid Lego certificate definition or missing lego_acme_email: {{ item.name | default('unnamed') }}"
+  loop: "{{ lego_certificates }}"
+  loop_control:
+    label: "{{ item.name | default('unnamed') }}"
+
+- name: "Lego: Configure Linux"
+  ansible.builtin.include_tasks: linux.yaml
+  when: ansible_facts['system'] == 'Linux'
+
+- name: "Lego: Configure Windows"
+  ansible.builtin.include_tasks: windows.yaml
+  when: ansible_facts['os_family'] == 'Windows'
+
+- name: "Lego: Reject unsupported operating system"
+  ansible.builtin.fail:
+    msg: "The Lego role supports Linux and Windows only (detected {{ ansible_facts['system'] }})."
+  when:
+    - ansible_facts['system'] != 'Linux'
+    - ansible_facts['os_family'] != 'Windows'

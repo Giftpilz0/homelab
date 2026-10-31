@@ -1,0 +1,107 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy Keycloak identity and access management as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: System user for rootless podman operations.
+
+      keycloak_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      keycloak_version:
+        type: str
+        required: false
+        description: Container image version.
+
+      keycloak_autoupdate:
+        type: bool
+        required: false
+        description: Enable podman auto-update for this container.
+
+      keycloak_network_enabled:
+        type: bool
+        required: false
+        description: Create and manage the podman network.
+
+      keycloak_network_name:
+        type: str
+        required: false
+        description: Podman network name.
+
+      keycloak_network_driver:
+        type: str
+        required: false
+        description: Podman network driver.
+
+      keycloak_port_map_enabled:
+        type: bool
+        required: false
+        description: Expose container ports on the host.
+
+      keycloak_bind_ip:
+        type: str
+        required: false
+        description: Host IP to bind exposed ports to.
+
+      keycloak_port_map:
+        type: list
+        elements: str
+        required: false
+        description: Host:container port mappings.
+
+      keycloak_domain:
+        type: str
+        required: false
+        description: External domain for the Keycloak instance.
+
+      keycloak_admin_password:
+        type: str
+        required: false
+        description: Admin bootstrap password.
+
+      keycloak_db_host:
+        type: str
+        required: false
+        description: PostgreSQL container hostname.
+
+      keycloak_db_name:
+        type: str
+        required: false
+        description: Database name.
+
+      keycloak_db_user:
+        type: str
+        required: false
+        description: Database user.
+
+      keycloak_db_password:
+        type: str
+        required: false
+        description: Database user password.
+
+      keycloak_environment_vars:
+        type: dict
+        required: false
+        description: Extra environment variables injected into the container.
+
+      keycloak_entrypoint:
+        type: str
+        required: false
+        description: Optional container entrypoint override.
+
+      keycloak_extra_files:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      keycloak_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.

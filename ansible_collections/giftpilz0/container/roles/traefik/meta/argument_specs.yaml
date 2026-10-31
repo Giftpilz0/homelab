@@ -1,0 +1,231 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy the Traefik reverse proxy as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: System user for rootless podman operations.
+
+      traefik_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      traefik_version:
+        type: str
+        required: false
+        description: Container image version.
+
+      traefik_autoupdate:
+        type: bool
+        required: false
+        description: Enable podman auto-update for this container.
+
+      traefik_network_enabled:
+        type: bool
+        required: false
+        description: Create and manage the podman network.
+
+      traefik_network_name:
+        type: str
+        required: false
+        description: Podman network name.
+
+      traefik_network_driver:
+        type: str
+        required: false
+        description: Podman network driver.
+
+      traefik_networks:
+        type: list
+        elements: str
+        required: false
+        description: Additional podman networks to join (by role name).
+
+      traefik_bind_ip:
+        type: str
+        required: false
+        description: Host IP to bind exposed ports to.
+
+      traefik_acme_enabled:
+        type: bool
+        required: false
+        description: Enable ACME/Let's Encrypt certificates.
+
+      traefik_acme_email:
+        type: str
+        required: false
+        description: ACME account email.
+
+      traefik_acme_ca_server:
+        type: str
+        required: false
+        description: ACME CA server URL.
+
+      traefik_acme_challenge_type:
+        type: str
+        required: false
+        description: ACME challenge type (dns, http, or tls).
+
+      traefik_acme_dns_provider:
+        type: str
+        required: false
+        description: DNS provider for DNS challenge.
+
+      traefik_acme_dns_resolvers:
+        type: list
+        elements: str
+        required: false
+        description: Custom DNS resolvers for DNS challenge.
+
+      traefik_acme_eab_enabled:
+        type: bool
+        required: false
+        description: Enable external account binding for ACME.
+
+      traefik_acme_eab_kid:
+        type: str
+        required: false
+        description: ACME EAB key ID.
+
+      traefik_acme_eab_hmac:
+        type: str
+        required: false
+        description: ACME EAB HMAC key.
+
+      traefik_http_internal_port:
+        type: int
+        required: false
+        description: Internal HTTP entrypoint port.
+
+      traefik_https_internal_port:
+        type: int
+        required: false
+        description: Internal HTTPS entrypoint port.
+
+      traefik_http_redirect_https:
+        type: bool
+        required: false
+        description: Redirect HTTP to HTTPS.
+
+      traefik_http3_enabled:
+        type: bool
+        required: false
+        description: Enable HTTP/3 (QUIC).
+
+      traefik_http3_advertised_port:
+        type: int
+        required: false
+        description: HTTP/3 advertised port.
+
+      traefik_tcp_entrypoints:
+        type: list
+        elements: dict
+        required: false
+        description: TCP entrypoint definitions.
+
+      traefik_log_level:
+        type: str
+        required: false
+        description: Traefik log level.
+
+      traefik_log_format:
+        type: str
+        required: false
+        description: Traefik log format.
+
+      traefik_access_log_format:
+        type: str
+        required: false
+        description: Access log format.
+
+      traefik_access_log_buffer_size:
+        type: int
+        required: false
+        description: Access log channel buffer size.
+
+      traefik_ping_internal_port:
+        type: int
+        required: false
+        description: Port of the ping endpoint used by the health check, bound to 127.0.0.1.
+
+      traefik_transport_timeouts_enabled:
+        type: bool
+        required: false
+        description: Enable custom transport timeouts.
+
+      traefik_transport_read_timeout:
+        type: str
+        required: false
+        description: Transport read timeout (e.g. 12h).
+
+      traefik_transport_write_timeout:
+        type: str
+        required: false
+        description: Transport write timeout (e.g. 12h).
+
+      traefik_transport_idle_timeout:
+        type: str
+        required: false
+        description: Transport idle timeout (e.g. 3m).
+
+      traefik_plugins:
+        type: dict
+        required: false
+        description: Experimental Traefik plugin definitions keyed by plugin name.
+
+      traefik_middlewares_redirect:
+        type: dict
+        required: false
+        description: Redirect middleware definitions (path/regex-based).
+
+      traefik_custom_middlewares:
+        type: dict
+        required: false
+        description: Custom traefik middleware definitions.
+
+      traefik_http_services:
+        type: list
+        elements: dict
+        required: false
+        description: HTTP service/router definitions.
+
+      traefik_http_service_defaults:
+        type: dict
+        required: false
+        description: Values for keys missing in traefik_http_services entries.
+
+      traefik_tcp_services:
+        type: list
+        elements: dict
+        required: false
+        description: TCP service/router definitions.
+
+      traefik_tcp_service_defaults:
+        type: dict
+        required: false
+        description: Values for keys missing in traefik_tcp_services entries.
+
+      traefik_environment_vars:
+        type: dict
+        required: false
+        description: Extra environment variables for the container.
+
+      traefik_entrypoint:
+        type: str
+        required: false
+        description: Optional container entrypoint override.
+
+      traefik_extra_files:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      traefik_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.

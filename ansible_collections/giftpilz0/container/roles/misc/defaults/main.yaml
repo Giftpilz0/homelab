@@ -1,0 +1,35 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image (built locally)
+misc_image: "localhost/misc-custom"
+misc_version: "latest"
+misc_git_repo: "https://forgejo.nixpi.de/moritz/service-misc.git"
+misc_commit: "db16ab7ca40f6e1e98e6e7a3947fb9e2aa04f527"
+misc_dockerfile: "docker/docker-minimal/Dockerfile"
+misc_autoupdate: true
+
+# Network (always joined, created only when enabled)
+misc_network_enabled: true
+misc_network_name: "misc-internal"
+misc_network_driver: "bridge"
+
+# Host ports
+misc_port_map_enabled: true
+misc_bind_ip: "{{ ansible_facts['default_ipv4']['address'] }}"
+misc_port_map:
+  - "8080:8080"
+
+# Environment
+misc_environment_vars:
+  TZ: "Europe/Berlin"
+  LOGLEVEL: "INFO"
+  PORT: 8080
+
+## Advanced
+misc_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+misc_extra_files: []
+misc_extra_dirs: []

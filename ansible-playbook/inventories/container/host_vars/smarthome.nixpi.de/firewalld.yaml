@@ -1,0 +1,26 @@
+---
+######################################
+### giftpilz0.general.firewalld
+
+firewalld_zones_define_host:
+  - zone: iot-trusted
+    source: 192.168.30.0/24
+
+# MQTT and MQTT over websocket
+firewalld_rules_ports_host:
+  - port: 9001
+    protocol: tcp
+    zone: clients
+  - port: 1883
+    protocol: tcp
+    zone: clients
+  - port: 9001
+    protocol: tcp
+    zone: iot-trusted
+  - port: 1883
+    protocol: tcp
+    zone: iot-trusted
+  # Gatus
+  - port: 1883
+    protocol: tcp
+    zone: server

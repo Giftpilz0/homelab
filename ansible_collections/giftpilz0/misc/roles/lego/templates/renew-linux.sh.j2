@@ -1,0 +1,100 @@
+#!/bin/bash
+set -euo pipefail
+
+LEGO={{ lego_binary | quote }}
+STATE={{ lego_state_path | quote }}
+{% for item in _lego_certificates %}
+echo "Processing {{ item.name }}"
+ENV_FILE="$STATE/{{ item.name }}.env"
+set -a
+source "$ENV_FILE"
+set +a
+DOMAINS=()
+{% for domain in item.domains %}
+DOMAINS+=(--domains {{ domain | quote }})
+{% endfor %}
+RESOLVERS=()
+{% for resolver in lego_acme_dns_resolvers %}
+RESOLVERS+=(--dns.resolvers {{ resolver | quote }})
+{% endfor %}
+CERT="$STATE/certificates/{{ item.domains[0] | replace('*', '_') }}.crt"
+
+LEGO_ARGS=(run --accept-tos)
+LEGO_ARGS+=(--email {{ lego_acme_email | quote }})
+LEGO_ARGS+=(--server {{ lego_acme_server | quote }})
+LEGO_ARGS+=(--path "$STATE")
+LEGO_ARGS+=(--key-type {{ item.key_type | quote }})
+{% if item.challenge.type == 'dns-01' %}
+LEGO_ARGS+=(--dns "$LEGO_DNS_PROVIDER")
+{% elif item.challenge.type == 'http-01' %}
+LEGO_ARGS+=(--http)
+{% else %}
+LEGO_ARGS+=(--tls-alpn)
+{% endif %}
+LEGO_ARGS+=("${DOMAINS[@]}")
+LEGO_ARGS+=("${RESOLVERS[@]}")
+{% for extra_arg in lego_extra_args %}
+LEGO_ARGS+=({{ extra_arg | quote }})
+{% endfor %}
+{% for extra_arg in item.extra_args %}
+LEGO_ARGS+=({{ extra_arg | quote }})
+{% endfor %}
+LEGO_ARGS+=(--pem)
+{% if item.deploy.pfx is defined %}
+LEGO_ARGS+=(--pfx)
+{% endif %}
+if [[ -f "$CERT" ]]; then
+  LEGO_ARGS+=(--renew-days {{ item.renewal.threshold }})
+fi
+
+echo "Running: $LEGO ${LEGO_ARGS[*]}"
+SERVER={{ lego_acme_server | quote }}
+SERVER_HOST="${SERVER#*://}"
+SERVER_HOST="${SERVER_HOST%%/*}"
+SERVER_HOST="${SERVER_HOST//:/_}"
+ACCOUNT_ID={{ item.account_id | quote }}
+ACCOUNT_DIR="$STATE/accounts/$SERVER_HOST/$ACCOUNT_ID"
+LOG_FILE=$(mktemp)
+
+set +e
+runuser -u {{ lego_service_user | quote }} -- env -i PATH=/usr/bin:/bin /bin/bash -c \
+  'set -a; source "$1"; set +a; shift; exec "$@"' -- "$ENV_FILE" "$LEGO" "${LEGO_ARGS[@]}" 2>&1 | tee "$LOG_FILE"
+LEGO_STATUS=${PIPESTATUS[0]}
+set -e
+
+if [[ "$LEGO_STATUS" -ne 0 ]] && grep -q "accountDoesNotExist" "$LOG_FILE"; then
+  if [[ ! -d "$ACCOUNT_DIR" ]]; then
+    rm -f "$LOG_FILE"
+    exit "$LEGO_STATUS"
+  fi
+
+  STALE_ACCOUNT_DIR="${ACCOUNT_DIR}.stale.$(date +%Y%m%d_%H%M%S)"
+  echo "Archiving stale Lego account: $ACCOUNT_DIR"
+  mv "$ACCOUNT_DIR" "$STALE_ACCOUNT_DIR"
+  runuser -u {{ lego_service_user | quote }} -- env -i PATH=/usr/bin:/bin /bin/bash -c \
+    'set -a; source "$1"; set +a; shift; exec "$@"' -- "$ENV_FILE" "$LEGO" "${LEGO_ARGS[@]}"
+elif [[ "$LEGO_STATUS" -ne 0 ]]; then
+  rm -f "$LOG_FILE"
+  exit "$LEGO_STATUS"
+fi
+rm -f "$LOG_FILE"
+if [[ ! -f "$STATE/.{{ item.name }}.deployed" ]] || [[ "$CERT" -nt "$STATE/.{{ item.name }}.deployed" ]]; then
+{% if item.deploy.pem is defined %}
+{% set pem = lego_deploy_pem_defaults | combine(item.deploy.pem) %}
+  install -d -m {{ pem.directory_mode }} -o {{ pem.owner }} -g {{ pem.group }} {{ pem.directory | quote }}
+  cat "$STATE/certificates/{{ item.domains[0] | replace('*', '_') }}.crt" "$STATE/certificates/{{ item.domains[0] | replace('*', '_') }}.issuer.crt" > "{{ item.deploy.pem.directory }}/.fullchain.pem.tmp"
+  install -m {{ pem.certificate_mode }} -o {{ pem.owner }} -g {{ pem.group }} "{{ item.deploy.pem.directory }}/.fullchain.pem.tmp" {{ item.deploy.pem.directory | quote }}/fullchain.pem
+  rm -f "{{ item.deploy.pem.directory }}/.fullchain.pem.tmp"
+  install -m {{ pem.private_key_mode }} -o {{ pem.owner }} -g {{ pem.group }} "$STATE/certificates/{{ item.domains[0] | replace('*', '_') }}.key" {{ item.deploy.pem.directory | quote }}/privkey.pem
+{% endif %}
+{% if item.deploy.pfx is defined %}
+{% set pfx = lego_deploy_pfx_defaults | combine(item.deploy.pfx) %}
+  install -d -m {{ pfx.directory_mode }} -o {{ pfx.owner }} -g {{ pfx.group }} "$(dirname {{ pfx.path | quote }})"
+  install -m {{ pfx.mode }} -o {{ pfx.owner }} -g {{ pfx.group }} "$STATE/certificates/{{ item.domains[0] | replace('*', '_') }}.pfx" {{ item.deploy.pfx.path | quote }}
+{% endif %}
+{% for hook in item.hooks.changed | selectattr('command', 'defined') %}
+  {{ hook.command }}
+{% endfor %}
+  touch "$STATE/.{{ item.name }}.deployed"
+fi
+{% endfor %}

@@ -1,0 +1,47 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image
+suwayomi_image: "ghcr.io/suwayomi/suwayomi-server"
+# renovate: datasource=docker depName=ghcr.io/suwayomi/suwayomi-server
+suwayomi_version: "v2.4.2435"
+suwayomi_autoupdate: true
+
+# Network (always joined, created only when enabled)
+suwayomi_network_enabled: true
+suwayomi_network_name: "suwayomi-internal"
+suwayomi_network_driver: "bridge"
+
+# Host ports (not needed behind Traefik)
+suwayomi_port_map_enabled: false
+suwayomi_bind_ip: "127.0.0.1"
+suwayomi_port_map:
+  - "4567:4567"
+
+# Environment
+suwayomi_environment_vars:
+  TZ: "Europe/Berlin"
+  BIND_IP: "0.0.0.0"
+  BIND_PORT: "4567"
+  AUTH_MODE: "none"
+  WEB_UI_UPDATE_INTERVAL: "0"
+  DOWNLOAD_AS_CBZ: "true"
+  FLARESOLVERR_ENABLED: "true"
+  FLARESOLVERR_URL: "http://127.0.0.1:8191"
+
+## FlareSolverr (Byparr)
+suwayomi_flaresolverr_image: "ghcr.io/thephaseless/byparr"
+# renovate: datasource=docker depName=ghcr.io/thephaseless/byparr
+suwayomi_flaresolverr_version: "3.0.4"
+suwayomi_flaresolverr_autoupdate: true
+suwayomi_flaresolverr_environment_vars:
+  TZ: "Europe/Berlin"
+
+## Advanced
+suwayomi_entrypoint: ""
+suwayomi_flaresolverr_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+suwayomi_extra_files: []
+suwayomi_extra_dirs: []

@@ -1,0 +1,13 @@
+---
+_beszel_agent_arch: "{{ 'amd64' if ansible_facts['architecture'] == 'x86_64' else 'arm64' if ansible_facts['architecture'] == 'aarch64' else ansible_facts['architecture'] }}"
+_beszel_agent_release_dir: "/usr/local/lib/beszel-agent-{{ beszel_agent_version }}"
+
+_beszel_agent_environment: >-
+  {{ {'HUB_URL': beszel_agent_hub_url,
+      'KEY': beszel_agent_key,
+      'TOKEN': beszel_agent_token,
+      'DATA_DIR': '/var/lib/beszel-agent',
+      'DISABLE_SSH': 'true'}
+     | combine({'DOCKER_HOST': 'unix:///run/user/' ~ ansible_facts['getent_passwd'][beszel_agent_user][1] ~ '/podman/podman.sock'}
+               if beszel_agent_podman_socket else {})
+     | combine(beszel_agent_environment_vars) }}

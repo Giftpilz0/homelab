@@ -1,0 +1,27 @@
+---
+- name: "Update: Update packages (dnf)"
+  become: true
+  ansible.builtin.dnf:
+    name: "{{ update_package_names }}"
+    state: latest
+    update_only: true
+    update_cache: true
+    security: "{{ update_package_security_only }}"
+    bugfix: "{{ update_package_bugfix_only }}"
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: "Update: Update packages (apt)"
+  become: true
+  ansible.builtin.apt:
+    name: "{{ update_package_names }}"
+    state: latest
+    update_cache: true
+    only_upgrade: true
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: "Update: Update packages (pacman)"
+  become: true
+  community.general.pacman:
+    update_cache: true
+    upgrade: true
+  when: ansible_facts['os_family'] == 'Archlinux'

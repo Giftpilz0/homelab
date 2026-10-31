@@ -1,0 +1,9 @@
+---
+git_package_state: present
+git_package:
+  - git
+
+# [{key, value}]
+git_config_system: []
+# [{key, value, scope}] for the connecting user
+git_config: []

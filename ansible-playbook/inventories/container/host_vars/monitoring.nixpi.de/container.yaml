@@ -1,0 +1,68 @@
+---
+######################################
+### giftpilz0.container.beszel
+
+# renovate: datasource=docker depName=henrygd/beszel
+beszel_version: "0.21.1"
+
+beszel_app_url: "https://monitoring.nixpi.de"
+beszel_environment_vars:
+  APP_URL: "{{ beszel_app_url }}"
+  DISABLE_SSH: "true"
+  # Accounts for Keycloak users
+  USER_CREATION: "true"
+
+######################################
+### giftpilz0.container.gatus
+
+# renovate: datasource=docker depName=twinproduction/gatus
+gatus_version: "v5.38.0"
+
+gatus_url: "https://status.nixpi.de"
+gatus_oidc_enabled: true
+gatus_oidc_issuer_url: "https://login.nixpi.de/realms/nixpi"
+
+# Websocket listener, checked below via plain MQTT
+gatus_traefik_exclude:
+  - mqtt-websocket
+
+# traefik-oidc-auth answers non-browser requests with 401
+gatus_traefik_overrides:
+  music-webui:
+    conditions:
+      - "[STATUS] == 401"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  suwayomi:
+    conditions:
+      - "[STATUS] == 401"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+
+gatus_endpoints:
+  - name: mqtt
+    group: smarthome
+    url: "tcp://mqtt.nixpi.de:1883"
+    conditions:
+      - "[CONNECTED] == true"
+
+######################################
+### giftpilz0.container.traefik
+
+traefik_networks:
+  - beszel
+  - gatus
+
+traefik_http_services:
+  - name: beszel
+    domain: monitoring.nixpi.de
+    rule: "Host(`monitoring.nixpi.de`)"
+    servers:
+      - url: "http://beszel-pod:8090"
+    tls_enabled: true
+    acme_enabled: true
+  - name: gatus
+    domain: status.nixpi.de
+    rule: "Host(`status.nixpi.de`)"
+    servers:
+      - url: "http://gatus-pod:8080"
+    tls_enabled: true
+    acme_enabled: true

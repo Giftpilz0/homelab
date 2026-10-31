@@ -1,0 +1,22 @@
+---
+- name: "Bumper: Build image"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+    tasks_from: build
+  vars:
+    quadlet_role: bumper
+    quadlet_builds:
+      - name: "{{ bumper_image }}"
+        tag: "{{ bumper_version }}"
+        git_repo: "{{ bumper_git_repo }}"
+        git_version: "{{ bumper_commit }}"
+        cache: false
+
+- name: "Bumper: Deploy pod"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: bumper
+    quadlet_extra_files: "{{ bumper_extra_files }}"
+    quadlet_extra_dirs: "{{ bumper_extra_dirs }}"
+    quadlet_units: "{{ (['bumper-network.service'] if bumper_network_enabled else []) + ['bumper-pod.service'] }}"

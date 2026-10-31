@@ -1,0 +1,18 @@
+---
+######################################
+### giftpilz0.general.firewalld
+
+# Traefik
+firewalld_rules_services_web:
+  - service: http
+    zone: clients
+  - service: https
+    zone: clients
+  - service: http3
+    zone: clients
+  - service: http
+    zone: server
+  - service: https
+    zone: server
+  - service: http3
+    zone: server

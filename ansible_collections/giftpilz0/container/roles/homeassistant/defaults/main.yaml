@@ -1,0 +1,35 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image
+homeassistant_image: "ghcr.io/home-assistant/home-assistant"
+# renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant
+homeassistant_version: "2026.10.4"
+homeassistant_autoupdate: true
+
+# Network (always joined, created only when enabled)
+homeassistant_network_enabled: true
+homeassistant_network_name: "homeassistant-internal"
+homeassistant_network_driver: "bridge"
+
+# Host ports (not needed behind Traefik)
+homeassistant_port_map_enabled: true
+homeassistant_bind_ip: "127.0.0.1"
+homeassistant_port_map:
+  - "8123:8123"
+
+## Service
+# Access to devices mounted via extra files: dialout group and SELinux spc_t
+homeassistant_device_access: false
+
+# Environment
+homeassistant_environment_vars:
+  TZ: Europe/Berlin
+
+## Advanced
+homeassistant_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+homeassistant_extra_files: []
+homeassistant_extra_dirs: []

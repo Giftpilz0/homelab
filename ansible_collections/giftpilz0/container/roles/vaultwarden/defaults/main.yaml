@@ -1,0 +1,37 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image
+vaultwarden_image: "docker.io/vaultwarden/server"
+# renovate: datasource=docker depName=vaultwarden/server
+vaultwarden_version: "1.37.4-alpine"
+vaultwarden_autoupdate: true
+
+# Network (always joined, created only when enabled)
+vaultwarden_network_enabled: true
+vaultwarden_network_name: "vaultwarden-internal"
+vaultwarden_network_driver: "bridge"
+
+# Host ports (not needed behind Traefik)
+vaultwarden_port_map_enabled: true
+vaultwarden_bind_ip: "127.0.0.1"
+vaultwarden_port_map:
+  - "80:80"
+
+## Service
+vaultwarden_domain: ""
+vaultwarden_admin_token: ""
+
+# Environment
+vaultwarden_environment_vars:
+  DOMAIN: "{{ vaultwarden_domain }}"
+  ADMIN_TOKEN: "{{ vaultwarden_admin_token }}"
+  ROCKET_PORT: "80"
+
+## Advanced
+vaultwarden_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+vaultwarden_extra_files: []
+vaultwarden_extra_dirs: []

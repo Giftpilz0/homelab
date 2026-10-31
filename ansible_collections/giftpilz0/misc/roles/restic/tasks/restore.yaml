@@ -1,0 +1,134 @@
+---
+- name: "Restic: Validate restore request"
+  ansible.builtin.assert:
+    that:
+      - restic_restore_action in ['snapshots', 'ls', 'files', 'inplace']
+      - restic_restore_repository in _restic_repositories | map(attribute='name')
+      - restic_restore_paths is not string
+      - restic_restore_action not in ['files', 'inplace'] or restic_restore_paths | length > 0
+      - restic_restore_action != 'inplace' or ansible_play_hosts_all | length == 1
+    fail_msg: >-
+      Set restic_restore_action (snapshots, ls, files, inplace) and a restic_restore_repository of
+      {{ _restic_repositories | map(attribute='name') | join(', ') }}. files and inplace need a list of
+      restic_restore_paths, inplace runs on a single host only (-l).
+    quiet: true
+
+- name: "Restic: Browse repository"
+  when: restic_restore_action in ['snapshots', 'ls']
+  block:
+    - name: "Restic: Run restic"
+      become: true
+      ansible.builtin.command:
+        argv: "{{ ['/usr/local/bin/restic-repo', restic_restore_repository]
+          + (['snapshots', '--compact'] if restic_restore_action == 'snapshots'
+             else ['ls', '--long', restic_restore_snapshot] + (restic_restore_paths or ['/'])) }}"
+      register: _restic_restore_output
+      changed_when: false
+
+    - name: "Restic: Show result"
+      ansible.builtin.debug:
+        var: _restic_restore_output.stdout_lines
+
+- name: "Restic: Restore files"
+  when: restic_restore_action == 'files'
+  block:
+    - name: "Restic: Set restore directory"
+      ansible.builtin.set_fact:
+        _restic_restore_files_dir: "{{ restic_restore_target }}/{{ restic_restore_repository }}-{{ now(fmt='%Y%m%d-%H%M%S') }}"
+
+    - name: "Restic: Restore paths"
+      become: true
+      ansible.builtin.command:
+        argv: "{{ ['/usr/local/bin/restic-repo', restic_restore_repository, 'restore', restic_restore_snapshot,
+          '--target', _restic_restore_files_dir] + restic_restore_paths | map('regex_replace', '^', '--include=') }}"
+      changed_when: true
+
+    - name: "Restic: Show restore directory"
+      ansible.builtin.debug:
+        msg: "Restored to {{ inventory_hostname }}:{{ _restic_restore_files_dir }}"
+
+- name: "Restic: Restore in place"
+  when: restic_restore_action == 'inplace'
+  block:
+    - name: "Restic: Set suffix for current data"
+      ansible.builtin.set_fact:
+        _restic_restore_suffix: ".pre-restore-{{ now(fmt='%Y%m%d-%H%M%S') }}"
+
+    - name: "Restic: Stop units"
+      become: true
+      ansible.builtin.command:
+        argv: "{{ _restic_systemctl_user.split() + ['stop'] + restic_restore_stop_units }}"
+      when: restic_restore_stop_units | length > 0
+      changed_when: true
+
+    - name: "Restic: Check current paths"
+      become: true
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop: "{{ restic_restore_paths }}"
+      register: _restic_restore_current
+
+    - name: "Restic: Move current data aside"
+      become: true
+      ansible.builtin.command:
+        argv: [mv, "{{ item.item }}", "{{ item.item }}{{ _restic_restore_suffix }}"]
+      loop: "{{ _restic_restore_current.results | selectattr('stat.exists') }}"
+      loop_control:
+        label: "{{ item.item }}"
+      changed_when: true
+
+    - name: "Restic: Restore paths"
+      become: true
+      ansible.builtin.command:
+        argv: "{{ ['/usr/local/bin/restic-repo', restic_restore_repository, 'restore', restic_restore_snapshot,
+          '--target', '/'] + restic_restore_paths | map('regex_replace', '^', '--include=') }}"
+      changed_when: true
+
+    - name: "Restic: Start units"
+      become: true
+      ansible.builtin.command:
+        argv: "{{ _restic_systemctl_user.split() + ['start', item] }}"
+      loop: "{{ restic_restore_stop_units | reverse }}"
+      changed_when: true
+
+    - name: "Restic: Show previous data"
+      ansible.builtin.debug:
+        msg: "Previous data kept as <path>{{ _restic_restore_suffix }}, remove it once everything works."
+
+  rescue:
+    - name: "Restic: Check moved data"
+      become: true
+      ansible.builtin.stat:
+        path: "{{ item }}{{ _restic_restore_suffix }}"
+      loop: "{{ restic_restore_paths }}"
+      register: _restic_restore_moved
+
+    - name: "Restic: Remove partial restore"
+      become: true
+      ansible.builtin.file:
+        path: "{{ item.item }}"
+        state: absent
+      loop: "{{ _restic_restore_moved.results | selectattr('stat.exists') }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: "Restic: Move current data back"
+      become: true
+      ansible.builtin.command:
+        argv: [mv, "{{ item.item }}{{ _restic_restore_suffix }}", "{{ item.item }}"]
+      loop: "{{ _restic_restore_moved.results | selectattr('stat.exists') }}"
+      loop_control:
+        label: "{{ item.item }}"
+      changed_when: true
+
+    - name: "Restic: Start units again"
+      become: true
+      ansible.builtin.command:
+        argv: "{{ _restic_systemctl_user.split() + ['start', item] }}"
+      loop: "{{ restic_restore_stop_units | reverse }}"
+      changed_when: true
+      failed_when: false
+
+    - name: "Restic: Fail restore"
+      ansible.builtin.fail:
+        msg: "Restore failed, the previous data was put back."

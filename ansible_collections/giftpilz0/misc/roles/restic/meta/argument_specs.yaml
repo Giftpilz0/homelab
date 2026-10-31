@@ -1,0 +1,207 @@
+---
+argument_specs:
+  main:
+    short_description: Install and configure restic/resticprofile for automated repository backups.
+    options:
+      resticprofile_version:
+        type: str
+        required: false
+        description: resticprofile release version.
+
+      rest_server_version:
+        type: str
+        required: false
+        description: rest-server release version.
+
+      restic_mode:
+        type: str
+        required: false
+        choices:
+          - client
+          - server
+          - both
+        description: role operating mode.
+
+      restic_user:
+        type: str
+        required: false
+        description: system user for restic operations.
+
+      restic_user_home:
+        type: str
+        required: false
+        description: home directory of the restic user.
+
+      restic_config_dir:
+        type: str
+        required: false
+        description: directory for resticprofile configuration.
+
+      restic_cache_dir:
+        type: str
+        required: false
+        description: directory for restic cache data.
+
+      restic_log_dir:
+        type: str
+        required: false
+        description: directory for restic log files.
+
+      restic_password_dir:
+        type: str
+        required: false
+        description: directory for repository password files.
+
+      restic_env_dir:
+        type: str
+        required: false
+        description: directory for the environment files of restic-repo and resticprofile.
+
+      restic_server_repo_base:
+        type: str
+        required: false
+        description: base directory for server-side repositories.
+
+      restic_server_host:
+        type: str
+        required: false
+        description: hostname or IP of the rest-server.
+
+      restic_server_port:
+        type: int
+        required: false
+        description: port of the rest-server.
+
+      restic_server_password:
+        type: str
+        required: false
+        description: rest-server password of the client, the username is the inventory hostname.
+
+      restic_stop_units_user:
+        type: str
+        required: false
+        description: owner of the user units in stop_units of a repository.
+
+      restic_repositories:
+        type: list
+        elements: dict
+        required: false
+        options:
+          name:
+            type: str
+            required: false
+            description: repository name.
+          password:
+            type: str
+            required: false
+            description: repository password.
+          backup_paths:
+            type: list
+            elements: str
+            required: false
+            description: paths to back up.
+          exclude_patterns:
+            type: list
+            elements: str
+            required: false
+            description: patterns to exclude from backup.
+          stop_units:
+            type: list
+            elements: str
+            required: false
+            description: user units stopped in order during the backup and started in reverse.
+          schedule:
+            type: str
+            required: false
+            description: systemd calendar schedule (e.g. *-*-* 02:00:00).
+          retention:
+            type: dict
+            required: false
+            options:
+              keep_daily:
+                type: int
+                required: false
+                description: number of daily snapshots to keep.
+              keep_weekly:
+                type: int
+                required: false
+                description: number of weekly snapshots to keep.
+              keep_monthly:
+                type: int
+                required: false
+                description: number of monthly snapshots to keep.
+              keep_yearly:
+                type: int
+                required: false
+                description: number of yearly snapshots to keep.
+        description: list of restic repositories to manage.
+
+      restic_repository_defaults:
+        type: dict
+        required: false
+        description: values for keys missing in restic_repositories entries (merged recursively).
+
+      restic_restore_test_enabled:
+        type: bool
+        required: false
+        description: run the weekly restore test.
+
+      restic_restore_test_schedule:
+        type: str
+        required: false
+        description: systemd calendar schedule of the restore test.
+
+      restic_restore_test_max_age_hours:
+        type: int
+        required: false
+        description: the restore test fails when the latest snapshot is older.
+
+      restic_restore_test_files:
+        type: int
+        required: false
+        description: number of random files restored per repository.
+
+      restic_restore_test_max_file_size:
+        type: int
+        required: false
+        description: largest file in bytes picked for the restore test.
+
+  restore:
+    short_description: List, browse and restore snapshots of a configured repository.
+    options:
+      restic_restore_action:
+        type: str
+        required: false
+        choices:
+          - snapshots
+          - ls
+          - files
+          - inplace
+        description: snapshots and ls only read, files restores below restic_restore_target, inplace replaces the paths.
+
+      restic_restore_repository:
+        type: str
+        required: false
+        description: name of the repository in restic_repositories.
+
+      restic_restore_snapshot:
+        type: str
+        required: false
+        description: snapshot ID or latest.
+
+      restic_restore_paths:
+        type: list
+        elements: str
+        required: false
+        description: absolute paths (or restic patterns) in the snapshot.
+
+      restic_restore_target:
+        type: str
+        required: false
+        description: directory below which the files action restores.
+
+      restic_restore_stop_units:
+        type: list
+        elements: str
+        required: false
+        description: user units stopped during an inplace restore, defaults to the stop_units of the repository.

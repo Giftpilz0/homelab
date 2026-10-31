@@ -1,0 +1,9 @@
+---
+- name: "Vaultwarden: Deploy pod"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: vaultwarden
+    quadlet_extra_files: "{{ vaultwarden_extra_files }}"
+    quadlet_extra_dirs: "{{ vaultwarden_extra_dirs }}"
+    quadlet_units: "{{ (['vaultwarden-network.service'] if vaultwarden_network_enabled else []) + ['vaultwarden-pod.service'] }}"

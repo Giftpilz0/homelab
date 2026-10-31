@@ -1,0 +1,27 @@
+[Unit]
+Description=Traefik Pod
+
+[Pod]
+PodName=traefik-pod
+
+Network={{ traefik_network_name }}
+{% for net in traefik_networks %}
+Network={{ net }}.network
+{% endfor %}
+
+{% if traefik_http_services | length > 0 %}
+PublishPort={{ traefik_bind_ip }}:80:{{ traefik_http_internal_port }}
+PublishPort={{ traefik_bind_ip }}:443:{{ traefik_https_internal_port }}
+{% if traefik_http3_enabled %}
+PublishPort={{ traefik_bind_ip }}:443:{{ traefik_https_internal_port }}/udp
+{% endif %}
+{% endif %}
+{% for entrypoint in traefik_tcp_entrypoints %}
+PublishPort={{ traefik_bind_ip }}:{{ entrypoint.port }}:{{ entrypoint.get('internal_port', entrypoint.port) }}
+{% endfor %}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

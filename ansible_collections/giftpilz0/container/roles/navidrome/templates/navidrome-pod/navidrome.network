@@ -1,0 +1,8 @@
+{% if navidrome_network_enabled %}
+[Unit]
+Description=Navidrome Internal Network
+
+[Network]
+NetworkName={{ navidrome_network_name }}
+Driver={{ navidrome_network_driver }}
+{% endif %}

@@ -1,0 +1,209 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy OpenCloud as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: System user for rootless podman operations.
+
+      opencloud_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      opencloud_version:
+        type: str
+        required: false
+        description: Container image version.
+
+      opencloud_autoupdate:
+        type: bool
+        required: false
+        description: Enable podman auto-update for this container.
+
+      opencloud_network_enabled:
+        type: bool
+        required: false
+        description: Create and manage the podman network.
+
+      opencloud_network_name:
+        type: str
+        required: false
+        description: Podman network name.
+
+      opencloud_network_driver:
+        type: str
+        required: false
+        description: Podman network driver.
+
+      opencloud_port_map_enabled:
+        type: bool
+        required: false
+        description: Expose container ports on the host.
+
+      opencloud_bind_ip:
+        type: str
+        required: false
+        description: Host IP to bind exposed ports to.
+
+      opencloud_port_map:
+        type: list
+        elements: str
+        required: false
+        description: Host:container port mappings.
+
+      opencloud_domain:
+        type: str
+        required: false
+        description: External domain for the OpenCloud instance.
+
+      opencloud_admin_password:
+        type: str
+        required: false
+        description: Admin user password.
+
+      opencloud_log_level:
+        type: str
+        required: false
+        description: OpenCloud log level.
+
+      opencloud_csp_oidc_origin:
+        type: str
+        required: false
+        description: OIDC origin for Content Security Policy.
+
+      opencloud_environment_vars:
+        type: dict
+        required: false
+        description: Extra environment variables injected into the container.
+
+      opencloud_oidc_clients:
+        type: str
+        required: false
+        description: Merged list of standard and custom OIDC clients.
+
+      opencloud_standard_clients:
+        type: list
+        elements: dict
+        required: false
+        description: Built-in OIDC client definitions.
+
+      opencloud_custom_clients:
+        type: list
+        elements: dict
+        required: false
+        description: Additional OIDC client definitions from inventory.
+
+      opencloud_collabora_enabled:
+        type: bool
+        required: false
+        description: Deploy Collabora Online for document editing.
+
+      opencloud_collabora_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      opencloud_collabora_version:
+        type: str
+        required: false
+        description: Collabora container image version.
+
+      opencloud_collabora_proof_key_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      opencloud_collabora_proof_key_version:
+        type: str
+        required: false
+        description: Image tag for the proof key generator.
+
+      opencloud_collabora_url:
+        type: str
+        required: false
+        description: Browser-facing URL for the Collabora editor.
+
+      opencloud_collabora_admin_username:
+        type: str
+        required: false
+        description: Collabora admin username.
+
+      opencloud_collabora_admin_password:
+        type: str
+        required: false
+        description: Collabora admin password.
+
+      opencloud_collabora_ssl_enable:
+        type: bool
+        required: false
+        description: Enable SSL in Collabora.
+
+      opencloud_collabora_ssl_verification:
+        type: bool
+        required: false
+        description: Enable SSL certificate verification in Collabora.
+
+      opencloud_collabora_ssl_termination:
+        type: bool
+        required: false
+        description: Enable SSL termination in Collabora.
+
+      opencloud_collabora_home_mode:
+        type: bool
+        required: false
+        description: Enable Collabora home mode.
+
+      opencloud_collabora_update_popup:
+        type: bool
+        required: false
+        description: Show the Collabora update notification in the editor.
+
+      opencloud_radicale_enabled:
+        type: bool
+        required: false
+        description: Deploy Radicale CalDAV/CardDAV server.
+
+      opencloud_radicale_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      opencloud_radicale_version:
+        type: str
+        required: false
+        description: Radicale container image version.
+
+      opencloud_entrypoint:
+        type: str
+        required: false
+        description: Optional OpenCloud container entrypoint override.
+
+      opencloud_collabora_entrypoint:
+        type: str
+        required: false
+        description: Optional Collabora container entrypoint override.
+
+      opencloud_collabora_proof_key_entrypoint:
+        type: str
+        required: false
+        description: Optional Collabora proof-key container entrypoint override.
+
+      opencloud_radicale_entrypoint:
+        type: str
+        required: false
+        description: Optional Radicale container entrypoint override.
+
+      opencloud_extra_files:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      opencloud_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.

@@ -1,0 +1,7 @@
+---
+######################################
+### giftpilz0.misc.restic
+
+backup_stop_units:
+  - keycloak-pod.service
+  - postgresql-pod.service

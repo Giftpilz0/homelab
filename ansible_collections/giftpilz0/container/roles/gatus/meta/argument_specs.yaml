@@ -1,0 +1,146 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy Gatus (endpoint monitoring and status page) as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: System user for rootless podman operations.
+
+      gatus_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      gatus_version:
+        type: str
+        required: false
+        description: Container image version.
+
+      gatus_autoupdate:
+        type: bool
+        required: false
+        description: Enable podman auto-update for this container.
+
+      gatus_network_enabled:
+        type: bool
+        required: false
+        description: Create and manage the podman network.
+
+      gatus_network_name:
+        type: str
+        required: false
+        description: Podman network name.
+
+      gatus_network_driver:
+        type: str
+        required: false
+        description: Podman network driver.
+
+      gatus_port_map_enabled:
+        type: bool
+        required: false
+        description: Expose container ports on the host.
+
+      gatus_bind_ip:
+        type: str
+        required: false
+        description: Host IP to bind exposed ports to.
+
+      gatus_port_map:
+        type: list
+        elements: str
+        required: false
+        description: Host:container port mappings.
+
+      gatus_url:
+        type: str
+        required: false
+        description: External URL of the status page, used for the OIDC redirect.
+
+      gatus_title:
+        type: str
+        required: false
+        description: Page title and header.
+
+      gatus_traefik_hosts:
+        type: list
+        elements: str
+        required: false
+        description: Inventory hosts whose traefik_http_services become endpoints.
+
+      gatus_traefik_exclude:
+        type: list
+        elements: str
+        required: false
+        description: traefik_http_services names that get no endpoint.
+
+      gatus_traefik_overrides:
+        type: dict
+        required: false
+        description: Endpoint keys for single generated endpoints, keyed by traefik_http_services name.
+
+      gatus_endpoints:
+        type: list
+        elements: dict
+        required: false
+        description: Additional Gatus endpoint definitions.
+
+      gatus_endpoint_defaults:
+        type: dict
+        required: false
+        description: Values for keys missing in generated and additional endpoints.
+
+      gatus_oidc_enabled:
+        type: bool
+        required: false
+        description: Require an OIDC login for the status page.
+
+      gatus_oidc_issuer_url:
+        type: str
+        required: false
+        description: OIDC issuer URL.
+
+      gatus_oidc_client_id:
+        type: str
+        required: false
+        description: OIDC client ID.
+
+      gatus_oidc_client_secret:
+        type: str
+        required: false
+        no_log: true
+        description: OIDC client secret.
+
+      gatus_alerting:
+        type: dict
+        required: false
+        description: Gatus alerting providers configuration.
+
+      gatus_extra_config:
+        type: dict
+        required: false
+        description: Merged recursively into the generated config.yaml.
+
+      gatus_environment_vars:
+        type: dict
+        required: false
+        description: Extra environment variables injected into the container.
+
+      gatus_entrypoint:
+        type: str
+        required: false
+        description: Optional container entrypoint override.
+
+      gatus_extra_files:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      gatus_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.

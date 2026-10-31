@@ -1,0 +1,35 @@
+---
+firewalld_service_name: firewalld.service
+firewalld_service_state: started
+firewalld_service_enabled: true
+firewalld_package_state: present
+firewalld_package:
+  - firewalld
+
+firewalld_logging: all
+firewalld_permanent: true
+firewalld_immediate: true
+firewalld_default_zone: block
+
+# Fail when no rule allows ssh (guards against locking out Ansible)
+firewalld_require_ssh: true
+# Remove sources bound to any zone, and services and ports of the defined zones and the
+# default zone, that are not in the inventory
+firewalld_remove_unmanaged: false
+
+# Each list is merged with all variables named <list>_<suffix>, e.g. group_vars set
+# firewalld_rules_services and a host adds firewalld_rules_services_mqtt
+# [{zone, source, target (optional)}]
+firewalld_zones_define: []
+# [{icmp_type, zone, state (optional)}]
+firewalld_rules_icmp: []
+# [{service, zone, state (optional)}]
+firewalld_rules_services: []
+# [{port, protocol, zone, state (optional)}]
+firewalld_rules_ports: []
+firewalld_rule_defaults:
+  state: enabled
+# [{allowip, port, protocol, action, zone}]
+firewalld_richrules_ports: []
+# [{allowip, service, action, zone}]
+firewalld_richrules_services: []

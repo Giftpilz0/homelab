@@ -1,0 +1,10 @@
+[Unit]
+Description=Check IP every {{ cfdyndns_check_interval }}
+
+[Timer]
+OnBootSec={{ cfdyndns_on_boot_delay }}
+OnUnitActiveSec={{ cfdyndns_check_interval }}
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,8 @@
+{% if opencloud_network_enabled %}
+[Unit]
+Description=OpenCloud Internal Network
+
+[Network]
+NetworkName={{ opencloud_network_name }}
+Driver={{ opencloud_network_driver }}
+{% endif %}

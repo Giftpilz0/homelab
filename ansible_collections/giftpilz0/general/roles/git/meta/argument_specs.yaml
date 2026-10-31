@@ -1,0 +1,57 @@
+---
+argument_specs:
+  main:
+    short_description: Install git and optionally configure system-wide git settings.
+    options:
+      git_package_state:
+        type: str
+        required: false
+        choices:
+          - present
+          - absent
+          - latest
+        description: desired state of git packages.
+
+      git_package:
+        type: list
+        elements: str
+        required: false
+        description: list of packages to install.
+
+      git_config_system:
+        type: list
+        elements: dict
+        required: false
+        options:
+          key:
+            type: str
+            required: false
+            description: git configuration key.
+          value:
+            type: str
+            required: false
+            description: git configuration value.
+        description: system-wide git configuration entries.
+
+      git_config:
+        type: list
+        elements: dict
+        required: false
+        options:
+          key:
+            type: str
+            required: false
+            description: git configuration key.
+          value:
+            type: str
+            required: false
+            description: git configuration value.
+          scope:
+            type: str
+            required: false
+            choices:
+              - file
+              - local
+              - global
+            description: git configuration scope.
+        description: per-user git configuration entries.

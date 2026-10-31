@@ -1,0 +1,76 @@
+---
+- name: Configure hosts - common
+  hosts: all
+  roles:
+    - role: giftpilz0.general.user
+    - role: giftpilz0.general.update
+    - role: giftpilz0.general.autoupgrade
+    - role: giftpilz0.general.beszel_agent
+    - role: giftpilz0.general.firewalld
+    - role: giftpilz0.general.packages
+    - role: giftpilz0.general.timezone
+    - role: giftpilz0.server.podman
+    - role: giftpilz0.misc.profile
+
+- name: Configure hosts - git
+  hosts: git
+  roles:
+    - role: giftpilz0.container.forgejo
+
+- name: Configure hosts - smarthome
+  hosts: smarthome
+  roles:
+    - role: giftpilz0.container.mosquitto
+    - role: giftpilz0.container.homeassistant
+
+- name: Configure hosts - cloud
+  hosts: cloud
+  roles:
+    - role: giftpilz0.container.opencloud
+
+- name: Configure hosts - media
+  hosts: media
+  roles:
+    - role: giftpilz0.container.navidrome
+    - role: giftpilz0.container.suwayomi
+
+- name: Configure hosts - vault
+  hosts: vault
+  roles:
+    - role: giftpilz0.container.vaultwarden
+
+- name: Configure hosts - vacuum
+  hosts: vacuum
+  roles:
+    - role: giftpilz0.container.bumper
+
+- name: Configure hosts - apps
+  hosts: apps
+  roles:
+    - role: giftpilz0.container.misc
+    - role: giftpilz0.container.market_brief
+    - role: giftpilz0.container.kartei
+    - role: giftpilz0.misc.cfdyndns
+
+- name: Configure hosts - login
+  hosts: login
+  roles:
+    - role: giftpilz0.container.keycloak
+
+- name: Configure hosts - monitoring
+  hosts: monitoring
+  roles:
+    - role: giftpilz0.container.beszel
+    - role: giftpilz0.container.gatus
+
+- name: Configure hosts - acme
+  hosts: acme
+  roles:
+    - role: giftpilz0.container.acme_dns
+
+# Last: joins the networks of the service pods
+- name: Configure hosts - traefik
+  hosts: all
+  roles:
+    - role: giftpilz0.container.traefik
+      when: traefik_http_services | length > 0 or traefik_tcp_services | length > 0
