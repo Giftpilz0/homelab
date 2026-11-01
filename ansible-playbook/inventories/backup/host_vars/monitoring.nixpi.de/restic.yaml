@@ -4,4 +4,5 @@
 
 backup_stop_units:
   - beszel-pod.service
-  - gatus-pod.service
+  # Consistency doesn't matter for Gatus, and it can sometimes crash on start (maybe when Keycloak is down)
+  # - gatus-pod.service

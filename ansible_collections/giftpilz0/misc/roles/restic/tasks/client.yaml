@@ -8,6 +8,11 @@
     fail_msg: "Set restic_server_host, restic_server_password and, when stop_units are used, restic_stop_units_user."
     quiet: true
 
+- name: "Restic: Get passwd entries"
+  become: true
+  ansible.builtin.getent:
+    database: passwd
+
 - name: "Restic: Create configuration directory"
   become: true
   ansible.builtin.file:
@@ -22,8 +27,8 @@
   ansible.builtin.file:
     path: "{{ restic_log_dir }}"
     state: directory
-    owner: "{{ restic_user }}"
-    group: "{{ restic_user }}"
+    owner: root
+    group: root
     mode: "0755"
 
 - name: "Restic: Create password and environment directories"

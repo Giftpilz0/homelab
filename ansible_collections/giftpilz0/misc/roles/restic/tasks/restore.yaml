@@ -54,6 +54,11 @@
       ansible.builtin.set_fact:
         _restic_restore_suffix: ".pre-restore-{{ now(fmt='%Y%m%d-%H%M%S') }}"
 
+    - name: "Restic: Get passwd entries"
+      become: true
+      ansible.builtin.getent:
+        database: passwd
+
     - name: "Restic: Stop units"
       become: true
       ansible.builtin.command:

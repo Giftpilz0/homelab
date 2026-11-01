@@ -2,4 +2,8 @@
 _restic_arch: "{{ 'amd64' if ansible_facts['architecture'] == 'x86_64' else 'arm64' if ansible_facts['architecture'] == 'aarch64' else ansible_facts['architecture'] }}"
 _restic_repositories: "{{ [restic_repository_defaults] | product(restic_repositories) | map('combine', recursive=True) }}"
 _restic_restore_repository: "{{ _restic_repositories | selectattr('name', 'eq', restic_restore_repository) | first }}"
-_restic_systemctl_user: "systemctl --user -M {{ restic_stop_units_user }}@"
+# Not `systemctl --user -M user@`: it fails with "Connection reset by peer" when stderr is a pipe (which it is in resticprofile hooks)
+_restic_systemctl_user: >-
+  runuser -u {{ restic_stop_units_user }} --
+  env XDG_RUNTIME_DIR=/run/user/{{ ansible_facts['getent_passwd'][restic_stop_units_user][1] }}
+  systemctl --user

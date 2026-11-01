@@ -25,7 +25,7 @@ argument_specs:
       restic_user:
         type: str
         required: false
-        description: system user for restic operations.
+        description: system user of rest-server, clients back up as root.
 
       restic_user_home:
         type: str
