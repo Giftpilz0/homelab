@@ -14,3 +14,24 @@ firewalld_rules_services_host:
     zone: management
   - service: https
     zone: server-dmz
+
+# VictoriaLogs syslog
+firewalld_rules_ports_host:
+  - port: 5514
+    protocol: tcp
+    zone: clients
+  - port: 5514
+    protocol: udp
+    zone: clients
+  - port: 5514
+    protocol: tcp
+    zone: server
+  - port: 5514
+    protocol: udp
+    zone: server
+  - port: 5514
+    protocol: tcp
+    zone: management
+  - port: 5514
+    protocol: udp
+    zone: management

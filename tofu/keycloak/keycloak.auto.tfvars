@@ -25,6 +25,18 @@ clients = {
     allowed_users                   = ["moritz"]
   }
 
+  "victorialogs" = {
+    name                            = "VictoriaLogs"
+    description                     = "VictoriaLogs log search"
+    secret_key                      = "victorialogs_client_secret"
+    pkce                            = true
+    valid_redirect_uris             = ["https://logs.nixpi.de/oidc/callback"]
+    valid_post_logout_redirect_uris = ["https://logs.nixpi.de/"]
+    web_origins                     = ["https://logs.nixpi.de"]
+    default_scopes                  = ["profile", "email"]
+    allowed_users                   = ["moritz"]
+  }
+
   "music-webui" = {
     name                            = "Music Library WebUI"
     description                     = "Navidrome music library management"

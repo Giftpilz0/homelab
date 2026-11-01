@@ -1,0 +1,60 @@
+---
+argument_specs:
+  main:
+    short_description: Ship the systemd journal to VictoriaLogs with Fluent Bit.
+    options:
+      fluent_bit_repo_baseurl:
+        type: str
+        required: false
+        description: Package repository URL.
+
+      fluent_bit_repo_gpgkey:
+        type: str
+        required: false
+        description: Signing key URL of the package repository.
+
+      fluent_bit_log_level:
+        type: str
+        required: false
+        description: Log level of Fluent Bit itself.
+
+      fluent_bit_mem_buf_limit:
+        type: str
+        required: false
+        description: Memory limit for buffered entries, reading pauses above it.
+
+      fluent_bit_timeout_stop_sec:
+        type: int
+        required: false
+        description: Seconds before systemd kills a stopping service.
+
+      fluent_bit_http_host:
+        type: str
+        required: false
+        description: Host name of the ingest endpoint.
+
+      fluent_bit_http_port:
+        type: int
+        required: false
+        description: HTTPS port of the ingest endpoint.
+
+      fluent_bit_stream_fields:
+        type: list
+        elements: str
+        required: false
+        description: Journal fields that identify a log stream.
+
+      fluent_bit_exclude_rules:
+        type: list
+        elements: dict
+        required: false
+        options:
+          key:
+            type: str
+            required: true
+            description: Journal field without its leading underscore.
+          regex:
+            type: str
+            required: true
+            description: Entries whose field matches are dropped.
+        description: Dropped journal entries.

@@ -1,0 +1,71 @@
+---
+- name: "Fluent Bit: Validate parameters"
+  ansible.builtin.assert:
+    that:
+      - fluent_bit_http_host | length > 0
+    fail_msg: "Define fluent_bit_http_host."
+    quiet: true
+
+- name: "Fluent Bit: Add package repository"
+  become: true
+  ansible.builtin.yum_repository:
+    name: fluent-bit
+    description: Fluent Bit
+    baseurl: "{{ fluent_bit_repo_baseurl }}"
+    gpgcheck: true
+    repo_gpgcheck: true
+    gpgkey: "{{ fluent_bit_repo_gpgkey }}"
+
+- name: "Fluent Bit: Install package"
+  become: true
+  ansible.builtin.package:
+    name: fluent-bit
+    state: present
+  notify: "Fluent Bit: Restart"
+
+- name: "Fluent Bit: Create state directory"
+  become: true
+  ansible.builtin.file:
+    path: /var/lib/fluent-bit
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: "Fluent Bit: Deploy config"
+  become: true
+  ansible.builtin.template:
+    src: fluent-bit.conf.j2
+    dest: /etc/fluent-bit/fluent-bit.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: "Fluent Bit: Restart"
+
+- name: "Fluent Bit: Create unit drop-in directory"
+  become: true
+  ansible.builtin.file:
+    path: /etc/systemd/system/fluent-bit.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "Fluent Bit: Limit stop timeout"
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/fluent-bit.service.d/timeout.conf
+    content: |
+      [Service]
+      TimeoutStopSec={{ fluent_bit_timeout_stop_sec }}
+    owner: root
+    group: root
+    mode: "0644"
+  notify: "Fluent Bit: Restart"
+
+- name: "Fluent Bit: Enable service"
+  become: true
+  ansible.builtin.systemd:
+    name: fluent-bit.service
+    state: started
+    enabled: true

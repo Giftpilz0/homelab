@@ -17,6 +17,8 @@ restic_repositories:
     password: "{{ restic_repo_password }}"
     backup_paths:
       - /home/container/.local/share/containers/storage/volumes
+    exclude_patterns:
+      - victorialogs-data
     stop_units: "{{ backup_stop_units }}"
     schedule: "*-*-* 02:00:00"
 

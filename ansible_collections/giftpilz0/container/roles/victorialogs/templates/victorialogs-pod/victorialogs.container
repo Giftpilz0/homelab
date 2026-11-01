@@ -1,0 +1,26 @@
+[Unit]
+Description=VictoriaLogs Container
+
+[Container]
+ContainerName=victorialogs
+Image={{ victorialogs_image }}:{{ victorialogs_version }}
+Pod=victorialogs.pod
+
+{% if victorialogs_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+{% if victorialogs_entrypoint %}
+Entrypoint={{ victorialogs_entrypoint }}
+{% endif %}
+
+Volume=victorialogs-data.volume:/victoria-logs-data
+
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
+{% endfor %}
+
+Exec=-storageDataPath=/victoria-logs-data -retentionPeriod={{ victorialogs_retention_period }} -retention.maxDiskSpaceUsageBytes={{ victorialogs_retention_max_disk_space }} -memory.allowedPercent={{ victorialogs_memory_allowed_percent }}{% if victorialogs_syslog_enabled %} -syslog.listenAddr.tcp=:{{ victorialogs_syslog_port }} -syslog.listenAddr.udp=:{{ victorialogs_syslog_port }} -syslog.timezone={{ victorialogs_syslog_timezone }} -syslog.streamFields.tcp='{{ victorialogs_syslog_stream_fields | to_json(separators=(",", ":")) }}' -syslog.streamFields.udp='{{ victorialogs_syslog_stream_fields | to_json(separators=(",", ":")) }}'{% endif %}
+
+
+[Service]
+Restart=always

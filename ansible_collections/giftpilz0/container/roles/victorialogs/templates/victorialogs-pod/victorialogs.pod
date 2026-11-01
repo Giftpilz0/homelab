@@ -1,0 +1,19 @@
+[Unit]
+Description=VictoriaLogs Pod
+
+[Pod]
+PodName=victorialogs-pod
+
+Network={{ victorialogs_network_name }}
+
+{% if victorialogs_port_map_enabled %}
+{% for port_mapping in victorialogs_port_map %}
+PublishPort={{ victorialogs_bind_ip }}:{{ port_mapping }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

@@ -8,3 +8,15 @@ beszel_agent_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKcE6gsG0Vud5kQdbd1q4dvat
 # Sees the containers of the Podman user
 beszel_agent_user: "{{ podman_user }}"
 beszel_agent_podman_socket: true
+
+######################################
+### giftpilz0.general.fluent_bit
+
+fluent_bit_http_host: logs.nixpi.de
+
+fluent_bit_exclude_rules:
+  # Podman API service, started every few seconds by the Beszel agent
+  - key: SYSTEMD_USER_UNIT
+    regex: ^podman\.service$
+  - key: USER_UNIT
+    regex: ^podman\.service$

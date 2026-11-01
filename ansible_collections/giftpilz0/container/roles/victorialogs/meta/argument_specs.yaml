@@ -1,0 +1,108 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy VictoriaLogs as a Podman Quadlet pod.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: System user for rootless Podman operations.
+
+      victorialogs_image:
+        type: str
+        required: false
+        description: VictoriaLogs image without tag.
+
+      victorialogs_version:
+        type: str
+        required: false
+        description: VictoriaLogs image tag.
+
+      victorialogs_autoupdate:
+        type: bool
+        required: false
+        description: Enable Podman registry auto-update.
+
+      victorialogs_network_enabled:
+        type: bool
+        required: false
+        description: Create and manage the Podman network.
+
+      victorialogs_network_name:
+        type: str
+        required: false
+        description: Name of the Podman network.
+
+      victorialogs_network_driver:
+        type: str
+        required: false
+        description: Driver of the Podman network.
+
+      victorialogs_port_map_enabled:
+        type: bool
+        required: false
+        description: Publish ports on the host.
+
+      victorialogs_bind_ip:
+        type: str
+        required: false
+        description: Host IP for published ports.
+
+      victorialogs_port_map:
+        type: list
+        elements: str
+        required: false
+        description: Published ports as host:container.
+
+      victorialogs_retention_period:
+        type: str
+        required: false
+        description: Age after which logs are deleted.
+
+      victorialogs_retention_max_disk_space:
+        type: str
+        required: false
+        description: Disk usage above which the oldest days are dropped.
+
+      victorialogs_memory_allowed_percent:
+        type: int
+        required: false
+        description: Percent of system memory the caches may use.
+
+      victorialogs_syslog_enabled:
+        type: bool
+        required: false
+        description: Receive syslog on TCP and UDP.
+
+      victorialogs_syslog_port:
+        type: int
+        required: false
+        description: Container port of the syslog receiver.
+
+      victorialogs_syslog_timezone:
+        type: str
+        required: false
+        description: Timezone of RFC3164 timestamps.
+
+      victorialogs_syslog_stream_fields:
+        type: list
+        elements: str
+        required: false
+        description: Syslog fields that identify a log stream.
+
+      victorialogs_entrypoint:
+        type: str
+        required: false
+        description: Optional entrypoint override.
+
+      victorialogs_extra_files:
+        type: list
+        elements: dict
+        required: false
+        description: Extra inventory files, format in the quadlet defaults.
+
+      victorialogs_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        description: Extra inventory directories, format in the quadlet defaults.

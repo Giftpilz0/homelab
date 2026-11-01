@@ -1,0 +1,18 @@
+---
+fluent_bit_repo_baseurl: "https://packages.fluentbit.io/almalinux/$releasever/"
+fluent_bit_repo_gpgkey: "https://packages.fluentbit.io/fluentbit.key"
+
+fluent_bit_log_level: warn
+fluent_bit_mem_buf_limit: 16MB
+# Stopping sometimes hangs until killed, entries are lost meanwhile
+fluent_bit_timeout_stop_sec: 15
+
+fluent_bit_http_host: ""
+fluent_bit_http_port: 443
+
+fluent_bit_stream_fields:
+  - HOSTNAME
+  - SYSLOG_IDENTIFIER
+
+# [{key: field without leading underscore, regex}]
+fluent_bit_exclude_rules: []

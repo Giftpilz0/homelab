@@ -1,0 +1,43 @@
+# {{ ansible_managed }}
+
+[SERVICE]
+    Flush     5
+    Daemon    off
+    Log_Level {{ fluent_bit_log_level }}
+
+[INPUT]
+    Name              systemd
+    Tag               journal
+    DB                /var/lib/fluent-bit/journal.db
+    Read_From_Tail    on
+    Strip_Underscores on
+    Mem_Buf_Limit     {{ fluent_bit_mem_buf_limit }}
+
+{% for rule in fluent_bit_exclude_rules %}
+[FILTER]
+    Name    grep
+    Match   journal
+    Exclude {{ rule.key }} {{ rule.regex }}
+
+{% endfor %}
+{% for priority, level in _fluent_bit_levels.items() %}
+[FILTER]
+    Name      modify
+    Match     journal
+    Condition Key_value_equals PRIORITY {{ priority }}
+    Add       level {{ level }}
+
+{% endfor %}
+[OUTPUT]
+    Name             http
+    Match            journal
+    Host             {{ fluent_bit_http_host }}
+    Port             {{ fluent_bit_http_port }}
+    TLS              on
+    TLS.Verify       on
+    URI              {{ _fluent_bit_uri }}
+    Format           json_lines
+    Json_Date_Key    date
+    Json_Date_Format iso8601
+    Compress         gzip
+    Retry_Limit      no_limits

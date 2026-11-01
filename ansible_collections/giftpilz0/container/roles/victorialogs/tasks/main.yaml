@@ -1,0 +1,9 @@
+---
+- name: "VictoriaLogs: Deploy pod"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: victorialogs
+    quadlet_extra_files: "{{ victorialogs_extra_files }}"
+    quadlet_extra_dirs: "{{ victorialogs_extra_dirs }}"
+    quadlet_units: "{{ (['victorialogs-network.service'] if victorialogs_network_enabled else []) + ['victorialogs-pod.service'] }}"

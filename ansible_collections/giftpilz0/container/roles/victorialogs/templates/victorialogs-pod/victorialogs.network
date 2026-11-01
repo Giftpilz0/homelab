@@ -1,0 +1,8 @@
+{% if victorialogs_network_enabled %}
+[Unit]
+Description=VictoriaLogs Internal Network
+
+[Network]
+NetworkName={{ victorialogs_network_name }}
+Driver={{ victorialogs_network_driver }}
+{% endif %}

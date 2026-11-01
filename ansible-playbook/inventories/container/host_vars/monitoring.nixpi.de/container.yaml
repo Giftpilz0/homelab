@@ -25,6 +25,7 @@ gatus_oidc_issuer_url: "https://login.nixpi.de/realms/nixpi"
 # Websocket listener, checked below via plain MQTT
 gatus_traefik_exclude:
   - mqtt-websocket
+  - victorialogs-ingest
 
 # traefik-oidc-auth answers non-browser requests with 401
 gatus_traefik_overrides:
@@ -33,6 +34,10 @@ gatus_traefik_overrides:
       - "[STATUS] == 401"
       - "[CERTIFICATE_EXPIRATION] > 336h"
   suwayomi:
+    conditions:
+      - "[STATUS] == 401"
+      - "[CERTIFICATE_EXPIRATION] > 336h"
+  victorialogs:
     conditions:
       - "[STATUS] == 401"
       - "[CERTIFICATE_EXPIRATION] > 336h"
@@ -45,13 +50,73 @@ gatus_endpoints:
       - "[CONNECTED] == true"
 
 ######################################
+### giftpilz0.container.victorialogs
+
+# renovate: datasource=docker depName=victoriametrics/victoria-logs
+victorialogs_version: "v1.53.0"
+
+victorialogs_syslog_enabled: true
+victorialogs_syslog_timezone: "Europe/Berlin"
+
+victorialogs_port_map_enabled: true
+victorialogs_bind_ip: "{{ ansible_facts['default_ipv4']['address'] }}"
+victorialogs_port_map:
+  - "5514:5514/tcp"
+  - "5514:5514/udp"
+
+######################################
 ### giftpilz0.container.traefik
 
 traefik_networks:
   - beszel
   - gatus
+  - victorialogs
+
+traefik_plugins:
+  traefik-oidc-auth:
+    moduleName: "github.com/sevensolutions/traefik-oidc-auth"
+    version: "v0.21.0"
+
+traefik_custom_middlewares:
+  victorialogs-oidc:
+    plugin:
+      traefik-oidc-auth:
+        Secret: "{{ victorialogs_oidc_session_secret }}"
+        Provider:
+          Url: "https://login.nixpi.de/realms/nixpi"
+          ClientId: "victorialogs"
+          ClientSecret: "{{ victorialogs_oidc_client_secret }}"
+          UsePkce: true
+        Scopes:
+          - "openid"
+          - "profile"
+          - "email"
+        ValidPostLoginRedirectUris:
+          - "https://logs.nixpi.de/"
+        ValidPostLogoutRedirectUris:
+          - "https://logs.nixpi.de/"
 
 traefik_http_services:
+  - name: victorialogs
+    domain: logs.nixpi.de
+    rule: "Host(`logs.nixpi.de`)"
+    servers:
+      - url: "http://victorialogs-pod:9428"
+    tls_enabled: true
+    acme_enabled: true
+    health_check:
+      path: "/health"
+      interval: "30s"
+    middlewares:
+      - "victorialogs-oidc@file"
+  # No auth: agents can't log in through Keycloak
+  - name: victorialogs-ingest
+    domain: logs.nixpi.de
+    rule: "Host(`logs.nixpi.de`) && PathPrefix(`/insert`)"
+    servers:
+      - url: "http://victorialogs-pod:9428"
+    tls_enabled: true
+    acme_enabled: true
   - name: beszel
     domain: monitoring.nixpi.de
     rule: "Host(`monitoring.nixpi.de`)"

@@ -1,0 +1,42 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image
+victorialogs_image: "docker.io/victoriametrics/victoria-logs"
+# renovate: datasource=docker depName=victoriametrics/victoria-logs
+victorialogs_version: "v1.53.0"
+victorialogs_autoupdate: true
+
+# Network (always joined, created only when enabled)
+victorialogs_network_enabled: true
+victorialogs_network_name: "victorialogs-internal"
+victorialogs_network_driver: "bridge"
+
+# Host ports (not needed behind Traefik)
+victorialogs_port_map_enabled: false
+victorialogs_bind_ip: "127.0.0.1"
+victorialogs_port_map:
+  - "9428:9428"
+
+## Service
+# Whichever limit is reached first drops the oldest days
+victorialogs_retention_period: "30d"
+victorialogs_retention_max_disk_space: "10GiB"
+victorialogs_memory_allowed_percent: 30
+
+# Publish the port with victorialogs_port_map
+victorialogs_syslog_enabled: false
+victorialogs_syslog_port: 5514
+# RFC3164 timestamps have no timezone
+victorialogs_syslog_timezone: "UTC"
+victorialogs_syslog_stream_fields:
+  - hostname
+  - app_name
+
+## Advanced
+victorialogs_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+victorialogs_extra_files: []
+victorialogs_extra_dirs: []
