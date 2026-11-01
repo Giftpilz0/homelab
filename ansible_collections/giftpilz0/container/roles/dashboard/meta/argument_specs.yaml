@@ -1,0 +1,111 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy a static page of links to services as a Podman Quadlet pod.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: System user for rootless Podman operations.
+
+      dashboard_image:
+        type: str
+        required: false
+        description: web server image without tag.
+
+      dashboard_version:
+        type: str
+        required: false
+        description: web server image tag.
+
+      dashboard_autoupdate:
+        type: bool
+        required: false
+        description: Enable Podman registry auto-update.
+
+      dashboard_network_enabled:
+        type: bool
+        required: false
+        description: Create and manage the Podman network.
+
+      dashboard_network_name:
+        type: str
+        required: false
+        description: Name of the Podman network.
+
+      dashboard_network_driver:
+        type: str
+        required: false
+        description: Driver of the Podman network.
+
+      dashboard_port_map_enabled:
+        type: bool
+        required: false
+        description: Publish ports on the host.
+
+      dashboard_bind_ip:
+        type: str
+        required: false
+        description: Host IP for published ports.
+
+      dashboard_port_map:
+        type: list
+        elements: str
+        required: false
+        description: Published ports as host:container.
+
+      dashboard_title:
+        type: str
+        required: false
+        description: Heading and browser title of the page.
+
+      dashboard_logo:
+        type: str
+        required: false
+        description: Favicon and heading logo, a file below site/.
+
+      dashboard_groups:
+        type: list
+        elements: dict
+        required: false
+        options:
+          name:
+            type: str
+            required: true
+            description: group label.
+          links:
+            type: list
+            elements: dict
+            required: true
+            options:
+              name:
+                type: str
+                required: true
+                description: name of the service.
+              url:
+                type: str
+                required: true
+                description: URL of the service.
+              icon:
+                type: str
+                required: false
+                description: file below site/, deployed with dashboard_extra_dirs.
+            description: links of the group, in display order.
+        description: groups of links, in display order.
+
+      dashboard_entrypoint:
+        type: str
+        required: false
+        description: Optional entrypoint override.
+
+      dashboard_extra_files:
+        type: list
+        elements: dict
+        required: false
+        description: Extra inventory files, format in the quadlet defaults.
+
+      dashboard_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        description: Extra inventory directories, format in the quadlet defaults.

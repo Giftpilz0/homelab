@@ -20,12 +20,85 @@ kartei_base_url: "https://kartei.nixpi.de"
 kartei_oidc_issuer_url: "https://login.nixpi.de/realms/nixpi"
 
 ######################################
+### giftpilz0.container.dashboard
+
+# renovate: datasource=docker depName=nginx
+dashboard_version: "1.31.8-alpine"
+
+dashboard_title: "nixpi.de"
+dashboard_logo: icons/nixpi.svg
+
+dashboard_extra_dirs:
+  - src: "{{ inventory_dir | dirname }}/host_vars/{{ inventory_hostname }}/assets/dashboard/icons"
+    dest: "site/icons"
+
+dashboard_groups:
+  - name: Media
+    links:
+      - name: Navidrome
+        url: https://navidrome.nixpi.de
+        icon: icons/navidrome.svg
+      - name: Music
+        url: https://music.nixpi.de
+        icon: icons/navidrome.svg
+      - name: Suwayomi
+        url: https://suwayomi.nixpi.de
+        icon: icons/suwayomi.svg
+  - name: Files & passwords
+    links:
+      - name: OpenCloud
+        url: https://opencloud.nixpi.de
+        icon: icons/opencloud.svg
+      - name: Vaultwarden
+        url: https://vaultwarden.nixpi.de
+        icon: icons/vaultwarden.svg
+  - name: Apps
+    links:
+      - name: Kartei
+        url: https://kartei.nixpi.de
+        icon: icons/kartei.svg
+      - name: Forgejo
+        url: https://forgejo.nixpi.de
+        icon: icons/forgejo.svg
+      - name: Home Assistant
+        url: https://homeassistant.nixpi.de
+        icon: icons/home-assistant.svg
+      - name: Bumper
+        url: https://bumper.nixpi.de:8443/
+        icon: icons/bumper.ico
+  - name: System
+    links:
+      - name: Keycloak
+        url: https://login.nixpi.de
+        icon: icons/keycloak.svg
+      - name: Beszel
+        url: https://monitoring.nixpi.de
+        icon: icons/beszel.svg
+      - name: Gatus
+        url: https://status.nixpi.de
+        icon: icons/gatus.svg
+      - name: Proxmox
+        url: https://pve.nixpi.de:8006
+        icon: icons/proxmox.svg
+      - name: UniFi
+        url: https://unifi.nixpi.de
+        icon: icons/unifi.svg
+
+######################################
 ### giftpilz0.container.traefik
 
 traefik_networks:
   - kartei
+  - dashboard
 
 traefik_http_services:
+  - name: dashboard
+    domain: nixpi.de
+    rule: "Host(`nixpi.de`)"
+    servers:
+      - url: "http://dashboard-pod:80"
+    tls_enabled: true
+    acme_enabled: true
   - name: kartei
     domain: kartei.nixpi.de
     rule: "Host(`kartei.nixpi.de`)"

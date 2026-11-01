@@ -1,0 +1,26 @@
+[Unit]
+Description=Dashboard Container
+
+[Container]
+ContainerName=dashboard
+Image={{ dashboard_image }}:{{ dashboard_version }}
+Pod=dashboard.pod
+
+{% if dashboard_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+{% if dashboard_entrypoint %}
+Entrypoint={{ dashboard_entrypoint }}
+{% endif %}
+
+Volume=%h/.config/containers/systemd/dashboard-pod/site:/usr/share/nginx/html:ro,Z
+
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
+{% endfor %}
+HealthCmd=["wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+HealthInterval=30s
+HealthStartPeriod=5s
+
+[Service]
+Restart=always

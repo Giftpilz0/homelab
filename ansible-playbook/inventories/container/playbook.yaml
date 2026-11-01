@@ -50,6 +50,7 @@
     - role: giftpilz0.container.misc
     - role: giftpilz0.container.market_brief
     - role: giftpilz0.container.kartei
+    - role: giftpilz0.container.dashboard
     - role: giftpilz0.misc.cfdyndns
 
 - name: Configure hosts - login

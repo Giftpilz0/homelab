@@ -1,0 +1,45 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image
+dashboard_image: "docker.io/library/nginx"
+# renovate: datasource=docker depName=nginx
+dashboard_version: "1.31.8-alpine"
+dashboard_autoupdate: true
+
+# Network (always joined, created only when enabled)
+dashboard_network_enabled: true
+dashboard_network_name: "dashboard-internal"
+dashboard_network_driver: "bridge"
+
+# Host ports (not needed behind Traefik)
+dashboard_port_map_enabled: false
+dashboard_bind_ip: "127.0.0.1"
+dashboard_port_map:
+  - "8080:80"
+
+## Service
+dashboard_title: "Dashboard"
+# Favicon and heading logo, a file below site/
+dashboard_logo: ""
+
+# icon is a file below site/, deployed with dashboard_extra_dirs. Without it, the link shows its first letter.
+# Example:
+#   dashboard_groups:
+#     - name: Media
+#       links:
+#         - name: Navidrome
+#           url: https://navidrome.example.org
+#           icon: icons/navidrome.svg
+#   dashboard_extra_dirs:
+#     - src: "{{ inventory_dir | dirname }}/host_vars/{{ inventory_hostname }}/assets/dashboard/icons"
+#       dest: "site/icons"
+dashboard_groups: []
+
+## Advanced
+dashboard_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+dashboard_extra_files: []
+dashboard_extra_dirs: []

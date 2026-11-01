@@ -1,0 +1,8 @@
+{% if dashboard_network_enabled %}
+[Unit]
+Description=Dashboard Internal Network
+
+[Network]
+NetworkName={{ dashboard_network_name }}
+Driver={{ dashboard_network_driver }}
+{% endif %}

@@ -1,0 +1,19 @@
+[Unit]
+Description=Dashboard Pod
+
+[Pod]
+PodName=dashboard-pod
+
+Network={{ dashboard_network_name }}
+
+{% if dashboard_port_map_enabled %}
+{% for port_mapping in dashboard_port_map %}
+PublishPort={{ dashboard_bind_ip }}:{{ port_mapping }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
