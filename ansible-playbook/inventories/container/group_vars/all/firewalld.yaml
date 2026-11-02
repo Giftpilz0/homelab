@@ -3,6 +3,7 @@
 ### giftpilz0.general.firewalld
 
 firewalld_remove_unmanaged: true
+firewalld_logging: unicast
 
 firewalld_zones_define:
   - zone: clients
