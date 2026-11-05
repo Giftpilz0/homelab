@@ -3,7 +3,7 @@
 ### giftpilz0.container.vaultwarden
 
 # renovate: datasource=docker depName=vaultwarden/server
-vaultwarden_version: "1.37.4-alpine"
+vaultwarden_version: "1.37.5-alpine"
 
 vaultwarden_domain: "https://vaultwarden.nixpi.de/"
 

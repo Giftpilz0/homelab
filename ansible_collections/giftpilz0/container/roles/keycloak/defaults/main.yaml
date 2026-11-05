@@ -5,7 +5,7 @@ podman_user: "{{ ansible_user }}"
 # Image
 keycloak_image: "quay.io/keycloak/keycloak"
 # renovate: datasource=docker depName=quay.io/keycloak/keycloak
-keycloak_version: "26.8.1"
+keycloak_version: "26.8.2"
 keycloak_autoupdate: true
 
 # Network (always joined, created only when enabled)

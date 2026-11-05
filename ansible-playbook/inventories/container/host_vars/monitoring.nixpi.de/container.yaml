@@ -75,7 +75,8 @@ traefik_networks:
 traefik_plugins:
   traefik-oidc-auth:
     moduleName: "github.com/sevensolutions/traefik-oidc-auth"
-    version: "v0.21.0"
+    # renovate: datasource=github-releases depName=sevensolutions/traefik-oidc-auth
+    version: "v0.22.0"
 
 traefik_custom_middlewares:
   victorialogs-oidc:

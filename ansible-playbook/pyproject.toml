@@ -3,7 +3,7 @@ name = "homelab-ansible"
 version = "0.0.0"
 description = "Python/Ansible toolchain for the homelab playbooks (see run.sh)"
 requires-python = ">=3.14"
-dependencies = ["ansible-core==2.21.5", "netaddr"]
+dependencies = ["ansible-core==2.22.0", "netaddr"]
 
 [dependency-groups]
 dev = ["ansible-lint"]

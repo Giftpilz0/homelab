@@ -5,7 +5,7 @@ podman_user: "{{ ansible_user }}"
 # Image
 vaultwarden_image: "docker.io/vaultwarden/server"
 # renovate: datasource=docker depName=vaultwarden/server
-vaultwarden_version: "1.37.4-alpine"
+vaultwarden_version: "1.37.5-alpine"
 vaultwarden_autoupdate: true
 
 # Network (always joined, created only when enabled)
