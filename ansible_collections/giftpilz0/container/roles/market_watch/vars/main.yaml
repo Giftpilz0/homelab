@@ -1,0 +1,39 @@
+---
+_market_watch_timers:
+  - name: market-watch
+    description: Start the market watch price fetcher
+    schedule: "{{ market_watch_schedule }}"
+    persistent: true
+    enabled: "{{ market_watch_timer_enabled }}"
+  # A missed nightly scan is not repeated: the next night covers it
+  - name: market-watch-scan-eod
+    description: Start the market watch nightly scan
+    schedule: "{{ market_watch_scan_eod_schedule }}"
+    persistent: false
+    enabled: "{{ market_watch_scan_eod_timer_enabled }}"
+  - name: market-watch-scan-asia
+    description: Start the market watch Asia snapshot
+    schedule: "{{ market_watch_scan_asia_schedule }}"
+    persistent: false
+    enabled: "{{ market_watch_scan_snapshots_enabled }}"
+  - name: market-watch-scan-us-pre
+    description: Start the market watch US pre-market snapshot
+    schedule: "{{ market_watch_scan_us_pre_schedule }}"
+    persistent: false
+    enabled: "{{ market_watch_scan_snapshots_enabled }}"
+  - name: market-watch-scan-check
+    description: Start the market watch afternoon check snapshot
+    schedule: "{{ market_watch_scan_check_schedule }}"
+    persistent: false
+    enabled: "{{ market_watch_scan_snapshots_enabled }}"
+  - name: market-watch-scan-fundamentals
+    description: Start the market watch fundamentals job
+    schedule: "{{ market_watch_scan_fundamentals_schedule }}"
+    persistent: false
+    enabled: "{{ market_watch_scan_fundamentals_timer_enabled }}"
+  # A missed poll is not repeated: the next minute polls again
+  - name: market-watch-requests-poll
+    description: Start the market watch on-demand request poll
+    schedule: "{{ market_watch_requests_poll_schedule }}"
+    persistent: false
+    enabled: "{{ market_watch_requests_poll_timer_enabled }}"

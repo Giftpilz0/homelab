@@ -1,0 +1,31 @@
+[Unit]
+Description=Market Watch On-Demand Request Poll
+
+[Container]
+ContainerName=market-watch-requests-poll
+Image={{ market_watch_image }}:{{ market_watch_version }}
+Exec=requests-poll
+
+Environment=DATA_REPO={{ market_watch_data_repo }}
+Environment=DEPLOY_KEY={{ market_watch_deploy_key | trim | b64encode }}
+{% if market_watch_openfigi_api_key %}
+Environment=OPENFIGI_API_KEY={{ market_watch_openfigi_api_key }}
+{% endif %}
+{% for env_name, env_value in market_watch_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+# Last handled requests commit (requests-state.json) and its own OpenFIGI cache
+# (requested-symbols.json); the tick uses other files on the same volumes
+Volume=market-watch-data.volume:/data
+Volume=market-watch-cache.volume:/cache
+
+NoNewPrivileges=true
+DropCapability=ALL
+
+# Started by market-watch-requests-poll.timer
+[Service]
+Type=oneshot
+# The job stops starting requests after 8 minutes and then publishes what it has
+RuntimeMaxSec={{ market_watch_requests_poll_timeout }}
+CPUWeight=20

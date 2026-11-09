@@ -1,0 +1,60 @@
+---
+## Primary
+podman_user: "{{ ansible_user }}"
+
+# Image
+market_watch_image: "localhost/market-watch"
+market_watch_version: "latest"
+market_watch_git_repo: "ssh://git@ssh.github.com:443/Giftpilz0/market-watch-data.git"
+market_watch_git_version: "app"
+market_watch_git_host_key: "[ssh.github.com]:443 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
+market_watch_containerfile: "Containerfile"
+
+## Service
+market_watch_schedule: "*:0/15"
+market_watch_timer_enabled: true
+market_watch_timeout: "15min"
+
+# Nightly scan, anchored in New York so it runs after the futures settle at 17:00 ET
+market_watch_scan_eod_schedule: "Mon..Fri *-*-* 17:20:00 America/New_York"
+market_watch_scan_eod_timer_enabled: true
+market_watch_scan_eod_timeout: "45min"
+
+# Snapshots, each anchored in the zone of its market
+market_watch_scan_asia_schedule: "Mon..Fri *-*-* 12:05:00 Asia/Hong_Kong"
+market_watch_scan_us_pre_schedule: "Mon..Fri *-*-* 08:20:00 America/New_York"
+market_watch_scan_check_schedule: "Mon..Fri *-*-* 16:00:00 Europe/Berlin"
+market_watch_scan_snapshots_enabled: true
+market_watch_scan_snapshot_timeout: "30min"
+
+# Fundamentals: weekdays only stocks near earnings, just before the nightly scan; Saturdays all
+market_watch_scan_fundamentals_schedule:
+  - "Mon..Fri *-*-* 17:00:00 America/New_York"
+  - "Sat *-*-* 10:00:00 Europe/Berlin"
+market_watch_scan_fundamentals_timer_enabled: true
+market_watch_scan_fundamentals_timeout: "40min"
+
+# On-demand requests of the Claude runs: every minute in the two request windows.
+# With nothing new a poll is one git ls-remote.
+market_watch_requests_poll_schedule:
+  - "Mon..Fri *-*-* 06:15/1:00 Europe/Berlin"
+  - "Mon..Fri *-*-* 07:*:00 Europe/Berlin"
+  - "Mon..Fri *-*-* 08:45/1:00 America/New_York"
+  - "Mon..Fri *-*-* 09:*:00 America/New_York"
+market_watch_requests_poll_timer_enabled: true
+market_watch_requests_poll_timeout: "15min"
+
+market_watch_data_repo: ""
+market_watch_deploy_key: ""
+market_watch_openfigi_api_key: ""
+
+# Environment
+market_watch_environment_vars:
+  TZ: "Europe/Berlin"
+
+## Advanced
+market_watch_entrypoint: ""
+
+# Extra inventory files/dirs, format: see quadlet defaults
+market_watch_extra_files: []
+market_watch_extra_dirs: []

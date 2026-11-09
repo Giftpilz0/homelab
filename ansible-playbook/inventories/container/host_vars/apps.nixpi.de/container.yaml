@@ -6,9 +6,9 @@ misc_version: "latest"
 misc_commit: "db16ab7ca40f6e1e98e6e7a3947fb9e2aa04f527"
 
 ######################################
-### giftpilz0.container.market_brief
+### giftpilz0.container.market_watch
 
-market_brief_data_repo: "ssh://git@ssh.github.com:443/Giftpilz0/market-watch-data.git"
+market_watch_data_repo: "ssh://git@ssh.github.com:443/Giftpilz0/market-watch-data.git"
 
 ######################################
 ### giftpilz0.container.kartei

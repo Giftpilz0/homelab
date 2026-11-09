@@ -1,0 +1,163 @@
+---
+argument_specs:
+  main:
+    short_description: Run the market watch price fetcher (built from its git repository) on a systemd timer as a Podman quadlet.
+    options:
+      podman_user:
+        type: str
+        required: false
+        description: System user for rootless podman operations.
+
+      market_watch_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      market_watch_version:
+        type: str
+        required: false
+        description: Image tag.
+
+      market_watch_git_repo:
+        type: str
+        required: false
+        description: Git repository the image is built from.
+
+      market_watch_git_version:
+        type: str
+        required: false
+        description: Branch, tag or commit to build from.
+
+      market_watch_git_host_key:
+        type: str
+        required: false
+        description: Accepted ssh host key of the git host (known_hosts line).
+
+      market_watch_containerfile:
+        type: str
+        required: false
+        description: Containerfile path inside the repository.
+
+      market_watch_schedule:
+        type: str
+        required: false
+        description: systemd OnCalendar expression for the ticks; the container decides on each tick whether a full run is due.
+
+      market_watch_timer_enabled:
+        type: bool
+        required: false
+        description: Run the ticks on the schedule; when false it only runs when started by hand.
+
+      market_watch_timeout:
+        type: str
+        required: false
+        description: Maximum runtime of one run (systemd time span).
+
+      market_watch_scan_eod_schedule:
+        type: str
+        required: false
+        description: systemd OnCalendar expression for the nightly scan.
+
+      market_watch_scan_eod_timer_enabled:
+        type: bool
+        required: false
+        description: Run the nightly scan on its schedule; when false it only runs when started by hand.
+
+      market_watch_scan_eod_timeout:
+        type: str
+        required: false
+        description: Maximum runtime of one nightly scan (systemd time span).
+
+      market_watch_scan_asia_schedule:
+        type: str
+        required: false
+        description: systemd OnCalendar expression for the Asia snapshot.
+
+      market_watch_scan_us_pre_schedule:
+        type: str
+        required: false
+        description: systemd OnCalendar expression for the US pre-market snapshot.
+
+      market_watch_scan_check_schedule:
+        type: str
+        required: false
+        description: systemd OnCalendar expression for the afternoon check snapshot.
+
+      market_watch_scan_snapshots_enabled:
+        type: bool
+        required: false
+        description: Run the three snapshots on their schedules; when false they only run when started by hand.
+
+      market_watch_scan_snapshot_timeout:
+        type: str
+        required: false
+        description: Maximum runtime of one snapshot (systemd time span).
+
+      market_watch_scan_fundamentals_schedule:
+        type: list
+        elements: str
+        required: false
+        description: systemd OnCalendar expressions for the fundamentals job (weekday runs refresh stocks near earnings, Saturday runs all).
+
+      market_watch_scan_fundamentals_timer_enabled:
+        type: bool
+        required: false
+        description: Run the fundamentals job on its schedule; when false it only runs when started by hand.
+
+      market_watch_scan_fundamentals_timeout:
+        type: str
+        required: false
+        description: Maximum runtime of one fundamentals run (systemd time span).
+
+      market_watch_requests_poll_schedule:
+        type: list
+        elements: str
+        required: false
+        description: systemd OnCalendar expressions for the on-demand request poll.
+
+      market_watch_requests_poll_timer_enabled:
+        type: bool
+        required: false
+        description: Run the request poll on its schedule; when false it only runs when started by hand.
+
+      market_watch_requests_poll_timeout:
+        type: str
+        required: false
+        description: Maximum runtime of one request poll (systemd time span).
+
+      market_watch_data_repo:
+        type: str
+        required: false
+        description: ssh URL of the data repository holding the watchlist and prices branches.
+
+      market_watch_deploy_key:
+        type: str
+        required: false
+        description: Private ssh key with write access to the data repository, also used to clone the build context.
+
+      market_watch_openfigi_api_key:
+        type: str
+        required: false
+        description: Optional OpenFIGI API key.
+
+      market_watch_environment_vars:
+        type: dict
+        required: false
+        description: Settings passed as environment variables.
+
+      market_watch_entrypoint:
+        type: str
+        required: false
+        description: Optional container entrypoint override.
+
+      market_watch_extra_files:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary file entries with src (controller path) or source (target path), dest, optional mount, mode, and template.
+
+      market_watch_extra_dirs:
+        type: list
+        elements: dict
+        required: false
+        description: Arbitrary directory entries with src (controller directory) or source (target path), dest, optional mount and mode.

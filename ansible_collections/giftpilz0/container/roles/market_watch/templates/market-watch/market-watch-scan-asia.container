@@ -1,0 +1,25 @@
+[Unit]
+Description=Market Watch Asia Snapshot
+
+[Container]
+ContainerName=market-watch-scan-asia
+Image={{ market_watch_image }}:{{ market_watch_version }}
+Exec=scan-asia
+
+Environment=DATA_REPO={{ market_watch_data_repo }}
+Environment=DEPLOY_KEY={{ market_watch_deploy_key | trim | b64encode }}
+{% for env_name, env_value in market_watch_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+# Keeps no local state
+ReadOnly=true
+NoNewPrivileges=true
+DropCapability=ALL
+
+# Started by market-watch-scan-asia.timer
+[Service]
+Type=oneshot
+# The job stops starting requests when its time budget is spent and publishes what it has
+RuntimeMaxSec={{ market_watch_scan_snapshot_timeout }}
+CPUWeight=20

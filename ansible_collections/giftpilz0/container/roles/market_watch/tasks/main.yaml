@@ -1,0 +1,97 @@
+---
+- name: "Market watch: Validate parameters"
+  ansible.builtin.assert:
+    that:
+      - market_watch_data_repo | length > 0
+      - market_watch_deploy_key | length > 0
+    fail_msg: "Needs market_watch_data_repo and market_watch_deploy_key (encrypted host vars)."
+    quiet: true
+
+- name: "Market watch: Create ssh directory"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.ssh"
+    state: directory
+    mode: "0700"
+
+- name: "Market watch: Pin git host key"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.known_hosts:
+    path: "/home/{{ podman_user }}/.ssh/known_hosts"
+    name: "{{ market_watch_git_host_key.split()[0] }}"
+    key: "{{ market_watch_git_host_key }}"
+
+- name: "Market watch: Deploy key for the image build"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    dest: "/home/{{ podman_user }}/.ssh/market_watch_deploy_key"
+    content: "{{ market_watch_deploy_key | trim }}\n"
+    mode: "0600"
+  no_log: true
+
+- name: "Market watch: Build image"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+    tasks_from: build
+  vars:
+    quadlet_role: market_watch
+    quadlet_builds:
+      - name: "{{ market_watch_image }}"
+        tag: "{{ market_watch_version }}"
+        git_repo: "{{ market_watch_git_repo }}"
+        git_version: "{{ market_watch_git_version }}"
+        dockerfile: "{{ market_watch_containerfile }}"
+        git_key_file: "/home/{{ podman_user }}/.ssh/market_watch_deploy_key"
+
+# No pod: starting it would start a run
+- name: "Market watch: Deploy quadlets"
+  ansible.builtin.include_role:
+    name: giftpilz0.container.quadlet
+  vars:
+    quadlet_role: market_watch
+    quadlet_dir: market-watch
+    quadlet_extra_files: "{{ market_watch_extra_files }}"
+    quadlet_extra_dirs: "{{ market_watch_extra_dirs }}"
+    quadlet_units:
+      - market-watch-data-volume.service
+      - market-watch-cache-volume.service
+
+# Inline: templates/ is deployed to the quadlet directory
+- name: "Market watch: Deploy timers"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.copy:
+    dest: "/home/{{ podman_user }}/.config/systemd/user/{{ item.name }}.timer"
+    mode: "0644"
+    content: |
+      [Unit]
+      Description={{ item.description }}
+
+      [Timer]
+      {% for schedule in ([item.schedule] if item.schedule is string else item.schedule) %}
+      OnCalendar={{ schedule }}
+      {% endfor %}
+      Persistent={{ item.persistent | lower }}
+
+      [Install]
+      WantedBy=timers.target
+  loop: "{{ _market_watch_timers }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: _market_watch_timer_files
+
+- name: "Market watch: Manage timers"
+  become: true
+  become_user: "{{ podman_user }}"
+  ansible.builtin.systemd:
+    name: "{{ item.name }}.timer"
+    enabled: "{{ item.enabled }}"
+    state: "{{ 'started' if item.enabled else 'stopped' }}"
+    daemon_reload: "{{ _market_watch_timer_files is changed }}"
+    scope: user
+  loop: "{{ _market_watch_timers }}"
+  loop_control:
+    label: "{{ item.name }}"

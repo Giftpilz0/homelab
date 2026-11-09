@@ -1,0 +1,31 @@
+[Unit]
+Description=Market Watch Price Fetcher
+
+[Container]
+ContainerName=market-watch
+Image={{ market_watch_image }}:{{ market_watch_version }}
+
+{% if market_watch_entrypoint %}
+Entrypoint={{ market_watch_entrypoint }}
+{% endif %}
+
+Environment=DATA_REPO={{ market_watch_data_repo }}
+Environment=DEPLOY_KEY={{ market_watch_deploy_key | trim | b64encode }}
+{% if market_watch_openfigi_api_key %}
+Environment=OPENFIGI_API_KEY={{ market_watch_openfigi_api_key }}
+{% endif %}
+{% for env_name, env_value in market_watch_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+Volume=market-watch-data.volume:/data
+Volume=market-watch-cache.volume:/cache
+
+{% for volume in quadlet_extra_volumes %}
+Volume={{ volume }}
+{% endfor %}
+
+# Started by market-watch.timer
+[Service]
+RuntimeMaxSec={{ market_watch_timeout }}
+CPUWeight=20
