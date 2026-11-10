@@ -1,17 +1,47 @@
 ---
 argument_specs:
   main:
-    short_description: Ship the systemd journal to VictoriaLogs with Fluent Bit.
+    short_description: Ship the systemd journal or Windows event log to VictoriaLogs with Fluent Bit.
     options:
       fluent_bit_repo_baseurl:
         type: str
         required: false
-        description: Package repository URL.
+        description: Package repository URL (Linux).
+
+      fluent_bit_repo_suite:
+        type: str
+        required: false
+        description: Suite of the APT repository (Debian and Ubuntu).
 
       fluent_bit_repo_gpgkey:
         type: str
         required: false
-        description: Signing key URL of the package repository.
+        description: Signing key URL of the package repository (Linux).
+
+      fluent_bit_windows_version:
+        type: str
+        required: false
+        description: Fluent Bit release installed on Windows.
+
+      fluent_bit_windows_url:
+        type: str
+        required: false
+        description: Download URL of the Windows release zip, a .sha256 file must exist next to it.
+
+      fluent_bit_windows_install_path:
+        type: str
+        required: false
+        description: Directory the Windows releases are extracted to, older releases are removed.
+
+      fluent_bit_config_path:
+        type: str
+        required: false
+        description: Directory of fluent-bit.conf.
+
+      fluent_bit_state_path:
+        type: str
+        required: false
+        description: Directory of the read position databases and, on Windows, the log file.
 
       fluent_bit_log_level:
         type: str
@@ -26,12 +56,80 @@ argument_specs:
       fluent_bit_timeout_stop_sec:
         type: int
         required: false
-        description: Seconds before systemd kills a stopping service.
+        description: Seconds before systemd kills a stopping service (Linux).
+
+      fluent_bit_windows_channels:
+        type: list
+        elements: str
+        required: false
+        description: Windows event log channels to read, missing channels are skipped.
+
+      fluent_bit_windows_event_query:
+        type: str
+        required: false
+        description: XPath query that selects events in every channel.
+
+      fluent_bit_tail_inputs:
+        type: list
+        elements: dict
+        required: false
+        options:
+          name:
+            type: str
+            required: true
+            description: Unique name, stored in the source field. Letters, digits, - and _.
+          path:
+            type: str
+            required: true
+            description: File path, wildcards allowed.
+          exclude_path:
+            type: str
+            required: false
+            description: Files matching Path that are not read.
+          parser:
+            type: str
+            required: false
+            description: Parser from parsers.conf or fluent_bit_parsers.
+          multiline_parser:
+            type: str
+            required: false
+            description: Multiline parser that joins lines such as stack traces.
+          msg_field:
+            type: str
+            required: false
+            description: Record field shown as the message.
+        description: Log files to read.
+
+      fluent_bit_tail_input_defaults:
+        type: dict
+        required: false
+        description: Defaults merged into every entry of fluent_bit_tail_inputs.
+
+      fluent_bit_parsers:
+        type: list
+        elements: dict
+        required: false
+        description: Custom parsers, each a dict of Fluent Bit [PARSER] keys and values.
+
+      fluent_bit_exclude_rules:
+        type: list
+        elements: dict
+        required: false
+        options:
+          key:
+            type: str
+            required: true
+            description: Record field, journal fields without their leading underscore.
+          regex:
+            type: str
+            required: true
+            description: Entries whose field matches are dropped.
+        description: Dropped log entries of all inputs.
 
       fluent_bit_http_host:
         type: str
         required: false
-        description: Host name of the ingest endpoint.
+        description: Host name of the VictoriaLogs ingest endpoint.
 
       fluent_bit_http_port:
         type: int
@@ -42,19 +140,4 @@ argument_specs:
         type: list
         elements: str
         required: false
-        description: Journal fields that identify a log stream.
-
-      fluent_bit_exclude_rules:
-        type: list
-        elements: dict
-        required: false
-        options:
-          key:
-            type: str
-            required: true
-            description: Journal field without its leading underscore.
-          regex:
-            type: str
-            required: true
-            description: Entries whose field matches are dropped.
-        description: Dropped journal entries.
+        description: Record fields that identify a log stream.

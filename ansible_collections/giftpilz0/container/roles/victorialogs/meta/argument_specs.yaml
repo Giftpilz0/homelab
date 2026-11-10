@@ -95,6 +95,12 @@ argument_specs:
         required: false
         description: Optional entrypoint override.
 
+      victorialogs_extra_args:
+        type: list
+        elements: str
+        required: false
+        description: Additional VictoriaLogs command line flags.
+
       victorialogs_extra_files:
         type: list
         elements: dict

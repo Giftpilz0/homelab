@@ -19,7 +19,7 @@ Volume=victorialogs-data.volume:/victoria-logs-data
 Volume={{ volume }}
 {% endfor %}
 
-Exec=-storageDataPath=/victoria-logs-data -retentionPeriod={{ victorialogs_retention_period }} -retention.maxDiskSpaceUsageBytes={{ victorialogs_retention_max_disk_space }} -memory.allowedPercent={{ victorialogs_memory_allowed_percent }}{% if victorialogs_syslog_enabled %} -syslog.listenAddr.tcp=:{{ victorialogs_syslog_port }} -syslog.listenAddr.udp=:{{ victorialogs_syslog_port }} -syslog.timezone={{ victorialogs_syslog_timezone }} -syslog.streamFields.tcp='{{ victorialogs_syslog_stream_fields | to_json(separators=(",", ":")) }}' -syslog.streamFields.udp='{{ victorialogs_syslog_stream_fields | to_json(separators=(",", ":")) }}'{% endif %}
+Exec={{ _victorialogs_args | join(' ') }}
 
 
 [Service]

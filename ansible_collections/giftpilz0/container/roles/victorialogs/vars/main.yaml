@@ -1,0 +1,19 @@
+---
+_victorialogs_base_args:
+  - "-storageDataPath=/victoria-logs-data"
+  - "-retentionPeriod={{ victorialogs_retention_period }}"
+  - "-retention.maxDiskSpaceUsageBytes={{ victorialogs_retention_max_disk_space }}"
+  - "-memory.allowedPercent={{ victorialogs_memory_allowed_percent }}"
+
+_victorialogs_syslog_stream_fields: "{{ victorialogs_syslog_stream_fields | to_json(separators=(',', ':')) }}"
+_victorialogs_syslog_args:
+  - "-syslog.listenAddr.tcp=:{{ victorialogs_syslog_port }}"
+  - "-syslog.listenAddr.udp=:{{ victorialogs_syslog_port }}"
+  - "-syslog.timezone={{ victorialogs_syslog_timezone }}"
+  - "-syslog.streamFields.tcp='{{ _victorialogs_syslog_stream_fields }}'"
+  - "-syslog.streamFields.udp='{{ _victorialogs_syslog_stream_fields }}'"
+
+_victorialogs_args: >-
+  {{ _victorialogs_base_args
+     + (_victorialogs_syslog_args if victorialogs_syslog_enabled else [])
+     + victorialogs_extra_args }}

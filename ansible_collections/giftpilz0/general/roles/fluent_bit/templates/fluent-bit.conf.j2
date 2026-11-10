@@ -1,43 +1,107 @@
+{% macro output(match, stream_fields, msg_field) %}
+[OUTPUT]
+    Name             http
+    Match            {{ match }}
+    Host             {{ fluent_bit_http_host }}
+    Port             {{ fluent_bit_http_port }}
+    TLS              on
+    TLS.Verify       on
+    URI              /insert/jsonline?_stream_fields={{ stream_fields | join(',') }}&_msg_field={{ msg_field }}&_time_field=date
+    Format           json_lines
+    Json_Date_Key    date
+    Json_Date_Format iso8601
+    Compress         gzip
+    Retry_Limit      no_limits
+{%- endmacro %}
 # {{ ansible_managed }}
 
 [SERVICE]
     Flush     5
     Daemon    off
     Log_Level {{ fluent_bit_log_level }}
+{% if _fluent_bit_windows %}
+    Log_File  {{ fluent_bit_state_path }}\fluent-bit.log
+{% endif %}
+{% if _fluent_bit_tail_inputs %}
+{% for file in _fluent_bit_parsers_files %}
+    Parsers_File {{ file }}
+{% endfor %}
+{% endif %}
 
+{% if _fluent_bit_windows %}
+[INPUT]
+    Name                    winevtlog
+    Tag                     {{ _fluent_bit_tag }}
+    Channels                {{ fluent_bit_windows_channels | join(',') }}
+    Event_Query             {{ fluent_bit_windows_event_query }}
+    Ignore_Missing_Channels on
+    DB                      {{ fluent_bit_state_path }}\winevtlog.db
+    Interval_Sec            1
+    Event_Data_As_Map       on
+    String_Inserts          off
+    Mem_Buf_Limit           {{ fluent_bit_mem_buf_limit }}
+{% else %}
 [INPUT]
     Name              systemd
-    Tag               journal
-    DB                /var/lib/fluent-bit/journal.db
+    Tag               {{ _fluent_bit_tag }}
+    DB                {{ fluent_bit_state_path }}/journal.db
     Read_From_Tail    on
     Strip_Underscores on
     Mem_Buf_Limit     {{ fluent_bit_mem_buf_limit }}
+{% endif %}
 
+{% for input in _fluent_bit_tail_inputs %}
+[INPUT]
+    Name             tail
+    Tag              tail.{{ input.name }}
+    Path             {{ input.path }}
+{% if input.exclude_path %}
+    Exclude_Path     {{ input.exclude_path }}
+{% endif %}
+    Path_Key         file
+    DB               {{ fluent_bit_state_path }}{{ _fluent_bit_sep }}tail-{{ input.name }}.db
+    Skip_Long_Lines  on
+    Mem_Buf_Limit    {{ fluent_bit_mem_buf_limit }}
+{% if input.parser %}
+    Parser           {{ input.parser }}
+{% endif %}
+{% if input.multiline_parser %}
+    multiline.parser {{ input.multiline_parser }}
+{% endif %}
+
+[FILTER]
+    Name  modify
+    Match tail.{{ input.name }}
+    Add   {{ _fluent_bit_host_field }} {{ _fluent_bit_host }}
+    Add   source {{ input.name }}
+
+{% endfor %}
 {% for rule in fluent_bit_exclude_rules %}
 [FILTER]
     Name    grep
-    Match   journal
+    Match   *
     Exclude {{ rule.key }} {{ rule.regex }}
 
 {% endfor %}
-{% for priority, level in _fluent_bit_levels.items() %}
+{% if _fluent_bit_windows %}
+[FILTER]
+    Name   lua
+    Match  {{ _fluent_bit_tag }}
+    Script {{ fluent_bit_config_path }}\level.lua
+    Call   add_level
+
+{% else %}
+{% for priority, level in _fluent_bit_journal_levels.items() %}
 [FILTER]
     Name      modify
-    Match     journal
+    Match     {{ _fluent_bit_tag }}
     Condition Key_value_equals PRIORITY {{ priority }}
     Add       level {{ level }}
 
 {% endfor %}
-[OUTPUT]
-    Name             http
-    Match            journal
-    Host             {{ fluent_bit_http_host }}
-    Port             {{ fluent_bit_http_port }}
-    TLS              on
-    TLS.Verify       on
-    URI              {{ _fluent_bit_uri }}
-    Format           json_lines
-    Json_Date_Key    date
-    Json_Date_Format iso8601
-    Compress         gzip
-    Retry_Limit      no_limits
+{% endif %}
+{{ output(_fluent_bit_tag, fluent_bit_stream_fields, _fluent_bit_msg_field) }}
+{% for input in _fluent_bit_tail_inputs %}
+
+{{ output('tail.' ~ input.name, [_fluent_bit_host_field, 'source'], input.msg_field) }}
+{% endfor %}

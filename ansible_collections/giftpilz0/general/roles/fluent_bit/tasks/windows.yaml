@@ -1,0 +1,84 @@
+---
+- name: "Fluent Bit: Create directories"
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop: "{{ [fluent_bit_windows_install_path, fluent_bit_config_path, fluent_bit_state_path] | unique }}"
+
+- name: "Fluent Bit: Check installed release"
+  ansible.windows.win_stat:
+    path: "{{ _fluent_bit_windows_binary }}"
+  register: _fluent_bit_windows_installed
+
+- name: "Fluent Bit: Install release"
+  when: not _fluent_bit_windows_installed.stat.exists
+  block:
+    - name: "Fluent Bit: Download release"
+      ansible.windows.win_get_url:
+        url: "{{ fluent_bit_windows_url }}"
+        checksum_url: "{{ fluent_bit_windows_url }}.sha256"
+        checksum_algorithm: sha256
+        dest: "{{ fluent_bit_windows_install_path }}\\{{ _fluent_bit_windows_release }}.zip"
+
+    - name: "Fluent Bit: Extract release"
+      community.windows.win_unzip:
+        src: "{{ fluent_bit_windows_install_path }}\\{{ _fluent_bit_windows_release }}.zip"
+        dest: "{{ fluent_bit_windows_install_path }}"
+        delete_archive: true
+      notify: "Fluent Bit: Restart"
+
+- name: "Fluent Bit: Deploy config"
+  ansible.windows.win_template:
+    src: fluent-bit.conf.j2
+    dest: "{{ fluent_bit_config_path }}\\fluent-bit.conf"
+  notify: "Fluent Bit: Restart"
+
+- name: "Fluent Bit: Deploy custom parsers"
+  ansible.windows.win_template:
+    src: custom-parsers.conf.j2
+    dest: "{{ fluent_bit_config_path }}\\custom-parsers.conf"
+  when: fluent_bit_parsers | length > 0
+  notify: "Fluent Bit: Restart"
+
+- name: "Fluent Bit: Deploy level script"
+  ansible.windows.win_template:
+    src: level.lua.j2
+    dest: "{{ fluent_bit_config_path }}\\level.lua"
+  notify: "Fluent Bit: Restart"
+
+- name: "Fluent Bit: Register service"
+  ansible.windows.win_service:
+    name: fluent-bit
+    display_name: Fluent Bit
+    description: Ships the Windows event log to VictoriaLogs
+    path: "{{ _fluent_bit_windows_service_path }}"
+    start_mode: delayed
+    failure_actions:
+      - type: restart
+        delay_ms: 10000
+    failure_reset_period_sec: 86400
+  notify: "Fluent Bit: Restart"
+
+- name: "Fluent Bit: Start service"
+  ansible.windows.win_service:
+    name: fluent-bit
+    state: started
+
+# The service runs the old release until it restarts
+- name: "Fluent Bit: Restart before removing old releases"
+  ansible.builtin.meta: flush_handlers
+
+- name: "Fluent Bit: Find releases"
+  ansible.windows.win_find:
+    paths: "{{ fluent_bit_windows_install_path }}"
+    patterns: ["fluent-bit-*-win64"]
+    file_type: directory
+  register: _fluent_bit_windows_releases
+
+- name: "Fluent Bit: Remove old releases"
+  ansible.windows.win_file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ _fluent_bit_windows_releases.files | rejectattr('filename', 'equalto', _fluent_bit_windows_release) }}"
+  loop_control:
+    label: "{{ item.filename }}"

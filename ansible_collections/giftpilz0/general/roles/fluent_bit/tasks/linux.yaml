@@ -1,0 +1,103 @@
+---
+- name: "Fluent Bit: Install from RPM repository"
+  when: ansible_facts['os_family'] == 'RedHat'
+  become: true
+  block:
+    - name: "Fluent Bit: Add RPM repository"
+      ansible.builtin.yum_repository:
+        name: fluent-bit
+        description: Fluent Bit
+        baseurl: "{{ fluent_bit_repo_baseurl }}"
+        gpgcheck: true
+        repo_gpgcheck: true
+        gpgkey: "{{ fluent_bit_repo_gpgkey }}"
+
+    - name: "Fluent Bit: Install RPM package"
+      ansible.builtin.dnf:
+        name: fluent-bit
+        state: present
+      notify: "Fluent Bit: Restart"
+
+- name: "Fluent Bit: Install from APT repository"
+  when: ansible_facts['os_family'] == 'Debian'
+  become: true
+  block:
+    # Required by deb822_repository
+    - name: "Fluent Bit: Install python3-debian"
+      ansible.builtin.apt:
+        name: python3-debian
+        state: present
+
+    - name: "Fluent Bit: Add APT repository"
+      ansible.builtin.deb822_repository:
+        name: fluent-bit
+        uris: "{{ fluent_bit_repo_baseurl }}"
+        suites: "{{ fluent_bit_repo_suite }}"
+        components: main
+        signed_by: "{{ fluent_bit_repo_gpgkey }}"
+      register: _fluent_bit_apt_repo
+
+    - name: "Fluent Bit: Install DEB package"
+      ansible.builtin.apt:
+        name: fluent-bit
+        state: present
+        update_cache: "{{ _fluent_bit_apt_repo is changed }}"
+      notify: "Fluent Bit: Restart"
+
+- name: "Fluent Bit: Create state directory"
+  become: true
+  ansible.builtin.file:
+    path: "{{ fluent_bit_state_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: "Fluent Bit: Deploy config"
+  become: true
+  ansible.builtin.template:
+    src: fluent-bit.conf.j2
+    dest: "{{ fluent_bit_config_path }}/fluent-bit.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: "Fluent Bit: Restart"
+
+- name: "Fluent Bit: Deploy custom parsers"
+  become: true
+  ansible.builtin.template:
+    src: custom-parsers.conf.j2
+    dest: "{{ fluent_bit_config_path }}/custom-parsers.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  when: fluent_bit_parsers | length > 0
+  notify: "Fluent Bit: Restart"
+
+- name: "Fluent Bit: Create unit drop-in directory"
+  become: true
+  ansible.builtin.file:
+    path: /etc/systemd/system/fluent-bit.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "Fluent Bit: Limit stop timeout"
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/fluent-bit.service.d/timeout.conf
+    content: |
+      [Service]
+      TimeoutStopSec={{ fluent_bit_timeout_stop_sec }}
+    owner: root
+    group: root
+    mode: "0644"
+  notify: "Fluent Bit: Restart"
+
+- name: "Fluent Bit: Enable service"
+  become: true
+  ansible.builtin.systemd:
+    name: fluent-bit.service
+    state: started
+    enabled: true

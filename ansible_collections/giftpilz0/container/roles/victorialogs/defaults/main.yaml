@@ -36,6 +36,8 @@ victorialogs_syslog_stream_fields:
 
 ## Advanced
 victorialogs_entrypoint: ""
+# Command line flags, e.g. ["-loggerLevel=WARN"]
+victorialogs_extra_args: []
 
 # Extra inventory files/dirs, format: see quadlet defaults
 victorialogs_extra_files: []

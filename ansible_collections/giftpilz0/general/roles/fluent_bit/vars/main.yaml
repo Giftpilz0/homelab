@@ -1,6 +1,22 @@
 ---
+_fluent_bit_windows: "{{ ansible_facts['os_family'] == 'Windows' }}"
+# Single-quoted: "\\" is a backslash in Jinja
+_fluent_bit_sep: '{{ "\\" if _fluent_bit_windows else "/" }}'
+
+_fluent_bit_tag: "{{ 'winevtlog' if _fluent_bit_windows else 'journal' }}"
+_fluent_bit_msg_field: "{{ 'Message' if _fluent_bit_windows else 'MESSAGE' }}"
+
+# Log file records get the host in the same field as the journal or event log
+_fluent_bit_host_field: "{{ 'Computer' if _fluent_bit_windows else 'HOSTNAME' }}"
+_fluent_bit_host: "{{ ansible_facts['fqdn'] if _fluent_bit_windows else ansible_facts['nodename'] }}"
+_fluent_bit_tail_inputs: "{{ [fluent_bit_tail_input_defaults] | product(fluent_bit_tail_inputs) | map('combine') }}"
+
+_fluent_bit_parsers_files: >-
+  {{ [_fluent_bit_windows_path ~ '\\conf\\parsers.conf' if _fluent_bit_windows else '/etc/fluent-bit/parsers.conf']
+     + ([fluent_bit_config_path ~ _fluent_bit_sep ~ 'custom-parsers.conf'] if fluent_bit_parsers else []) }}
+
 # The VictoriaLogs UI only detects levels by name
-_fluent_bit_levels:
+_fluent_bit_journal_levels:
   0: emerg
   1: alert
   2: crit
@@ -9,5 +25,19 @@ _fluent_bit_levels:
   5: notice
   6: info
   7: debug
+# 0 (LogAlways) is used by Security audit events
+_fluent_bit_winevtlog_levels:
+  0: info
+  1: crit
+  2: error
+  3: warning
+  4: info
+  5: debug
+_fluent_bit_winevtlog_audit_failure: "0x8010000000000000"
 
-_fluent_bit_uri: "/insert/jsonline?_stream_fields={{ fluent_bit_stream_fields | join(',') }}&_msg_field=MESSAGE&_time_field=date"
+# Every release is extracted to its own directory
+_fluent_bit_windows_release: "fluent-bit-{{ fluent_bit_windows_version }}-win64"
+_fluent_bit_windows_path: "{{ fluent_bit_windows_install_path }}\\{{ _fluent_bit_windows_release }}"
+_fluent_bit_windows_binary: "{{ _fluent_bit_windows_path }}\\bin\\fluent-bit.exe"
+_fluent_bit_windows_service_path: >-
+  "{{ _fluent_bit_windows_binary }}" -c "{{ fluent_bit_config_path }}\fluent-bit.conf"

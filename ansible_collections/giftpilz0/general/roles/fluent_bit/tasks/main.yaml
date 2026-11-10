@@ -6,66 +6,31 @@
     fail_msg: "Define fluent_bit_http_host."
     quiet: true
 
-- name: "Fluent Bit: Add package repository"
-  become: true
-  ansible.builtin.yum_repository:
-    name: fluent-bit
-    description: Fluent Bit
-    baseurl: "{{ fluent_bit_repo_baseurl }}"
-    gpgcheck: true
-    repo_gpgcheck: true
-    gpgkey: "{{ fluent_bit_repo_gpgkey }}"
+# The name is used in tags and file names
+- name: "Fluent Bit: Validate log file inputs"
+  ansible.builtin.assert:
+    that:
+      - item.name is defined
+      - item.name is match('^[A-Za-z0-9_-]+$')
+      - fluent_bit_tail_inputs | selectattr('name', 'defined') | selectattr('name', 'equalto', item.name) | length == 1
+      - item.path is defined
+    fail_msg: "Log file inputs need a path and a unique name of letters, digits, - and _: {{ item }}"
+    quiet: true
+  loop: "{{ fluent_bit_tail_inputs }}"
+  loop_control:
+    label: "{{ item.name | default('unnamed') }}"
 
-- name: "Fluent Bit: Install package"
-  become: true
-  ansible.builtin.package:
-    name: fluent-bit
-    state: present
-  notify: "Fluent Bit: Restart"
+- name: "Fluent Bit: Configure Linux"
+  ansible.builtin.include_tasks: linux.yaml
+  when: ansible_facts['system'] == 'Linux'
 
-- name: "Fluent Bit: Create state directory"
-  become: true
-  ansible.builtin.file:
-    path: /var/lib/fluent-bit
-    state: directory
-    owner: root
-    group: root
-    mode: "0700"
+- name: "Fluent Bit: Configure Windows"
+  ansible.builtin.include_tasks: windows.yaml
+  when: ansible_facts['os_family'] == 'Windows'
 
-- name: "Fluent Bit: Deploy config"
-  become: true
-  ansible.builtin.template:
-    src: fluent-bit.conf.j2
-    dest: /etc/fluent-bit/fluent-bit.conf
-    owner: root
-    group: root
-    mode: "0644"
-  notify: "Fluent Bit: Restart"
-
-- name: "Fluent Bit: Create unit drop-in directory"
-  become: true
-  ansible.builtin.file:
-    path: /etc/systemd/system/fluent-bit.service.d
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-
-- name: "Fluent Bit: Limit stop timeout"
-  become: true
-  ansible.builtin.copy:
-    dest: /etc/systemd/system/fluent-bit.service.d/timeout.conf
-    content: |
-      [Service]
-      TimeoutStopSec={{ fluent_bit_timeout_stop_sec }}
-    owner: root
-    group: root
-    mode: "0644"
-  notify: "Fluent Bit: Restart"
-
-- name: "Fluent Bit: Enable service"
-  become: true
-  ansible.builtin.systemd:
-    name: fluent-bit.service
-    state: started
-    enabled: true
+- name: "Fluent Bit: Reject unsupported operating system"
+  ansible.builtin.fail:
+    msg: "The Fluent Bit role supports Linux and Windows only (detected {{ ansible_facts['system'] }})."
+  when:
+    - ansible_facts['system'] != 'Linux'
+    - ansible_facts['os_family'] != 'Windows'

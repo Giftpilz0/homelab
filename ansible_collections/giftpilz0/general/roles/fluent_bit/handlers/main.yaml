@@ -1,7 +1,16 @@
 ---
-- name: "Fluent Bit: Restart"
+- name: "Fluent Bit: Restart systemd service"
   become: true
   ansible.builtin.systemd:
     name: fluent-bit.service
     state: restarted
     daemon_reload: true
+  listen: "Fluent Bit: Restart"
+  when: ansible_facts['system'] == 'Linux'
+
+- name: "Fluent Bit: Restart Windows service"
+  ansible.windows.win_service:
+    name: fluent-bit
+    state: restarted
+  listen: "Fluent Bit: Restart"
+  when: ansible_facts['os_family'] == 'Windows'

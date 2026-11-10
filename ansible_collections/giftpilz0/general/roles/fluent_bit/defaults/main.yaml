@@ -1,18 +1,67 @@
 ---
-fluent_bit_repo_baseurl: "https://packages.fluentbit.io/almalinux/$releasever/"
+## Install
+# Linux: RPM repository on RedHat, deb822 repository on Debian and Ubuntu
+fluent_bit_repo_baseurl: >-
+  {{ 'https://packages.fluentbit.io/almalinux/$releasever/' if ansible_facts['os_family'] == 'RedHat'
+     else 'https://packages.fluentbit.io/' ~ ansible_facts['distribution'] | lower ~ '/' ~ ansible_facts['distribution_release'] }}
+fluent_bit_repo_suite: "{{ ansible_facts['distribution_release'] }}"
 fluent_bit_repo_gpgkey: "https://packages.fluentbit.io/fluentbit.key"
+
+# Windows: release zip, its checksum is read from <url>.sha256
+# renovate: datasource=github-releases depName=fluent/fluent-bit extractVersion=^v(?<version>.*)$
+fluent_bit_windows_version: "5.2.0"
+fluent_bit_windows_url: "https://packages.fluentbit.io/windows/fluent-bit-{{ fluent_bit_windows_version }}-win64.zip"
+fluent_bit_windows_install_path: 'C:\Program Files\fluent-bit'
+
+## Service
+# Single-quoted: \f in a Jinja string literal is a form feed
+fluent_bit_config_path: '{{ "C:\\ProgramData\\fluent-bit" if ansible_facts["os_family"] == "Windows" else "/etc/fluent-bit" }}'
+fluent_bit_state_path: '{{ "C:\\ProgramData\\fluent-bit" if ansible_facts["os_family"] == "Windows" else "/var/lib/fluent-bit" }}'
 
 fluent_bit_log_level: warn
 fluent_bit_mem_buf_limit: 16MB
-# Stopping sometimes hangs until killed, entries are lost meanwhile
+# Linux: stopping sometimes hangs until killed, entries are lost meanwhile
 fluent_bit_timeout_stop_sec: 15
 
+## Input
+# Windows event log channels, missing ones are skipped
+fluent_bit_windows_channels:
+  - Application
+  - System
+  - Security
+# XPath filter applied to every channel
+fluent_bit_windows_event_query: "*"
+
+# Log files, read from their end like the journal
+# Example:
+#   fluent_bit_tail_inputs:
+#     - name: nginx-access
+#       path: /var/log/nginx/access*.log
+#       parser: nginx
+fluent_bit_tail_inputs: []
+fluent_bit_tail_input_defaults:
+  exclude_path: ""
+  # Without a parser the line is stored in the log field
+  parser: ""
+  # Built-in multiline parser, e.g. java, python, go
+  multiline_parser: ""
+  msg_field: log
+
+# Parsers for fluent_bit_tail_inputs, next to the ones shipped with Fluent Bit
+# Example:
+#   fluent_bit_parsers:
+#     - Name: app
+#       Format: regex
+#       Regex: '^(?<time>[^ ]+) (?<level>[a-z]+) (?<message>.*)$'
+#       Time_Key: time
+#       Time_Format: "%Y-%m-%dT%H:%M:%S%z"
+fluent_bit_parsers: []
+
+# [{key: record field (journal fields without leading underscore), regex}], applies to all inputs
+fluent_bit_exclude_rules: []
+
+## Output
 fluent_bit_http_host: ""
 fluent_bit_http_port: 443
 
-fluent_bit_stream_fields:
-  - HOSTNAME
-  - SYSLOG_IDENTIFIER
-
-# [{key: field without leading underscore, regex}]
-fluent_bit_exclude_rules: []
+fluent_bit_stream_fields: "{{ ['Computer', 'Channel'] if ansible_facts['os_family'] == 'Windows' else ['HOSTNAME', 'SYSLOG_IDENTIFIER'] }}"

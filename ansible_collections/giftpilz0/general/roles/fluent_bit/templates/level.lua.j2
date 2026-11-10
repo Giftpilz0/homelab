@@ -1,0 +1,17 @@
+-- {{ ansible_managed }}
+-- Level is an integer, which the modify filter can't match
+
+local levels = {
+{% for level, name in _fluent_bit_winevtlog_levels.items() %}
+  [{{ level }}] = "{{ name }}",
+{% endfor %}
+}
+
+function add_level(tag, timestamp, record)
+  if record["Keywords"] == "{{ _fluent_bit_winevtlog_audit_failure }}" then
+    record["level"] = "warning"
+  else
+    record["level"] = levels[record["Level"]]
+  end
+  return 2, timestamp, record
+end
