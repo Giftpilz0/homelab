@@ -1,10 +1,12 @@
 ---
 ## Install
 # Linux: RPM repository on RedHat, deb822 repository on Debian and Ubuntu
+# Windows facts have no distribution_release, argument validation renders these there too
 fluent_bit_repo_baseurl: >-
   {{ 'https://packages.fluentbit.io/almalinux/$releasever/' if ansible_facts['os_family'] == 'RedHat'
-     else 'https://packages.fluentbit.io/' ~ ansible_facts['distribution'] | lower ~ '/' ~ ansible_facts['distribution_release'] }}
-fluent_bit_repo_suite: "{{ ansible_facts['distribution_release'] }}"
+     else 'https://packages.fluentbit.io/' ~ ansible_facts['distribution'] | lower ~ '/' ~ ansible_facts['distribution_release']
+     if ansible_facts['os_family'] == 'Debian' else '' }}
+fluent_bit_repo_suite: "{{ ansible_facts['distribution_release'] if ansible_facts['os_family'] == 'Debian' else '' }}"
 fluent_bit_repo_gpgkey: "https://packages.fluentbit.io/fluentbit.key"
 
 # Windows: release zip, its checksum is read from <url>.sha256
