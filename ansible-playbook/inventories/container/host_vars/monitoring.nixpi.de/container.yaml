@@ -48,6 +48,11 @@ gatus_endpoints:
     url: "tcp://mqtt.nixpi.de:1883"
     conditions:
       - "[CONNECTED] == true"
+  # 503 when a market watch job or Claude run is missed or failed
+  - name: market-watch-jobs
+    group: apps
+    url: "https://finance.nixpi.de/api/health"
+    interval: 5m
 
 ######################################
 ### giftpilz0.container.victorialogs

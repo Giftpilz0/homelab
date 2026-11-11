@@ -1,0 +1,26 @@
+[Unit]
+Description=Market Watch Ingest of the Claude Runs' Output
+
+[Container]
+ContainerName=market-watch-ingest
+Image={{ market_watch_image }}:{{ market_watch_version }}
+Exec=ingest
+
+Environment=DATA_REPO={{ market_watch_data_repo }}
+Environment=DEPLOY_KEY={{ market_watch_deploy_key | trim | b64encode }}
+Environment=DB_PATH={{ market_watch_db_path }}
+{% for env_name, env_value in market_watch_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+# Writes only the database on the data volume
+Volume=market-watch-data.volume:/data
+ReadOnly=true
+NoNewPrivileges=true
+DropCapability=ALL
+
+# Started by market-watch-ingest.timer
+[Service]
+Type=oneshot
+RuntimeMaxSec={{ market_watch_ingest_timeout }}
+CPUWeight=20

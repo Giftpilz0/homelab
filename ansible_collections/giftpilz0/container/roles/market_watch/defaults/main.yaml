@@ -6,9 +6,15 @@ podman_user: "{{ ansible_user }}"
 market_watch_image: "localhost/market-watch"
 market_watch_version: "latest"
 market_watch_git_repo: "ssh://git@ssh.github.com:443/Giftpilz0/market-watch-data.git"
-market_watch_git_version: "app"
+market_watch_git_version: "main"
 market_watch_git_host_key: "[ssh.github.com]:443 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
 market_watch_containerfile: "Containerfile"
+market_watch_autoupdate: true
+
+# Network (always joined, created only when enabled)
+market_watch_network_enabled: true
+market_watch_network_name: "market-watch-internal"
+market_watch_network_driver: "bridge"
 
 ## Service
 market_watch_schedule: "*:0/15"
@@ -43,6 +49,22 @@ market_watch_requests_poll_schedule:
   - "Mon..Fri *-*-* 09:*:00 America/New_York"
 market_watch_requests_poll_timer_enabled: true
 market_watch_requests_poll_timeout: "15min"
+
+# SQLite database on the data volume
+market_watch_db_path: "/data/market-watch.sqlite3"
+market_watch_backfill_timeout: "60min"
+
+# Ingest of the Claude runs' output (branch ai-output): every 10 minutes 05:00-23:30.
+# With nothing new an ingest is one git ls-remote.
+market_watch_ingest_schedule:
+  - "*-*-* 05..22:00/10:00 Europe/Berlin"
+  - "*-*-* 23:00,10,20,30:00 Europe/Berlin"
+market_watch_ingest_timer_enabled: true
+market_watch_ingest_timeout: "10min"
+
+# API trigger of the morning routine behind „Jetzt einordnen“; empty disables it
+market_watch_classify_routine_url: ""
+market_watch_classify_routine_token: ""
 
 market_watch_data_repo: ""
 market_watch_deploy_key: ""

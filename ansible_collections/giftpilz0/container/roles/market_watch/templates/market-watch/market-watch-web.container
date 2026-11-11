@@ -1,0 +1,35 @@
+[Unit]
+Description=Market Watch Web App (API and PWA)
+
+[Container]
+ContainerName=market-watch-web
+Image={{ market_watch_image }}:{{ market_watch_version }}
+Pod=market-watch-web.pod
+Exec=serve
+
+{% if market_watch_autoupdate %}
+AutoUpdate=local
+{% endif %}
+
+Environment=DB_PATH={{ market_watch_db_path }}
+{% if market_watch_classify_routine_url %}
+Environment=CLASSIFY_ROUTINE_URL={{ market_watch_classify_routine_url }}
+Environment=CLASSIFY_ROUTINE_TOKEN={{ market_watch_classify_routine_token }}
+{% endif %}
+{% for env_name, env_value in market_watch_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+# Reads what the jobs computed; writes only the watchlist and the classify requests
+Volume=market-watch-data.volume:/data
+ReadOnly=true
+NoNewPrivileges=true
+DropCapability=ALL
+
+HealthCmd=python -m market_watch healthcheck
+HealthInterval=30s
+HealthStartPeriod=20s
+HealthOnFailure=kill
+
+[Service]
+Restart=always

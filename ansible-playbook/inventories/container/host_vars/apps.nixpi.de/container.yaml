@@ -57,6 +57,9 @@ dashboard_groups:
       - name: Kartei
         url: https://kartei.nixpi.de
         icon: icons/kartei.svg
+      - name: Market Watch
+        url: https://finance.nixpi.de
+        icon: icons/market-watch.svg
       - name: Forgejo
         url: https://forgejo.nixpi.de
         icon: icons/forgejo.svg
@@ -93,6 +96,7 @@ dashboard_groups:
 traefik_networks:
   - kartei
   - dashboard
+  - market-watch
 
 traefik_http_services:
   - name: dashboard
@@ -113,6 +117,17 @@ traefik_http_services:
     large_downloads: true
     health_check:
       path: "/healthz"
+      interval: "30s"
+  # /api/ping only says the app answers; whether the jobs ran is /api/health, checked by Gatus
+  - name: market-watch
+    domain: finance.nixpi.de
+    rule: "Host(`finance.nixpi.de`)"
+    servers:
+      - url: "http://market-watch-pod:8080"
+    tls_enabled: true
+    acme_enabled: true
+    health_check:
+      path: "/api/ping"
       interval: "30s"
 
 ######################################

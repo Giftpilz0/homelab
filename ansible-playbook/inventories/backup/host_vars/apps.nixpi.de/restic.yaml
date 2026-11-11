@@ -4,3 +4,7 @@
 
 backup_stop_units:
   - kartei-pod.service
+  # SQLite database on market-watch-data: the web app and the 15-minute tick write to it
+  - market-watch-web-pod.service
+  - market-watch.timer
+  - market-watch.service

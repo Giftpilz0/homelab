@@ -1,0 +1,26 @@
+[Unit]
+Description=Market Watch Backfill (manual)
+
+[Container]
+ContainerName=market-watch-backfill
+Image={{ market_watch_image }}:{{ market_watch_version }}
+Exec=backfill
+
+Environment=DATA_REPO={{ market_watch_data_repo }}
+Environment=DEPLOY_KEY={{ market_watch_deploy_key | trim | b64encode }}
+Environment=DB_PATH={{ market_watch_db_path }}
+{% for env_name, env_value in market_watch_environment_vars.items() %}
+Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+
+Volume=market-watch-data.volume:/data
+ReadOnly=true
+NoNewPrivileges=true
+DropCapability=ALL
+
+# No timer: started by hand with systemctl --user start market-watch-backfill; run again to continue
+[Service]
+Type=oneshot
+# The job stops fetching after 50 minutes and keeps what it has
+RuntimeMaxSec={{ market_watch_backfill_timeout }}
+CPUWeight=20

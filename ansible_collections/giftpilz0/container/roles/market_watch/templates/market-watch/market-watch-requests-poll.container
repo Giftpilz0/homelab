@@ -8,6 +8,7 @@ Exec=requests-poll
 
 Environment=DATA_REPO={{ market_watch_data_repo }}
 Environment=DEPLOY_KEY={{ market_watch_deploy_key | trim | b64encode }}
+Environment=DB_PATH={{ market_watch_db_path }}
 {% if market_watch_openfigi_api_key %}
 Environment=OPENFIGI_API_KEY={{ market_watch_openfigi_api_key }}
 {% endif %}
@@ -19,7 +20,7 @@ Environment={{ env_name }}={{ env_value }}
 # (requested-symbols.json); the tick uses other files on the same volumes
 Volume=market-watch-data.volume:/data
 Volume=market-watch-cache.volume:/cache
-
+ReadOnly=true
 NoNewPrivileges=true
 DropCapability=ALL
 

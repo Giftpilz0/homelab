@@ -46,7 +46,7 @@
         dockerfile: "{{ market_watch_containerfile }}"
         git_key_file: "/home/{{ podman_user }}/.ssh/market_watch_deploy_key"
 
-# No pod: starting it would start a run
+# Only the web pod runs all the time; the jobs start from their timers
 - name: "Market watch: Deploy quadlets"
   ansible.builtin.include_role:
     name: giftpilz0.container.quadlet
@@ -55,9 +55,10 @@
     quadlet_dir: market-watch
     quadlet_extra_files: "{{ market_watch_extra_files }}"
     quadlet_extra_dirs: "{{ market_watch_extra_dirs }}"
-    quadlet_units:
-      - market-watch-data-volume.service
-      - market-watch-cache-volume.service
+    quadlet_units: >-
+      {{ ['market-watch-data-volume.service', 'market-watch-cache-volume.service']
+         + (['market-watch-network.service'] if market_watch_network_enabled else [])
+         + ['market-watch-web-pod.service'] }}
 
 # Inline: templates/ is deployed to the quadlet directory
 - name: "Market watch: Deploy timers"

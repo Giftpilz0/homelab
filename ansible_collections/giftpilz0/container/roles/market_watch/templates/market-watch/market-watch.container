@@ -11,6 +11,7 @@ Entrypoint={{ market_watch_entrypoint }}
 
 Environment=DATA_REPO={{ market_watch_data_repo }}
 Environment=DEPLOY_KEY={{ market_watch_deploy_key | trim | b64encode }}
+Environment=DB_PATH={{ market_watch_db_path }}
 {% if market_watch_openfigi_api_key %}
 Environment=OPENFIGI_API_KEY={{ market_watch_openfigi_api_key }}
 {% endif %}
@@ -24,6 +25,9 @@ Volume=market-watch-cache.volume:/cache
 {% for volume in quadlet_extra_volumes %}
 Volume={{ volume }}
 {% endfor %}
+ReadOnly=true
+NoNewPrivileges=true
+DropCapability=ALL
 
 # Started by market-watch.timer
 [Service]

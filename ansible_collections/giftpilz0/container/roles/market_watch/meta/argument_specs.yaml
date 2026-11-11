@@ -1,7 +1,7 @@
 ---
 argument_specs:
   main:
-    short_description: Run the market watch price fetcher (built from its git repository) on a systemd timer as a Podman quadlet.
+    short_description: Run the market watch jobs on systemd timers and its web app as Podman quadlets, built from its git repository.
     options:
       podman_user:
         type: str
@@ -37,6 +37,26 @@ argument_specs:
         type: str
         required: false
         description: Containerfile path inside the repository.
+
+      market_watch_autoupdate:
+        type: bool
+        required: false
+        description: Enable podman auto-update for the web app.
+
+      market_watch_network_enabled:
+        type: bool
+        required: false
+        description: Create and manage the Podman network.
+
+      market_watch_network_name:
+        type: str
+        required: false
+        description: Podman network name.
+
+      market_watch_network_driver:
+        type: str
+        required: false
+        description: Podman network driver.
 
       market_watch_schedule:
         type: str
@@ -124,6 +144,42 @@ argument_specs:
         type: str
         required: false
         description: Maximum runtime of one request poll (systemd time span).
+
+      market_watch_db_path:
+        type: str
+        required: false
+        description: Path of the SQLite database inside the containers (on the data volume).
+
+      market_watch_backfill_timeout:
+        type: str
+        required: false
+        description: Maximum runtime of one manual backfill run (systemd time span).
+
+      market_watch_ingest_schedule:
+        type: list
+        elements: str
+        required: false
+        description: systemd OnCalendar expressions for the ingest of the Claude runs' output.
+
+      market_watch_ingest_timer_enabled:
+        type: bool
+        required: false
+        description: Run the ingest on its schedule; when false it only runs when started by hand.
+
+      market_watch_ingest_timeout:
+        type: str
+        required: false
+        description: Maximum runtime of one ingest (systemd time span).
+
+      market_watch_classify_routine_url:
+        type: str
+        required: false
+        description: API trigger URL of the routine „Jetzt einordnen“ starts (empty disables it).
+
+      market_watch_classify_routine_token:
+        type: str
+        required: false
+        description: Bearer token of that API trigger (encrypted host vars).
 
       market_watch_data_repo:
         type: str

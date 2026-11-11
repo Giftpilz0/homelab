@@ -37,3 +37,9 @@ _market_watch_timers:
     schedule: "{{ market_watch_requests_poll_schedule }}"
     persistent: false
     enabled: "{{ market_watch_requests_poll_timer_enabled }}"
+  # A missed ingest is not repeated: the next one takes every new file
+  - name: market-watch-ingest
+    description: Start the market watch ingest of the Claude runs' output
+    schedule: "{{ market_watch_ingest_schedule }}"
+    persistent: false
+    enabled: "{{ market_watch_ingest_timer_enabled }}"

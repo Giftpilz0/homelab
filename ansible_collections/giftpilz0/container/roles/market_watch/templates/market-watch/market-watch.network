@@ -1,0 +1,8 @@
+{% if market_watch_network_enabled %}
+[Unit]
+Description=Market Watch Internal Network
+
+[Network]
+NetworkName={{ market_watch_network_name }}
+Driver={{ market_watch_network_driver }}
+{% endif %}

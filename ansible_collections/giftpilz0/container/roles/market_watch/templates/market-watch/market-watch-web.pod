@@ -1,0 +1,13 @@
+[Unit]
+Description=Market Watch Web Pod
+
+[Pod]
+PodName=market-watch-pod
+
+Network={{ market_watch_network_name }}
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
