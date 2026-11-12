@@ -79,6 +79,11 @@ argument_specs:
         no_log: true
         description: Password for a password-based scheduled-task identity.
 
+      lego_windows_event_source:
+        type: str
+        required: false
+        description: Application event log source the renewal script writes to; empty disables it.
+
       lego_binary:
         type: path
         required: false

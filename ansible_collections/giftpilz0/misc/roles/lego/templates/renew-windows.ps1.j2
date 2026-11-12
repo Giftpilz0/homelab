@@ -8,17 +8,32 @@ $Lego = '{{ lego_path }}\lego.exe'
 $State = '{{ lego_state_path }}'
 $Server = '{{ lego_acme_server }}'
 $ServerHost = ([Uri]$Server).Host -replace ':', '_'
+$EventSource = '{{ lego_windows_event_source }}'
+
+# Console and Application event log; messages are capped below its 32k limit.
+# A failing event log never stops the renewal.
+function Write-Log([string]$Message, [string]$EntryType = 'Information', [int]$EventId = 1000) {
+  Write-Host $Message
+  if ($EventSource) {
+    $Text = if ($Message.Length -gt 30000) { $Message.Substring(0, 30000) + ' [truncated]' } else { $Message }
+    try {
+      Write-EventLog -LogName Application -Source $EventSource -EntryType $EntryType -EventId $EventId -Message $Text
+    }
+    catch {
+      Write-Warning "Cannot write to the event log: $_"
+    }
+  }
+}
+
 try {
-  Write-Host "Started Lego processing at $(Get-Date -Format o); hook-only mode: $RunHook"
+  Write-Log "Started Lego processing; hook-only mode: $RunHook"
   if ($RunHook -and -not $CertificateName) {
     throw 'RunHook requires -CertificateName so only the requested deployment hook is executed'
   }
 
 {% for item in _lego_certificates %}
-if ($CertificateName -and $CertificateName -ne '{{ item.name }}') {
-  continue
-}
-Write-Host 'Processing {{ item.name }}'
+if (-not $CertificateName -or $CertificateName -eq '{{ item.name }}') {
+Write-Log 'Processing {{ item.name }}'
 $Environment = Join-Path $State '{{ item.name }}.ps1'
 if (Test-Path -LiteralPath $Environment) {
   . $Environment
@@ -65,12 +80,12 @@ if (Test-Path -LiteralPath $Certificate) {
   $Arguments += @('--renew-days', '{{ item.renewal.threshold }}')
 }
 
-Write-Host "Running: $Lego $($Arguments -join ' ')"
+Write-Log "Running: $Lego $($Arguments -join ' ')"
 $AccountId = '{{ item.account_id }}'
 $AccountDir = Join-Path $State "accounts\$ServerHost\$AccountId"
 $Output = (& $Lego @Arguments 2>&1 | Out-String)
 $ExitCode = $LASTEXITCODE
-$Output | Write-Host
+Write-Log "Lego output for {{ item.name }} (exit code $ExitCode):`n$Output" -EventId 1001
 
 if (($ExitCode -ne 0) -and ($Output -match 'accountDoesNotExist')) {
   if (-not (Test-Path -LiteralPath $AccountDir -PathType Container)) {
@@ -78,11 +93,11 @@ if (($ExitCode -ne 0) -and ($Output -match 'accountDoesNotExist')) {
   }
 
   $StaleAccountDir = "$AccountDir.stale.$(Get-Date -Format yyyyMMdd_HHmmss)"
-  Write-Host "Archiving stale Lego account: $AccountDir"
+  Write-Log "Archiving stale Lego account: $AccountDir" -EntryType Warning
   Move-Item -LiteralPath $AccountDir -Destination $StaleAccountDir
   $Output = (& $Lego @Arguments 2>&1 | Out-String)
   $ExitCode = $LASTEXITCODE
-  $Output | Write-Host
+  Write-Log "Lego output for {{ item.name }} (exit code $ExitCode):`n$Output" -EventId 1001
 }
 
 if ($ExitCode -ne 0) {
@@ -95,6 +110,7 @@ $Changed = $RunHook -or (-not (Test-Path -LiteralPath $Marker) -or
   ((Get-Item -LiteralPath $Certificate).LastWriteTime -gt (Get-Item -LiteralPath $Marker).LastWriteTime)
 )
 if ($Changed) {
+  Write-Log 'Deploying {{ item.name }}' -EventId 1002
 {% if item.deploy.pfx is defined %}
   $PfxSource = Join-Path $State 'certificates\{{ item.domains[0] | replace('*', '_') }}.pfx'
   $PfxDestination = '{{ item.deploy.pfx.path }}'
@@ -113,11 +129,13 @@ if ($Changed) {
   if (-not $RunHook) {
     New-Item -ItemType File -Path $Marker -Force | Out-Null
   }
+  Write-Log 'Deployed {{ item.name }}' -EventId 1002
+}
 }
 {% endfor %}
-  Write-Host "Completed Lego processing at $(Get-Date -Format o)"
+  Write-Log 'Completed Lego processing'
 }
 catch {
-  Write-Error $_
+  Write-Log "Lego processing failed: $_`n$($_.ScriptStackTrace)" -EntryType Error -EventId 1100
   exit 1
 }

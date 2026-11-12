@@ -93,6 +93,14 @@
   loop_control:
     label: "{{ item.name }}"
 
+- name: "Lego: Register event log source"
+  ansible.windows.win_eventlog:
+    name: Application
+    sources:
+      - "{{ lego_windows_event_source }}"
+    state: present
+  when: lego_windows_event_source | length > 0
+
 - name: "Lego: Install renewal script"
   ansible.windows.win_template:
     src: renew-windows.ps1.j2

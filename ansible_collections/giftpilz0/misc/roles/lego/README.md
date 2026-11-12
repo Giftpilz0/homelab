@@ -5,6 +5,9 @@ on Linux and Windows. The role installs a daily renewal job at 03:00 with a
 one-hour delay. Missing certificates are not issued during deployment unless
 `lego_issue_on_deploy: true` is set.
 
+On Windows every renewal run, Lego's output and errors are written to the
+Application event log (source `Lego`, set with `lego_windows_event_source`).
+
 Keep provider credentials and PFX passwords in Ansible Vault or another secret
 store. `lego_certificates` is a list; every entry needs a unique `name`,
 `domains`, and a `challenge`.

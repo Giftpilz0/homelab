@@ -66,6 +66,7 @@ lego_windows_state_acl:
 lego_windows_task_username: SYSTEM
 lego_windows_task_logon_type: service_account
 lego_windows_task_password: ""
+lego_windows_event_source: Lego
 
 # Passed to every lego run
 lego_extra_args: []
