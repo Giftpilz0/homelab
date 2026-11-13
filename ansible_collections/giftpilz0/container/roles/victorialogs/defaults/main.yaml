@@ -5,7 +5,7 @@ podman_user: "{{ ansible_user }}"
 # Image
 victorialogs_image: "docker.io/victoriametrics/victoria-logs"
 # renovate: datasource=docker depName=victoriametrics/victoria-logs
-victorialogs_version: "v1.53.0"
+victorialogs_version: "v1.54.0"
 victorialogs_autoupdate: true
 
 # Network (always joined, created only when enabled)
