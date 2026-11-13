@@ -5,7 +5,7 @@ podman_user: "{{ ansible_user }}"
 # Image
 opencloud_image: "docker.io/opencloudeu/opencloud-rolling"
 # renovate: datasource=docker depName=opencloudeu/opencloud-rolling
-opencloud_version: "9.0.0"
+opencloud_version: "9.1.0"
 # Applies to all OpenCloud pods
 opencloud_autoupdate: true
 
@@ -104,7 +104,7 @@ opencloud_custom_clients: []
 opencloud_collabora_enabled: false
 opencloud_collabora_image: "docker.io/collabora/code"
 # renovate: datasource=docker depName=collabora/code
-opencloud_collabora_version: "26.04.5.2.1"
+opencloud_collabora_version: "26.04.6.1.1"
 opencloud_collabora_proof_key_image: "docker.io/alpine/openssl"
 # renovate: datasource=docker depName=alpine/openssl
 opencloud_collabora_proof_key_version: "3.5.9"

@@ -22,7 +22,7 @@ navidrome_webui_environment_vars:
 ### giftpilz0.container.suwayomi
 
 # renovate: datasource=docker depName=ghcr.io/suwayomi/suwayomi-server
-suwayomi_version: "v2.4.2476"
+suwayomi_version: "v2.4.2490"
 # renovate: datasource=docker depName=ghcr.io/thephaseless/byparr
 suwayomi_flaresolverr_version: "3.1.1"
 
@@ -37,7 +37,7 @@ traefik_plugins:
   traefik-oidc-auth:
     moduleName: "github.com/sevensolutions/traefik-oidc-auth"
     # renovate: datasource=github-releases depName=sevensolutions/traefik-oidc-auth
-    version: "v0.22.0"
+    version: "v0.24.0"
 
 traefik_custom_middlewares:
   suwayomi-oidc:
