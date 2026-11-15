@@ -58,7 +58,7 @@ gatus_endpoints:
 ### giftpilz0.container.victorialogs
 
 # renovate: datasource=docker depName=victoriametrics/victoria-logs
-victorialogs_version: "v1.53.0"
+victorialogs_version: "v1.54.0"
 
 victorialogs_syslog_enabled: true
 victorialogs_syslog_timezone: "Europe/Berlin"
@@ -81,7 +81,7 @@ traefik_plugins:
   traefik-oidc-auth:
     moduleName: "github.com/sevensolutions/traefik-oidc-auth"
     # renovate: datasource=github-releases depName=sevensolutions/traefik-oidc-auth
-    version: "v0.22.0"
+    version: "v0.24.0"
 
 traefik_custom_middlewares:
   victorialogs-oidc:
