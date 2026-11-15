@@ -1,0 +1,1 @@
+import{t as e}from"./preload-helper-HclGiUj8.mjs";await(await e(()=>import(`./remoteEntry-D3C-XPWc.mjs`),[],import.meta.url)).init();

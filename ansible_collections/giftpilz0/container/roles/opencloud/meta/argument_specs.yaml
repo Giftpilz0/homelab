@@ -74,6 +74,12 @@ argument_specs:
         required: false
         description: OIDC origin for Content Security Policy.
 
+      opencloud_csp_frame_src:
+        type: list
+        elements: str
+        required: false
+        description: Extra CSP frame-src origins.
+
       opencloud_environment_vars:
         type: dict
         required: false

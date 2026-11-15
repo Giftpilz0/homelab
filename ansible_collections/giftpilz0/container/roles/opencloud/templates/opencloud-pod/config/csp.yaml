@@ -19,6 +19,9 @@ directives:
 {% if opencloud_collabora_enabled %}
     - '{{ opencloud_collabora_url }}/'
 {% endif %}
+{% for origin in opencloud_csp_frame_src %}
+    - '{{ origin }}/'
+{% endfor %}
   img-src:
     - "'self'"
     - 'data:'
@@ -27,6 +30,7 @@ directives:
     - "'self'"
   media-src:
     - "'self'"
+    - 'blob:'
   object-src:
     - "'self'"
     - 'blob:'
@@ -39,6 +43,7 @@ directives:
   style-src:
     - "'self'"
     - "'unsafe-inline'"
+    - 'blob:'
   worker-src:
     - "'self'"
     - 'blob:'

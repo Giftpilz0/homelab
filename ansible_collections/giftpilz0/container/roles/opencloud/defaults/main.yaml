@@ -25,17 +25,21 @@ opencloud_domain: ""
 opencloud_admin_password: ""
 opencloud_log_level: "info"
 opencloud_csp_oidc_origin: ""
+# Extra CSP frame-src origins, e.g. for web extensions such as draw.io
+opencloud_csp_frame_src: []
 
 # Environment
 opencloud_environment_vars:
   IDM_ADMIN_PASSWORD: "{{ opencloud_admin_password }}"
-  OPEN_CLOUD_LOG_LEVEL: "{{ opencloud_log_level }}"
+  OC_LOG_LEVEL: "{{ opencloud_log_level }}"
   OC_URL: "{{ opencloud_domain }}"
   OC_CORS_ALLOW_ORIGINS: "{{ opencloud_domain }}"
   PROXY_TLS: false
   FRONTEND_ARCHIVER_MAX_SIZE: 68719476736
   THUMBNAILS_MAX_CONCURRENT_REQUESTS: 64
   FRONTEND_CHECK_FOR_UPDATES: false
+  WEB_OPTION_DISABLE_SPONSOR_LINK: true
+  WEB_OPTION_DISABLE_FEEDBACK_LINK: true
 
 # Clients of the built-in IDP (unused with external OIDC)
 opencloud_oidc_clients: "{{ opencloud_standard_clients + opencloud_custom_clients }}"
