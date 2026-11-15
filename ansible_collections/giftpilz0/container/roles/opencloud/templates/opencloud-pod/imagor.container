@@ -1,0 +1,40 @@
+{% if opencloud_imagor_enabled %}
+[Unit]
+Description=Imagor thumbnail generator for OpenCloud
+
+[Container]
+ContainerName=imagor
+Image={{ opencloud_imagor_image }}:{{ opencloud_imagor_version }}
+Pod=opencloud.pod
+
+{% if opencloud_imagor_entrypoint %}
+Entrypoint={{ opencloud_imagor_entrypoint }}
+{% endif %}
+
+{% if opencloud_autoupdate %}
+AutoUpdate=registry
+{% endif %}
+
+ReadOnly=true
+DropCapability=all
+NoNewPrivileges=true
+PodmanArgs=--memory={{ opencloud_imagor_memory }}
+
+Environment=BIND=127.0.0.1:{{ opencloud_imagor_port }}
+Environment=IMAGOR_UNSAFE=1
+Environment=UPLOAD_LOADER_ENABLE=1
+Environment=HTTP_LOADER_DISABLE=1
+# Limits of the built-in generator, with a pixel budget so 48MP photos fit
+Environment=UPLOAD_LOADER_MAX_ALLOWED_SIZE=52428800
+Environment=VIPS_MAX_RESOLUTION=58982400
+Environment=VIPS_MAX_ANIMATION_FRAMES=100
+Environment=IMAGOR_PROCESS_CONCURRENCY={{ opencloud_imagor_concurrency }}
+Environment=IMAGOR_PROCESS_QUEUE_SIZE=64
+HealthCmd=["curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:{{ opencloud_imagor_port }}/healthcheck"]
+HealthInterval=30s
+HealthStartPeriod=10s
+HealthOnFailure=kill
+
+[Service]
+Restart=always
+{% endif %}

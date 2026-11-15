@@ -130,11 +130,26 @@ opencloud_radicale_image: "docker.io/opencloudeu/radicale"
 # renovate: datasource=docker depName=opencloudeu/radicale
 opencloud_radicale_version: "v3.9.0"
 
+## Imagor thumbnail generator (in opencloud-pod)
+# Replaces the built-in generator, which cannot read HEIC, HEIF or AVIF
+opencloud_imagor_enabled: false
+opencloud_imagor_image: "docker.io/shumc/imagor"
+# renovate: datasource=docker depName=shumc/imagor
+opencloud_imagor_version: "1.10.4"
+opencloud_imagor_port: 8000
+opencloud_imagor_concurrency: 4
+opencloud_imagor_memory: "2g"
+opencloud_imagor_source_types:
+  - image/heic
+  - image/heif
+  - image/avif
+
 ## Advanced
 opencloud_entrypoint: ""
 opencloud_collabora_entrypoint: ""
 opencloud_collabora_proof_key_entrypoint: ""
 opencloud_radicale_entrypoint: ""
+opencloud_imagor_entrypoint: ""
 
 # Extra inventory files/dirs, format: see quadlet defaults
 # Mounts to /var/lib/opencloud/web/assets/custom-{themes,apps} enable theming/plugins

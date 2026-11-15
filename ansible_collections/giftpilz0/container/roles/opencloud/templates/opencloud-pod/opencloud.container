@@ -34,6 +34,11 @@ Environment=COLLABORATION_APP_INSECURE={{ (not opencloud_collabora_ssl_verificat
 Environment=COLLABORATION_CS3API_DATAGATEWAY_INSECURE={{ (not opencloud_collabora_ssl_verification) | bool | lower }}
 {% endif %}
 
+{% if opencloud_imagor_enabled %}
+Environment=WEBDAV_THUMBNAILS_GENERATOR_URL=http://localhost:{{ opencloud_imagor_port }}
+Environment=OC_THUMBNAILS_ADDITIONAL_SOURCE_TYPES={{ opencloud_imagor_source_types | join(',') }}
+{% endif %}
+
 {% if _theming %}
 Environment=WEB_ASSET_THEMES_PATH=/var/lib/opencloud/web/assets/custom-themes
 Environment=WEB_UI_THEME_PATH=/themes/opencloud/theme.json

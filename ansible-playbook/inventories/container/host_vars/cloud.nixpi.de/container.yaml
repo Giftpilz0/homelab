@@ -20,6 +20,8 @@ opencloud_csp_frame_src:
 
 opencloud_radicale_enabled: true
 
+opencloud_imagor_enabled: true
+
 opencloud_collabora_enabled: true
 opencloud_collabora_url: "https://collabora.nixpi.de"
 opencloud_collabora_admin_password: "{{ opencloud_admin_password }}"
@@ -33,7 +35,6 @@ opencloud_environment_vars:
   PROXY_TLS: false
   PROXY_CSP_CONFIG_FILE_LOCATION: "/etc/opencloud/csp.yaml"
   FRONTEND_ARCHIVER_MAX_SIZE: 68719476736
-  THUMBNAILS_MAX_CONCURRENT_REQUESTS: 64
   FRONTEND_CHECK_FOR_UPDATES: false
   WEB_OPTION_DISABLE_SPONSOR_LINK: true
   WEB_OPTION_DISABLE_FEEDBACK_LINK: true

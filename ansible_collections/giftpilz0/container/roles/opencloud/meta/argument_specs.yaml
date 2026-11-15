@@ -182,6 +182,42 @@ argument_specs:
         required: false
         description: Radicale container image version.
 
+      opencloud_imagor_enabled:
+        type: bool
+        required: false
+        description: Generate thumbnails with imagor, adding HEIC, HEIF and AVIF previews.
+
+      opencloud_imagor_image:
+        type: str
+        required: false
+        description: Image name without tag.
+
+      opencloud_imagor_version:
+        type: str
+        required: false
+        description: Imagor container image version.
+
+      opencloud_imagor_port:
+        type: int
+        required: false
+        description: Port imagor listens on inside the pod.
+
+      opencloud_imagor_concurrency:
+        type: int
+        required: false
+        description: Images imagor processes at the same time; more are queued.
+
+      opencloud_imagor_memory:
+        type: str
+        required: false
+        description: Memory limit of the imagor container, e.g. 1g.
+
+      opencloud_imagor_source_types:
+        type: list
+        elements: str
+        required: false
+        description: Mime types previewed in addition to the built-in ones.
+
       opencloud_entrypoint:
         type: str
         required: false
@@ -201,6 +237,11 @@ argument_specs:
         type: str
         required: false
         description: Optional Radicale container entrypoint override.
+
+      opencloud_imagor_entrypoint:
+        type: str
+        required: false
+        description: Optional imagor container entrypoint override.
 
       opencloud_extra_files:
         type: list
