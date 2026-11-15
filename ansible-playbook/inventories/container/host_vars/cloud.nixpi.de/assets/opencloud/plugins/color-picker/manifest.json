@@ -1,0 +1,7 @@
+{
+  "name": "color-picker",
+  "version": "0.1.0",
+  "description": "Material You theme color picker for OpenCloud Web",
+  "license": "MIT",
+  "entrypoint": "js/remoteEntry-jeYi_HRT.mjs"
+}

@@ -1,0 +1,1 @@
+import{t as e}from"./preload-helper-CRzLMJPS.mjs";await(await e(()=>import(`./remoteEntry-jeYi_HRT.mjs`),[],import.meta.url)).init();
