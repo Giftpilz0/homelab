@@ -1,6 +1,6 @@
 ---
 # renovate: datasource=github-releases depName=henrygd/beszel extractVersion=^v(?<version>.*)$
-beszel_agent_version: "0.21.1"
+beszel_agent_version: "0.21.2"
 
 # Created as system user if missing
 beszel_agent_user: beszel

@@ -3,7 +3,7 @@
 ### giftpilz0.container.beszel
 
 # renovate: datasource=docker depName=henrygd/beszel
-beszel_version: "0.21.1"
+beszel_version: "0.21.2"
 
 beszel_app_url: "https://monitoring.nixpi.de"
 beszel_environment_vars:
