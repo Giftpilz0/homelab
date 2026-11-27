@@ -23,7 +23,7 @@ kartei_oidc_issuer_url: "https://login.nixpi.de/realms/nixpi"
 ### giftpilz0.container.dashboard
 
 # renovate: datasource=docker depName=nginx
-dashboard_version: "1.31.8-alpine"
+dashboard_version: "1.31.10-alpine"
 
 dashboard_title: "nixpi.de"
 dashboard_logo: icons/nixpi.svg

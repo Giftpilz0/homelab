@@ -5,7 +5,7 @@ podman_user: "{{ ansible_user }}"
 # Image (built locally from build/: mosquitto from source + mosquitto-go-auth against its headers)
 mosquitto_image: "localhost/mosquitto-custom"
 # renovate: datasource=github-tags depName=eclipse-mosquitto/mosquitto extractVersion=^v(?<version>.+)$
-mosquitto_version: "2.1.2"
+mosquitto_version: "2.1.4"
 # renovate: datasource=github-tags depName=lhns/mosquitto-go-auth
 mosquitto_go_auth_version: "3.6.0"
 mosquitto_autoupdate: true

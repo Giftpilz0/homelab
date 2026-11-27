@@ -3,7 +3,7 @@
 ### giftpilz0.container.homeassistant
 
 # renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant
-homeassistant_version: "2026.11.1"
+homeassistant_version: "2026.11.3"
 
 homeassistant_device_access: true
 homeassistant_extra_files:
@@ -20,7 +20,7 @@ homeassistant_extra_files:
 ### giftpilz0.container.mosquitto
 
 # renovate: datasource=github-tags depName=eclipse-mosquitto/mosquitto extractVersion=^v(?<version>.+)$
-mosquitto_version: "2.1.2"
+mosquitto_version: "2.1.4"
 
 mosquitto_acl_patterns: []
 mosquitto_acl_users:
