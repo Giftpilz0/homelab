@@ -6,7 +6,7 @@ ARG DEBIAN_VERSION=trixie
 
 FROM docker.io/library/golang:${GO_VERSION}-${DEBIAN_VERSION} AS builder
 # renovate: datasource=github-tags depName=eclipse-mosquitto/mosquitto extractVersion=^v(?<version>.+)$
-ARG MOSQUITTO_VERSION=2.1.2
+ARG MOSQUITTO_VERSION=2.1.4
 # renovate: datasource=github-tags depName=lhns/mosquitto-go-auth
 ARG GO_AUTH_VERSION=3.6.0
 

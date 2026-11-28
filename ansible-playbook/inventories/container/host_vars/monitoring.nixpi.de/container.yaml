@@ -58,7 +58,7 @@ gatus_endpoints:
 ### giftpilz0.container.victorialogs
 
 # renovate: datasource=docker depName=victoriametrics/victoria-logs
-victorialogs_version: "v1.54.0"
+victorialogs_version: "v1.55.0"
 
 victorialogs_syslog_enabled: true
 victorialogs_syslog_timezone: "Europe/Berlin"

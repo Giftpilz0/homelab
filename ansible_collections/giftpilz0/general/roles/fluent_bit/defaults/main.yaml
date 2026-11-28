@@ -11,7 +11,7 @@ fluent_bit_repo_gpgkey: "https://packages.fluentbit.io/fluentbit.key"
 
 # Windows: release zip, its checksum is read from <url>.sha256
 # renovate: datasource=github-releases depName=fluent/fluent-bit extractVersion=^v(?<version>.*)$
-fluent_bit_windows_version: "5.2.0"
+fluent_bit_windows_version: "5.2.1"
 fluent_bit_windows_url: "https://packages.fluentbit.io/windows/fluent-bit-{{ fluent_bit_windows_version }}-win64.zip"
 fluent_bit_windows_install_path: 'C:\Program Files\fluent-bit'
 
