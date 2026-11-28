@@ -5,7 +5,7 @@ podman_user: "{{ ansible_user }}"
 # Image
 beszel_image: "docker.io/henrygd/beszel"
 # renovate: datasource=docker depName=henrygd/beszel
-beszel_version: "0.21.1"
+beszel_version: "0.21.2"
 beszel_autoupdate: true
 
 # Network (always joined, created only when enabled)
